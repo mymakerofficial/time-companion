@@ -3,7 +3,7 @@ import {Input} from "@/components/ui/input";
 import {ref, watch} from "vue";
 
 // duration in minutes
-const model = defineModel<number>()
+const model = defineModel<number>({ required: true })
 
 // duration in minutes
 const inputValue = ref(toTimeString(model.value))

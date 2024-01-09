@@ -76,8 +76,32 @@ const dayPredictedEndAt = computed(() => {
 const currentEventId = ref<string | null>(null)
 const selectedEventId = ref<string | null>(null)
 
-const selectedEvent = computed(() => {
-  return events.find(it => it.id === selectedEventId.value) || null
+const currentEvent = computed<CalendarEvent | null>({
+  get() {
+    return events.find(it => it.id === currentEventId.value) || null
+  },
+  set(value) {
+    if (value === null) {
+      currentEventId.value = null
+      return
+    }
+    const index = events.findIndex(it => it.id === currentEventId.value)
+    events[index] = value
+  }
+})
+
+const selectedEvent = computed<CalendarEvent | null>({
+  get() {
+    return events.find(it => it.id === selectedEventId.value) || null
+  },
+  set(value) {
+    if (value === null) {
+      selectedEventId.value = null
+      return
+    }
+    const index = events.findIndex(it => it.id === selectedEventId.value)
+    events[index] = value
+  }
 })
 
 function createEvent() {
@@ -100,22 +124,12 @@ function createEvent() {
   return id
 }
 
-function updateEvent(displayName: string, startedAt: Date) {
-  const index = events.findIndex(it => it.id === currentEventId.value)
-  events[index] = {
-    ...events[index],
-    projectDisplayName: displayName,
-    startedAt,
+function endCurrentEvent() {
+  currentEvent.value = {
+    ...currentEvent.value,
+    endedAt: dayjs().toDate()
   }
-}
-
-function endEvent() {
-  const index = events.findIndex(it => it.id === currentEventId.value)
-  events[index] = {
-    ...events[index],
-    endedAt: dayjs().toDate(),
-  }
-  currentEventId.value = null
+  currentEvent.value = null
 }
 </script>
 
@@ -125,9 +139,9 @@ function endEvent() {
     <main class="grid grid-cols-2 h-[calc(100vh-3.5rem)]">
       <section class="border-r border-border">
         <CurrentEventCard
+          v-model="currentEvent"
           @create-event="createEvent"
-          @update-event="updateEvent"
-          @end-event="endEvent"
+          @end-event="() => endCurrentEvent()"
         />
         <RemindersContainer :reminders="reminders" />
         <EditEventCard

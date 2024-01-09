@@ -7,7 +7,7 @@ import type {CalendarEvent} from "@/lib/types";
 import TimeDurationInput from "@/components/TimeDurationInput.vue";
 import {minsSinceStartOfDay} from "@/lib/time-utils";
 
-const model = defineModel<CalendarEvent | null>()
+const model = defineModel<CalendarEvent | null>({ required: true })
 
 const emit = defineEmits<{
   continue: [id: string]
