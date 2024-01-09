@@ -104,18 +104,25 @@ const selectedEvent = computed<CalendarEvent | null>({
   }
 })
 
-function startCurrentEvent() {
+function startCurrentEvent(partialEvent?: Partial<CalendarEvent>) {
+  if (currentEvent.value !== null) {
+    stopCurrentEvent()
+  }
+
   const id = uuid()
 
   events.push(calendarEvent({
+    ...partialEvent,
     id,
     startedAt: dayjs().toDate(),
+    endedAt: null,
+    privateNote: null,
   }))
 
   currentEventId.value = id
 }
 
-function endCurrentEvent() {
+function stopCurrentEvent() {
   if (currentEvent.value === null) {
     return
   }
@@ -138,12 +145,13 @@ function endCurrentEvent() {
         <CurrentEventCard
           v-model="currentEvent"
           @create-event="startCurrentEvent"
-          @end-event="() => endCurrentEvent()"
+          @end-event="stopCurrentEvent"
         />
         <RemindersContainer :reminders="reminders" />
         <EditEventCard
           v-if="selectedEvent"
           v-model="selectedEvent"
+          @continue="startCurrentEvent"
         />
       </section>
       <section class="flex flex-col h-[calc(100vh-3.5rem)]">

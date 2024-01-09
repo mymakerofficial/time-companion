@@ -2,7 +2,7 @@
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {computed, reactive, watch} from "vue";
-import {useNow} from "@vueuse/core";
+import {useNow, whenever} from "@vueuse/core";
 import dayjs from "dayjs";
 import {MoreVertical} from "lucide-vue-next";
 import TimeDurationInput from "@/components/TimeDurationInput.vue";
@@ -12,14 +12,15 @@ import type {CalendarEvent} from "@/lib/types";
 const model = defineModel<CalendarEvent | null>({ required: true })
 
 const emit = defineEmits<{
-  createEvent: []
-  endEvent: [id: string]
+  startEvent: []
+  stopEvent: []
 }>()
 
 const now = useNow()
 
 const state = reactive({
-  input: '',
+  name: '',
+
   startedAt: computed<Date | null>({
     get() { return model.value?.startedAt || null },
     set(value) {
@@ -29,21 +30,32 @@ const state = reactive({
       model.value!.startedAt = value
     }
   }),
+
   isRunning: computed(() => model.value !== null)
 })
 
-watch([() => state.input, () => state.isRunning], () => {
+whenever(() => state.isRunning, () => {
+  if (model.value!.projectDisplayName !== null) {
+    state.name = model.value!.projectDisplayName
+  } else {
+    model.value!.projectDisplayName = state.name
+  }
+
+  state.startedAt = model.value!.startedAt
+})
+
+watch(() => state.name, () => {
   if (!state.isRunning) {
     return
   }
-  model.value!.projectDisplayName = state.input
+  model.value!.projectDisplayName = state.name
 })
 
 function handleStartStop() {
   if (!state.isRunning) {
     emit('createEvent')
   } else {
-    emit('endEvent', model.value!.id)
+    emit('endEvent')
   }
 }
 
@@ -75,7 +87,7 @@ const durationLabel = computed(() => {
   <div class="p-8 bg-primary text-primary-foreground flex flex-col gap-2">
     <div class="flex flex-row justify-between items-center gap-8">
       <div class="flex-grow">
-        <Input v-model="state.input" placeholder="what are you working on?" class="bg-primary text-primary-foreground border-none font-medium text-xl" />
+        <Input v-model="state.name" placeholder="what are you working on?" class="bg-primary text-primary-foreground border-none font-medium text-xl" />
       </div>
       <div class="flex flex-row items-center gap-8">
         <TimeDurationInput v-if="state.isRunning" v-model="startedAtInMinutes" class="w-16 text-center font-medium text-sm border-none bg-primary text-primary-foreground" />
