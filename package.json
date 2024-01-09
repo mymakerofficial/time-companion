@@ -1,0 +1,42 @@
+{
+  "name": "time-companion",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "run-p type-check \"build-only {@}\" --",
+    "preview": "vite preview",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false"
+  },
+  "dependencies": {
+    "@types/color": "^3.0.6",
+    "@vueuse/core": "^10.6.1",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "color": "^4.2.3",
+    "dayjs": "^1.11.10",
+    "lucide-vue-next": "^0.294.0",
+    "pinia": "^2.1.7",
+    "radix-vue": "^1.2.7",
+    "tailwind-merge": "^2.0.0",
+    "tailwindcss-animate": "^1.0.7",
+    "uuid": "^9.0.1",
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.5"
+  },
+  "devDependencies": {
+    "@tsconfig/node18": "^18.2.2",
+    "@types/node": "^18.18.5",
+    "@types/uuid": "^9.0.7",
+    "@vitejs/plugin-vue": "^4.4.0",
+    "@vue/tsconfig": "^0.4.0",
+    "autoprefixer": "^10.4.16",
+    "npm-run-all2": "^6.1.1",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.5",
+    "typescript": "~5.2.0",
+    "vite": "^4.4.11",
+    "vue-tsc": "^1.8.19"
+  }
+}
