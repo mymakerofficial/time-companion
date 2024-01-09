@@ -21,10 +21,43 @@ const reminders = reactive<CalendarReminder[]>([
     buttonLabel: 'Start',
     buttonAction: () => {},
     color: 'orange',
+  },
+  {
+    id: uuid(),
+    displayName: 'End of work',
+    remindAt: timeStringToDate('17:00:00'),
+    remindBeforeMins: 120,
+    remindAfterMins: 30,
+    buttonLabel: 'Stop working now',
+    buttonAction: () => {},
+    color: 'rose',
   }
 ])
 
-const events = reactive<CalendarEvent[]>([])
+const events = reactive<CalendarEvent[]>([
+  {
+    id: uuid(),
+    projectDisplayName: 'Test',
+    activityDisplayName: null,
+    privateNote: null,
+    color: 'blue',
+    repeats: false,
+    isBreak: false,
+    startedAt: timeStringToDate('08:00:00'),
+    endedAt: timeStringToDate('09:00:00'),
+  },
+  {
+    id: uuid(),
+    projectDisplayName: 'Foo Bar',
+    activityDisplayName: null,
+    privateNote: null,
+    color: 'green',
+    repeats: false,
+    isBreak: false,
+    startedAt: timeStringToDate('08:30:00'),
+    endedAt: timeStringToDate('09:30:00'),
+  }
+])
 
 const workDayLengthHours = 8
 const workBreakLengthHours = 0.5
@@ -41,6 +74,11 @@ const dayPredictedEndAt = computed(() => {
 })
 
 const currentEventId = ref<string | null>(null)
+const selectedEventId = ref<string | null>(null)
+
+const selectedEvent = computed(() => {
+  return events.find(it => it.id === selectedEventId.value) || null
+})
 
 function createEvent() {
   const id = uuid()
@@ -62,11 +100,12 @@ function createEvent() {
   return id
 }
 
-function updateEvent(displayName: string) {
+function updateEvent(displayName: string, startedAt: Date) {
   const index = events.findIndex(it => it.id === currentEventId.value)
   events[index] = {
     ...events[index],
     projectDisplayName: displayName,
+    startedAt,
   }
 }
 
@@ -91,14 +130,20 @@ function endEvent() {
           @end-event="endEvent"
         />
         <RemindersContainer :reminders="reminders" />
-        <EditEventCard />
+        <EditEventCard
+          v-if="selectedEvent"
+          v-model="selectedEvent"
+        />
       </section>
       <section class="flex flex-col h-[calc(100vh-3.5rem)]">
         <CalendarHeader
           :day-started-at="dayStartedAt"
           :day-predicted-end-at="dayPredictedEndAt"
         />
-        <CalendarView :events="events" />
+        <CalendarView
+          :events="events"
+          @event-selected="(id) => selectedEventId = id"
+        />
       </section>
     </main>
   </div>

@@ -16,6 +16,10 @@ const props = defineProps<{
   inset: number
 }>()
 
+const emit = defineEmits<{
+  click: []
+}>()
+
 const now = useNow()
 
 const hasEnd = computed(() => {
@@ -54,15 +58,19 @@ const startedAtLabel = computed(() => {
 
 const endedAtLabel = computed(() => {
   if (!hasEnd.value) {
-    return 'jetzt'
+    return 'now'
   }
   return dayjs(props.event.endedAt).format('HH:mm')
 })
+
+function handleClick() {
+  emit('click')
+}
 </script>
 
 <template>
   <div class="flex relative mt-0.5" :style="containerStyle">
-    <div class="absolute inset-0.5 flex rounded-md overflow-hidden bg-background min-h-3" v-provide-color="event.color">
+    <div @click="handleClick" class="cursor-pointer absolute inset-0.5 flex rounded-md overflow-hidden bg-background min-h-3" v-provide-color="event.color">
       <div class="flex-1 px-2 py-1 flex flex-col gap-1 bg-primary text-primary-foreground hover:bg-primary/90">
         <div class="flex flex-row justify-between items-center">
           <h2 :data-small="containerPosition.spanRows < 2" class="space-x-2 text-sm data-[small=true]:text-xs data-[small=true]:-my-2">

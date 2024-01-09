@@ -26,7 +26,11 @@ export function formatTimeDiff(
   return prefix + dayjs().startOf('day').add(diff).format(format)
 }
 
-export function minsSinceStartOfDay(dateTime: Date): number {
+export function minsSinceStartOfDay(dateTime: Date | null): number {
+  if (!dateTime) {
+    return 0
+  }
+
   const startOfDay = dayjs(dateTime).startOf('day')
 
   return dayjs(dateTime).diff(startOfDay, 'minute')

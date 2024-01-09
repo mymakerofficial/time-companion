@@ -14,6 +14,10 @@ const props = defineProps<{
   events: CalendarEvent[]
 }>()
 
+const emit = defineEmits<{
+  eventSelected: [id: string]
+}>()
+
 const now = useNow()
 
 function indexToTime(index: number) {
@@ -43,6 +47,10 @@ function calculateInset(event: CalendarEvent) {
 
   return inset
 }
+
+function handleClick(id: string) {
+  emit('eventSelected', id)
+}
 </script>
 
 <template>
@@ -63,9 +71,13 @@ function calculateInset(event: CalendarEvent) {
         <div class="relative col-start-1 col-end-2 row-end-2 mr-3 border-r border-border grid grid-rows-[2rem_repeat(288,_minmax(0,_1fr))_auto] grid-cols-12">
           <CalendarViewArea :started-at="null" :ended-at="timeStringToDate('07:00:00')" />
           <CalendarViewArea :started-at="timeStringToDate('18:00:00')" :ended-at="null" />
-          <template v-for="event in events">
-            <CalendarViewEvent :event="event" :inset="calculateInset(event)" />
-          </template>
+          <CalendarViewEvent
+            v-for="event in events"
+            :key="event.id"
+            :event="event"
+            :inset="calculateInset(event)"
+            @click="handleClick(event.id)"
+          />
           <CalendarViewPointer :date="now" />
         </div>
       </div>
