@@ -12,8 +12,9 @@ dayjs.extend(relativeTime)
 const props = defineProps<{
   displayName: string
   remindAt: Date
-  color: string
   buttonLabel: string
+  buttonAction: () => void
+  color: string
 }>()
 
 const now = useNow()
@@ -21,6 +22,10 @@ const now = useNow()
 const timeLabel = computed(() => {
   return dayjs(now.value).to(props.remindAt)
 })
+
+function handleClick() {
+  props.buttonAction()
+}
 </script>
 
 <template>
@@ -33,7 +38,7 @@ const timeLabel = computed(() => {
         <time class="text-2xl font-medium tracking-wide">{{ timeLabel }}</time>
       </div>
       <div class="flex flex-row items-center gap-2">
-        <Button v-if="buttonLabel" variant="inverted">{{ buttonLabel }}</Button>
+        <Button v-if="buttonLabel" variant="inverted" @click="handleClick()">{{ buttonLabel }}</Button>
         <Button variant="ghost" size="icon"><MoreVertical /></Button>
       </div>
     </div>

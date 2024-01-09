@@ -27,6 +27,7 @@ const filteredReminders = computed(() => {
     :display-name="reminder.displayName"
     :remind-at="reminder.remindAt"
     :button-label="reminder.buttonLabel"
+    :button-action="reminder.buttonAction"
     :color="reminder.color"
   />
 </template>

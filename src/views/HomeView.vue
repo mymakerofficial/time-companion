@@ -19,7 +19,7 @@ const reminders = reactive<CalendarReminder[]>([
     remindBeforeMins: 30,
     remindAfterMins: 30,
     buttonLabel: 'Start',
-    buttonAction: () => {},
+    buttonAction: () => stopCurrentEvent(),
     color: 'orange',
   },
   {
@@ -29,7 +29,7 @@ const reminders = reactive<CalendarReminder[]>([
     remindBeforeMins: 120,
     remindAfterMins: 30,
     buttonLabel: 'Stop working now',
-    buttonAction: () => {},
+    buttonAction: () => stopCurrentEvent(),
     color: 'rose',
   }
 ])
