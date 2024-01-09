@@ -5,7 +5,7 @@ import HeaderBar from "@/components/HeaderBar.vue";
 import {computed, reactive, ref} from "vue";
 import {timeStringToDate} from "@/lib/time-utils";
 import dayjs from "dayjs";
-import type {CalendarEvent, CalendarReminder} from "@/lib/types";
+import {calendarEvent, type CalendarEvent, type CalendarReminder} from "@/lib/types";
 import CurrentEventCard from "@/components/event-cards/CurrentEventCard.vue";
 import EditEventCard from "@/components/event-cards/EditEventCard.vue";
 import RemindersContainer from "@/components/RemindersContainer.vue";
@@ -104,31 +104,28 @@ const selectedEvent = computed<CalendarEvent | null>({
   }
 })
 
-function createEvent() {
+function startCurrentEvent() {
   const id = uuid()
 
-  events.push({
+  events.push(calendarEvent({
     id,
-    projectDisplayName: null,
-    activityDisplayName: null,
-    privateNote: null,
-    color: null,
-    repeats: false,
-    isBreak: false,
     startedAt: dayjs().toDate(),
-    endedAt: null,
-  })
+  }))
 
   currentEventId.value = id
-
-  return id
 }
 
 function endCurrentEvent() {
+  if (currentEvent.value === null) {
+    return
+  }
+
   currentEvent.value = {
     ...currentEvent.value,
     endedAt: dayjs().toDate()
   }
+
+  selectedEventId.value = currentEventId.value
   currentEvent.value = null
 }
 </script>
@@ -140,7 +137,7 @@ function endCurrentEvent() {
       <section class="border-r border-border">
         <CurrentEventCard
           v-model="currentEvent"
-          @create-event="createEvent"
+          @create-event="startCurrentEvent"
           @end-event="() => endCurrentEvent()"
         />
         <RemindersContainer :reminders="reminders" />
