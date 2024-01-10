@@ -14,7 +14,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  continue: [event: ReactiveActivity]
+  continue: [activity: ReactiveActivity]
 }>()
 
 const state = reactive({
