@@ -4,7 +4,7 @@ import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {computed, reactive} from "vue";
 import TimeDurationInput from "@/components/TimeDurationInput.vue";
-import {minutesSinceStartOfDay} from "@/lib/time-utils";
+import {minutesSinceStartOfDay, minutesSinceStartOfDayToDate} from "@/lib/time-utils";
 import {isNotNull, isNull} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendar-event";
 import type {ReactiveActivity} from "@/model/activity";
@@ -22,27 +22,18 @@ const state = reactive({
   }),
 
   startedAtMinutes: computed({
-    get() { return minutesSinceStartOfDay(model.value?.startedAt) },
-    set() { return /* todo */ }
+    get() { return minutesSinceStartOfDay(model.value.startedAt) },
+    set(value) { model.value.startedAt = minutesSinceStartOfDayToDate(value) }
   }),
 
   endedAtMinutes: computed({
-    get() { return minutesSinceStartOfDay(model.value?.endedAt) },
-    set() { return /* todo */ }
+    get() { return minutesSinceStartOfDay(model.value.endedAt) },
+    set(value) { model.value.endedAt = minutesSinceStartOfDayToDate(value) }
   }),
 
   durationMinutes: computed({
-    get() {
-      const startedAt = model.value.startedAt
-      const endedAt = model.value.endedAt
-
-      if (isNull(startedAt) || isNull(endedAt)) {
-        return 0
-      }
-
-      return minutesSinceStartOfDay(endedAt) - minutesSinceStartOfDay(startedAt)
-    },
-    set() { return /* todo */ }
+    get() { return model.value.durationMinutes },
+    set(value) { model.value.durationMinutes = value }
   }),
 })
 
@@ -62,12 +53,12 @@ function handleContinue() {
         <Input v-model="state.name" class="font-medium text-xl" />
       </div>
       <div class="flex flex-row items-center">
-        <TimeDurationInput v-model="state.startedAtMinutes" placeholder="00:00" class="w-16 text-center font-medium text-sm border-none" />
-        <span class="text-accent">-</span>
-        <TimeDurationInput v-model="state.endedAtMinutes" placeholder="00:00" class="w-16 text-center font-medium text-sm border-none" />
+        <TimeDurationInput v-if="model.hasStarted" v-model="state.startedAtMinutes" placeholder="00:00" class="w-16 text-center font-medium text-sm border-none" />
+        <span v-if="model.hasEnded" class="text-accent">-</span>
+        <TimeDurationInput v-if="model.hasEnded"  v-model="state.endedAtMinutes" placeholder="00:00" class="w-16 text-center font-medium text-sm border-none" />
       </div>
       <div>
-        <TimeDurationInput v-model="state.durationMinutes" placeholder="00:00" class="w-20 text-center font-medium text-xl border-none" />
+        <TimeDurationInput v-if="model.hasEnded" v-model="state.durationMinutes" placeholder="00:00" class="w-20 text-center font-medium text-xl border-none" />
       </div>
       <div class="flex flex-row items-center gap-2">
         <Button v-if="isNotNull(model.activity)" @click="handleContinue()">Continue</Button>

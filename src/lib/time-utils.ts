@@ -40,6 +40,10 @@ export function minutesSinceStartOfDay(date: Maybe<Date>): number {
   return dayjs(date).diff(startOfDay, 'minute')
 }
 
+export function minutesSinceStartOfDayToDate(minutes: number): Date {
+  return dayjs().startOf('day').add(minutes, 'minute').toDate()
+}
+
 export function formatMinutes(minutes: number, format = 'HH:mm'): string {
   return dayjs().startOf('day').add(minutes, 'minute').format(format)
 }

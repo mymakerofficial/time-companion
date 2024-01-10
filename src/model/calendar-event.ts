@@ -2,8 +2,10 @@ import {v4 as uuid} from "uuid";
 import {computed, reactive, ref} from "vue";
 import type {Nullable} from "@/lib/utils";
 import type {ReactiveActivity} from "@/model/activity";
-import {isNotNull, runIf} from "@/lib/utils";
+import {isNotNull, isNull, runIf} from "@/lib/utils";
 import type {HasId, ID} from "@/lib/types";
+import {minutesSinceStartOfDay} from "@/lib/time-utils";
+import dayjs from "dayjs";
 
 export interface ReactiveCalendarEvent extends HasId {
   projectId: Nullable<ReactiveActivity['projectId']>
@@ -17,6 +19,7 @@ export interface ReactiveCalendarEvent extends HasId {
   endedAt: Nullable<Date>
   hasStarted: boolean
   hasEnded: boolean
+  durationMinutes: number
 }
 
 export interface CalendarEventInit {
@@ -42,6 +45,60 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
   const hasStarted = computed(() => isNotNull(config.startedAt))
   const hasEnded = computed(() => isNotNull(config.endedAt))
 
+  const startedAt = computed({
+    get() { return config.startedAt },
+    set(value) {
+      if (isNull(value)) {
+        config.startedAt = null
+        config.endedAt = null
+        return
+      }
+
+      if (isNotNull(config.endedAt)) {
+        config.endedAt = dayjs(value).add(durationMinutes.value, 'minute').toDate()
+      }
+
+      config.startedAt = value
+    }
+  })
+
+  const endedAt = computed({
+    get() { return config.endedAt },
+    set(value) {
+      if (isNull(value)) {
+        config.endedAt = null
+        return
+      }
+
+      if (dayjs(value).isBefore(dayjs(startedAt.value))) {
+        throw Error('Tried to set endedAt before startedAt.')
+      }
+
+      config.endedAt = value
+    }
+  })
+
+  const durationMinutes = computed({
+    get() {
+      if (!hasStarted.value || !hasEnded.value) {
+        return 0
+      }
+
+      return minutesSinceStartOfDay(config.endedAt) - minutesSinceStartOfDay(config.startedAt)
+    },
+    set(value) {
+      if (isNull(config.startedAt)) {
+        throw Error('Tried to set durationMinutes before startedAt was set.')
+      }
+
+      if (value < 0) {
+        throw Error('Tried to set durationMinutes to a negative value.')
+      }
+
+      config.endedAt = dayjs(config.startedAt).add(value, 'minute').toDate()
+    }
+  })
+
   return reactive({
     id: computed(() => config.id),
     projectId: computed(() => inherits.activity?.projectId ?? null),
@@ -60,9 +117,10 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
       set: (value) => runIf(inherits.activity, isNotNull, () => inherits.activity!.color = value)
     }),
     privateNote: config.privateNote,
-    startedAt: config.startedAt,
-    endedAt: config.endedAt,
+    startedAt,
+    endedAt,
     hasStarted,
     hasEnded,
+    durationMinutes,
   })
 }

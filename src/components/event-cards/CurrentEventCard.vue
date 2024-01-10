@@ -2,15 +2,15 @@
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {computed, reactive, watch} from "vue";
-import {isDef, useNow, whenever} from "@vueuse/core";
+import {useNow, whenever} from "@vueuse/core";
 import dayjs from "dayjs";
 import {MoreVertical} from "lucide-vue-next";
 import TimeDurationInput from "@/components/TimeDurationInput.vue";
 import {formatTimeDiff, minutesSinceStartOfDay} from "@/lib/time-utils";
-import type {CalendarEvent} from "@/lib/types";
 import {isNotNull, isNull, type Nullable} from "@/lib/utils";
+import type {ReactiveCalendarEvent} from "@/model/calendar-event";
 
-const model = defineModel<Nullable<CalendarEvent>>({ required: true })
+const model = defineModel<Nullable<ReactiveCalendarEvent>>({ required: true })
 
 const emit = defineEmits<{
   startEvent: []
