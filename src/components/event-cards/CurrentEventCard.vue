@@ -9,7 +9,9 @@ import {formatTimeDiff, minutesSinceStartOfDay, minutesSinceStartOfDayToDate} fr
 import {isNotDefined, isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendar-event";
 
-const model = defineModel<Nullable<ReactiveCalendarEvent>>({ required: true })
+const props = defineProps<{
+  event: Nullable<ReactiveCalendarEvent>
+}>()
 
 const emit = defineEmits<{
   startEvent: []
@@ -22,37 +24,37 @@ const state = reactive({
   name: '',
 
   startedAtMinutes: computed({
-    get() { return minutesSinceStartOfDay(model.value?.startedAt) },
-    set(value: number) { runIf(model.value, isNotNull, () => model.value!.startedAt = minutesSinceStartOfDayToDate(value)) }
+    get() { return minutesSinceStartOfDay(props.event?.startedAt) },
+    set(value: number) { runIf(props.event, isNotNull, () => props.event!.startedAt = minutesSinceStartOfDayToDate(value)) }
   }),
 
-  isRunning: computed(() => isNotNull(model.value) && model.value.hasStarted && !model.value.hasEnded)
+  isRunning: computed(() => isNotNull(props.event) && props.event.hasStarted && !props.event.hasEnded)
 })
 
-watch(() => model.value?.projectDisplayName, () => {
-  if (isNull(model.value)) {
+watch(() => props.event?.projectDisplayName, () => {
+  if (isNull(props.event)) {
     return
   }
 
-  if (isNotNull(model.value.projectDisplayName)) {
+  if (isNotNull(props.event.projectDisplayName)) {
     // if a name is already set by the parent, use that
-    state.name = model.value.projectDisplayName
+    state.name = props.event.projectDisplayName
   } else {
     // otherwise, use the input value
-    model.value.projectDisplayName = state.name
+    props.event.projectDisplayName = state.name
   }
 })
 
 watch(() => state.name, () => {
-  if (isNull(model.value)) {
+  if (isNull(props.event)) {
     return
   }
 
-  model.value.projectDisplayName = state.name
+  props.event.projectDisplayName = state.name
 })
 
 function handleStartStop() {
-  if (isNull(model.value)) {
+  if (isNull(props.event)) {
     emit('startEvent')
   } else {
     emit('stopEvent')
@@ -60,12 +62,12 @@ function handleStartStop() {
 }
 
 const durationLabel = computed(() => {
-  if (isNotDefined(model.value?.startedAt)) {
+  if (isNotDefined(props.event?.startedAt)) {
     return '00:00:00'
   }
 
   // time between now and startedAt in HH:mm:ss
-  return formatTimeDiff(model.value!.startedAt, now.value)
+  return formatTimeDiff(props.event!.startedAt, now.value)
 })
 </script>
 

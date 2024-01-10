@@ -124,14 +124,14 @@ function handleEventSelected(id: string) {
     <main class="grid grid-cols-2 h-[calc(100vh-3.5rem)]">
       <section class="border-r border-border">
         <CurrentEventCard
-          v-model="currentEvent"
+          :event="currentEvent"
           @start-event="startCurrentEvent"
           @stop-event="stopCurrentEvent"
         />
         <RemindersContainer :reminders="reminders" />
         <EditEventCard
           v-if="selectedEvent"
-          v-model="selectedEvent"
+          :event="selectedEvent"
           @continue="startCurrentEvent"
         />
       </section>
