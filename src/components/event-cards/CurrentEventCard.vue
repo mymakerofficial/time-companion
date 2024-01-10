@@ -6,8 +6,8 @@ import {useNow, whenever} from "@vueuse/core";
 import dayjs from "dayjs";
 import {MoreVertical} from "lucide-vue-next";
 import TimeDurationInput from "@/components/TimeDurationInput.vue";
-import {formatTimeDiff, minutesSinceStartOfDay} from "@/lib/time-utils";
-import {isNotNull, isNull, type Nullable} from "@/lib/utils";
+import {formatTimeDiff, minutesSinceStartOfDay, minutesSinceStartOfDayToDate} from "@/lib/time-utils";
+import {isNotDefined, isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendar-event";
 
 const model = defineModel<Nullable<ReactiveCalendarEvent>>({ required: true })
@@ -22,33 +22,12 @@ const now = useNow()
 const state = reactive({
   name: '',
 
-  startedAt: computed<Nullable<Date>>({
-    get() {
-      return model.value?.startedAt || null
-    },
-    set(value) {
-      if (isNull(value) || isNull(model.value)) {
-        return
-      }
-
-      model.value.startedAt = value
-    }
-  }),
-
   startedAtMinutes: computed({
-    get() {
-      return minutesSinceStartOfDay(model.value?.startedAt)
-    },
-    set(value: number) {
-      if (isNull(model.value)) {
-        return
-      }
-
-      model.value.startedAt = dayjs().startOf('day').add(value, 'minute').toDate()
-    }
+    get() { return minutesSinceStartOfDay(model.value?.startedAt) },
+    set(value: number) { runIf(model.value, isNotNull, () => model.value!.startedAt = minutesSinceStartOfDayToDate(value)) }
   }),
 
-  isRunning: computed(() => isNotNull(model.value))
+  isRunning: computed(() => isNotNull(model.value) && model.value.hasStarted && !model.value.hasEnded)
 })
 
 watch(() => model.value?.projectDisplayName, () => {
@@ -82,12 +61,12 @@ function handleStartStop() {
 }
 
 const durationLabel = computed(() => {
-  if (isNull(state.startedAt)) {
+  if (isNotDefined(model.value?.startedAt)) {
     return '00:00:00'
   }
 
   // time between now and startedAt in HH:mm:ss
-  return formatTimeDiff(state.startedAt, now.value)
+  return formatTimeDiff(model.value!.startedAt, now.value)
 })
 </script>
 
