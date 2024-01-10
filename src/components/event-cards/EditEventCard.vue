@@ -5,13 +5,14 @@ import {Button} from "@/components/ui/button";
 import {computed, reactive} from "vue";
 import TimeDurationInput from "@/components/TimeDurationInput.vue";
 import {minutesSinceStartOfDay} from "@/lib/time-utils";
-import {isNull} from "@/lib/utils";
+import {isNotNull, isNull} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendar-event";
+import type {ReactiveActivity} from "@/model/activity";
 
 const model = defineModel<ReactiveCalendarEvent>({ required: true })
 
 const emit = defineEmits<{
-  continue: [event: ReactiveCalendarEvent]
+  continue: [event: ReactiveActivity]
 }>()
 
 const state = reactive({
@@ -46,7 +47,11 @@ const state = reactive({
 })
 
 function handleContinue() {
-  emit('continue', model.value)
+  if(isNull(model.value.activity)) {
+    return
+  }
+
+  emit('continue', model.value.activity)
 }
 </script>
 
@@ -65,7 +70,7 @@ function handleContinue() {
         <TimeDurationInput v-model="state.durationMinutes" placeholder="00:00" class="w-20 text-center font-medium text-xl border-none" />
       </div>
       <div class="flex flex-row items-center gap-2">
-        <Button @click="handleContinue()">Continue</Button>
+        <Button v-if="isNotNull(model.activity)" @click="handleContinue()">Continue</Button>
         <Button variant="ghost" size="icon"><MoreVertical /></Button>
       </div>
     </div>

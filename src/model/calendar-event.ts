@@ -8,6 +8,7 @@ import type {HasId, ID} from "@/lib/types";
 export interface ReactiveCalendarEvent extends HasId {
   projectId: Nullable<ReactiveActivity['projectId']>
   projectDisplayName: ReactiveActivity['projectDisplayName']
+  activity: Nullable<ReactiveActivity>
   activityId: Nullable<ReactiveActivity['id']>
   activityDisplayName: ReactiveActivity['displayName']
   privateNote: Nullable<string>
@@ -48,6 +49,7 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
       get: () => inherits.activity?.projectDisplayName ?? '',
       set: (value) => runIf(inherits.activity, isNotNull, () => inherits.activity!.projectDisplayName = value)
     }),
+    activity: computed(() => inherits.activity),
     activityId: computed(() => inherits.activity?.id ?? null),
     activityDisplayName: computed({
       get: () => inherits.activity?.displayName ?? '',

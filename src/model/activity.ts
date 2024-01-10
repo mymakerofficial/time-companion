@@ -6,6 +6,7 @@ import type {HasId, ID} from "@/lib/types";
 
 export interface ReactiveActivity extends HasId {
   displayName: Nullable<string>
+  project: ReactiveProject
   projectId: ReactiveProject['id']
   projectDisplayName: ReactiveProject['displayName']
   color: ReactiveProject['color']
@@ -30,6 +31,7 @@ export function createActivity(init: ActivityInit): ReactiveActivity {
   return reactive({
     id: computed(() => config.id),
     displayName: config.displayName,
+    project: computed(() => inherits.project),
     projectId: computed(() => inherits.project.id),
     projectDisplayName: computed({
       get: () => inherits.project.displayName,
