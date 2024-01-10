@@ -17,12 +17,14 @@ const emit = defineEmits<{
   click: []
 }>()
 
+const now = useNow()
+
 const containerPosition = computed(() => {
   const { startedAt, endedAt, durationMinutes } = props.event
 
   const startOffset = 2 // due to spacing at the top
   const startRow = minutesToGridRows(minutesSinceStartOfDay(startedAt)) + startOffset
-  const spanRows = minutesToGridRows(durationMinutes)
+  const spanRows = minutesToGridRows(dayjs(endedAt || now.value).diff(dayjs(startedAt), 'minute'))
 
   const minRowSpan = 1 // to prevent to small and negative spans
   if (spanRows < minRowSpan) {
