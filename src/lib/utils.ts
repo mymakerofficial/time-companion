@@ -18,8 +18,8 @@ export function isNotDefined<T>(value: Maybe<T>): value is null | undefined {
   return !isDefined(value)
 }
 
-export function makeSureThat<T>(value: T, assertion: (value: T) => boolean, otherwise: (value: T) => void) {
-  if (!assertion(value)) {
-    otherwise(value)
+export function runIf<T>(value: T, predicate: (value: T) => boolean, block: (value: T) => void) {
+  if (predicate(value)) {
+    block(value)
   }
 }

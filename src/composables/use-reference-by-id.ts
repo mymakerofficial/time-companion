@@ -1,13 +1,13 @@
-import type {Ref, WritableComputedRef} from "vue";
-import type {CalendarEvent, HasId} from "@/lib/types";
+import type {WritableComputedRef} from "vue";
+import type {HasId, ID} from "@/lib/types";
 import {computed, ref} from "vue";
 import type {Nullable} from "@/lib/utils";
 import {isNull} from "@/lib/utils";
 
 export function useReferenceById<T extends HasId>(collection: T[]) {
-  const id = ref<Nullable<HasId['id']>>(null)
+  const id = ref<Nullable<ID>>(null)
 
-  function referenceBy(newId: Nullable<HasId['id']>) {
+  function referenceBy(newId: Nullable<ID>) {
     id.value = newId
   }
 

@@ -5,63 +5,67 @@ import HeaderBar from "@/components/HeaderBar.vue";
 import {computed, reactive, ref} from "vue";
 import {now, timeStringToDate} from "@/lib/time-utils";
 import dayjs from "dayjs";
-import {calendarEvent, type CalendarEvent, calendarReminder, type CalendarReminder} from "@/lib/types";
 import CurrentEventCard from "@/components/event-cards/CurrentEventCard.vue";
 import EditEventCard from "@/components/event-cards/EditEventCard.vue";
 import RemindersContainer from "@/components/RemindersContainer.vue";
-import { v4 as uuid } from "uuid";
 import {isNotNull, isNull} from "@/lib/utils";
 import {firstOf} from "@/lib/list-utils";
 import {useReferenceById} from "@/composables/use-reference-by-id";
+import {createReminder, type ReactiveCalendarReminder} from "@/model/calendar-reminder";
+import {createEvent, type ReactiveCalendarEvent} from "@/model/calendar-event";
+import {createProject} from "@/model/project";
+import {createActivity, type ReactiveActivity} from "@/model/activity";
 
-const reminders = reactive<CalendarReminder[]>([
-  calendarReminder({
-    displayName: 'Take a break',
-    remindAt: timeStringToDate('12:00:00'),
-    remindBeforeMinutes: 60,
-    remindAfterMinutes: 30,
-    actionLabel: 'Start',
-    onAction: () => startBreak(),
-    color: 'orange',
+const activities = reactive<ReactiveActivity[]>([
+  createActivity({
+    project: createProject({
+      displayName: 'Foo Bar',
+      color: 'blue',
+    }),
   }),
-  calendarReminder({
-    displayName: 'End of work',
-    remindAt: timeStringToDate('17:00:00'),
-    remindBeforeMinutes: 120,
-    remindAfterMinutes: 30,
-    actionLabel: 'Stop working now',
-    onAction: () => stopCurrentEvent(),
-    color: 'red',
+  createActivity({
+    project: createProject({
+      displayName: 'Fizz Buzz',
+      color: 'green',
+    }),
+  }),
+  createActivity({
+    project: createProject({
+      displayName: 'Break',
+      color: 'orange',
+    }),
   })
 ])
 
-const events = reactive<CalendarEvent[]>([
-  {
-    id: uuid(),
-    projectDisplayName: 'Test',
-    activityDisplayName: null,
-    privateNote: null,
-    color: 'blue',
-    repeats: false,
-    isBreak: false,
-    startedAt: timeStringToDate('08:00:00'),
-    endedAt: timeStringToDate('09:00:00'),
-  },
-  {
-    id: uuid(),
-    projectDisplayName: 'Foo Bar',
-    activityDisplayName: null,
-    privateNote: null,
-    color: 'green',
-    repeats: false,
-    isBreak: false,
-    startedAt: timeStringToDate('08:30:00'),
-    endedAt: timeStringToDate('09:30:00'),
-  }
+const reminders = reactive<ReactiveCalendarReminder[]>([
+  createReminder({
+    displayText: 'Take a break',
+    remindAt: timeStringToDate('12:00:00'),
+    remindMinutesBefore: 60,
+    remindMinutesAfter: 30,
+    actionLabel: 'Start',
+    onAction: () => startCurrentEvent(activities[2]),
+    color: 'orange',
+  })
 ])
 
-const workDayLengthHours = ref(8)
-const workBreakLengthHours = ref(0.5)
+const events = reactive<ReactiveCalendarEvent[]>([
+  createEvent({
+    activity: activities[0],
+    startedAt: timeStringToDate('08:00:00'),
+    endedAt: timeStringToDate('09:00:00'),
+  }),
+  createEvent({
+    activity: activities[1],
+    startedAt: timeStringToDate('08:30:00'),
+    endedAt: timeStringToDate('09:30:00'),
+  })
+])
+
+const config = reactive({
+  workDayLengthHours: 8,
+  workBreakLengthHours: 0.5,
+})
 
 const dayStartedAt = computed(() => {
   return firstOf(events)?.startedAt || null
@@ -72,28 +76,24 @@ const dayPredictedEndAt = computed(() => {
     return null
   }
 
-  return dayjs(dayStartedAt.value).add(workDayLengthHours.value + workBreakLengthHours.value, 'hour').toDate()
+  return dayjs(dayStartedAt.value).add(config.workDayLengthHours + config.workBreakLengthHours, 'hour').toDate()
 })
 
 const currentEvent = useReferenceById(events)
 const selectedEvent = useReferenceById(events)
 
-function startCurrentEvent(partialEvent?: Partial<CalendarEvent>) {
+function startCurrentEvent(activity?: ReactiveActivity) {
   if (isNotNull(currentEvent.value)) {
     stopCurrentEvent()
   }
 
-  const id = uuid()
-
-  events.push(calendarEvent({
-    ...partialEvent,
-    id,
+  const event = createEvent({
+    activity,
     startedAt: now(),
-    endedAt: null,
-    privateNote: null,
-  }))
+  })
 
-  currentEvent.referenceBy(id)
+  events.push(event)
+  currentEvent.referenceBy(event.id)
 }
 
 function stopCurrentEvent() {
@@ -101,21 +101,10 @@ function stopCurrentEvent() {
     return
   }
 
-  currentEvent.value = {
-    ...currentEvent.value,
-    endedAt: now()
-  }
+  currentEvent.value.endedAt = now()
 
   selectedEvent.referenceBy(currentEvent.value.id)
   currentEvent.value = null
-}
-
-function startBreak() {
-  startCurrentEvent({
-    projectDisplayName: 'Break',
-    isBreak: true,
-    color: 'orange',
-  })
 }
 
 function handleEventSelected(id: string) {

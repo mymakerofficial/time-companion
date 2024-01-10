@@ -3,15 +3,15 @@ import {MoreVertical} from "lucide-vue-next";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {computed, reactive} from "vue";
-import type {CalendarEvent} from "@/lib/types";
 import TimeDurationInput from "@/components/TimeDurationInput.vue";
 import {minutesSinceStartOfDay} from "@/lib/time-utils";
 import {isNull} from "@/lib/utils";
+import type {ReactiveCalendarEvent} from "@/model/calendar-event";
 
-const model = defineModel<CalendarEvent>({ required: true })
+const model = defineModel<ReactiveCalendarEvent>({ required: true })
 
 const emit = defineEmits<{
-  continue: [event: CalendarEvent]
+  continue: [event: ReactiveCalendarEvent]
 }>()
 
 const state = reactive({
@@ -22,12 +22,12 @@ const state = reactive({
 
   startedAtMinutes: computed({
     get() { return minutesSinceStartOfDay(model.value?.startedAt) },
-    set() { return }
+    set() { return /* todo */ }
   }),
 
   endedAtMinutes: computed({
     get() { return minutesSinceStartOfDay(model.value?.endedAt) },
-    set() { return }
+    set() { return /* todo */ }
   }),
 
   durationMinutes: computed({
@@ -41,7 +41,7 @@ const state = reactive({
 
       return minutesSinceStartOfDay(endedAt) - minutesSinceStartOfDay(startedAt)
     },
-    set() { return }
+    set() { return /* todo */ }
   }),
 })
 

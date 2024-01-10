@@ -6,13 +6,13 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import {computed} from "vue";
 import {vProvideColor} from "@/directives/v-provide-color";
-import type {CalendarReminder} from "@/lib/types";
 import {isDefined, isNotDefined} from "@/lib/utils";
+import type {ReactiveCalendarReminder} from "@/model/calendar-reminder";
 
 dayjs.extend(relativeTime)
 
 const props = defineProps<{
-  reminder: CalendarReminder
+  reminder: ReactiveCalendarReminder
 }>()
 
 const now = useNow()
@@ -42,7 +42,7 @@ function handleClick() {
   <div v-provide-color="reminder.color" class="p-8 border-b border-border bg-primary text-primary-foreground">
     <div class="flex flex-row justify-between items-center gap-4">
       <div class="flex-grow">
-        <h1 class="font-medium text-xl ml-3">{{ reminder.displayName }}</h1>
+        <h1 class="font-medium text-xl ml-3">{{ reminder.displayText }}</h1>
       </div>
       <div>
         <time class="text-2xl font-medium tracking-wide">{{ timeLabel }}</time>

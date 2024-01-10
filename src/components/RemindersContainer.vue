@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type {CalendarReminder} from "@/lib/types";
 import ReminderEventCard from "@/components/event-cards/ReminderEventCard.vue";
 import {computed} from "vue";
 import dayjs from "dayjs";
 import {useNow} from "@vueuse/core";
+import type {ReactiveCalendarReminder} from "@/model/calendar-reminder";
 
 const props = defineProps<{
-  reminders: CalendarReminder[]
+  reminders: ReactiveCalendarReminder[]
 }>()
 
 const now = useNow()
@@ -17,8 +17,8 @@ const filteredReminders = computed(() => {
       return false
     }
 
-    const startAt = dayjs(reminder.remindAt).add(-reminder.remindBeforeMinutes, 'minute')
-    const endAt = dayjs(reminder.remindAt).add(reminder.remindAfterMinutes, 'minute')
+    const startAt = dayjs(reminder.remindAt).add(-reminder.remindMinutesBefore, 'minute')
+    const endAt = dayjs(reminder.remindAt).add(reminder.remindMinutesAfter, 'minute')
 
     return dayjs(now.value).isAfter(startAt) && dayjs(now.value).isBefore(endAt)
   })
