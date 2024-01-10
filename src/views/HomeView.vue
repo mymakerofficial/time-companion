@@ -2,7 +2,7 @@
 import CalendarView from "@/components/calendar/CalendarView.vue";
 import CalendarHeader from "@/components/CalendarHeader.vue";
 import HeaderBar from "@/components/HeaderBar.vue";
-import {computed, reactive, ref} from "vue";
+import {computed, reactive} from "vue";
 import {now, timeStringToDate} from "@/lib/time-utils";
 import dayjs from "dayjs";
 import CurrentEventCard from "@/components/event-cards/CurrentEventCard.vue";
@@ -16,6 +16,7 @@ import {createEvent, type ReactiveCalendarEvent} from "@/model/calendar-event";
 import {createProject} from "@/model/project";
 import {createActivity, type ReactiveActivity} from "@/model/activity";
 import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
+import EventInput from "@/components/EventInput.vue";
 
 const activities = reactive<ReactiveActivity[]>([
   createActivity({
@@ -142,6 +143,7 @@ function handleEventSelected(id: string) {
           :event="selectedEvent"
           @continue="startCurrentEvent"
         />
+        <EventInput :projects="projects" :activities="activities" />
       </section>
       <section class="flex flex-col h-[calc(100vh-3.5rem)]">
         <CalendarHeader

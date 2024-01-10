@@ -1,3 +1,11 @@
+import type {ClassValue} from "clsx";
+import {twMerge} from "tailwind-merge";
+import {clsx} from "clsx";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
 export type Nullable<T> = T | null
 export type Optional<T> = T | undefined
 export type Maybe<T> = Nullable<Optional<T>>
