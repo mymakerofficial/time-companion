@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import {minsSinceStartOfDay} from "@/lib/time-utils";
+import {minutesSinceStartOfDay} from "@/lib/time-utils";
 import {computed} from "vue";
 import dayjs from 'dayjs'
 import localizedFormat from 'dayjs/plugin/localizedFormat'
 import {useNow} from "@vueuse/core";
-import {minsToGridRows} from "@/lib/calendar-utils";
+import {minutesToGridRows} from "@/lib/calendar-utils";
 import {Coffee, Repeat} from "lucide-vue-next";
 import type {CalendarEvent} from "@/lib/types";
 import {vProvideColor} from "@/directives/v-provide-color";
+import {isNotNull} from "@/lib/utils";
 
 dayjs.extend(localizedFormat)
 
@@ -23,18 +24,17 @@ const emit = defineEmits<{
 const now = useNow()
 
 const hasEnd = computed(() => {
-  return props.event.endedAt !== null
+  return isNotNull(props.event.endedAt)
 })
 
 const containerPosition = computed(() => {
   const { startedAt, endedAt } = props.event
 
   const startOffset = 2 // due to spacing at the top
-  const minRowSpan = 1
+  const startRow = minutesToGridRows(minutesSinceStartOfDay(startedAt)) + startOffset
+  const spanRows = minutesToGridRows(dayjs(endedAt || now.value).diff(dayjs(startedAt), 'minute'))
 
-  const startRow = minsToGridRows(minsSinceStartOfDay(startedAt)) + startOffset
-  const spanRows = minsToGridRows(dayjs(endedAt || now.value).diff(dayjs(startedAt), 'minute'))
-
+  const minRowSpan = 1 // to prevent to small and negative spans
   if (spanRows < minRowSpan) {
     return { startRow, spanRows: minRowSpan }
   }
@@ -60,6 +60,7 @@ const endedAtLabel = computed(() => {
   if (!hasEnd.value) {
     return 'now'
   }
+
   return dayjs(props.event.endedAt).format('HH:mm')
 })
 

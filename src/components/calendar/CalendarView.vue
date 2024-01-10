@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
-import localizedFormat from 'dayjs/plugin/localizedFormat'
 import {useNow} from "@vueuse/core";
-import {timeStringToDate} from "@/lib/time-utils";
+import {formatHours, timeStringToDate} from "@/lib/time-utils";
 import CalendarViewEvent from "@/components/calendar/CalendarViewEvent.vue";
 import CalendarViewPointer from "@/components/calendar/CalendarViewPointer.vue";
 import CalendarViewArea from "@/components/calendar/CalendarViewArea.vue";
 import type {CalendarEvent} from "@/lib/types";
-
-dayjs.extend(localizedFormat)
 
 const props = defineProps<{
   events: CalendarEvent[]
@@ -20,8 +17,9 @@ const emit = defineEmits<{
 
 const now = useNow()
 
-function indexToTime(index: number) {
-  return dayjs().startOf('day').add(index / 2, 'hour').format('HH:mm')
+function getRowTimeLabel(row: number) {
+  const rowsPerHour = 2
+  return formatHours(row / rowsPerHour)
 }
 
 function calculateInset(event: CalendarEvent) {
@@ -63,7 +61,7 @@ function handleClick(id: string) {
           <template v-for="i in 48">
             <div class="border-t border-border">
               <div v-if="i % 2 === 1" class="leading-5 text-right text-xs font-medium text-muted-foreground -ml-24 -mt-2.5 pr-5 w-24">
-                {{ indexToTime(i - 1) }}
+                {{ getRowTimeLabel(i - 1) }}
               </div>
             </div>
           </template>

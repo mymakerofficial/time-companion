@@ -1,15 +1,19 @@
 import { v4 as uuid } from 'uuid'
+import type {Nullable} from "@/lib/utils";
 
-export interface CalendarEvent {
+export interface HasId {
   id: string
-  projectDisplayName: string | null
-  activityDisplayName: string | null
-  privateNote: string | null
-  color: string | null
+}
+
+export interface CalendarEvent extends HasId {
+  projectDisplayName: Nullable<string>
+  activityDisplayName: Nullable<string>
+  privateNote: Nullable<string>
+  color: Nullable<string>
   repeats: boolean
   isBreak: boolean
   startedAt: Date
-  endedAt: Date | null
+  endedAt: Nullable<Date>
 }
 
 export function calendarEvent(partial: Partial<CalendarEvent>): CalendarEvent {
@@ -27,13 +31,26 @@ export function calendarEvent(partial: Partial<CalendarEvent>): CalendarEvent {
   }
 }
 
-export interface CalendarReminder {
-  id: string
+export interface CalendarReminder extends HasId {
   displayName: string
   remindAt: Date
-  remindBeforeMins: number
-  remindAfterMins: number
-  buttonLabel: string | null
-  buttonAction: (() => void) | null
+  remindBeforeMinutes: number
+  remindAfterMinutes: number
+  buttonLabel: Nullable<string>
+  buttonAction: Nullable<() => void>
   color: string
+}
+
+export function calendarReminder(partial: Partial<CalendarReminder>): CalendarReminder {
+  return {
+    id: uuid(),
+    displayName: '',
+    remindAt: new Date(),
+    remindBeforeMinutes: 0,
+    remindAfterMinutes: 0,
+    buttonLabel: null,
+    buttonAction: null,
+    color: 'gray',
+    ...partial,
+  }
 }

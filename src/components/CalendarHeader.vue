@@ -4,12 +4,13 @@ import {useNow, useToggle} from "@vueuse/core";
 import {formatTimeDiff} from "@/lib/time-utils";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
+import {isNull, type Nullable} from "@/lib/utils";
 
 dayjs.extend(relativeTime)
 
 const props = defineProps<{
-  dayStartedAt: Date | null,
-  dayPredictedEndAt: Date | null
+  dayStartedAt: Nullable<Date>
+  dayPredictedEndAt: Nullable<Date>
 }>()
 
 const now = useNow()
@@ -17,7 +18,7 @@ const now = useNow()
 const [displayTimeLeft, toggleDisplayTimeLeft] = useToggle(false)
 
 const displayTimeLabel = computed(() => {
-  if (props.dayStartedAt === null || props.dayPredictedEndAt === null) {
+  if (isNull(props.dayStartedAt) || isNull(props.dayPredictedEndAt)) {
     return '00:00:00'
   }
 

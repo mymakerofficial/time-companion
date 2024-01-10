@@ -13,8 +13,8 @@ const now = useNow()
 
 const filteredReminders = computed(() => {
   return props.reminders.filter((reminder) => {
-    const startAt = dayjs(reminder.remindAt).add(-reminder.remindBeforeMins, 'minute')
-    const endAt = dayjs(reminder.remindAt).add(reminder.remindAfterMins, 'minute')
+    const startAt = dayjs(reminder.remindAt).add(-reminder.remindBeforeMinutes, 'minute')
+    const endAt = dayjs(reminder.remindAt).add(reminder.remindAfterMinutes, 'minute')
 
     return dayjs(now.value).isAfter(startAt) && dayjs(now.value).isBefore(endAt)
   })

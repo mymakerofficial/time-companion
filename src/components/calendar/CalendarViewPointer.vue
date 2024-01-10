@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {computed} from "vue";
-import {minsToGridRows} from "@/lib/calendar-utils";
-import {minsSinceStartOfDay} from "@/lib/time-utils";
+import {minutesToGridRows} from "@/lib/calendar-utils";
+import {minutesSinceStartOfDay} from "@/lib/time-utils";
 
 const props = defineProps<{
   date: Date,
@@ -9,7 +9,7 @@ const props = defineProps<{
 
 const containerStyle = computed(() => {
   const startOffset = 2 // due to spacing at the top
-  return { gridRow: minsToGridRows(minsSinceStartOfDay(props.date)) + startOffset }
+  return { gridRow: minutesToGridRows(minutesSinceStartOfDay(props.date)) + startOffset }
 })
 </script>
 

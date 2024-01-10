@@ -1,19 +1,21 @@
 <script setup lang="ts">
 import {computed} from "vue";
-import {minsToGridRows} from "@/lib/calendar-utils";
-import {minsSinceStartOfDay} from "@/lib/time-utils";
+import {minutesToGridRows} from "@/lib/calendar-utils";
+import {minutesSinceStartOfDay} from "@/lib/time-utils";
+import {isNotNull, type Nullable} from "@/lib/utils";
 
 const props = defineProps<{
-  startedAt: Date | null
-  endedAt: Date | null
+  startedAt: Nullable<Date>
+  endedAt: Nullable<Date>
 }>()
 
 const containerStyle = computed(() => {
   const { startedAt, endedAt } = props
 
   const startOffset = 2 // due to spacing at the top
-  const startRow = startedAt !== null ? minsToGridRows(minsSinceStartOfDay(startedAt)) + startOffset : 1
-  const endRow = endedAt !== null ? minsToGridRows(minsSinceStartOfDay(endedAt)) + startOffset : 290
+
+  const startRow = isNotNull(startedAt) ? minutesToGridRows(minutesSinceStartOfDay(startedAt)) + startOffset : 1
+  const endRow = isNotNull(endedAt) ? minutesToGridRows(minutesSinceStartOfDay(endedAt)) + startOffset : 290
   const spanRows = endRow - startRow
 
   return { gridRow: `${startRow} / span ${spanRows}` }

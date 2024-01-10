@@ -3,21 +3,23 @@ import CalendarView from "@/components/calendar/CalendarView.vue";
 import CalendarHeader from "@/components/CalendarHeader.vue";
 import HeaderBar from "@/components/HeaderBar.vue";
 import {computed, reactive, ref} from "vue";
-import {timeStringToDate} from "@/lib/time-utils";
+import {now, timeStringToDate} from "@/lib/time-utils";
 import dayjs from "dayjs";
 import {calendarEvent, type CalendarEvent, type CalendarReminder} from "@/lib/types";
 import CurrentEventCard from "@/components/event-cards/CurrentEventCard.vue";
 import EditEventCard from "@/components/event-cards/EditEventCard.vue";
 import RemindersContainer from "@/components/RemindersContainer.vue";
 import { v4 as uuid } from "uuid";
+import {isNotNull, isNull, type Nullable} from "@/lib/utils";
+import {firstOf} from "@/lib/list-utils";
 
 const reminders = reactive<CalendarReminder[]>([
   {
     id: uuid(),
     displayName: 'Take a break',
     remindAt: timeStringToDate('12:00:00'),
-    remindBeforeMins: 30,
-    remindAfterMins: 30,
+    remindBeforeMinutes: 30,
+    remindAfterMinutes: 30,
     buttonLabel: 'Start',
     buttonAction: () => stopCurrentEvent(),
     color: 'orange',
@@ -26,11 +28,11 @@ const reminders = reactive<CalendarReminder[]>([
     id: uuid(),
     displayName: 'End of work',
     remindAt: timeStringToDate('17:00:00'),
-    remindBeforeMins: 120,
-    remindAfterMins: 30,
+    remindBeforeMinutes: 120,
+    remindAfterMinutes: 30,
     buttonLabel: 'Stop working now',
     buttonAction: () => stopCurrentEvent(),
-    color: 'rose',
+    color: 'red',
   }
 ])
 
@@ -59,53 +61,56 @@ const events = reactive<CalendarEvent[]>([
   }
 ])
 
-const workDayLengthHours = 8
-const workBreakLengthHours = 0.5
+const workDayLengthHours = ref(8)
+const workBreakLengthHours = ref(0.5)
 
 const dayStartedAt = computed(() => {
-  return events[0]?.startedAt || null
+  return firstOf(events)?.startedAt || null
 })
 
 const dayPredictedEndAt = computed(() => {
-  if (dayStartedAt.value === null) {
+  if (isNull(dayStartedAt.value)) {
     return null
   }
-  return dayjs(dayStartedAt.value).add(workDayLengthHours + workBreakLengthHours, 'hour').toDate()
+
+  return dayjs(dayStartedAt.value).add(workDayLengthHours.value + workBreakLengthHours.value, 'hour').toDate()
 })
 
-const currentEventId = ref<string | null>(null)
-const selectedEventId = ref<string | null>(null)
+const currentEventId = ref<Nullable<string>>(null)
+const selectedEventId = ref<Nullable<string>>(null)
 
-const currentEvent = computed<CalendarEvent | null>({
+const currentEvent = computed<Nullable<CalendarEvent>>({
   get() {
     return events.find(it => it.id === currentEventId.value) || null
   },
   set(value) {
-    if (value === null) {
+    if (isNull(value)) {
       currentEventId.value = null
       return
     }
+
     const index = events.findIndex(it => it.id === currentEventId.value)
     events[index] = value
   }
 })
 
-const selectedEvent = computed<CalendarEvent | null>({
+const selectedEvent = computed<Nullable<CalendarEvent>>({
   get() {
     return events.find(it => it.id === selectedEventId.value) || null
   },
   set(value) {
-    if (value === null) {
+    if (isNull(value)) {
       selectedEventId.value = null
       return
     }
+
     const index = events.findIndex(it => it.id === selectedEventId.value)
     events[index] = value
   }
 })
 
 function startCurrentEvent(partialEvent?: Partial<CalendarEvent>) {
-  if (currentEvent.value !== null) {
+  if (isNotNull(currentEvent.value)) {
     stopCurrentEvent()
   }
 
@@ -114,7 +119,7 @@ function startCurrentEvent(partialEvent?: Partial<CalendarEvent>) {
   events.push(calendarEvent({
     ...partialEvent,
     id,
-    startedAt: dayjs().toDate(),
+    startedAt: now(),
     endedAt: null,
     privateNote: null,
   }))
@@ -123,13 +128,13 @@ function startCurrentEvent(partialEvent?: Partial<CalendarEvent>) {
 }
 
 function stopCurrentEvent() {
-  if (currentEvent.value === null) {
+  if (isNull(currentEvent.value)) {
     return
   }
 
   currentEvent.value = {
     ...currentEvent.value,
-    endedAt: dayjs().toDate()
+    endedAt: now()
   }
 
   selectedEventId.value = currentEventId.value
@@ -144,8 +149,8 @@ function stopCurrentEvent() {
       <section class="border-r border-border">
         <CurrentEventCard
           v-model="currentEvent"
-          @create-event="startCurrentEvent"
-          @end-event="stopCurrentEvent"
+          @start-event="startCurrentEvent"
+          @stop-event="stopCurrentEvent"
         />
         <RemindersContainer :reminders="reminders" />
         <EditEventCard
