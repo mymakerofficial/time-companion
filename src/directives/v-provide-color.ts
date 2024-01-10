@@ -2,7 +2,6 @@ import Color from "color";
 import colors from "tailwindcss/colors";
 import type {Maybe} from "@/lib/utils";
 import {isNotDefined} from "@/lib/utils";
-import type {DefaultColors} from "tailwindcss/types/generated/colors";
 
 function getHsl(color: string, shade: number) {
   // be warned, ugly code ahead
@@ -10,7 +9,7 @@ function getHsl(color: string, shade: number) {
     Color(colors
       [color as keyof typeof colors]
       [shade.toString() as keyof typeof colors['neutral']]
-    ).hsl() as unknown as  { color: [number, number, number] }
+    ).hsl() as unknown as { color: [number, number, number] }
   ).color
   return { h, s, l }
 }

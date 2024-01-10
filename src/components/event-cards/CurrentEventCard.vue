@@ -2,14 +2,19 @@
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {computed, reactive, watch} from "vue";
-import {useNow} from "@vueuse/core";
+import {syncRef, useNow} from "@vueuse/core";
 import {MoreVertical} from "lucide-vue-next";
 import TimeDurationInput from "@/components/TimeDurationInput.vue";
 import {formatTimeDiff, minutesSinceStartOfDay, minutesSinceStartOfDayToDate} from "@/lib/time-utils";
 import {isNotDefined, isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendar-event";
+import EventInput from "@/components/EventInput.vue";
+import type {ReactiveProject} from "@/model/project";
+import type {ReactiveActivity} from "@/model/activity";
 
 const props = defineProps<{
+  projects: ReactiveProject[]
+  activities: ReactiveActivity[]
   event: Nullable<ReactiveCalendarEvent>
 }>()
 
@@ -21,7 +26,9 @@ const emit = defineEmits<{
 const now = useNow()
 
 const state = reactive({
-  name: '',
+  project: props.event?.project ?? null as Nullable<ReactiveProject>,
+  activity: props.event?.activity ?? null as Nullable<ReactiveActivity>,
+  note: props.event?.note ?? '',
 
   startedAtMinutes: computed({
     get() { return minutesSinceStartOfDay(props.event?.startedAt) },
@@ -31,26 +38,29 @@ const state = reactive({
   isRunning: computed(() => isNotNull(props.event) && props.event.hasStarted && !props.event.hasEnded)
 })
 
-watch(() => props.event?.projectDisplayName, () => {
-  if (isNull(props.event)) {
-    return
-  }
-
-  if (isNotNull(props.event.projectDisplayName)) {
-    // if a name is already set by the parent, use that
-    state.name = props.event.projectDisplayName
-  } else {
-    // otherwise, use the input value
-    props.event.projectDisplayName = state.name
-  }
+watch(() => state.project, (value) => {
+  runIf(props.event, isNotNull, () => props.event!.project = value)
+})
+watch(() => state.activity, (value) => {
+  runIf(props.event, isNotNull, () => props.event!.activity = value)
 })
 
-watch(() => state.name, () => {
-  if (isNull(props.event)) {
+watch(() => props.event, (value) => {
+  if (isNull(value)) {
     return
   }
 
-  props.event.projectDisplayName = state.name
+  if (isNull(value.project)) {
+    // if no project is set by the parent, use the user input
+    value.project = state.project
+    value.activity = state.activity
+    value.note = state.note
+    return
+  }
+
+  state.project = value?.project ?? null
+  state.activity = value?.activity ?? null
+  state.note = value?.note ?? ''
 })
 
 function handleStartStop() {
@@ -75,7 +85,14 @@ const durationLabel = computed(() => {
   <div class="p-8 bg-primary text-primary-foreground flex flex-col gap-2">
     <div class="flex flex-row justify-between items-center gap-8">
       <div class="flex-grow">
-        <Input v-model="state.name" placeholder="what are you working on?" class="bg-primary text-primary-foreground border-none font-medium text-xl" />
+        <EventInput
+          :projects="projects"
+          :activities="activities"
+          v-model:project="state.project"
+          v-model:activity="state.activity"
+          placeholder="what are you working on?..."
+          class="bg-primary text-primary-foreground border-none"
+        />
       </div>
       <div class="flex flex-row items-center gap-8">
         <TimeDurationInput v-if="state.isRunning" v-model="state.startedAtMinutes" class="w-16 text-center font-medium text-sm border-none bg-primary text-primary-foreground" />

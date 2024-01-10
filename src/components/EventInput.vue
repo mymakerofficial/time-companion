@@ -2,16 +2,42 @@
 import type {ReactiveProject} from "@/model/project";
 import type {ReactiveActivity} from "@/model/activity";
 import {useReferenceById} from "@/composables/use-reference-by-id";
-import {computed, ref} from "vue";
-import {Popover, PopoverTrigger, PopoverContent} from "@/components/ui/popover";
+import {computed, reactive, watch} from "vue";
+import AutocompleteCombobox from "@/components/AutocompleteCombobox.vue";
+import {cn, isNotNull, isNull, type Nullable, takeIf} from "@/lib/utils";
+import {vProvideColor} from "@/directives/v-provide-color";
+import {isEmpty} from "@/lib/list-utils";
+
+const projectModel = defineModel<Nullable<ReactiveProject>>('project', { required: true })
+const activityModel = defineModel<Nullable<ReactiveActivity>>('activity', { required: true })
 
 const props = defineProps<{
   projects: ReactiveProject[]
   activities: ReactiveActivity[]
+  placeholder?: string
 }>()
+
+const state = reactive({
+  focused: false,
+  searchTerm: '',
+})
 
 const selectedProject = useReferenceById(props.projects)
 const selectedActivity = useReferenceById(props.activities)
+
+watch(projectModel, (value) => {
+  selectedProject.referenceBy(value?.id ?? null)
+}, { immediate: true })
+watch(selectedProject, () => {
+  projectModel.value = selectedProject.value
+})
+
+watch(activityModel, (value) => {
+  selectedActivity.referenceBy(value?.id ?? null)
+}, { immediate: true })
+watch(selectedActivity, () => {
+  activityModel.value = selectedActivity.value
+})
 
 const projectOptions = computed(() => props.projects.map((project) => ({
   label: project.displayName,
@@ -24,33 +50,76 @@ const activityOptions = computed(() => props.activities.map((activity) => ({
 })))
 
 const options = computed(() => {
-  return projectOptions.value
+  if (isNull(selectedProject.value)) {
+    return projectOptions.value
+  }
+
+  if (isNull(selectedActivity.value)) {
+    return activityOptions.value
+  }
+
+  return []
 })
 
-const searchTerm = ref('')
+const filteredOptions = computed(() => {
+  return options.value.filter((option) => {
+    return option.label.toLowerCase().includes(state.searchTerm.toLowerCase())
+  })
+})
 
-const open = ref(true)
+function handleSelected(option: { label: string, value: string }) {
+  state.searchTerm = ''
 
-const hoveredIndex = ref(0)
+  if (isNull(selectedProject.value)) {
+    selectedProject.referenceBy(option.value)
+    return
+  }
+
+  if (isNull(selectedActivity.value)) {
+    selectedActivity.referenceBy(option.value)
+    return
+  }
+}
+
+const tags = computed(() => {
+  return [
+    selectedProject.value,
+    selectedActivity.value,
+  ].filter(isNotNull)
+})
+
+const autofillOpen = computed(() => {
+  return state.focused && state.searchTerm.length > 0 && filteredOptions.value.length > 0
+})
 </script>
 
 <template>
-  <Popover :open="open">
-    <PopoverTrigger>
-      <div class="inline-flex flex-row items-center justify-between">
-        <div class="flex flex-row items-center">
-          <div>{{ selectedProject?.displayName }}</div>
-          <div>{{ selectedActivity?.displayName }}</div>
-          <input v-model="searchTerm" />
+  <AutocompleteCombobox
+    :open="autofillOpen"
+    :options="filteredOptions"
+    @selected="handleSelected"
+  >
+    <div
+      :data-focused="state.focused"
+      :class="cn('inline-flex flex-row items-center justify-between w-full rounded-md border border-input bg-background p-1 font-medium text-xl ring-offset-background data-[focused=true]:ring-2 data-[focused=true]:ring-ring data-[focused=true]:ring-offset-2', $attrs?.class ?? '')"
+    >
+      <div class="flex-grow flex flex-row items-center gap-1">
+        <div
+          v-provide-color="selectedProject?.color"
+          v-for="tag in tags"
+          :key="tag.id"
+          class="flex flex-row items-center bg-primary text-primary-foreground rounded-md px-3 py-1 text-xl font-medium"
+        >
+          {{ tag.displayName }}
         </div>
+        <input
+          v-model="state.searchTerm"
+          @focus="state.focused = true"
+          @blur="state.focused = false"
+          :placeholder="takeIf(isEmpty(tags), props.placeholder) || ''"
+          class="flex-grow focus-visible:outline-none bg-inherit placeholder:text-muted-foreground py-1 mx-2"
+        />
       </div>
-    </PopoverTrigger>
-    <PopoverContent class="p-2">
-      <div class="flex flex-col">
-        <div v-for="(option, index) in options" :key="option.value" :data-active="index === hoveredIndex" class="py-1 px-2 rounded-sm data-[active=true]:bg-accent">
-          <div>{{ option.label }}</div>
-        </div>
-      </div>
-    </PopoverContent>
-  </Popover>
+    </div>
+  </AutocompleteCombobox>
 </template>

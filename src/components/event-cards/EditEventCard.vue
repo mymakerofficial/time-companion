@@ -8,8 +8,13 @@ import {minutesSinceStartOfDay, minutesSinceStartOfDayToDate} from "@/lib/time-u
 import {isNotNull, isNull} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendar-event";
 import type {ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
+import type {ReactiveProject} from "@/model/project";
+import type {ReactiveActivity} from "@/model/activity";
+import EventInput from "@/components/EventInput.vue";
 
 const props = defineProps<{
+  projects: ReactiveProject[]
+  activities: ReactiveActivity[]
   event: ReactiveCalendarEvent
 }>()
 
@@ -18,9 +23,19 @@ const emit = defineEmits<{
 }>()
 
 const state = reactive({
-  name: computed({
-    get() { return props.event.projectDisplayName || '' },
-    set(value) { props.event.projectDisplayName = value }
+  project: computed({
+    get() { return props.event.project },
+    set(value) { props.event.project = value }
+  }),
+
+  activity: computed({
+    get() { return props.event.activity },
+    set(value) { props.event.activity = value }
+  }),
+
+  note: computed({
+    get() { return props.event.note },
+    set(value) { props.event.note = value }
   }),
 
   startedAtMinutes: computed({
@@ -52,7 +67,12 @@ function handleContinue() {
   <div class="p-8 border-b border-border">
     <div class="flex flex-row justify-between items-center gap-4">
       <div class="flex-grow">
-        <Input v-model="state.name" class="font-medium text-xl" />
+        <EventInput
+          :projects="projects"
+          :activities="activities"
+          v-model:project="state.project"
+          v-model:activity="state.activity"
+        />
       </div>
       <div class="flex flex-row items-center">
         <TimeDurationInput v-if="event.hasStarted" v-model="state.startedAtMinutes" placeholder="00:00" class="w-16 text-center font-medium text-sm border-none" />

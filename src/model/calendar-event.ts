@@ -116,8 +116,15 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
 
   return reactive({
     id: computed(() => config.id),
-    project: inherits.project,
-    activity: inherits.activity,
+    //
+    project: computed({
+      get: () => inherits.project,
+      set: (value) => inherits.project = value
+    }),
+    activity: computed({
+      get: () => inherits.activity,
+      set: (value) => inherits.activity = value
+    }),
     note: config.note,
     //
     projectDisplayName: computed({

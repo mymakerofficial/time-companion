@@ -16,7 +16,6 @@ import {createEvent, type ReactiveCalendarEvent} from "@/model/calendar-event";
 import {createProject} from "@/model/project";
 import {createActivity, type ReactiveActivity} from "@/model/activity";
 import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
-import EventInput from "@/components/EventInput.vue";
 
 const activities = reactive<ReactiveActivity[]>([
   createActivity({
@@ -133,6 +132,8 @@ function handleEventSelected(id: string) {
     <main class="grid grid-cols-2 h-[calc(100vh-3.5rem)]">
       <section class="border-r border-border">
         <CurrentEventCard
+          :projects="projects"
+          :activities="activities"
           :event="currentEvent"
           @start-event="startCurrentEvent"
           @stop-event="stopCurrentEvent"
@@ -140,10 +141,11 @@ function handleEventSelected(id: string) {
         <RemindersContainer :reminders="reminders" />
         <EditEventCard
           v-if="selectedEvent"
+          :projects="projects"
+          :activities="activities"
           :event="selectedEvent"
           @continue="startCurrentEvent"
         />
-        <EventInput :projects="projects" :activities="activities" />
       </section>
       <section class="flex flex-col h-[calc(100vh-3.5rem)]">
         <CalendarHeader

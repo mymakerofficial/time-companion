@@ -31,3 +31,7 @@ export function runIf<T>(value: T, predicate: (value: T) => boolean, block: (val
     block(value)
   }
 }
+
+export function takeIf<T>(condition: boolean, value: T): Nullable<T> {
+  return condition ? value : null
+}
