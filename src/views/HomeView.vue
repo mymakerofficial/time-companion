@@ -42,7 +42,7 @@ const activities = reactive<ReactiveActivity[]>([
 const reminders = reactive<ReactiveCalendarReminder[]>([
   createReminder({
     displayText: 'Take a break',
-    remindAt: timeStringToDate('15:00:00'),
+    remindAt: timeStringToDate('12:00:00'),
     remindMinutesBefore: 60,
     remindMinutesAfter: 30,
     actionLabel: 'Start',
