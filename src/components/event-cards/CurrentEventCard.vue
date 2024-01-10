@@ -2,8 +2,7 @@
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {computed, reactive, watch} from "vue";
-import {useNow, whenever} from "@vueuse/core";
-import dayjs from "dayjs";
+import {useNow} from "@vueuse/core";
 import {MoreVertical} from "lucide-vue-next";
 import TimeDurationInput from "@/components/TimeDurationInput.vue";
 import {formatTimeDiff, minutesSinceStartOfDay, minutesSinceStartOfDayToDate} from "@/lib/time-utils";

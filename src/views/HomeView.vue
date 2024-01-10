@@ -16,7 +16,15 @@ import {createEvent, type ReactiveCalendarEvent} from "@/model/calendar-event";
 import {createProject} from "@/model/project";
 import {createActivity, type ReactiveActivity} from "@/model/activity";
 
+const breakActivity = createActivity({
+  project: createProject({
+    displayName: 'Break',
+    color: 'orange',
+  }),
+})
+
 const activities = reactive<ReactiveActivity[]>([
+  breakActivity,
   createActivity({
     project: createProject({
       displayName: 'Foo Bar',
@@ -29,34 +37,28 @@ const activities = reactive<ReactiveActivity[]>([
       color: 'green',
     }),
   }),
-  createActivity({
-    project: createProject({
-      displayName: 'Break',
-      color: 'orange',
-    }),
-  })
 ])
 
 const reminders = reactive<ReactiveCalendarReminder[]>([
   createReminder({
     displayText: 'Take a break',
-    remindAt: timeStringToDate('12:00:00'),
+    remindAt: timeStringToDate('15:00:00'),
     remindMinutesBefore: 60,
     remindMinutesAfter: 30,
     actionLabel: 'Start',
-    onAction: () => startCurrentEvent(activities[2]),
+    onAction: () => startCurrentEvent(breakActivity),
     color: 'orange',
   })
 ])
 
 const events = reactive<ReactiveCalendarEvent[]>([
   createEvent({
-    activity: activities[0],
+    activity: activities[1],
     startedAt: timeStringToDate('08:00:00'),
     endedAt: timeStringToDate('09:00:00'),
   }),
   createEvent({
-    activity: activities[1],
+    activity: activities[2],
     startedAt: timeStringToDate('08:30:00'),
     endedAt: timeStringToDate('09:30:00'),
   })
@@ -108,6 +110,10 @@ function stopCurrentEvent() {
 }
 
 function handleEventSelected(id: string) {
+  if (id === currentEvent.value?.id) {
+    return
+  }
+
   selectedEvent.referenceBy(id)
 }
 </script>
