@@ -24,10 +24,7 @@ const filteredReminders = computed(() => {
 <template>
   <ReminderEventCard
     v-for="reminder in filteredReminders"
-    :display-name="reminder.displayName"
-    :remind-at="reminder.remindAt"
-    :button-label="reminder.buttonLabel"
-    :button-action="reminder.buttonAction"
-    :color="reminder.color"
+    :key="reminder.id"
+    :reminder="reminder"
   />
 </template>
