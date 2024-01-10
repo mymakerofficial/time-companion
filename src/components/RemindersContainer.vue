@@ -13,6 +13,10 @@ const now = useNow()
 
 const filteredReminders = computed(() => {
   return props.reminders.filter((reminder) => {
+    if (reminder.isDismissed) {
+      return false
+    }
+
     const startAt = dayjs(reminder.remindAt).add(-reminder.remindBeforeMinutes, 'minute')
     const endAt = dayjs(reminder.remindAt).add(reminder.remindAfterMinutes, 'minute')
 

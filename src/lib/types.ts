@@ -36,9 +36,11 @@ export interface CalendarReminder extends HasId {
   remindAt: Date
   remindBeforeMinutes: number
   remindAfterMinutes: number
-  buttonLabel: Nullable<string>
-  buttonAction: Nullable<() => void>
-  color: string
+  actionLabel: Nullable<string>
+  onAction: Nullable<() => void>
+  dismissAfterAction: boolean
+  isDismissed: boolean
+  color: Nullable<string>
 }
 
 export function calendarReminder(partial: Partial<CalendarReminder>): CalendarReminder {
@@ -48,9 +50,11 @@ export function calendarReminder(partial: Partial<CalendarReminder>): CalendarRe
     remindAt: new Date(),
     remindBeforeMinutes: 0,
     remindAfterMinutes: 0,
-    buttonLabel: null,
-    buttonAction: null,
-    color: 'gray',
+    actionLabel: null,
+    onAction: null,
+    dismissAfterAction: true,
+    isDismissed: false,
+    color: null,
     ...partial,
   }
 }

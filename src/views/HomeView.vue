@@ -5,7 +5,7 @@ import HeaderBar from "@/components/HeaderBar.vue";
 import {computed, reactive, ref} from "vue";
 import {now, timeStringToDate} from "@/lib/time-utils";
 import dayjs from "dayjs";
-import {calendarEvent, type CalendarEvent, type CalendarReminder} from "@/lib/types";
+import {calendarEvent, type CalendarEvent, calendarReminder, type CalendarReminder} from "@/lib/types";
 import CurrentEventCard from "@/components/event-cards/CurrentEventCard.vue";
 import EditEventCard from "@/components/event-cards/EditEventCard.vue";
 import RemindersContainer from "@/components/RemindersContainer.vue";
@@ -15,26 +15,24 @@ import {firstOf} from "@/lib/list-utils";
 import {useReferenceById} from "@/composables/use-reference-by-id";
 
 const reminders = reactive<CalendarReminder[]>([
-  {
-    id: uuid(),
+  calendarReminder({
     displayName: 'Take a break',
     remindAt: timeStringToDate('12:00:00'),
-    remindBeforeMinutes: 30,
+    remindBeforeMinutes: 60,
     remindAfterMinutes: 30,
-    buttonLabel: 'Start',
-    buttonAction: () => stopCurrentEvent(),
+    actionLabel: 'Start',
+    onAction: () => startBreak(),
     color: 'orange',
-  },
-  {
-    id: uuid(),
+  }),
+  calendarReminder({
     displayName: 'End of work',
     remindAt: timeStringToDate('17:00:00'),
     remindBeforeMinutes: 120,
     remindAfterMinutes: 30,
-    buttonLabel: 'Stop working now',
-    buttonAction: () => stopCurrentEvent(),
+    actionLabel: 'Stop working now',
+    onAction: () => stopCurrentEvent(),
     color: 'red',
-  }
+  })
 ])
 
 const events = reactive<CalendarEvent[]>([
@@ -110,6 +108,14 @@ function stopCurrentEvent() {
 
   selectedEvent.referenceBy(currentEvent.value.id)
   currentEvent.value = null
+}
+
+function startBreak() {
+  startCurrentEvent({
+    projectDisplayName: 'Break',
+    isBreak: true,
+    color: 'orange',
+  })
 }
 
 function handleEventSelected(id: string) {

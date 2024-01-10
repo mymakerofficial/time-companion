@@ -22,15 +22,19 @@ const timeLabel = computed(() => {
 })
 
 const hasButton = computed(() => {
-  return isDefined(props.reminder.buttonLabel) && isDefined(props.reminder.buttonAction)
+  return isDefined(props.reminder.actionLabel) && isDefined(props.reminder.onAction)
 })
 
 function handleClick() {
-  if (isNotDefined(props.reminder.buttonAction)) {
+  if (isNotDefined(props.reminder.onAction)) {
     return
   }
 
-  props.reminder.buttonAction()
+  props.reminder.onAction()
+
+  if (props.reminder.dismissAfterAction) {
+    props.reminder.isDismissed = true
+  }
 }
 </script>
 
@@ -44,7 +48,7 @@ function handleClick() {
         <time class="text-2xl font-medium tracking-wide">{{ timeLabel }}</time>
       </div>
       <div class="flex flex-row items-center gap-2">
-        <Button v-if="hasButton" variant="inverted" @click="handleClick()">{{ reminder.buttonLabel }}</Button>
+        <Button v-if="hasButton" variant="inverted" @click="handleClick()">{{ reminder.actionLabel }}</Button>
         <Button variant="ghost" size="icon"><MoreVertical /></Button>
       </div>
     </div>

@@ -51,7 +51,7 @@ const state = reactive({
   isRunning: computed(() => isNotNull(model.value))
 })
 
-whenever(() => isNotNull(model.value), () => {
+watch(() => model.value?.projectDisplayName, () => {
   if (isNull(model.value)) {
     return
   }
@@ -63,10 +63,6 @@ whenever(() => isNotNull(model.value), () => {
     // otherwise, use the input value
     model.value.projectDisplayName = state.name
   }
-})
-
-whenever(() => isNull(model.value), () => {
-  state.name = ''
 })
 
 watch(() => state.name, () => {
