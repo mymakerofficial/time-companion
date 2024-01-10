@@ -51,7 +51,7 @@ const state = reactive({
   isRunning: computed(() => isNotNull(model.value))
 })
 
-whenever(() => state.isRunning, () => {
+whenever(() => isNotNull(model.value), () => {
   if (isNull(model.value)) {
     return
   }
@@ -65,6 +65,10 @@ whenever(() => state.isRunning, () => {
   }
 })
 
+whenever(() => isNull(model.value), () => {
+  state.name = ''
+})
+
 watch(() => state.name, () => {
   if (isNull(model.value)) {
     return
@@ -74,7 +78,7 @@ watch(() => state.name, () => {
 })
 
 function handleStartStop() {
-  if (!state.isRunning) {
+  if (isNull(model.value)) {
     emit('startEvent')
   } else {
     emit('stopEvent')
