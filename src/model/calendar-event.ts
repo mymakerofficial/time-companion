@@ -6,24 +6,27 @@ import {isNotNull, isNull, runIf} from "@/lib/utils";
 import type {HasId, ID} from "@/lib/types";
 import {minutesSinceStartOfDay} from "@/lib/time-utils";
 import dayjs from "dayjs";
+import type {ReactiveProject} from "@/model/project";
+import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
 
 export interface ReactiveCalendarEvent extends HasId {
-  projectId: Nullable<ReactiveActivity['projectId']>
-  projectDisplayName: ReactiveActivity['projectDisplayName']
+  project: Nullable<ReactiveProject>
   activity: Nullable<ReactiveActivity>
-  activityId: Nullable<ReactiveActivity['id']>
-  activityDisplayName: ReactiveActivity['displayName']
   privateNote: Nullable<string>
-  color: ReactiveActivity['color']
+  projectDisplayName: ReactiveProject['displayName']
+  activityDisplayName: ReactiveActivity['displayName']
+  color: ReactiveProject['color']
   startedAt: Nullable<Date>
   endedAt: Nullable<Date>
   hasStarted: boolean
   hasEnded: boolean
   durationMinutes: number
+  createShadow: () => ReactiveCalendarEventShadow
 }
 
 export interface CalendarEventInit {
   id?: ID
+  project?: Nullable<ReactiveProject>
   activity?: Nullable<ReactiveActivity>
   privateNote?: Nullable<string>
   startedAt?: Nullable<Date>
@@ -39,6 +42,7 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
   })
 
   const inherits = reactive({
+    project: init.project ?? null,
     activity: init.activity ?? null,
   })
 
@@ -99,28 +103,42 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
     }
   })
 
+  function createShadow() {
+    if (isNull(inherits.project)) {
+      throw Error('Tried to create a shadow of an event without a project.')
+    }
+
+    return createEventShadow({
+      project: inherits.project,
+      activity: inherits.activity,
+    })
+  }
+
   return reactive({
     id: computed(() => config.id),
-    projectId: computed(() => inherits.activity?.projectId ?? null),
+    project: inherits.project,
+    activity: inherits.activity,
+    privateNote: config.privateNote,
+    //
     projectDisplayName: computed({
-      get: () => inherits.activity?.projectDisplayName ?? '',
-      set: (value) => runIf(inherits.activity, isNotNull, () => inherits.activity!.projectDisplayName = value)
+      get: () => inherits.project?.displayName ?? '',
+      set: (value) => runIf(inherits.project, isNotNull, () => inherits.project!.displayName = value)
     }),
-    activity: computed(() => inherits.activity),
-    activityId: computed(() => inherits.activity?.id ?? null),
     activityDisplayName: computed({
       get: () => inherits.activity?.displayName ?? '',
-      set: (value) => runIf(inherits.activity, isNotNull, () => inherits.activity!.displayName = value)
+      set: (value) => runIf(inherits.project, isNotNull, () => inherits.activity!.displayName = value)
     }),
     color: computed({
-      get: () => inherits.activity?.color ?? null,
-      set: (value) => runIf(inherits.activity, isNotNull, () => inherits.activity!.color = value)
+      get: () => inherits.project?.color ?? null,
+      set: (value) => runIf(inherits.project, isNotNull, () => inherits.project!.color = value)
     }),
-    privateNote: config.privateNote,
+    //
     startedAt,
     endedAt,
     hasStarted,
     hasEnded,
     durationMinutes,
+    //
+    createShadow,
   })
 }

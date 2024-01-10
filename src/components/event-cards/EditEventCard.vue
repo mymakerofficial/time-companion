@@ -7,14 +7,14 @@ import TimeDurationInput from "@/components/TimeDurationInput.vue";
 import {minutesSinceStartOfDay, minutesSinceStartOfDayToDate} from "@/lib/time-utils";
 import {isNotNull, isNull} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendar-event";
-import type {ReactiveActivity} from "@/model/activity";
+import type {ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
 
 const props = defineProps<{
   event: ReactiveCalendarEvent
 }>()
 
 const emit = defineEmits<{
-  continue: [activity: ReactiveActivity]
+  continue: [shadow: ReactiveCalendarEventShadow]
 }>()
 
 const state = reactive({
@@ -44,7 +44,7 @@ function handleContinue() {
     return
   }
 
-  emit('continue', props.event.activity)
+  emit('continue', props.event.createShadow())
 }
 </script>
 

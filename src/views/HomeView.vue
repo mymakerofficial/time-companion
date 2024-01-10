@@ -15,29 +15,35 @@ import {createReminder, type ReactiveCalendarReminder} from "@/model/calendar-re
 import {createEvent, type ReactiveCalendarEvent} from "@/model/calendar-event";
 import {createProject} from "@/model/project";
 import {createActivity, type ReactiveActivity} from "@/model/activity";
+import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
 
-const breakActivity = createActivity({
-  project: createProject({
+const activities = reactive<ReactiveActivity[]>([
+  createActivity({
+    displayName: 'Bar',
+  }),
+  createActivity({
+    displayName: 'Buzz',
+  }),
+])
+
+const projects = reactive([
+  createProject({
     displayName: 'Break',
     color: 'orange',
   }),
-})
-
-const activities = reactive<ReactiveActivity[]>([
-  breakActivity,
-  createActivity({
-    project: createProject({
-      displayName: 'Foo Bar',
-      color: 'blue',
-    }),
+  createProject({
+    displayName: 'Foo',
+    color: 'blue',
   }),
-  createActivity({
-    project: createProject({
-      displayName: 'Fizz Buzz',
-      color: 'green',
-    }),
+  createProject({
+    displayName: 'Fizz',
+    color: 'green',
   }),
 ])
+
+const breakShadow = createEventShadow({
+  project: projects[0],
+})
 
 const reminders = reactive<ReactiveCalendarReminder[]>([
   createReminder({
@@ -46,19 +52,21 @@ const reminders = reactive<ReactiveCalendarReminder[]>([
     remindMinutesBefore: 60,
     remindMinutesAfter: 30,
     actionLabel: 'Start',
-    onAction: () => startCurrentEvent(breakActivity),
+    onAction: () => startCurrentEvent(breakShadow),
     color: 'orange',
   })
 ])
 
 const events = reactive<ReactiveCalendarEvent[]>([
   createEvent({
-    activity: activities[1],
+    project: projects[1],
+    activity: activities[0],
     startedAt: timeStringToDate('08:00:00'),
     endedAt: timeStringToDate('09:00:00'),
   }),
   createEvent({
-    activity: activities[2],
+    project: projects[2],
+    activity: activities[1],
     startedAt: timeStringToDate('08:30:00'),
     endedAt: timeStringToDate('09:30:00'),
   })
@@ -84,13 +92,13 @@ const dayPredictedEndAt = computed(() => {
 const currentEvent = useReferenceById(events)
 const selectedEvent = useReferenceById(events)
 
-function startCurrentEvent(activity?: ReactiveActivity) {
+function startCurrentEvent(shadow?: ReactiveCalendarEventShadow) {
   if (isNotNull(currentEvent.value)) {
     stopCurrentEvent()
   }
 
   const event = createEvent({
-    activity,
+    ...shadow?.createEvent(),
     startedAt: now(),
   })
 
