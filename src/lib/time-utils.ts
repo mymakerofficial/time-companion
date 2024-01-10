@@ -15,7 +15,10 @@ export function timeStringToDate(timeString: string, format = 'HH:mm:ss'): Date 
   return dayjs(timeString, format).toDate()
 }
 
-export function formatDate(date: Date, format = 'HH:mm:ss') {
+export function formatDate(date: Maybe<Date>, format = 'HH:mm:ss') {
+  if (isNotDefined(date)) {
+    return ''
+  }
   return dayjs(date).format(format)
 }
 
@@ -44,10 +47,16 @@ export function minutesSinceStartOfDayToDate(minutes: number): Date {
   return dayjs().startOf('day').add(minutes, 'minute').toDate()
 }
 
-export function formatMinutes(minutes: number, format = 'HH:mm'): string {
+export function formatMinutes(minutes: Maybe<number>, format = 'HH:mm'): string {
+  if (isNotDefined(minutes)) {
+    return ''
+  }
   return dayjs().startOf('day').add(minutes, 'minute').format(format)
 }
 
-export function formatHours(hours: number, format = 'HH:mm'): string {
+export function formatHours(hours: Maybe<number>, format = 'HH:mm'): string {
+  if (isNotDefined(hours)) {
+    return ''
+  }
   return dayjs().startOf('day').add(hours, 'hours').format(format)
 }

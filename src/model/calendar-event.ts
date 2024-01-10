@@ -12,7 +12,7 @@ import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calen
 export interface ReactiveCalendarEvent extends HasId {
   project: Nullable<ReactiveProject>
   activity: Nullable<ReactiveActivity>
-  privateNote: Nullable<string>
+  note: string
   projectDisplayName: ReactiveProject['displayName']
   activityDisplayName: ReactiveActivity['displayName']
   color: ReactiveProject['color']
@@ -28,7 +28,7 @@ export interface CalendarEventInit {
   id?: ID
   project?: Nullable<ReactiveProject>
   activity?: Nullable<ReactiveActivity>
-  privateNote?: Nullable<string>
+  note?: string
   startedAt?: Nullable<Date>
   endedAt?: Nullable<Date>
 }
@@ -36,7 +36,7 @@ export interface CalendarEventInit {
 export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
   const config = reactive({
     id: init.id ?? uuid(),
-    privateNote: init.privateNote ?? null,
+    note: init.note ?? null,
     startedAt: init.startedAt ?? null,
     endedAt: init.endedAt ?? null,
   })
@@ -118,7 +118,7 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
     id: computed(() => config.id),
     project: inherits.project,
     activity: inherits.activity,
-    privateNote: config.privateNote,
+    note: config.note,
     //
     projectDisplayName: computed({
       get: () => inherits.project?.displayName ?? '',

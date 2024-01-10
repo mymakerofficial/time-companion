@@ -1,19 +1,15 @@
 <script setup lang="ts">
-import {minutesSinceStartOfDay} from "@/lib/time-utils";
+import {formatDate, minutesSinceStartOfDay} from "@/lib/time-utils";
 import {computed} from "vue";
 import dayjs from 'dayjs'
-import localizedFormat from 'dayjs/plugin/localizedFormat'
 import {useNow} from "@vueuse/core";
 import {minutesToGridRows} from "@/lib/calendar-utils";
-import {Coffee, Repeat} from "lucide-vue-next";
-import type {CalendarEvent} from "@/lib/types";
 import {vProvideColor} from "@/directives/v-provide-color";
 import {isNotNull} from "@/lib/utils";
-
-dayjs.extend(localizedFormat)
+import type {ReactiveCalendarEvent} from "@/model/calendar-event";
 
 const props = defineProps<{
-  event: CalendarEvent
+  event: ReactiveCalendarEvent
   inset: number
 }>()
 
@@ -21,18 +17,12 @@ const emit = defineEmits<{
   click: []
 }>()
 
-const now = useNow()
-
-const hasEnd = computed(() => {
-  return isNotNull(props.event.endedAt)
-})
-
 const containerPosition = computed(() => {
-  const { startedAt, endedAt } = props.event
+  const { startedAt, endedAt, durationMinutes } = props.event
 
   const startOffset = 2 // due to spacing at the top
   const startRow = minutesToGridRows(minutesSinceStartOfDay(startedAt)) + startOffset
-  const spanRows = minutesToGridRows(dayjs(endedAt || now.value).diff(dayjs(startedAt), 'minute'))
+  const spanRows = minutesToGridRows(durationMinutes)
 
   const minRowSpan = 1 // to prevent to small and negative spans
   if (spanRows < minRowSpan) {
@@ -53,15 +43,15 @@ const containerStyle = computed(() => {
 })
 
 const startedAtLabel = computed(() => {
-  return dayjs(props.event.startedAt).format('HH:mm')
+  return formatDate(props.event.startedAt, 'HH:mm')
 })
 
 const endedAtLabel = computed(() => {
-  if (!hasEnd.value) {
+  if (!props.event.hasEnded) {
     return 'now'
   }
 
-  return dayjs(props.event.endedAt).format('HH:mm')
+  return formatDate(props.event.endedAt, 'HH:mm')
 })
 
 function handleClick() {
@@ -78,13 +68,9 @@ function handleClick() {
             <span class="font-medium">{{ event.projectDisplayName || 'Unnamed' }}</span>
             <span v-if="event.activityDisplayName">{{ event.activityDisplayName }}</span>
           </h2>
-          <div>
-            <Coffee v-if="event.isBreak" class="size-4" />
-            <Repeat v-if="event.repeats" class="size-4" />
-          </div>
         </div>
         <p class="text-xs"><time>{{ startedAtLabel }}</time> - <time>{{ endedAtLabel }}</time></p>
-        <p class="text-xs">{{ event.privateNote }}</p>
+        <p class="text-xs">{{ event.note }}</p>
       </div>
     </div>
   </div>
