@@ -10,8 +10,9 @@ import CurrentEventCard from "@/components/event-cards/CurrentEventCard.vue";
 import EditEventCard from "@/components/event-cards/EditEventCard.vue";
 import RemindersContainer from "@/components/RemindersContainer.vue";
 import { v4 as uuid } from "uuid";
-import {isNotNull, isNull, type Nullable} from "@/lib/utils";
+import {isNotNull, isNull} from "@/lib/utils";
 import {firstOf} from "@/lib/list-utils";
+import {useReferenceById} from "@/composables/use-reference-by-id";
 
 const reminders = reactive<CalendarReminder[]>([
   {
@@ -76,38 +77,8 @@ const dayPredictedEndAt = computed(() => {
   return dayjs(dayStartedAt.value).add(workDayLengthHours.value + workBreakLengthHours.value, 'hour').toDate()
 })
 
-const currentEventId = ref<Nullable<string>>(null)
-const selectedEventId = ref<Nullable<string>>(null)
-
-const currentEvent = computed<Nullable<CalendarEvent>>({
-  get() {
-    return events.find(it => it.id === currentEventId.value) || null
-  },
-  set(value) {
-    if (isNull(value)) {
-      currentEventId.value = null
-      return
-    }
-
-    const index = events.findIndex(it => it.id === currentEventId.value)
-    events[index] = value
-  }
-})
-
-const selectedEvent = computed<Nullable<CalendarEvent>>({
-  get() {
-    return events.find(it => it.id === selectedEventId.value) || null
-  },
-  set(value) {
-    if (isNull(value)) {
-      selectedEventId.value = null
-      return
-    }
-
-    const index = events.findIndex(it => it.id === selectedEventId.value)
-    events[index] = value
-  }
-})
+const currentEvent = useReferenceById(events)
+const selectedEvent = useReferenceById(events)
 
 function startCurrentEvent(partialEvent?: Partial<CalendarEvent>) {
   if (isNotNull(currentEvent.value)) {
@@ -124,7 +95,7 @@ function startCurrentEvent(partialEvent?: Partial<CalendarEvent>) {
     privateNote: null,
   }))
 
-  currentEventId.value = id
+  currentEvent.referenceBy(id)
 }
 
 function stopCurrentEvent() {
@@ -137,8 +108,12 @@ function stopCurrentEvent() {
     endedAt: now()
   }
 
-  selectedEventId.value = currentEventId.value
+  selectedEvent.referenceBy(currentEvent.value.id)
   currentEvent.value = null
+}
+
+function handleEventSelected(id: string) {
+  selectedEvent.referenceBy(id)
 }
 </script>
 
@@ -166,7 +141,7 @@ function stopCurrentEvent() {
         />
         <CalendarView
           :events="events"
-          @event-selected="(id) => selectedEventId = id"
+          @event-selected="handleEventSelected"
         />
       </section>
     </main>
