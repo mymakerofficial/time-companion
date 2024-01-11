@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type {ReactiveProject} from "@/model/project";
-import type {ReactiveActivity} from "@/model/activity";
+import {createProject, type ReactiveProject} from "@/model/project";
+import {createActivity, type ReactiveActivity} from "@/model/activity";
 import {useReferenceById} from "@/composables/use-reference-by-id";
 import {computed, reactive, watch} from "vue";
 import AutocompleteCombobox from "@/components/AutocompleteCombobox.vue";
@@ -8,6 +8,9 @@ import {cn, isNotNull, isNull, type Nullable, takeIf} from "@/lib/utils";
 import {vProvideColor} from "@/directives/v-provide-color";
 import {isEmpty} from "@/lib/list-utils";
 import AutoGrowInput from "@/components/AutoGrowInput.vue";
+import {Popover, PopoverContent} from "@/components/ui/popover";
+import {PopoverAnchor} from "radix-vue";
+import {CornerDownLeft} from "lucide-vue-next";
 
 const projectModel = defineModel<Nullable<ReactiveProject>>('project', { required: true })
 const activityModel = defineModel<Nullable<ReactiveActivity>>('activity', { required: true })
@@ -21,9 +24,12 @@ const props = defineProps<{
 }>()
 
 const state = reactive({
-  focused: false,
+  searchFocused: false,
+  tagInputFocused: false,
   searchTerm: '',
 })
+
+const focused = computed(() => state.searchFocused || state.tagInputFocused)
 
 const selectedProject = useReferenceById(props.projects)
 const selectedActivity = useReferenceById(props.activities)
@@ -77,6 +83,50 @@ const filteredOptions = computed(() => {
   })
 })
 
+const autofillOpen = computed(() => {
+  return focused.value && state.searchTerm.length > 0 && filteredOptions.value.length > 0
+})
+
+const promptOpen = computed(() => {
+  return state.searchFocused &&
+      (isNull(selectedProject.value) || isNull(selectedActivity.value)) &&
+      state.searchTerm.length > 1 &&
+      state.searchTerm.length <= 20 &&
+      filteredOptions.value.length === 0
+})
+
+const promptMessage = computed(() => {
+  if (isNull(selectedProject.value)) {
+    return `Create project "${state.searchTerm}"?`
+  }
+
+  if (isNull(selectedActivity.value)) {
+    return `Create activity "${state.searchTerm}"?`
+  }
+})
+
+function addProject() {
+  const project = createProject({
+    displayName: state.searchTerm,
+  }, {
+    randomColor: true,
+  })
+
+  props.projects.push(project)
+  selectedProject.referenceBy(project.id)
+  state.searchTerm = ''
+}
+
+function addActivity() {
+  const activity = createActivity({
+    displayName: state.searchTerm,
+  })
+
+  props.activities.push(activity)
+  selectedActivity.referenceBy(activity.id)
+  state.searchTerm = ''
+}
+
 function handleSelected(option: { label: string, value: string }) {
   state.searchTerm = ''
 
@@ -109,15 +159,27 @@ function handleDelete(event: KeyboardEvent) {
   }
 }
 
+function handleConfirm() {
+  if (!promptOpen.value) {
+    return
+  }
+
+  if (isNull(selectedProject.value)) {
+    addProject()
+    return
+  }
+
+  if (isNull(selectedActivity.value)) {
+    addActivity()
+    return
+  }
+}
+
 const tags = computed(() => {
   return [
     selectedProject.value,
     selectedActivity.value,
   ].filter(isNotNull)
-})
-
-const autofillOpen = computed(() => {
-  return state.focused && state.searchTerm.length > 0 && filteredOptions.value.length > 0
 })
 </script>
 
@@ -127,34 +189,45 @@ const autofillOpen = computed(() => {
     :options="filteredOptions"
     @selected="handleSelected"
   >
-    <div
-      :data-focused="state.focused"
-      :class="cn('inline-flex flex-row items-center justify-between w-full rounded-md border border-input bg-background p-1 font-medium text-xl ring-offset-background data-[focused=true]:ring-2 data-[focused=true]:ring-ring data-[focused=true]:ring-offset-2', props.class ?? '')"
-    >
-      <div class="flex-grow flex flex-row items-center gap-1">
+    <Popover :open="promptOpen">
+      <PopoverAnchor>
         <div
-          v-provide-color="selectedProject?.color"
-          v-for="tag in tags"
-          :key="tag.id"
-          class="flex flex-row items-center bg-primary text-primary-foreground rounded-md px-3 py-1 text-xl font-medium"
+          :data-focused="focused"
+          :class="cn('inline-flex flex-row items-center justify-between w-full rounded-md border border-input bg-background p-1 font-medium text-xl ring-offset-background data-[focused=true]:ring-2 data-[focused=true]:ring-ring data-[focused=true]:ring-offset-2', props.class ?? '')"
         >
-          <AutoGrowInput
-            v-model="tag.displayName"
-            @focus="state.focused = true"
-            @blur="state.focused = false"
-            @keydown.delete="handleDelete"
-            class="focus-visible:outline-none"
-          />
+          <div class="flex-grow flex flex-row items-center gap-1">
+            <div
+              v-provide-color="selectedProject?.color"
+              v-for="tag in tags"
+              :key="tag.id"
+              class="flex flex-row items-center bg-primary text-primary-foreground rounded-md px-3 py-1 text-xl font-medium"
+            >
+              <AutoGrowInput
+                v-model="tag.displayName"
+                @focus="state.tagInputFocused = true"
+                @blur="state.tagInputFocused = false"
+                @keydown.delete="handleDelete"
+                class="focus-visible:outline-none"
+              />
+            </div>
+            <input
+              v-model="state.searchTerm"
+              @focus="state.searchFocused = true"
+              @blur="state.searchFocused = false"
+              @keydown.delete="handleDelete"
+              @keydown.enter.prevent="handleConfirm"
+              :placeholder="takeIf(tags, isEmpty, props.placeholder) || ''"
+              class="flex-grow focus-visible:outline-none bg-inherit placeholder:text-muted-foreground py-1 mx-2"
+            />
+          </div>
         </div>
-        <input
-          v-model="state.searchTerm"
-          @focus="state.focused = true"
-          @blur="state.focused = false"
-          @keydown.delete="handleDelete"
-          :placeholder="takeIf(tags, isEmpty, props.placeholder) || ''"
-          class="flex-grow focus-visible:outline-none bg-inherit placeholder:text-muted-foreground py-1 mx-2"
-        />
-      </div>
-    </div>
+      </PopoverAnchor>
+      <PopoverContent align="start" class="p-2">
+        <div class="flex flex-row items-center justify-between gap-1 cursor-pointer py-1 px-2 rounded-sm bg-accent">
+          <span>{{ promptMessage }}</span>
+          <CornerDownLeft class="size-4" />
+        </div>
+      </PopoverContent>
+    </Popover>
   </AutocompleteCombobox>
 </template>
