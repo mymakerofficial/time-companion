@@ -9,7 +9,7 @@ const props = defineProps<{
   reminders: ReactiveCalendarReminder[]
 }>()
 
-const now = useNow()
+const now = useNow({ interval: 60000 }) // update every minute
 
 const filteredReminders = computed(() => {
   return props.reminders.filter((reminder) => {

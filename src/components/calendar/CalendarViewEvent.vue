@@ -6,7 +6,6 @@ import {useNow} from "@vueuse/core";
 import {minutesToGridRows} from "@/lib/calendar-utils";
 import {vProvideColor} from "@/directives/v-provide-color";
 import type {ReactiveCalendarEvent} from "@/model/calendar-event";
-import {Slash} from "lucide-vue-next";
 
 const props = defineProps<{
   event: ReactiveCalendarEvent
@@ -17,7 +16,7 @@ const emit = defineEmits<{
   click: []
 }>()
 
-const now = useNow()
+const now = useNow({ interval: 60000 }) // update every minute
 
 const containerPosition = computed(() => {
   const { startedAt, endedAt, durationMinutes } = props.event

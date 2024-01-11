@@ -15,7 +15,7 @@ const emit = defineEmits<{
   eventSelected: [id: string]
 }>()
 
-const now = useNow()
+const now = useNow({ interval: 60000 }) // update every minute
 
 function getRowTimeLabel(row: number) {
   const rowsPerHour = 2

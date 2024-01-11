@@ -22,7 +22,7 @@ const emit = defineEmits<{
   stopEvent: []
 }>()
 
-const now = useNow()
+const now = useNow({ interval: 60000 }) // update every minute
 
 const state = reactive({
   project: props.event?.project ?? null as Nullable<ReactiveProject>,

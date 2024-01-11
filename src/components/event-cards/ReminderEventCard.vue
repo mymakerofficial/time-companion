@@ -16,7 +16,7 @@ const props = defineProps<{
   reminder: ReactiveCalendarReminder
 }>()
 
-const now = useNow()
+const now = useNow({ interval: 60000 }) // update every minute
 
 const timeLabel = computed(() => {
   return dayjs(now.value).to(props.reminder.remindAt)

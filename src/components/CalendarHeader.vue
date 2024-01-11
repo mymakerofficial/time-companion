@@ -12,7 +12,7 @@ const props = defineProps<{
   dayStartedAt: Nullable<Date>
 }>()
 
-const now = useNow()
+const now = useNow({ interval: 1000 }) // update every second
 
 const displayTimeLabel = computed(() => {
   if (isNull(props.dayStartedAt)) {
