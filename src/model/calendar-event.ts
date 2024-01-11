@@ -58,8 +58,8 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
         return
       }
 
-      if (isNotNull(config.endedAt)) {
-        config.endedAt = dayjs(value).add(durationMinutes.value, 'minute').toDate()
+      if (dayjs(value).isAfter(dayjs(endedAt.value))) {
+        throw Error('Tried to set startedAt after endedAt.')
       }
 
       config.startedAt = value
