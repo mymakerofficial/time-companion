@@ -2,6 +2,7 @@ import type {HasId, ID} from "@/lib/types";
 import {computed, reactive} from "vue";
 import {v4 as uuid} from "uuid";
 import type {Nullable} from "@/lib/utils";
+import {isNotDefined} from "@/lib/utils";
 
 export interface ReactiveCalendarReminder extends HasId {
   displayText: string
@@ -13,6 +14,8 @@ export interface ReactiveCalendarReminder extends HasId {
   onAction: Nullable<() => void>
   dismissAfterAction: boolean
   isDismissed: boolean
+  triggerAction: () => void
+  dismiss: () => void
 }
 
 export interface CalendarReminderInit {
@@ -44,16 +47,58 @@ export function createReminder(init: CalendarReminderInit): ReactiveCalendarRemi
     isDismissed: false,
   })
 
+  function dismiss() {
+    state.isDismissed = true
+  }
+
+  function triggerAction() {
+    if (isNotDefined(config.onAction)) {
+      return
+    }
+
+    config.onAction()
+
+    if (config.dismissAfterAction) {
+      dismiss()
+    }
+  }
+
   return reactive({
     id: computed(() => config.id),
-    displayText: config.displayText,
-    color: config.color,
-    remindAt: config.remindAt,
-    remindMinutesBefore: config.remindMinutesBefore,
-    remindMinutesAfter: config.remindMinutesAfter,
-    actionLabel: config.actionLabel,
-    onAction: config.onAction,
-    dismissAfterAction: config.dismissAfterAction,
-    isDismissed: state.isDismissed,
+    displayText: computed({
+      get: () => config.displayText,
+      set: (value) => config.displayText = value,
+    }),
+    color: computed({
+      get: () => config.color,
+      set: (value) => config.color = value,
+    }),
+    remindAt: computed({
+      get: () => config.remindAt,
+      set: (value) => config.remindAt = value,
+    }),
+    remindMinutesBefore: computed({
+      get: () => config.remindMinutesBefore,
+      set: (value) => config.remindMinutesBefore = value,
+    }),
+    remindMinutesAfter: computed({
+      get: () => config.remindMinutesAfter,
+      set: (value) => config.remindMinutesAfter = value,
+    }),
+    actionLabel: computed({
+      get: () => config.actionLabel,
+      set: (value) => config.actionLabel = value,
+    }),
+    onAction: computed({
+      get: () => config.onAction,
+      set: (value) => config.onAction = value,
+    }),
+    dismissAfterAction: computed({
+      get: () => config.dismissAfterAction,
+      set: (value) => config.dismissAfterAction = value,
+    }),
+    isDismissed: computed(() => state.isDismissed),
+    triggerAction,
+    dismiss,
   })
 }

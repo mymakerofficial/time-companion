@@ -8,6 +8,7 @@ import {computed} from "vue";
 import {vProvideColor} from "@/directives/v-provide-color";
 import {isDefined, isNotDefined} from "@/lib/utils";
 import type {ReactiveCalendarReminder} from "@/model/calendar-reminder";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 
 dayjs.extend(relativeTime)
 
@@ -25,16 +26,12 @@ const hasButton = computed(() => {
   return isDefined(props.reminder.actionLabel) && isDefined(props.reminder.onAction)
 })
 
-function handleClick() {
-  if (isNotDefined(props.reminder.onAction)) {
-    return
-  }
+function handleTrigger() {
+  props.reminder.triggerAction()
+}
 
-  props.reminder.onAction()
-
-  if (props.reminder.dismissAfterAction) {
-    props.reminder.isDismissed = true
-  }
+function handleDismiss() {
+  props.reminder.dismiss()
 }
 </script>
 
@@ -48,8 +45,15 @@ function handleClick() {
         <time class="text-2xl font-medium tracking-wide">{{ timeLabel }}</time>
       </div>
       <div class="flex flex-row items-center gap-2">
-        <Button v-if="hasButton" variant="inverted" @click="handleClick()">{{ reminder.actionLabel }}</Button>
-        <Button variant="ghost" size="icon"><MoreVertical /></Button>
+        <Button v-if="hasButton" variant="inverted" @click="handleTrigger()">{{ reminder.actionLabel }}</Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger>
+            <Button variant="ghost" size="icon"><MoreVertical /></Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem @click="handleDismiss()">Dismiss</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   </div>
