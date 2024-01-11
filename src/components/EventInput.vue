@@ -7,6 +7,7 @@ import AutocompleteCombobox from "@/components/AutocompleteCombobox.vue";
 import {cn, isNotNull, isNull, type Nullable, takeIf} from "@/lib/utils";
 import {vProvideColor} from "@/directives/v-provide-color";
 import {isEmpty} from "@/lib/list-utils";
+import AutoGrowInput from "@/components/AutoGrowInput.vue";
 
 const projectModel = defineModel<Nullable<ReactiveProject>>('project', { required: true })
 const activityModel = defineModel<Nullable<ReactiveActivity>>('activity', { required: true })
@@ -15,6 +16,7 @@ const props = defineProps<{
   projects: ReactiveProject[]
   activities: ReactiveActivity[]
   placeholder?: string
+  class?: string
 }>()
 
 const state = reactive({
@@ -81,6 +83,24 @@ function handleSelected(option: { label: string, value: string }) {
   }
 }
 
+function handleDelete(event: KeyboardEvent) {
+  const input = event.target as HTMLInputElement
+
+  if (input.selectionStart !== 0 || input.selectionEnd !== 0) {
+    return
+  }
+
+  if (isNotNull(selectedActivity.value)) {
+    selectedActivity.value = null
+    return
+  }
+
+  if (isNotNull(selectedProject.value)) {
+    selectedProject.value = null
+    return
+  }
+}
+
 const tags = computed(() => {
   return [
     selectedProject.value,
@@ -101,7 +121,7 @@ const autofillOpen = computed(() => {
   >
     <div
       :data-focused="state.focused"
-      :class="cn('inline-flex flex-row items-center justify-between w-full rounded-md border border-input bg-background p-1 font-medium text-xl ring-offset-background data-[focused=true]:ring-2 data-[focused=true]:ring-ring data-[focused=true]:ring-offset-2', $attrs?.class ?? '')"
+      :class="cn('inline-flex flex-row items-center justify-between w-full rounded-md border border-input bg-background p-1 font-medium text-xl ring-offset-background data-[focused=true]:ring-2 data-[focused=true]:ring-ring data-[focused=true]:ring-offset-2', props.class ?? '')"
     >
       <div class="flex-grow flex flex-row items-center gap-1">
         <div
@@ -110,13 +130,20 @@ const autofillOpen = computed(() => {
           :key="tag.id"
           class="flex flex-row items-center bg-primary text-primary-foreground rounded-md px-3 py-1 text-xl font-medium"
         >
-          {{ tag.displayName }}
+          <AutoGrowInput
+            v-model="tag.displayName"
+            @focus="state.focused = true"
+            @blur="state.focused = false"
+            @keydown.delete="handleDelete"
+            class="focus-visible:outline-none"
+          />
         </div>
         <input
           v-model="state.searchTerm"
           @focus="state.focused = true"
           @blur="state.focused = false"
-          :placeholder="takeIf(isEmpty(tags), props.placeholder) || ''"
+          @keydown.delete="handleDelete"
+          :placeholder="takeIf(tags, isEmpty, props.placeholder) || ''"
           class="flex-grow focus-visible:outline-none bg-inherit placeholder:text-muted-foreground py-1 mx-2"
         />
       </div>

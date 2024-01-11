@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import {Popover, PopoverContent} from "@/components/ui/popover";
-import {computed, reactive, ref} from "vue";
+import {computed, ref} from "vue";
 import {useMagicKeys, whenever} from "@vueuse/core";
 import {PopoverAnchor} from "radix-vue";
+import {clamp} from "@/lib/utils";
 
 interface Option {
   label: string
@@ -19,10 +20,8 @@ const emit = defineEmits<{
   selected: [option: Option]
 }>()
 
-const state = reactive({
-  selectedIndex: 0,
-  selectedOption: computed(() => props.options[state.selectedIndex]),
-})
+const selectedIndex = ref(0)
+const selectedOption = computed(() => props.options[selectedIndex.value])
 
 const { down, up, enter } = useMagicKeys()
 
@@ -31,7 +30,7 @@ whenever(down, () => {
     return
   }
 
-  state.selectedIndex = Math.min(state.selectedIndex + 1, props.options.length - 1)
+  selectedIndex.value = clamp(selectedIndex.value + 1, 0, props.options.length - 1)
 })
 
 whenever(up, () => {
@@ -39,7 +38,7 @@ whenever(up, () => {
     return
   }
 
-  state.selectedIndex = Math.max(state.selectedIndex - 1, 0)
+  selectedIndex.value = clamp(selectedIndex.value - 1, 0, props.options.length - 1)
 })
 
 whenever(enter, () => {
@@ -51,7 +50,7 @@ whenever(enter, () => {
 })
 
 function handleConfirm() {
-  emit('selected', state.selectedOption)
+  emit('selected', selectedOption.value)
 }
 </script>
 
@@ -60,14 +59,15 @@ function handleConfirm() {
     <PopoverAnchor>
       <slot />
     </PopoverAnchor>
-    <PopoverContent class="p-2">
-      <div class="flex flex-col">
+    <PopoverContent align="start" class="p-2">
+      <div role="presentation" class="flex flex-col">
         <div
           v-for="(option, index) in props.options"
           :key="option.value"
-          :data-active="index === state.selectedIndex"
-          @mouseenter="state.selectedIndex = index"
+          :data-active="index === selectedIndex"
+          @mouseenter="selectedIndex = index"
           @click="handleConfirm"
+          role="option"
           class="cursor-pointer py-1 px-2 rounded-sm data-[active=true]:bg-accent"
         >
           <div>{{ option.label }}</div>

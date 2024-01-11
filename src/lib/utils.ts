@@ -32,6 +32,14 @@ export function runIf<T>(value: T, predicate: (value: T) => boolean, block: (val
   }
 }
 
-export function takeIf<T>(condition: boolean, value: T): Nullable<T> {
-  return condition ? value : null
+export function takeIf<T, G>(condition: G, predicate: (condition: G) => boolean, value: T): Nullable<T> {
+  if (predicate(condition)) {
+    return value
+  }
+
+  return null
+}
+
+export function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max)
 }

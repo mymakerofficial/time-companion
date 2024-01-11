@@ -20,6 +20,8 @@ function toString(color: { h: number, s: number, l: number }) {
 
 function update(el: HTMLElement, color: Maybe<string>) {
   if (isNotDefined(color)) {
+    el.style.removeProperty('--primary')
+    el.style.removeProperty('--primary-foreground')
     return
   }
 
