@@ -10,6 +10,7 @@ import type {ReactiveCalendarEvent} from "@/model/calendar-event";
 import EventInput from "@/components/inputs/EventInput.vue";
 import type {ReactiveProject} from "@/model/project";
 import type {ReactiveActivity} from "@/model/activity";
+import dayjs from "dayjs";
 
 const props = defineProps<{
   projects: ReactiveProject[]
@@ -22,7 +23,7 @@ const emit = defineEmits<{
   stopEvent: []
 }>()
 
-const now = useNow({ interval: 60000 }) // update every minute
+const now = useNow({ interval: 1000 }) // update every minute
 
 const state = reactive({
   project: props.event?.project ?? null as Nullable<ReactiveProject>,
@@ -77,7 +78,10 @@ function handleStartStop() {
 }
 
 const durationLabel = computed(() => {
-  if (isNotDefined(props.event?.startedAt)) {
+  if (
+    isNotDefined(props.event?.startedAt) ||
+    dayjs(props.event!.startedAt).isAfter(now.value)
+  ) {
     return '00:00:00'
   }
 
