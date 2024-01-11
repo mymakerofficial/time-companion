@@ -11,7 +11,7 @@ interface Option {
   value: string
 }
 
-const open = defineModel('open')
+const open = defineModel<boolean>('open', { required: true})
 
 const props = defineProps<{
   options: Option[]

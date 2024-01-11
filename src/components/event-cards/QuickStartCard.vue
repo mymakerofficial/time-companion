@@ -20,8 +20,8 @@ function handleStart(shadow: ReactiveCalendarEventShadow) {
   <div v-if="shadows.length" class="border-b border-border">
     <div class="grid grid-flow-row grid-cols-4 gap-2 p-8">
       <button
-        v-for="shadow in shadows"
-        :key="shadow.id"
+        v-for="(shadow, index) in shadows"
+        :key="index"
         @click="handleStart(shadow)"
         v-provide-color="shadow.project.color"
         class="px-8 py-4 rounded-md flex flex-row justify-between items-center gap-4 bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-medium tracking-wide text-start"

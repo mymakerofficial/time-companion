@@ -1,6 +1,8 @@
 <script setup lang="ts">
 const model = defineModel<string>({ required: true })
-function handleInput(event: InputEvent) {
+
+function handleInput(event: Event) {
+  // @ts-ignore
   model.value = event.target.outerText ?? ''
 }
 </script>
