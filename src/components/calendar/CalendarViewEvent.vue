@@ -67,12 +67,12 @@ function handleClick() {
       <div class="flex-1 px-2 py-1 flex flex-col gap-1 bg-primary text-primary-foreground hover:bg-primary/90">
         <div class="flex flex-row justify-between items-center">
           <h2 :data-small="containerPosition.spanRows < 2" class="space-x-2 text-sm data-[small=true]:text-xs data-[small=true]:-my-2">
-            <span class="font-medium">{{ event.projectDisplayName || 'Unnamed' }}</span>
-            <span v-if="event.activityDisplayName">{{ event.activityDisplayName }}</span>
+            <span class="font-medium">{{ event.projectDisplayName || event.note || 'Unnamed' }}</span>
+            <span v-if="!(!event.projectDisplayName && !event.activityDisplayName && event.note)">{{ event.activityDisplayName || event.note }}</span>
           </h2>
         </div>
         <p class="text-xs"><time>{{ startedAtLabel }}</time> - <time>{{ endedAtLabel }}</time></p>
-        <p class="text-xs">{{ event.note }}</p>
+        <p v-if="event.projectDisplayName && event.activityDisplayName && event.note" class="text-xs">{{ event.note }}</p>
       </div>
     </div>
   </div>

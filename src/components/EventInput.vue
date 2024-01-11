@@ -11,6 +11,7 @@ import AutoGrowInput from "@/components/AutoGrowInput.vue";
 
 const projectModel = defineModel<Nullable<ReactiveProject>>('project', { required: true })
 const activityModel = defineModel<Nullable<ReactiveActivity>>('activity', { required: true })
+const noteModel = defineModel<string>('note', { required: true })
 
 const props = defineProps<{
   projects: ReactiveProject[]
@@ -39,6 +40,13 @@ watch(activityModel, (value) => {
 }, { immediate: true })
 watch(selectedActivity, () => {
   activityModel.value = selectedActivity.value
+})
+
+watch(noteModel, (value) => {
+  state.searchTerm = value
+})
+watch(() => state.searchTerm, (value) => {
+  noteModel.value = value
 })
 
 const projectOptions = computed(() => props.projects.map((project) => ({

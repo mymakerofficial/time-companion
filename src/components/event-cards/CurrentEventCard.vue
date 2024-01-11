@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {computed, reactive, watch} from "vue";
-import {syncRef, useNow} from "@vueuse/core";
+import { useNow} from "@vueuse/core";
 import {MoreVertical} from "lucide-vue-next";
 import TimeDurationInput from "@/components/TimeDurationInput.vue";
 import {formatTimeDiff, minutesSinceStartOfDay, minutesSinceStartOfDayToDate} from "@/lib/time-utils";
@@ -43,6 +42,9 @@ watch(() => state.project, (value) => {
 })
 watch(() => state.activity, (value) => {
   runIf(props.event, isNotNull, () => props.event!.activity = value)
+})
+watch(() => state.note, (value) => {
+  runIf(props.event, isNotNull, () => props.event!.note = value)
 })
 
 watch(() => props.event, (value) => {
@@ -90,6 +92,7 @@ const durationLabel = computed(() => {
           :activities="activities"
           v-model:project="state.project"
           v-model:activity="state.activity"
+          v-model:note="state.note"
           placeholder="what are you working on?..."
           class="bg-primary text-primary-foreground border-none"
         />

@@ -72,6 +72,7 @@ function handleContinue() {
           :activities="activities"
           v-model:project="state.project"
           v-model:activity="state.activity"
+          v-model:note="state.note"
         />
       </div>
       <div class="flex flex-row items-center">
