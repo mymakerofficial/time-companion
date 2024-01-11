@@ -5,10 +5,10 @@ import {formatHours, timeStringToDate} from "@/lib/time-utils";
 import CalendarViewEvent from "@/components/calendar/CalendarViewEvent.vue";
 import CalendarViewPointer from "@/components/calendar/CalendarViewPointer.vue";
 import CalendarViewArea from "@/components/calendar/CalendarViewArea.vue";
-import type {CalendarEvent} from "@/lib/types";
+import type {ReactiveCalendarEvent} from "@/model/calendar-event";
 
 const props = defineProps<{
-  events: CalendarEvent[]
+  events: ReactiveCalendarEvent[]
 }>()
 
 const emit = defineEmits<{
@@ -22,7 +22,7 @@ function getRowTimeLabel(row: number) {
   return formatHours(row / rowsPerHour)
 }
 
-function calculateInset(event: CalendarEvent) {
+function calculateInset(event: ReactiveCalendarEvent) {
   const start = dayjs(event.startedAt)
 
   let inset = 0

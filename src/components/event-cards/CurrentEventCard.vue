@@ -84,7 +84,7 @@ const durationLabel = computed(() => {
 </script>
 
 <template>
-  <div class="p-8 bg-primary text-primary-foreground flex flex-col gap-2">
+  <div class="p-8 bg-primary text-primary-foreground flex flex-col gap-2 border-b border-border">
     <div class="flex flex-row justify-between items-center gap-8">
       <div class="flex-grow">
         <EventInput

@@ -16,6 +16,7 @@ import {createProject} from "@/model/project";
 import {createActivity} from "@/model/activity";
 import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
 import {createDay} from "@/model/calendar-day";
+import DayReportCard from "@/components/event-cards/DayReportCard.vue";
 
 const activities = reactive([
   createActivity({
@@ -120,23 +121,28 @@ function handleRemoveEvent(event: ReactiveCalendarEvent) {
   <div class="flex flex-col min-h-screen">
     <HeaderBar />
     <main class="grid grid-cols-2 h-[calc(100vh-3.5rem)]">
-      <section class="border-r border-border">
-        <CurrentEventCard
-          :projects="projects"
-          :activities="activities"
-          :event="currentEvent"
-          @start-event="startCurrentEvent"
-          @stop-event="stopCurrentEvent"
-        />
-        <RemindersContainer :reminders="reminders" />
-        <EditEventCard
-          v-if="selectedEvent"
-          :projects="projects"
-          :activities="activities"
-          :event="selectedEvent"
-          @continue="startCurrentEvent"
-          @remove="handleRemoveEvent"
-        />
+      <section class="border-r border-border h-[calc(100vh-3.5rem)] flex flex-col justify-between">
+        <div class="flex-1 overflow-y-auto">
+          <CurrentEventCard
+              :projects="projects"
+              :activities="activities"
+              :event="currentEvent"
+              @start-event="startCurrentEvent"
+              @stop-event="stopCurrentEvent"
+          />
+          <RemindersContainer :reminders="reminders" />
+          <EditEventCard
+              v-if="selectedEvent"
+              :projects="projects"
+              :activities="activities"
+              :event="selectedEvent"
+              @continue="startCurrentEvent"
+              @remove="handleRemoveEvent"
+          />
+        </div>
+        <div>
+          <DayReportCard :report="day.timeReport" />
+        </div>
       </section>
       <section class="flex flex-col h-[calc(100vh-3.5rem)]">
         <CalendarHeader
