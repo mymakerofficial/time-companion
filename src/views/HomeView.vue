@@ -2,7 +2,7 @@
 import CalendarView from "@/components/calendar/CalendarView.vue";
 import CalendarHeader from "@/components/CalendarHeader.vue";
 import HeaderBar from "@/components/HeaderBar.vue";
-import {reactive} from "vue";
+import {computed, reactive} from "vue";
 import {now, timeStringToDate} from "@/lib/time-utils";
 import dayjs from "dayjs";
 import CurrentEventCard from "@/components/event-cards/CurrentEventCard.vue";
@@ -17,6 +17,7 @@ import {createActivity} from "@/model/activity";
 import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
 import {createDay} from "@/model/calendar-day";
 import DayReportCard from "@/components/event-cards/DayReportCard.vue";
+import QuickStartCard from "@/components/event-cards/QuickStartCard.vue";
 
 const activities = reactive([
   createActivity({
@@ -115,6 +116,13 @@ function handleEventSelected(id: string) {
 function handleRemoveEvent(event: ReactiveCalendarEvent) {
   day.removeEvent(event)
 }
+
+const quickAccessShadows = computed(() => {
+  return projects
+    .filter((it) => it.id !== currentEvent.value?.project?.id)
+    .map((project) => createEventShadow({ project }))
+    .reverse()
+})
 </script>
 
 <template>
@@ -124,21 +132,22 @@ function handleRemoveEvent(event: ReactiveCalendarEvent) {
       <section class="border-r border-border h-[calc(100vh-3.5rem)] flex flex-col justify-between">
         <div class="flex-1 overflow-y-auto">
           <CurrentEventCard
-              :projects="projects"
-              :activities="activities"
-              :event="currentEvent"
-              @start-event="startCurrentEvent"
-              @stop-event="stopCurrentEvent"
+            :projects="projects"
+            :activities="activities"
+            :event="currentEvent"
+            @start-event="startCurrentEvent"
+            @stop-event="stopCurrentEvent"
           />
           <RemindersContainer :reminders="reminders" />
           <EditEventCard
-              v-if="selectedEvent"
-              :projects="projects"
-              :activities="activities"
-              :event="selectedEvent"
-              @continue="startCurrentEvent"
-              @remove="handleRemoveEvent"
+            v-if="selectedEvent"
+            :projects="projects"
+            :activities="activities"
+            :event="selectedEvent"
+            @continue="startCurrentEvent"
+            @remove="handleRemoveEvent"
           />
+          <QuickStartCard :shadows="quickAccessShadows" @start="startCurrentEvent" />
         </div>
         <div>
           <DayReportCard :report="day.timeReport" />
