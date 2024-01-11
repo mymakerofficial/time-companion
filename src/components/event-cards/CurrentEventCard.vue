@@ -49,6 +49,9 @@ watch(() => state.note, (value) => {
 
 watch(() => props.event, (value) => {
   if (isNull(value)) {
+    state.project = null
+    state.activity = null
+    state.note = ''
     return
   }
 
