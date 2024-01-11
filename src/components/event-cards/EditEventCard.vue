@@ -10,6 +10,7 @@ import type {ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
 import type {ReactiveProject} from "@/model/project";
 import type {ReactiveActivity} from "@/model/activity";
 import EventInput from "@/components/inputs/EventInput.vue";
+import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 
 const props = defineProps<{
   projects: ReactiveProject[]
@@ -19,6 +20,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   continue: [shadow: ReactiveCalendarEventShadow]
+  remove: [event: ReactiveCalendarEvent]
 }>()
 
 const state = reactive({
@@ -60,6 +62,10 @@ function handleContinue() {
 
   emit('continue', props.event.createShadow())
 }
+
+function handleRemove() {
+  emit('remove', props.event)
+}
 </script>
 
 <template>
@@ -84,7 +90,12 @@ function handleContinue() {
       </div>
       <div class="flex flex-row items-center gap-2">
         <Button v-if="isNotNull(event.activity)" @click="handleContinue()">Continue</Button>
-        <Button variant="ghost" size="icon"><MoreVertical /></Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger><Button variant="ghost" size="icon"><MoreVertical /></Button></DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem @click="handleRemove()">Delete</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   </div>

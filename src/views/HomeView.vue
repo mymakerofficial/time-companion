@@ -11,7 +11,7 @@ import RemindersContainer from "@/components/RemindersContainer.vue";
 import {isNotNull, isNull} from "@/lib/utils";
 import {useReferenceById} from "@/composables/use-reference-by-id";
 import {createReminder, type ReactiveCalendarReminder} from "@/model/calendar-reminder";
-import {createEvent} from "@/model/calendar-event";
+import {createEvent, type ReactiveCalendarEvent} from "@/model/calendar-event";
 import {createProject} from "@/model/project";
 import {createActivity} from "@/model/activity";
 import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
@@ -110,6 +110,10 @@ function handleEventSelected(id: string) {
 
   selectedEvent.referenceBy(id)
 }
+
+function handleRemoveEvent(event: ReactiveCalendarEvent) {
+  day.removeEvent(event)
+}
 </script>
 
 <template>
@@ -131,6 +135,7 @@ function handleEventSelected(id: string) {
           :activities="activities"
           :event="selectedEvent"
           @continue="startCurrentEvent"
+          @remove="handleRemoveEvent"
         />
       </section>
       <section class="flex flex-col h-[calc(100vh-3.5rem)]">
