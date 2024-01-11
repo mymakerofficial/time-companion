@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import {Button} from "@/components/ui/button";
 import {computed, reactive, watch} from "vue";
-import { useNow} from "@vueuse/core";
+import {useNow} from "@vueuse/core";
 import {MoreVertical} from "lucide-vue-next";
-import TimeDurationInput from "@/components/TimeDurationInput.vue";
+import TimeDurationInput from "@/components/inputs/TimeDurationInput.vue";
 import {formatTimeDiff, minutesSinceStartOfDay, minutesSinceStartOfDayToDate} from "@/lib/time-utils";
 import {isNotDefined, isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendar-event";
-import EventInput from "@/components/EventInput.vue";
+import EventInput from "@/components/inputs/EventInput.vue";
 import type {ReactiveProject} from "@/model/project";
 import type {ReactiveActivity} from "@/model/activity";
 

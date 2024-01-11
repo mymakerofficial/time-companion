@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import {MoreVertical} from "lucide-vue-next";
-import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {computed, reactive} from "vue";
-import TimeDurationInput from "@/components/TimeDurationInput.vue";
+import TimeDurationInput from "@/components/inputs/TimeDurationInput.vue";
 import {minutesSinceStartOfDay, minutesSinceStartOfDayToDate} from "@/lib/time-utils";
 import {isNotNull, isNull} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendar-event";
 import type {ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
 import type {ReactiveProject} from "@/model/project";
 import type {ReactiveActivity} from "@/model/activity";
-import EventInput from "@/components/EventInput.vue";
+import EventInput from "@/components/inputs/EventInput.vue";
 
 const props = defineProps<{
   projects: ReactiveProject[]
