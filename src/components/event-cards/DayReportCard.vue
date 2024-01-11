@@ -21,13 +21,13 @@ const props = defineProps<{
     </div>
     <table class="w-full border-t border-border">
       <tr class="h-16 border-b border-border last:border-none">
-        <th v-for="project in report.projects" :key="project.project?.id ?? null" class="px-4 text-md font-medium tracking-wide text-start border-r border-border last:border-none even:bg-secondary/30">
+        <th v-for="project in report.projects" :key="project.project?.id ?? 'null'" class="px-4 text-md font-medium tracking-wide text-start border-r border-border last:border-none even:bg-secondary/30">
           <span v-if="isNull(project.project)" class="px-4 py-2">Unassigned</span>
           <AutoGrowInput v-else v-model="project.projectDisplayName" class="px-4 py-2 focus-visible:outline-none" />
         </th>
       </tr>
       <tr class="h-16">
-        <td v-for="project in report.projects" :key="project.project?.id ?? null" class="px-8 py-2 border-r border-border last:border-none even:bg-secondary/30">
+        <td v-for="project in report.projects" :key="project.project?.id ?? 'null'" class="px-8 py-2 border-r border-border last:border-none even:bg-secondary/30">
           <div class="flex flex-row items-center gap-2">
             <Clock v-if="project.isOngoing" class="size-4" />
             <time>{{ formatMinutes(project.durationMinutes) }}</time>
