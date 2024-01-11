@@ -145,9 +145,7 @@ function handleRemoveEvent(event: ReactiveCalendarEvent) {
         </div>
       </section>
       <section class="flex flex-col h-[calc(100vh-3.5rem)]">
-        <CalendarHeader
-          :day-started-at="day.startedAt"
-        />
+        <CalendarHeader />
         <CalendarView
           :events="day.events"
           @event-selected="handleEventSelected"

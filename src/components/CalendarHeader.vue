@@ -1,26 +1,12 @@
 <script setup lang="ts">
 import {computed} from "vue";
-import {useNow, useToggle} from "@vueuse/core";
-import {formatTimeDiff} from "@/lib/time-utils";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import {isNull, type Nullable} from "@/lib/utils";
-
-dayjs.extend(relativeTime)
-
-const props = defineProps<{
-  dayStartedAt: Nullable<Date>
-}>()
+import {useNow} from "@vueuse/core";
+import {formatDate} from "@/lib/time-utils";
 
 const now = useNow({ interval: 1000 }) // update every second
 
 const displayTimeLabel = computed(() => {
-  if (isNull(props.dayStartedAt)) {
-    return '00:00:00'
-  }
-
-  // time between now and startedAt in HH:mm:ss
-  return formatTimeDiff(props.dayStartedAt, now.value)
+  return formatDate(now.value)
 })
 </script>
 
