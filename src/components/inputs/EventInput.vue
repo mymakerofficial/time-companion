@@ -10,7 +10,7 @@ import {isEmpty} from "@/lib/list-utils";
 import AutoGrowInput from "@/components/inputs/AutoGrowInput.vue";
 import {Popover, PopoverContent} from "@/components/ui/popover";
 import {PopoverAnchor} from "radix-vue";
-import {CornerDownLeft} from "lucide-vue-next";
+import {Slash, CornerDownLeft} from "lucide-vue-next";
 
 const projectModel = defineModel<Nullable<ReactiveProject>>('project', { required: true })
 const activityModel = defineModel<Nullable<ReactiveActivity>>('activity', { required: true })
@@ -196,19 +196,21 @@ const tags = computed(() => {
           :class="cn('inline-flex flex-row items-center justify-between w-full rounded-md border border-input bg-background p-1 font-medium text-xl ring-offset-background data-[focused=true]:ring-2 data-[focused=true]:ring-ring data-[focused=true]:ring-offset-2', props.class ?? '')"
         >
           <div class="flex-grow flex flex-row items-center gap-1">
-            <div
-              v-provide-color="selectedProject?.color"
-              v-for="tag in tags"
-              :key="tag.id"
-              class="flex flex-row items-center bg-primary text-primary-foreground rounded-md px-3 py-1 text-xl font-medium"
-            >
-              <AutoGrowInput
-                v-model="tag.displayName"
-                @focus="state.tagInputFocused = true"
-                @blur="state.tagInputFocused = false"
-                @keydown.delete="handleDelete"
-                class="focus-visible:outline-none"
-              />
+            <div v-if="tags.length" v-provide-color="selectedProject?.color" class="px-3 py-1 flex flex-row items-center gap-1 text-xl font-medium bg-primary text-primary-foreground rounded-md">
+              <div
+                v-for="(tag, index) in tags"
+                :key="tag.id"
+                class="flex flex-row items-center"
+              >
+                <AutoGrowInput
+                    v-model="tag.displayName"
+                    @focus="state.tagInputFocused = true"
+                    @blur="state.tagInputFocused = false"
+                    @keydown.delete="handleDelete"
+                    class="focus-visible:outline-none"
+                />
+                <Slash class="size-4 ml-2" v-if="index !== tags.length - 1" />
+              </div>
             </div>
             <input
               v-model="state.searchTerm"

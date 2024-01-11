@@ -5,8 +5,8 @@ import dayjs from 'dayjs'
 import {useNow} from "@vueuse/core";
 import {minutesToGridRows} from "@/lib/calendar-utils";
 import {vProvideColor} from "@/directives/v-provide-color";
-import {isNotNull} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendar-event";
+import {Slash} from "lucide-vue-next";
 
 const props = defineProps<{
   event: ReactiveCalendarEvent

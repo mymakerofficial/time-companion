@@ -4,6 +4,7 @@ import {computed, ref} from "vue";
 import {useMagicKeys, whenever} from "@vueuse/core";
 import {PopoverAnchor} from "radix-vue";
 import {clamp} from "@/lib/utils";
+import {CornerDownLeft} from "lucide-vue-next";
 
 interface Option {
   label: string
@@ -68,9 +69,10 @@ function handleConfirm() {
           @mouseenter="selectedIndex = index"
           @click="handleConfirm"
           role="option"
-          class="cursor-pointer py-1 px-2 rounded-sm data-[active=true]:bg-accent"
+          class="cursor-pointer flex flex-row items-center justify-between gap-1 py-1 px-2 rounded-sm data-[active=true]:bg-accent"
         >
-          <div>{{ option.label }}</div>
+          <span>{{ option.label }}</span>
+          <CornerDownLeft v-show="index === selectedIndex" class="size-4" />
         </div>
       </div>
     </PopoverContent>
