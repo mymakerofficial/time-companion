@@ -36,7 +36,7 @@ export interface CalendarEventInit {
 export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
   const config = reactive({
     id: init.id ?? uuid(),
-    note: init.note ?? null,
+    note: init.note ?? '',
     startedAt: init.startedAt ?? null,
     endedAt: init.endedAt ?? null,
   })
