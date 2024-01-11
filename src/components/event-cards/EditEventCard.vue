@@ -33,7 +33,7 @@ const state = reactive({
   }),
 
   note: computed({
-    get() { return props.event.note },
+    get() { return props.event.note ?? '' },
     set(value) { props.event.note = value }
   }),
 
