@@ -10,21 +10,13 @@ dayjs.extend(relativeTime)
 
 const props = defineProps<{
   dayStartedAt: Nullable<Date>
-  dayPredictedEndAt: Nullable<Date>
 }>()
 
 const now = useNow()
 
-const [displayTimeLeft, toggleDisplayTimeLeft] = useToggle(false)
-
 const displayTimeLabel = computed(() => {
-  if (isNull(props.dayStartedAt) || isNull(props.dayPredictedEndAt)) {
+  if (isNull(props.dayStartedAt)) {
     return '00:00:00'
-  }
-
-  if (displayTimeLeft.value) {
-    // time between now and dayPredictedEndAt in HH:mm:ss
-    return dayjs(now.value).to(props.dayPredictedEndAt)
   }
 
   // time between now and startedAt in HH:mm:ss
@@ -38,9 +30,7 @@ const displayTimeLabel = computed(() => {
       <div>
         <h3 class="text-md font-medium tracking-wide">Today</h3>
       </div>
-      <button @click="toggleDisplayTimeLeft()">
-        <time class="text-md font-medium tracking-wide">{{ displayTimeLabel }}</time>
-      </button>
+      <time class="text-md font-medium tracking-wide">{{ displayTimeLabel }}</time>
     </div>
   </div>
 </template>

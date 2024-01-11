@@ -2,22 +2,22 @@
 import CalendarView from "@/components/calendar/CalendarView.vue";
 import CalendarHeader from "@/components/CalendarHeader.vue";
 import HeaderBar from "@/components/HeaderBar.vue";
-import {computed, reactive} from "vue";
+import {reactive} from "vue";
 import {now, timeStringToDate} from "@/lib/time-utils";
 import dayjs from "dayjs";
 import CurrentEventCard from "@/components/event-cards/CurrentEventCard.vue";
 import EditEventCard from "@/components/event-cards/EditEventCard.vue";
 import RemindersContainer from "@/components/RemindersContainer.vue";
 import {isNotNull, isNull} from "@/lib/utils";
-import {firstOf} from "@/lib/list-utils";
 import {useReferenceById} from "@/composables/use-reference-by-id";
 import {createReminder, type ReactiveCalendarReminder} from "@/model/calendar-reminder";
-import {createEvent, type ReactiveCalendarEvent} from "@/model/calendar-event";
+import {createEvent} from "@/model/calendar-event";
 import {createProject} from "@/model/project";
-import {createActivity, type ReactiveActivity} from "@/model/activity";
+import {createActivity} from "@/model/activity";
 import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
+import {createDay} from "@/model/calendar-day";
 
-const activities = reactive<ReactiveActivity[]>([
+const activities = reactive([
   createActivity({
     displayName: 'Bar',
   }),
@@ -57,40 +57,26 @@ const reminders = reactive<ReactiveCalendarReminder[]>([
   })
 ])
 
-const events = reactive<ReactiveCalendarEvent[]>([
-  createEvent({
-    project: projects[1],
-    activity: activities[0],
-    startedAt: timeStringToDate('08:00:00'),
-    endedAt: timeStringToDate('09:00:00'),
-  }),
-  createEvent({
-    project: projects[2],
-    activity: activities[1],
-    startedAt: timeStringToDate('08:30:00'),
-    endedAt: timeStringToDate('09:30:00'),
-  })
-])
-
-const config = reactive({
-  workDayLengthHours: 8,
-  workBreakLengthHours: 0.5,
+const day = createDay({
+  date: dayjs().startOf('day').toDate(),
 })
 
-const dayStartedAt = computed(() => {
-  return firstOf(events)?.startedAt || null
-})
+day.addEvent(createEvent({
+  project: projects[1],
+  activity: activities[0],
+  startedAt: timeStringToDate('08:00:00'),
+  endedAt: timeStringToDate('09:00:00'),
+}))
 
-const dayPredictedEndAt = computed(() => {
-  if (isNull(dayStartedAt.value)) {
-    return null
-  }
+day.addEvent(createEvent({
+  project: projects[2],
+  activity: activities[1],
+  startedAt: timeStringToDate('08:30:00'),
+  endedAt: timeStringToDate('09:30:00'),
+}))
 
-  return dayjs(dayStartedAt.value).add(config.workDayLengthHours + config.workBreakLengthHours, 'hour').toDate()
-})
-
-const currentEvent = useReferenceById(events)
-const selectedEvent = useReferenceById(events)
+const currentEvent = useReferenceById(day.events)
+const selectedEvent = useReferenceById(day.events)
 
 function startCurrentEvent(shadow?: ReactiveCalendarEventShadow) {
   if (isNotNull(currentEvent.value)) {
@@ -102,7 +88,7 @@ function startCurrentEvent(shadow?: ReactiveCalendarEventShadow) {
     startedAt: now(),
   })
 
-  events.push(event)
+  day.addEvent(event)
   currentEvent.referenceBy(event.id)
 }
 
@@ -149,11 +135,10 @@ function handleEventSelected(id: string) {
       </section>
       <section class="flex flex-col h-[calc(100vh-3.5rem)]">
         <CalendarHeader
-          :day-started-at="dayStartedAt"
-          :day-predicted-end-at="dayPredictedEndAt"
+          :day-started-at="day.startedAt"
         />
         <CalendarView
-          :events="events"
+          :events="day.events"
           @event-selected="handleEventSelected"
         />
       </section>
