@@ -32,12 +32,12 @@ export interface CalendarDayInit {
   events?: ReactiveCalendarEvent[]
 }
 
-export type DayDeserializationAssets = EventDeserializationAssets
+export type DayDeserializationAssets = Omit<EventDeserializationAssets, 'date'>
 
 export function fromSerializedDay(serialized: SerializedCalendarDay, assets: DayDeserializationAssets): CalendarDayInit {
   const date = parseDate(serialized.date, DATE_FORMAT)
 
-  assets = {
+  const eventAssets: EventDeserializationAssets = {
     ...assets,
     date,
   }
@@ -45,7 +45,7 @@ export function fromSerializedDay(serialized: SerializedCalendarDay, assets: Day
   return {
     id: serialized.id,
     date,
-    events: serialized.events.map(it => createEvent(fromSerializedEvent(it, assets))),
+    events: serialized.events.map(it => createEvent(fromSerializedEvent(it, eventAssets))),
   }
 }
 

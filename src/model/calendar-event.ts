@@ -147,8 +147,8 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
     return {
       id: config.id,
       note: config.note,
-      startedAt: formatDate(config.startedAt, DATE_FORMAT) ?? null,
-      endedAt: formatDate(config.endedAt, DATE_FORMAT) ?? null,
+      startedAt: formatDate(config.startedAt, DATE_FORMAT) || null,
+      endedAt: formatDate(config.endedAt, DATE_FORMAT) || null,
       projectId: inherits.project?.id ?? null,
       activityId: inherits.activity?.id ?? null,
     }
