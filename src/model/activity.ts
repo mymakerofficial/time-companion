@@ -13,7 +13,7 @@ export interface ActivityInit {
 
 export function createActivity(init: ActivityInit): ReactiveActivity {
   const config = reactive({
-    id: uuid() ?? init.id,
+    id: init.id ?? uuid(),
     displayName: init.displayName ?? '',
   })
 
