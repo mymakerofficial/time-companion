@@ -9,13 +9,13 @@ import dayjs from "dayjs";
 import type {ReactiveProject} from "@/model/project";
 import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
 
-const DATE_FORMAT = 'Thh:mm:ss'
+const DATE_FORMAT = 'THH:mm:ss'
 
 export interface SerializedCalendarEvent {
   id: string
   note: string
-  startedAt: Nullable<string> // Thh:mm:ss
-  endedAt: Nullable<string> // Thh:mm:ss
+  startedAt: Nullable<string> // THH:mm:ss
+  endedAt: Nullable<string> // THH:mm:ss
   projectId: Nullable<string>
   activityId: Nullable<string>
 }

@@ -5,13 +5,13 @@ import type {Nullable} from "@/lib/utils";
 import {isNotDefined} from "@/lib/utils";
 import {formatDate, parseDate} from "@/lib/time-utils";
 
-const DATE_FORMAT = 'Thh:mm:ss'
+const DATE_FORMAT = 'THH:mm:ss'
 
 export interface SerializedCalendarReminder {
   id: string
   displayText: string
   color: Nullable<string>
-  remindAt: string // Thh:mm:ss
+  remindAt: string // THH:mm:ss
   remindMinutesBefore: number
   remindMinutesAfter: number
   // TODO: serialize action
