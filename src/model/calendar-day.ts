@@ -7,8 +7,6 @@ import {createTimeReport, type ReactiveTimeReport} from "@/model/time-report";
 import type {Nullable} from "@/lib/utils";
 import {formatDate, parseDate} from "@/lib/time-utils";
 import {createEvent, fromSerializedEvent} from "@/model/calendar-event";
-import type {ReactiveProject} from "@/model/project";
-import type {ReactiveActivity} from "@/model/activity";
 
 const DATE_FORMAT = 'YYYY-MM-DD'
 
@@ -37,9 +35,16 @@ export interface CalendarDayInit {
 export type DayDeserializationAssets = EventDeserializationAssets
 
 export function fromSerializedDay(serialized: SerializedCalendarDay, assets: DayDeserializationAssets): CalendarDayInit {
+  const date = parseDate(serialized.date, DATE_FORMAT)
+
+  assets = {
+    ...assets,
+    date,
+  }
+
   return {
     id: serialized.id,
-    date: parseDate(serialized.date, DATE_FORMAT),
+    date,
     events: serialized.events.map(it => createEvent(fromSerializedEvent(it, assets))),
   }
 }

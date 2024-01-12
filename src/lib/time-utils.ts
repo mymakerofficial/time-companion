@@ -64,3 +64,12 @@ export function formatHours(hours: Maybe<number>, format = 'HH:mm'): string {
   }
   return dayjs().startOf('day').add(hours, 'hours').format(format)
 }
+
+export function combineDateAndTime(date: Date, time: Date): Date {
+  return dayjs(date)
+    .set('hour', dayjs(time).hour())
+    .set('minute', dayjs(time).minute())
+    .set('second', dayjs(time).second())
+    .set('millisecond', dayjs(time).millisecond())
+    .toDate()
+}

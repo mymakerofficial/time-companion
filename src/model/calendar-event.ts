@@ -4,16 +4,18 @@ import type {Nullable} from "@/lib/utils";
 import type {ReactiveActivity} from "@/model/activity";
 import {isNotNull, isNull, runIf} from "@/lib/utils";
 import type {HasId, ID} from "@/lib/types";
-import {minutesSinceStartOfDay, parseDate} from "@/lib/time-utils";
+import {combineDateAndTime, formatDate, minutesSinceStartOfDay, parseDate} from "@/lib/time-utils";
 import dayjs from "dayjs";
 import type {ReactiveProject} from "@/model/project";
 import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
 
+const DATE_FORMAT = 'Thh:mm:ss'
+
 export interface SerializedCalendarEvent {
   id: string
   note: string
-  startedAt: Nullable<string> // ISO 8601
-  endedAt: Nullable<string> // ISO 8601
+  startedAt: Nullable<string> // Thh:mm:ss
+  endedAt: Nullable<string> // Thh:mm:ss
   projectId: Nullable<string>
   activityId: Nullable<string>
 }
@@ -46,14 +48,15 @@ export interface CalendarEventInit {
 export interface EventDeserializationAssets {
   projects: ReactiveProject[]
   activities: ReactiveActivity[]
+  date: Date // start of day
 }
 
 export function fromSerializedEvent(serialized: SerializedCalendarEvent, assets: EventDeserializationAssets): CalendarEventInit {
   return {
     id: serialized.id,
     note: serialized.note,
-    startedAt: serialized.startedAt ? parseDate(serialized.startedAt) : null,
-    endedAt: serialized.endedAt ? parseDate(serialized.endedAt) : null,
+    startedAt: serialized.startedAt ? combineDateAndTime(assets.date, parseDate(serialized.startedAt, DATE_FORMAT)) : null,
+    endedAt: serialized.endedAt ? combineDateAndTime(assets.date, parseDate(serialized.endedAt, DATE_FORMAT)) : null,
     project: assets.projects.find((it) => it.id === serialized.projectId) ?? null,
     activity: assets.activities.find((it) => it.id === serialized.activityId) ?? null,
   }
@@ -144,8 +147,8 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
     return {
       id: config.id,
       note: config.note,
-      startedAt: config.startedAt?.toISOString() ?? null,
-      endedAt: config.endedAt?.toISOString() ?? null,
+      startedAt: formatDate(config.startedAt, DATE_FORMAT) ?? null,
+      endedAt: formatDate(config.endedAt, DATE_FORMAT) ?? null,
       projectId: inherits.project?.id ?? null,
       activityId: inherits.activity?.id ?? null,
     }

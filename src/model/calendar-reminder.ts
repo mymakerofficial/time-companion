@@ -5,6 +5,8 @@ import type {Nullable} from "@/lib/utils";
 import {isNotDefined} from "@/lib/utils";
 import {formatDate, parseDate} from "@/lib/time-utils";
 
+const DATE_FORMAT = 'Thh:mm:ss'
+
 export interface SerializedCalendarReminder {
   id: string
   displayText: string
@@ -47,7 +49,7 @@ export function fromSerializedReminder(serialized: SerializedCalendarReminder): 
     id: serialized.id,
     displayText: serialized.displayText,
     color: serialized.color,
-    remindAt: parseDate(serialized.remindAt, 'Thh:mm:ss'),
+    remindAt: parseDate(serialized.remindAt, DATE_FORMAT),
     remindMinutesBefore: serialized.remindMinutesBefore,
     remindMinutesAfter: serialized.remindMinutesAfter,
   }
@@ -91,7 +93,7 @@ export function createReminder(init: CalendarReminderInit): ReactiveCalendarRemi
       id: config.id,
       displayText: config.displayText,
       color: config.color,
-      remindAt: formatDate(config.remindAt, 'Thh:mm:ss'),
+      remindAt: formatDate(config.remindAt, DATE_FORMAT),
       remindMinutesBefore: config.remindMinutesBefore,
       remindMinutesAfter: config.remindMinutesAfter,
     }
