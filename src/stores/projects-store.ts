@@ -42,7 +42,7 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
   watch([() => projects, () => activities], store, {deep: true})
 
   function addProject(project: ReactiveProject) {
-    if (!activities.some((it) => it.id === project.id)) {
+    if (activities.some((it) => it.id === project.id)) {
       throw new Error(`Activity with id ${project.id} already exists`)
     }
 
@@ -54,7 +54,7 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
   }
 
   function addActivity(activity: ReactiveActivity) {
-    if (!activities.some((it) => it.id === activity.id)) {
+    if (activities.some((it) => it.id === activity.id)) {
       throw new Error(`Activity with id ${activity.id} already exists`)
     }
 
