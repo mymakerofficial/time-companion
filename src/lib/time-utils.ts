@@ -22,6 +22,10 @@ export function formatDate(date: Maybe<Date>, format = 'HH:mm:ss') {
   return dayjs(date).format(format)
 }
 
+export function parseDate(dateString: string, format?: string): Date {
+  return dayjs(dateString, format).toDate()
+}
+
 export function formatTimeDiff(
   start: Date,
   end: Date,

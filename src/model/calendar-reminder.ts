@@ -3,6 +3,17 @@ import {computed, reactive} from "vue";
 import {v4 as uuid} from "uuid";
 import type {Nullable} from "@/lib/utils";
 import {isNotDefined} from "@/lib/utils";
+import {formatDate, parseDate} from "@/lib/time-utils";
+
+export interface SerializedCalendarReminder {
+  id: string
+  displayText: string
+  color: Nullable<string>
+  remindAt: string // Thh:mm:ss
+  remindMinutesBefore: number
+  remindMinutesAfter: number
+  // TODO: serialize action
+}
 
 export interface ReactiveCalendarReminder extends Readonly<HasId> {
   displayText: string
@@ -16,6 +27,7 @@ export interface ReactiveCalendarReminder extends Readonly<HasId> {
   readonly isDismissed: boolean
   triggerAction: () => void
   dismiss: () => void
+  toSerialized: () => SerializedCalendarReminder
 }
 
 export interface CalendarReminderInit {
@@ -28,6 +40,17 @@ export interface CalendarReminderInit {
   actionLabel?: Nullable<string>
   onAction?: Nullable<() => void>
   dismissAfterAction?: boolean
+}
+
+export function serializedReminderInit(serialized: SerializedCalendarReminder): CalendarReminderInit {
+  return {
+    id: serialized.id,
+    displayText: serialized.displayText,
+    color: serialized.color,
+    remindAt: parseDate(serialized.remindAt, 'Thh:mm:ss'),
+    remindMinutesBefore: serialized.remindMinutesBefore,
+    remindMinutesAfter: serialized.remindMinutesAfter,
+  }
 }
 
 export function createReminder(init: CalendarReminderInit): ReactiveCalendarReminder {
@@ -60,6 +83,17 @@ export function createReminder(init: CalendarReminderInit): ReactiveCalendarRemi
 
     if (config.dismissAfterAction) {
       dismiss()
+    }
+  }
+
+  function toSerialized(): SerializedCalendarReminder {
+    return {
+      id: config.id,
+      displayText: config.displayText,
+      color: config.color,
+      remindAt: formatDate(config.remindAt, 'Thh:mm:ss'),
+      remindMinutesBefore: config.remindMinutesBefore,
+      remindMinutesAfter: config.remindMinutesAfter,
     }
   }
 
@@ -100,5 +134,6 @@ export function createReminder(init: CalendarReminderInit): ReactiveCalendarRemi
     isDismissed: computed(() => state.isDismissed),
     triggerAction,
     dismiss,
+    toSerialized,
   })
 }

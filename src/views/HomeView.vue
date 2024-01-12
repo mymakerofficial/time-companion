@@ -21,6 +21,7 @@ import QuickStartCard from "@/components/event-cards/QuickStartCard.vue";
 import {useProjectsStore} from "@/stores/projects-store";
 import {useRemindersStore} from "@/stores/remiders-store";
 import {useTodayStore} from "@/stores/today-store";
+import {useCalendarStore} from "@/stores/calendar-store";
 
 // const activities = reactive([
 //   createActivity({
@@ -62,11 +63,14 @@ import {useTodayStore} from "@/stores/today-store";
 //   })
 // ])
 
+const projectsStore = useProjectsStore()
+const calendarStore = useCalendarStore()
 const remindersStore = useRemindersStore()
-
 const today = useTodayStore()
 
-today.startDay()
+projectsStore.init()
+calendarStore.init()
+today.init()
 
 // day.addEvent(createEvent({
 //   project: projects[1],
@@ -149,6 +153,7 @@ function handleRemoveEvent(event: ReactiveCalendarEvent) {
             @remove="handleRemoveEvent"
           />
           <!--<QuickStartCard :shadows="quickAccessShadows" @start="startCurrentEvent" />-->
+          <pre>{{ today.day.toSerialized() }}</pre>
         </div>
         <div>
           <DayReportCard :report="today.day!.timeReport" />

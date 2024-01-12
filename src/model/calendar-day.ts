@@ -1,10 +1,21 @@
 import type {HasId, ID} from "@/lib/types";
-import type {ReactiveCalendarEvent} from "@/model/calendar-event";
+import type {ReactiveCalendarEvent, SerializedCalendarEvent} from "@/model/calendar-event";
 import {v4 as uuid} from "uuid";
 import {computed, reactive} from "vue";
 import {firstOf} from "@/lib/list-utils";
 import {createTimeReport, type ReactiveTimeReport} from "@/model/time-report";
 import type {Nullable} from "@/lib/utils";
+import {formatDate} from "@/lib/time-utils";
+import {createEvent, fromSerializedEvent} from "@/model/calendar-event";
+import type {ProjectsStore} from "@/stores/projects-store";
+import type {ReactiveProject} from "@/model/project";
+import type {ReactiveActivity} from "@/model/activity";
+
+export interface SerializedCalendarDay {
+  id: string
+  date: string // YYYY-MM-DD
+  events: SerializedCalendarEvent[]
+}
 
 export interface ReactiveCalendarDay extends Readonly<HasId> {
   readonly date: Date
@@ -13,12 +24,21 @@ export interface ReactiveCalendarDay extends Readonly<HasId> {
   readonly startedAt: Nullable<Date>
   addEvent: (event: ReactiveCalendarEvent) => void
   removeEvent: (event: ReactiveCalendarEvent) => void
+  toSerialized: () => SerializedCalendarDay
 }
 
 export interface CalendarDayInit {
   id?: ID
   date: Date
   events?: ReactiveCalendarEvent[]
+}
+
+export function fromSerializedDay(serialized: SerializedCalendarDay, assets: { projects: ReactiveProject[], activities: ReactiveActivity[] }): CalendarDayInit {
+  return {
+    id: serialized.id,
+    date: new Date(serialized.date),
+    events: serialized.events.map(it => createEvent(fromSerializedEvent(it, assets))),
+  }
 }
 
 export function createDay(init: CalendarDayInit): ReactiveCalendarDay {
@@ -49,6 +69,14 @@ export function createDay(init: CalendarDayInit): ReactiveCalendarDay {
     }
   }
 
+  function toSerialized(): SerializedCalendarDay {
+    return {
+      id: config.id,
+      date: formatDate(config.date, 'YYYY-MM-DD'),
+      events: inherits.events.map(it => it.toSerialized()),
+    }
+  }
+
   return reactive({
     id: computed(() => config.id),
     date: computed(() => config.date),
@@ -61,5 +89,7 @@ export function createDay(init: CalendarDayInit): ReactiveCalendarDay {
     //
     addEvent,
     removeEvent,
+    //
+    toSerialized,
   })
 }
