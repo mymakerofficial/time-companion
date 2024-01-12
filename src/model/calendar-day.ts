@@ -4,12 +4,13 @@ import {v4 as uuid} from "uuid";
 import {computed, reactive} from "vue";
 import {firstOf} from "@/lib/list-utils";
 import {createTimeReport, type ReactiveTimeReport} from "@/model/time-report";
+import type {Nullable} from "@/lib/utils";
 
-export interface ReactiveCalendarDay extends HasId {
-  date: Date
-  events: ReactiveCalendarEvent[]
-  timeReport: ReactiveTimeReport
-  startedAt: Date | null
+export interface ReactiveCalendarDay extends Readonly<HasId> {
+  readonly date: Date
+  readonly events: ReactiveCalendarEvent[]
+  readonly timeReport: ReactiveTimeReport
+  readonly startedAt: Nullable<Date>
   addEvent: (event: ReactiveCalendarEvent) => void
   removeEvent: (event: ReactiveCalendarEvent) => void
 }
@@ -42,7 +43,7 @@ export function createDay(init: CalendarDayInit): ReactiveCalendarDay {
   }
 
   function removeEvent(event: ReactiveCalendarEvent) {
-    const index = inherits.events.findIndex(e => e.id === event.id)
+    const index = inherits.events.findIndex((it) => it.id === event.id)
     if (index >= 0) {
       inherits.events.splice(index, 1)
     }

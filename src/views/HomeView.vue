@@ -18,67 +18,72 @@ import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calen
 import {createDay} from "@/model/calendar-day";
 import DayReportCard from "@/components/event-cards/DayReportCard.vue";
 import QuickStartCard from "@/components/event-cards/QuickStartCard.vue";
+import {useProjectsStore} from "@/stores/projects-store";
+import {useRemindersStore} from "@/stores/remiders-store";
+import {useTodayStore} from "@/stores/today-store";
 
-const activities = reactive([
-  createActivity({
-    displayName: 'Bar',
-  }),
-  createActivity({
-    displayName: 'Buzz',
-  }),
-])
+// const activities = reactive([
+//   createActivity({
+//     displayName: 'Bar',
+//   }),
+//   createActivity({
+//     displayName: 'Buzz',
+//   }),
+// ])
 
-const projects = reactive([
-  createProject({
-    displayName: 'Break',
-    color: 'orange',
-  }),
-  createProject({
-    displayName: 'Foo',
-    color: 'blue',
-  }),
-  createProject({
-    displayName: 'Fizz',
-    color: 'green',
-  }),
-])
+// const projects = reactive([
+//   createProject({
+//     displayName: 'Break',
+//     color: 'orange',
+//   }),
+//   createProject({
+//     displayName: 'Foo',
+//     color: 'blue',
+//   }),
+//   createProject({
+//     displayName: 'Fizz',
+//     color: 'green',
+//   }),
+// ])
 
-const breakShadow = createEventShadow({
-  project: projects[0],
-})
+// const breakShadow = createEventShadow({
+//   project: projects[0],
+// })
 
-const reminders = reactive<ReactiveCalendarReminder[]>([
-  createReminder({
-    displayText: 'Take a break',
-    remindAt: timeStringToDate('12:00:00'),
-    remindMinutesBefore: 60,
-    remindMinutesAfter: 30,
-    actionLabel: 'Start',
-    onAction: () => startCurrentEvent(breakShadow),
-    color: 'orange',
-  })
-])
+// const reminders = reactive<ReactiveCalendarReminder[]>([
+//   createReminder({
+//     displayText: 'Take a break',
+//     remindAt: timeStringToDate('12:00:00'),
+//     remindMinutesBefore: 60,
+//     remindMinutesAfter: 30,
+//     actionLabel: 'Start',
+//     onAction: () => startCurrentEvent(breakShadow),
+//     color: 'orange',
+//   })
+// ])
 
-const day = createDay({
-  date: dayjs().startOf('day').toDate(),
-})
+const remindersStore = useRemindersStore()
 
-day.addEvent(createEvent({
-  project: projects[1],
-  activity: activities[0],
-  startedAt: timeStringToDate('08:00:00'),
-  endedAt: timeStringToDate('09:00:00'),
-}))
+const today = useTodayStore()
 
-day.addEvent(createEvent({
-  project: projects[2],
-  activity: activities[1],
-  startedAt: timeStringToDate('08:30:00'),
-  endedAt: timeStringToDate('09:30:00'),
-}))
+today.startDay()
 
-const currentEvent = useReferenceById(day.events)
-const selectedEvent = useReferenceById(day.events)
+// day.addEvent(createEvent({
+//   project: projects[1],
+//   activity: activities[0],
+//   startedAt: timeStringToDate('08:00:00'),
+//   endedAt: timeStringToDate('09:00:00'),
+// }))
+//
+// day.addEvent(createEvent({
+//   project: projects[2],
+//   activity: activities[1],
+//   startedAt: timeStringToDate('08:30:00'),
+//   endedAt: timeStringToDate('09:30:00'),
+// }))
+
+const currentEvent = useReferenceById(today.day!.events)
+const selectedEvent = useReferenceById(today.day!.events)
 
 function startCurrentEvent(shadow?: ReactiveCalendarEventShadow) {
   if (isNotNull(currentEvent.value)) {
@@ -90,7 +95,7 @@ function startCurrentEvent(shadow?: ReactiveCalendarEventShadow) {
     startedAt: now(),
   })
 
-  day.addEvent(event)
+  today.day!.addEvent(event)
   currentEvent.referenceBy(event.id)
 }
 
@@ -114,15 +119,15 @@ function handleEventSelected(id: string) {
 }
 
 function handleRemoveEvent(event: ReactiveCalendarEvent) {
-  day.removeEvent(event)
+  today.day!.removeEvent(event)
 }
 
-const quickAccessShadows = computed(() => {
-  return projects
-    .filter((it) => it.id !== currentEvent.value?.project?.id)
-    .map((project) => createEventShadow({ project }))
-    .reverse()
-})
+// const quickAccessShadows = computed(() => {
+//   return projects
+//     .filter((it) => it.id !== currentEvent.value?.project?.id)
+//     .map((project) => createEventShadow({ project }))
+//     .reverse()
+// })
 </script>
 
 <template>
@@ -132,31 +137,27 @@ const quickAccessShadows = computed(() => {
       <section class="border-r border-border h-[calc(100vh-3.5rem)] flex flex-col justify-between">
         <div class="flex-1 overflow-y-auto">
           <CurrentEventCard
-            :projects="projects"
-            :activities="activities"
             :event="currentEvent"
             @start-event="startCurrentEvent"
             @stop-event="stopCurrentEvent"
           />
-          <RemindersContainer :reminders="reminders" />
+          <RemindersContainer :reminders="remindersStore.reminders" />
           <EditEventCard
             v-if="selectedEvent"
-            :projects="projects"
-            :activities="activities"
             :event="selectedEvent"
             @continue="startCurrentEvent"
             @remove="handleRemoveEvent"
           />
-          <QuickStartCard :shadows="quickAccessShadows" @start="startCurrentEvent" />
+          <!--<QuickStartCard :shadows="quickAccessShadows" @start="startCurrentEvent" />-->
         </div>
         <div>
-          <DayReportCard :report="day.timeReport" />
+          <DayReportCard :report="today.day!.timeReport" />
         </div>
       </section>
       <section class="flex flex-col h-[calc(100vh-3.5rem)]">
         <CalendarHeader />
         <CalendarView
-          :events="day.events"
+          :events="today.day!.events"
           @event-selected="handleEventSelected"
         />
       </section>

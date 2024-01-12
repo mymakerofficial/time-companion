@@ -3,10 +3,10 @@ import type {ReactiveProject} from "@/model/project";
 import {isNotNull, type Nullable, runIf} from "@/lib/utils";
 
 export interface ReactiveProjectTimeReport {
-  project: Nullable<ReactiveProject>
+  readonly project: Nullable<ReactiveProject>
   projectDisplayName: ReactiveProject['displayName']
-  durationMinutes: number
-  isOngoing: boolean
+  readonly durationMinutes: number
+  readonly isOngoing: boolean
 }
 
 export interface ProjectTimeReportInit {

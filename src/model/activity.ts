@@ -2,7 +2,7 @@ import {v4 as uuid} from "uuid";
 import {computed, reactive} from "vue";
 import type {HasId, ID} from "@/lib/types";
 
-export interface ReactiveActivity extends HasId {
+export interface ReactiveActivity extends Readonly<HasId> {
   displayName: string
 }
 

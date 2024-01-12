@@ -5,9 +5,9 @@ import type {Nullable} from "@/lib/utils";
 import {createProjectTimeReport} from "@/model/project-time-report";
 
 export interface ReactiveTimeReport {
-  date: Date
-  projects: ReactiveProjectTimeReport[]
-  totalDurationMinutes: number
+  readonly date: Date
+  readonly projects: ReactiveProjectTimeReport[]
+  readonly totalDurationMinutes: number
 }
 
 export interface TimeReportInit {

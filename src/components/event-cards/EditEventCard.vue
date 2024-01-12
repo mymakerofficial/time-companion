@@ -13,8 +13,6 @@ import EventInput from "@/components/inputs/EventInput.vue";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 
 const props = defineProps<{
-  projects: ReactiveProject[]
-  activities: ReactiveActivity[]
   event: ReactiveCalendarEvent
 }>()
 
@@ -73,8 +71,6 @@ function handleRemove() {
     <div class="flex flex-row justify-between items-center gap-4">
       <div class="flex-grow">
         <EventInput
-          :projects="projects"
-          :activities="activities"
           v-model:project="state.project"
           v-model:activity="state.activity"
           v-model:note="state.note"

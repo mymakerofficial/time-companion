@@ -13,8 +13,6 @@ import type {ReactiveActivity} from "@/model/activity";
 import dayjs from "dayjs";
 
 const props = defineProps<{
-  projects: ReactiveProject[]
-  activities: ReactiveActivity[]
   event: Nullable<ReactiveCalendarEvent>
 }>()
 
@@ -95,8 +93,6 @@ const durationLabel = computed(() => {
     <div class="flex flex-row justify-between items-center gap-8">
       <div class="flex-grow">
         <EventInput
-          :projects="projects"
-          :activities="activities"
           v-model:project="state.project"
           v-model:activity="state.activity"
           v-model:note="state.note"

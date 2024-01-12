@@ -9,7 +9,7 @@ import dayjs from "dayjs";
 import type {ReactiveProject} from "@/model/project";
 import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
 
-export interface ReactiveCalendarEvent extends HasId {
+export interface ReactiveCalendarEvent extends Readonly<HasId> {
   project: Nullable<ReactiveProject>
   activity: Nullable<ReactiveActivity>
   note: string
@@ -18,9 +18,9 @@ export interface ReactiveCalendarEvent extends HasId {
   color: ReactiveProject['color']
   startedAt: Nullable<Date>
   endedAt: Nullable<Date>
-  hasStarted: boolean
-  hasEnded: boolean
   durationMinutes: number
+  readonly hasStarted: boolean
+  readonly hasEnded: boolean
   createShadow: () => ReactiveCalendarEventShadow
 }
 
@@ -142,9 +142,9 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
     //
     startedAt,
     endedAt,
+    durationMinutes,
     hasStarted,
     hasEnded,
-    durationMinutes,
     //
     createShadow,
   })

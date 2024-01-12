@@ -4,7 +4,7 @@ import {v4 as uuid} from "uuid";
 import type {Nullable} from "@/lib/utils";
 import {isNotDefined} from "@/lib/utils";
 
-export interface ReactiveCalendarReminder extends HasId {
+export interface ReactiveCalendarReminder extends Readonly<HasId> {
   displayText: string
   color: Nullable<string>
   remindAt: Date
@@ -13,7 +13,7 @@ export interface ReactiveCalendarReminder extends HasId {
   actionLabel: Nullable<string>
   onAction: Nullable<() => void>
   dismissAfterAction: boolean
-  isDismissed: boolean
+  readonly isDismissed: boolean
   triggerAction: () => void
   dismiss: () => void
 }

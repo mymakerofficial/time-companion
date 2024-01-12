@@ -11,17 +11,18 @@ import AutoGrowInput from "@/components/inputs/AutoGrowInput.vue";
 import {Popover, PopoverContent} from "@/components/ui/popover";
 import {PopoverAnchor} from "radix-vue";
 import {Slash, CornerDownLeft} from "lucide-vue-next";
+import {useProjectsStore} from "@/stores/projects-store";
 
 const projectModel = defineModel<Nullable<ReactiveProject>>('project', { required: true })
 const activityModel = defineModel<Nullable<ReactiveActivity>>('activity', { required: true })
 const noteModel = defineModel<string>('note', { required: true })
 
 const props = defineProps<{
-  projects: ReactiveProject[]
-  activities: ReactiveActivity[]
   placeholder?: string
   class?: string
 }>()
+
+const projectsStore = useProjectsStore()
 
 const state = reactive({
   searchFocused: false,
@@ -31,8 +32,8 @@ const state = reactive({
 
 const focused = computed(() => state.searchFocused || state.tagInputFocused)
 
-const selectedProject = useReferenceById(props.projects)
-const selectedActivity = useReferenceById(props.activities)
+const selectedProject = useReferenceById(projectsStore.projects)
+const selectedActivity = useReferenceById(projectsStore.activities)
 
 watch(projectModel, (value) => {
   selectedProject.referenceBy(value?.id ?? null)
@@ -55,12 +56,12 @@ watch(() => state.searchTerm, (value) => {
   noteModel.value = value
 })
 
-const projectOptions = computed(() => props.projects.map((project) => ({
+const projectOptions = computed(() => projectsStore.projects.map((project) => ({
   label: project.displayName,
   value: project.id,
 })))
 
-const activityOptions = computed(() => props.activities.map((activity) => ({
+const activityOptions = computed(() => projectsStore.projects.map((activity) => ({
   label: activity.displayName,
   value: activity.id,
 })))
@@ -112,7 +113,7 @@ function addProject() {
     randomColor: true,
   })
 
-  props.projects.push(project)
+  projectsStore.addProject(project)
   selectedProject.referenceBy(project.id)
   state.searchTerm = ''
 }
@@ -122,7 +123,7 @@ function addActivity() {
     displayName: state.searchTerm,
   })
 
-  props.activities.push(activity)
+  projectsStore.addActivity(activity)
   selectedActivity.referenceBy(activity.id)
   state.searchTerm = ''
 }

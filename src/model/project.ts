@@ -4,7 +4,7 @@ import type {Nullable} from "@/lib/utils";
 import type {HasId, ID} from "@/lib/types";
 import {randomTailwindColor} from "@/lib/color-utils";
 
-export interface ReactiveProject extends HasId {
+export interface ReactiveProject extends Readonly<HasId> {
   displayName: string
   color: Nullable<string>
 }
