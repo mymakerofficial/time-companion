@@ -153,7 +153,6 @@ const quickAccessShadows = computed(() => {
             @remove="handleRemoveEvent"
           />
           <QuickStartCard :shadows="quickAccessShadows" @start="startCurrentEvent" />
-          <pre>{{ today.day?.toSerialized() }}</pre>
         </div>
         <div>
           <DayReportCard :report="today.day!.timeReport" />

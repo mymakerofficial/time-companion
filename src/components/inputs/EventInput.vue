@@ -61,7 +61,7 @@ const projectOptions = computed(() => projectsStore.projects.map((project) => ({
   value: project.id,
 })))
 
-const activityOptions = computed(() => projectsStore.projects.map((activity) => ({
+const activityOptions = computed(() => projectsStore.activities.map((activity) => ({
   label: activity.displayName,
   value: activity.id,
 })))
@@ -204,11 +204,11 @@ const tags = computed(() => {
                 class="flex flex-row items-center"
               >
                 <AutoGrowInput
-                    v-model="tag.displayName"
-                    @focus="state.tagInputFocused = true"
-                    @blur="state.tagInputFocused = false"
-                    @keydown.delete="handleDelete"
-                    class="focus-visible:outline-none"
+                  v-model="tag.displayName"
+                  @focus="state.tagInputFocused = true"
+                  @blur="state.tagInputFocused = false"
+                  @keydown.delete="handleDelete"
+                  class="focus-visible:outline-none text-nowrap"
                 />
                 <Slash class="size-4 ml-2" v-if="index !== tags.length - 1" />
               </div>
