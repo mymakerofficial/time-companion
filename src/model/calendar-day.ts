@@ -1,15 +1,16 @@
 import type {HasId, ID} from "@/lib/types";
-import type {ReactiveCalendarEvent, SerializedCalendarEvent} from "@/model/calendar-event";
+import type {EventDeserializationAssets, ReactiveCalendarEvent, SerializedCalendarEvent} from "@/model/calendar-event";
 import {v4 as uuid} from "uuid";
 import {computed, reactive} from "vue";
 import {firstOf} from "@/lib/list-utils";
 import {createTimeReport, type ReactiveTimeReport} from "@/model/time-report";
 import type {Nullable} from "@/lib/utils";
-import {formatDate} from "@/lib/time-utils";
+import {formatDate, parseDate} from "@/lib/time-utils";
 import {createEvent, fromSerializedEvent} from "@/model/calendar-event";
-import type {ProjectsStore} from "@/stores/projects-store";
 import type {ReactiveProject} from "@/model/project";
 import type {ReactiveActivity} from "@/model/activity";
+
+const DATE_FORMAT = 'YYYY-MM-DD'
 
 export interface SerializedCalendarDay {
   id: string
@@ -33,10 +34,12 @@ export interface CalendarDayInit {
   events?: ReactiveCalendarEvent[]
 }
 
-export function fromSerializedDay(serialized: SerializedCalendarDay, assets: { projects: ReactiveProject[], activities: ReactiveActivity[] }): CalendarDayInit {
+export type DayDeserializationAssets = EventDeserializationAssets
+
+export function fromSerializedDay(serialized: SerializedCalendarDay, assets: DayDeserializationAssets): CalendarDayInit {
   return {
     id: serialized.id,
-    date: new Date(serialized.date),
+    date: parseDate(serialized.date, DATE_FORMAT),
     events: serialized.events.map(it => createEvent(fromSerializedEvent(it, assets))),
   }
 }
@@ -72,7 +75,7 @@ export function createDay(init: CalendarDayInit): ReactiveCalendarDay {
   function toSerialized(): SerializedCalendarDay {
     return {
       id: config.id,
-      date: formatDate(config.date, 'YYYY-MM-DD'),
+      date: formatDate(config.date, DATE_FORMAT),
       events: inherits.events.map(it => it.toSerialized()),
     }
   }

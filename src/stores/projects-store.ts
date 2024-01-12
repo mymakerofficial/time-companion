@@ -1,9 +1,10 @@
 import {defineStore} from "pinia";
 import {reactive, watch} from "vue";
-import type {ReactiveProject} from "@/model/project";
-import type {ReactiveActivity} from "@/model/activity";
+import type {ReactiveProject, SerializedProject} from "@/model/project";
+import type {ReactiveActivity, SerializedActivity} from "@/model/activity";
 import {createProject, fromSerializedProject} from "@/model/project";
 import {createActivity, fromSerializedActivity} from "@/model/activity";
+import {useLocalStorage} from "@/composables/use-local-storage";
 
 export interface ProjectsStore {
   projects: ReactiveProject[]
@@ -13,33 +14,38 @@ export interface ProjectsStore {
   addActivity: (activity: ReactiveActivity) => void
 }
 
+interface ProjectsStorageSerialized {
+  projects: SerializedProject[]
+  activities: SerializedActivity[]
+}
+
 export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
+  const storage = useLocalStorage<ProjectsStorageSerialized>('time-companion-projects-store', { projects: [], activities: [] })
+
   const projects = reactive<ReactiveProject[]>([])
   const activities = reactive<ReactiveActivity[]>([])
 
   function init() {
-    const serialized = localStorage.getItem('time-companion-projects-store')
-    if (!serialized) {
-      return
-    }
+    const serialized = storage.get()
 
-    const parsed = JSON.parse(serialized)
-    projects.push(...parsed.projects.map((it: any) => createProject(fromSerializedProject(it))))
-    activities.push(...parsed.activities.map((it: any) => createActivity(fromSerializedActivity(it))))
+    projects.push(...serialized.projects.map((it: any) => createProject(fromSerializedProject(it))))
+    activities.push(...serialized.activities.map((it: any) => createActivity(fromSerializedActivity(it))))
   }
 
   function store() {
-    const serialized = {
+    storage.set({
       projects: projects.map((it) => it.toSerialized()),
       activities: activities.map((it) => it.toSerialized()),
-    }
-
-    localStorage.setItem('time-companion-projects-store', JSON.stringify(serialized))
+    })
   }
 
   watch([() => projects, () => activities], store, {deep: true})
 
   function addProject(project: ReactiveProject) {
+    if (!activities.some((it) => it.id === project.id)) {
+      throw new Error(`Activity with id ${project.id} already exists`)
+    }
+
     if (projects.some((it) => it.displayName === project.displayName)) {
       throw new Error(`Project with displayName ${project.displayName} already exists`)
     }
@@ -48,6 +54,10 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
   }
 
   function addActivity(activity: ReactiveActivity) {
+    if (!activities.some((it) => it.id === activity.id)) {
+      throw new Error(`Activity with id ${activity.id} already exists`)
+    }
+
     if (activities.some((it) => it.displayName === activity.displayName)) {
       throw new Error(`Activity with displayName ${activity.displayName} already exists`)
     }

@@ -14,21 +14,19 @@ export const useTodayStore = defineStore('today', () => {
   })
 
   function init() {
-    if (state.activeDay) {
-      throw new Error(`Day is already started`)
-    }
+    const existingDay = calendarStore.days.find((it) =>
+      formatDate(it.date, 'YYYY-MM-DD') === formatDate(now(), 'YYYY-MM-DD')
+    )
 
-    const today = calendarStore.days.find((it) => formatDate(it.date, 'YYYY-MM-DD') === formatDate(now(), 'YYYY-MM-DD'))
-
-    if (today) {
-      state.activeDay = today
+    if (existingDay) {
+      state.activeDay = existingDay
       return
     }
 
     const newDay = createDay({
       date: dayjs().startOf('day').toDate(),
     })
-    calendarStore.days.push(newDay)
+    calendarStore.addDay(newDay)
     state.activeDay = newDay
   }
 

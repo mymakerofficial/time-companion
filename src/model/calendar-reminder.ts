@@ -42,7 +42,7 @@ export interface CalendarReminderInit {
   dismissAfterAction?: boolean
 }
 
-export function serializedReminderInit(serialized: SerializedCalendarReminder): CalendarReminderInit {
+export function fromSerializedReminder(serialized: SerializedCalendarReminder): CalendarReminderInit {
   return {
     id: serialized.id,
     displayText: serialized.displayText,

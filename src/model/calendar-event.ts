@@ -43,7 +43,12 @@ export interface CalendarEventInit {
   endedAt?: Nullable<Date>
 }
 
-export function fromSerializedEvent(serialized: SerializedCalendarEvent, assets: { projects: ReactiveProject[], activities: ReactiveActivity[] }): CalendarEventInit {
+export interface EventDeserializationAssets {
+  projects: ReactiveProject[]
+  activities: ReactiveActivity[]
+}
+
+export function fromSerializedEvent(serialized: SerializedCalendarEvent, assets: EventDeserializationAssets): CalendarEventInit {
   return {
     id: serialized.id,
     note: serialized.note,

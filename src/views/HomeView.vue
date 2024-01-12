@@ -64,11 +64,12 @@ import {useCalendarStore} from "@/stores/calendar-store";
 // ])
 
 const projectsStore = useProjectsStore()
-const calendarStore = useCalendarStore()
 const remindersStore = useRemindersStore()
+const calendarStore = useCalendarStore()
 const today = useTodayStore()
 
 projectsStore.init()
+remindersStore.init()
 calendarStore.init()
 today.init()
 
@@ -126,12 +127,11 @@ function handleRemoveEvent(event: ReactiveCalendarEvent) {
   today.day!.removeEvent(event)
 }
 
-// const quickAccessShadows = computed(() => {
-//   return projects
-//     .filter((it) => it.id !== currentEvent.value?.project?.id)
-//     .map((project) => createEventShadow({ project }))
-//     .reverse()
-// })
+const quickAccessShadows = computed(() => {
+  return projectsStore.projects
+    .map((project) => createEventShadow({ project }))
+    .reverse()
+})
 </script>
 
 <template>
@@ -152,8 +152,8 @@ function handleRemoveEvent(event: ReactiveCalendarEvent) {
             @continue="startCurrentEvent"
             @remove="handleRemoveEvent"
           />
-          <!--<QuickStartCard :shadows="quickAccessShadows" @start="startCurrentEvent" />-->
-          <pre>{{ today.day.toSerialized() }}</pre>
+          <QuickStartCard :shadows="quickAccessShadows" @start="startCurrentEvent" />
+          <pre>{{ today.day?.toSerialized() }}</pre>
         </div>
         <div>
           <DayReportCard :report="today.day!.timeReport" />
