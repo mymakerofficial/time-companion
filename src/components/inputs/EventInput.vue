@@ -2,7 +2,7 @@
 import {createProject, type ReactiveProject} from "@/model/project";
 import {createActivity, type ReactiveActivity} from "@/model/activity";
 import {useReferenceById} from "@/composables/use-reference-by-id";
-import {computed, reactive, watch} from "vue";
+import {computed, reactive, ref, watch} from "vue";
 import AutocompleteCombobox from "@/components/inputs/AutocompleteCombobox.vue";
 import {cn, isNotNull, isNull, type Nullable, takeIf} from "@/lib/utils";
 import {vProvideColor} from "@/directives/v-provide-color";
@@ -13,9 +13,9 @@ import {PopoverAnchor} from "radix-vue";
 import {Slash, CornerDownLeft} from "lucide-vue-next";
 import {useProjectsStore} from "@/stores/projects-store";
 
-const projectModel = defineModel<Nullable<ReactiveProject>>('project', { required: true })
-const activityModel = defineModel<Nullable<ReactiveActivity>>('activity', { required: true })
-const noteModel = defineModel<string>('note', { required: true })
+const projectModel = defineModel<Nullable<ReactiveProject>>('project', {required: true})
+const activityModel = defineModel<Nullable<ReactiveActivity>>('activity', {required: true})
+const noteModel = defineModel<string>('note', {required: true})
 
 const props = defineProps<{
   placeholder?: string
@@ -32,19 +32,21 @@ const state = reactive({
 
 const focused = computed(() => state.searchFocused || state.tagInputFocused)
 
+const inputContainer = ref<Nullable<HTMLElement>>(null)
+
 const selectedProject = useReferenceById(projectsStore.projects)
 const selectedActivity = useReferenceById(projectsStore.activities)
 
 watch(projectModel, (value) => {
   selectedProject.referenceBy(value?.id ?? null)
-}, { immediate: true })
+}, {immediate: true})
 watch(selectedProject, () => {
   projectModel.value = selectedProject.value
 })
 
 watch(activityModel, (value) => {
   selectedActivity.referenceBy(value?.id ?? null)
-}, { immediate: true })
+}, {immediate: true})
 watch(selectedActivity, () => {
   activityModel.value = selectedActivity.value
 })
@@ -160,6 +162,67 @@ function handleDelete(event: KeyboardEvent) {
   }
 }
 
+function isSelectionAtStartOrEnd(target: HTMLElement, start: boolean) {
+  if (target.tagName === 'INPUT') {
+    const input = target as HTMLInputElement;
+    if (start) {
+      return input.selectionStart === 0 && input.selectionEnd === 0;
+    } else {
+      return input.selectionStart === input.value.length && input.selectionEnd === input.value.length;
+    }
+  } else if (target.contentEditable) {
+    const selection = document.getSelection();
+    if (!selection?.isCollapsed) {
+      return false;
+    }
+    if (selection?.anchorNode?.parentElement !== target) {
+      return
+    }
+    if (start) {
+      return selection?.anchorOffset === 0;
+    } else {
+      return selection?.anchorOffset === selection?.anchorNode?.textContent?.length;
+    }
+  }
+}
+
+function moveSelection(current: HTMLElement, previous: boolean) {
+  const inputs = [...inputContainer.value?.querySelectorAll('input, span[contenteditable]')] as HTMLElement[];
+  const currentInputPos = [...inputs].findIndex((input) => input === current);
+  const nextSelectedInput = inputs[previous ? currentInputPos - 1 : currentInputPos + 1];
+  if (!nextSelectedInput) {
+    return;
+  }
+  if (nextSelectedInput.tagName === 'INPUT') {
+    const input = nextSelectedInput as HTMLInputElement;
+    input.focus();
+    input.setSelectionRange(input.value.length, previous ? input.value.length : 0);
+  } else if (nextSelectedInput.contentEditable) {
+    const selection = document.getSelection();
+    const textNode = nextSelectedInput.childNodes[0];
+    selection?.collapse(textNode, previous ? textNode.textContent?.length : 0);
+  }
+}
+
+function handleLeft(event: KeyboardEvent) {
+  if (isSelectionAtStartOrEnd(event.target as HTMLElement, true)) {
+    event.preventDefault();
+    moveSelection(event.target as HTMLElement, true);
+  }
+}
+
+function handleRight(event: KeyboardEvent) {
+  if (isSelectionAtStartOrEnd(event.target as HTMLElement, false)) {
+    event.preventDefault();
+    moveSelection(event.target as HTMLElement, false);
+  }
+}
+
+function handleTagEnter(event: KeyboardEvent) {
+  moveSelection(event.target as HTMLElement, false);
+}
+
+
 function handleConfirm() {
   if (!promptOpen.value) {
     return
@@ -186,39 +249,47 @@ const tags = computed(() => {
 
 <template>
   <AutocompleteCombobox
-    :open="autofillOpen"
-    :options="filteredOptions"
-    @selected="handleSelected"
+      :open="autofillOpen"
+      :options="filteredOptions"
+      @selected="handleSelected"
   >
     <Popover :open="promptOpen">
       <PopoverAnchor>
         <div
-          :data-focused="focused"
-          :class="cn('inline-flex flex-row items-center justify-between w-full rounded-md border border-input bg-background p-1 font-medium text-xl ring-offset-background data-[focused=true]:ring-2 data-[focused=true]:ring-ring data-[focused=true]:ring-offset-2', props.class ?? '')"
+            :data-focused="focused"
+            :class="cn('inline-flex flex-row items-center justify-between w-full rounded-md border border-input bg-background p-1 font-medium text-xl ring-offset-background data-[focused=true]:ring-2 data-[focused=true]:ring-ring data-[focused=true]:ring-offset-2', props.class ?? '')"
         >
-          <div class="flex-grow flex flex-row items-center gap-1">
-            <div v-if="tags.length" v-provide-color="selectedProject?.color" class="px-3 py-1 flex flex-row items-center gap-1 text-xl font-medium bg-primary text-primary-foreground rounded-md">
+          <div class="flex-grow flex flex-row items-center gap-1" ref="inputContainer">
+            <div v-if="tags.length" v-provide-color="selectedProject?.color"
+                 class="px-3 py-1 flex flex-row items-center gap-1 text-xl font-medium bg-primary text-primary-foreground rounded-md">
               <div
-                v-for="(tag, index) in tags"
-                :key="tag.id"
-                class="flex flex-row items-center"
+                  v-for="(tag, index) in tags"
+                  :key="tag.id"
+                  class="flex flex-row items-center"
               >
                 <AutoGrowInput
                   v-model="tag.displayName"
+                  ref="tagInputs"
                   @focus="state.tagInputFocused = true"
                   @blur="state.tagInputFocused = false"
                   @keydown.delete="handleDelete"
+                  @keydown.left="handleLeft"
+                  @keydown.right="handleRight"
+                  @keydown.enter.prevent="handleTagEnter"
                   class="focus-visible:outline-none text-nowrap"
                 />
-                <Slash class="size-4 ml-2" v-if="index !== tags.length - 1" />
+                <Slash class="size-4 ml-2" v-if="index !== tags.length - 1"/>
               </div>
             </div>
             <input
               v-model="state.searchTerm"
+              ref="searchInput"
               @focus="state.searchFocused = true"
               @blur="state.searchFocused = false"
               @keydown.delete="handleDelete"
               @keydown.enter.prevent="handleConfirm"
+              @keydown.left="handleLeft"
+              @keydown.right="handleRight"
               :placeholder="takeIf(tags, isEmpty, props.placeholder) || ''"
               class="flex-grow focus-visible:outline-none bg-inherit placeholder:text-muted-foreground py-1 mx-2"
             />
@@ -228,7 +299,7 @@ const tags = computed(() => {
       <PopoverContent align="start" class="p-2">
         <div class="flex flex-row items-center justify-between gap-1 cursor-pointer py-1 px-2 rounded-sm bg-accent">
           <span>{{ promptMessage }}</span>
-          <CornerDownLeft class="size-4" />
+          <CornerDownLeft class="size-4"/>
         </div>
       </PopoverContent>
     </Popover>

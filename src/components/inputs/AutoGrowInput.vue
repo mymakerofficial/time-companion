@@ -11,7 +11,7 @@ function handleInput(event: Event) {
   <span
     role="textbox"
     contenteditable
-    v-text="model"
     @input="handleInput"
-  />
+    style="{ 'text-wrap': 'pre' }"
+  >{{model}}<b /></span>
 </template>
