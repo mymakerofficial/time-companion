@@ -54,10 +54,6 @@ const state = reactive({
 })
 
 function handleContinue() {
-  if(isNull(props.event.activity)) {
-    return
-  }
-
   emit('continue', props.event.createShadow())
 }
 

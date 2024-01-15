@@ -4,11 +4,17 @@ import {reactive, watch} from "vue";
 import {useProjectsStore} from "@/stores/projects-store";
 import {createDay, fromSerializedDay} from "@/model/calendar-day";
 import {useLocalStorage} from "@/composables/use-local-storage";
+import {useActiveDay} from "@/composables/use-active-day";
+import type {Nullable} from "@/lib/utils";
+import {isSameDay} from "@/lib/time-utils";
+import dayjs from "dayjs";
 
 export interface CalendarStore {
   days: ReactiveCalendarDay[]
+  activeDay: Nullable<ReactiveCalendarDay>
   init: () => void
   addDay: (day: ReactiveCalendarDay) => void
+  setActiveDay: (date: Date) => void
 }
 
 interface CalendarStorageSerialized {
@@ -21,7 +27,15 @@ export const useCalendarStore = defineStore('calendar', () => {
 
   const days = reactive<ReactiveCalendarDay[]>([])
 
+  const activeDay = useActiveDay(days)
+
   function init() {
+    // reset state
+    days.length = 0
+
+    // projects need to be initialized first
+    projectsStore.init()
+
     const serialized = storage.get()
 
     const assets = {
@@ -48,9 +62,28 @@ export const useCalendarStore = defineStore('calendar', () => {
     days.push(day)
   }
 
+  function setActiveDay(date: Date) {
+    const existingDay = days.find((it) => isSameDay(it.date, date))
+
+    if (existingDay) {
+      activeDay.setActiveDay(existingDay)
+      return
+    }
+
+    const newDay = createDay({
+      date: dayjs(date).startOf('day').toDate(),
+    })
+
+    addDay(newDay)
+
+    activeDay.setActiveDay(newDay)
+  }
+
   return {
     days,
+    activeDay,
     init,
     addDay,
+    setActiveDay,
   }
 })

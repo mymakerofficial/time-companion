@@ -20,6 +20,9 @@ export const useRemindersStore = defineStore('reminders', (): RemindersStore => 
   const reminders = reactive<ReactiveCalendarReminder[]>([])
 
   function init() {
+    //reset
+    reminders.length = 0
+
     const serialized = storage.get()
 
     reminders.push(...serialized.reminders.map((it: any) => createReminder(fromSerializedReminder(it))))

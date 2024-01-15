@@ -2,129 +2,40 @@
 import CalendarView from "@/components/calendar/CalendarView.vue";
 import CalendarHeader from "@/components/CalendarHeader.vue";
 import HeaderBar from "@/components/HeaderBar.vue";
-import {computed, reactive} from "vue";
-import {now, timeStringToDate} from "@/lib/time-utils";
-import dayjs from "dayjs";
+import {computed} from "vue";
+import {now} from "@/lib/time-utils";
 import CurrentEventCard from "@/components/event-cards/CurrentEventCard.vue";
 import EditEventCard from "@/components/event-cards/EditEventCard.vue";
 import RemindersContainer from "@/components/RemindersContainer.vue";
-import {isNotNull, isNull} from "@/lib/utils";
-import {useReferenceById} from "@/composables/use-reference-by-id";
-import {createReminder, type ReactiveCalendarReminder} from "@/model/calendar-reminder";
-import {createEvent, type ReactiveCalendarEvent} from "@/model/calendar-event";
-import {createProject} from "@/model/project";
-import {createActivity} from "@/model/activity";
+import type {ReactiveCalendarEvent} from "@/model/calendar-event";
 import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
-import {createDay} from "@/model/calendar-day";
 import DayReportCard from "@/components/event-cards/DayReportCard.vue";
 import QuickStartCard from "@/components/event-cards/QuickStartCard.vue";
 import {useProjectsStore} from "@/stores/projects-store";
 import {useRemindersStore} from "@/stores/remiders-store";
-import {useTodayStore} from "@/stores/today-store";
 import {useCalendarStore} from "@/stores/calendar-store";
-
-// const activities = reactive([
-//   createActivity({
-//     displayName: 'Bar',
-//   }),
-//   createActivity({
-//     displayName: 'Buzz',
-//   }),
-// ])
-
-// const projects = reactive([
-//   createProject({
-//     displayName: 'Break',
-//     color: 'orange',
-//   }),
-//   createProject({
-//     displayName: 'Foo',
-//     color: 'blue',
-//   }),
-//   createProject({
-//     displayName: 'Fizz',
-//     color: 'green',
-//   }),
-// ])
-
-// const breakShadow = createEventShadow({
-//   project: projects[0],
-// })
-
-// const reminders = reactive<ReactiveCalendarReminder[]>([
-//   createReminder({
-//     displayText: 'Take a break',
-//     remindAt: timeStringToDate('12:00:00'),
-//     remindMinutesBefore: 60,
-//     remindMinutesAfter: 30,
-//     actionLabel: 'Start',
-//     onAction: () => startCurrentEvent(breakShadow),
-//     color: 'orange',
-//   })
-// ])
+import type {ID} from "@/lib/types";
 
 const projectsStore = useProjectsStore()
 const remindersStore = useRemindersStore()
 const calendarStore = useCalendarStore()
-const today = useTodayStore()
 
-projectsStore.init()
 remindersStore.init()
 calendarStore.init()
-today.init()
 
-// day.addEvent(createEvent({
-//   project: projects[1],
-//   activity: activities[0],
-//   startedAt: timeStringToDate('08:00:00'),
-//   endedAt: timeStringToDate('09:00:00'),
-// }))
-//
-// day.addEvent(createEvent({
-//   project: projects[2],
-//   activity: activities[1],
-//   startedAt: timeStringToDate('08:30:00'),
-//   endedAt: timeStringToDate('09:30:00'),
-// }))
+calendarStore.setActiveDay(now())
 
-const currentEvent = useReferenceById(today.day!.events)
-const selectedEvent = useReferenceById(today.day!.events)
-
-function startCurrentEvent(shadow?: ReactiveCalendarEventShadow) {
-  if (isNotNull(currentEvent.value)) {
-    stopCurrentEvent()
-  }
-
-  const event = createEvent({
-    ...shadow?.createEvent(),
-    startedAt: now(),
-  })
-
-  today.day!.addEvent(event)
-  currentEvent.referenceBy(event.id)
+function handleStartEvent(shadow?: ReactiveCalendarEventShadow) {
+  calendarStore.activeDay.startEvent(shadow)
 }
-
-function stopCurrentEvent() {
-  if (isNull(currentEvent.value)) {
-    return
-  }
-
-  currentEvent.value.endedAt = now()
-
-  selectedEvent.referenceBy(currentEvent.value.id)
-  currentEvent.value = null
+function handleStopEvent() {
+  calendarStore.activeDay.stopEvent()
 }
-
-function handleEventSelected(id: string) {
-  if (id === currentEvent.value?.id) {
-    return
-  }
-
-  selectedEvent.referenceBy(id)
-}
-
 function handleRemoveEvent(event: ReactiveCalendarEvent) {
-  today.day!.removeEvent(event)
+  calendarStore.activeDay.day?.removeEvent(event)
+}
+function handleEventSelected(id: ID) {
+  calendarStore.activeDay.selectEventById(id)
 }
 
 const quickAccessShadows = computed(() => {
@@ -132,6 +43,7 @@ const quickAccessShadows = computed(() => {
     .map((project) => createEventShadow({ project }))
     .reverse()
 })
+
 </script>
 
 <template>
@@ -141,27 +53,34 @@ const quickAccessShadows = computed(() => {
       <section class="border-r border-border h-[calc(100vh-3.5rem)] flex flex-col justify-between">
         <div class="flex-1 overflow-y-auto">
           <CurrentEventCard
-            :event="currentEvent"
-            @start-event="startCurrentEvent"
-            @stop-event="stopCurrentEvent"
+            :event="calendarStore.activeDay.currentEvent"
+            @start-event="handleStartEvent"
+            @stop-event="handleStopEvent"
           />
           <RemindersContainer :reminders="remindersStore.reminders" />
           <EditEventCard
-            v-if="selectedEvent"
-            :event="selectedEvent"
-            @continue="startCurrentEvent"
+            v-if="calendarStore.activeDay.selectedEvent"
+            :event="calendarStore.activeDay.selectedEvent"
+            @continue="handleStartEvent"
             @remove="handleRemoveEvent"
           />
-          <QuickStartCard :shadows="quickAccessShadows" @start="startCurrentEvent" />
+          <QuickStartCard
+            :shadows="quickAccessShadows"
+            @start="handleStartEvent"
+          />
         </div>
         <div>
-          <DayReportCard :report="today.day!.timeReport" />
+          <DayReportCard
+            v-if="calendarStore.activeDay.day"
+            :report="calendarStore.activeDay.day.timeReport"
+          />
         </div>
       </section>
       <section class="flex flex-col h-[calc(100vh-3.5rem)]">
         <CalendarHeader />
         <CalendarView
-          :events="today.day!.events"
+          v-if="calendarStore.activeDay.day"
+          :events="calendarStore.activeDay.day.events"
           @event-selected="handleEventSelected"
         />
       </section>

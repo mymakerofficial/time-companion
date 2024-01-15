@@ -26,6 +26,10 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
   const activities = reactive<ReactiveActivity[]>([])
 
   function init() {
+    // reset
+    projects.length = 0
+    activities.length = 0
+
     const serialized = storage.get()
 
     projects.push(...serialized.projects.map((it: any) => createProject(fromSerializedProject(it))))
