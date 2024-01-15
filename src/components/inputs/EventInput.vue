@@ -182,6 +182,10 @@ const tags = computed(() => {
     selectedActivity.value,
   ].filter(isNotNull)
 })
+
+const color = computed(() => {
+  return selectedActivity.value?.color ?? selectedProject.value?.color ?? null
+})
 </script>
 
 <template>
@@ -197,7 +201,7 @@ const tags = computed(() => {
           :class="cn('inline-flex flex-row items-center justify-between w-full rounded-md border border-input bg-background p-1 font-medium text-xl ring-offset-background data-[focused=true]:ring-2 data-[focused=true]:ring-ring data-[focused=true]:ring-offset-2', props.class ?? '')"
         >
           <div class="flex-grow flex flex-row items-center gap-1">
-            <div v-if="tags.length" v-provide-color="selectedProject?.color" class="px-3 py-1 flex flex-row items-center gap-1 text-xl font-medium bg-primary text-primary-foreground rounded-md">
+            <div v-if="tags.length" v-provide-color="color" class="px-3 py-1 flex flex-row items-center gap-1 text-xl font-medium bg-primary text-primary-foreground rounded-md">
               <div
                 v-for="(tag, index) in tags"
                 :key="tag.id"

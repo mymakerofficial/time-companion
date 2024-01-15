@@ -179,8 +179,17 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
       set: (value) => runIf(inherits.project, isNotNull, () => inherits.activity!.displayName = value)
     }),
     color: computed({
-      get: () => inherits.project?.color ?? null,
-      set: (value) => runIf(inherits.project, isNotNull, () => inherits.project!.color = value)
+      get: () => inherits.activity?.color ?? inherits.project?.color ?? null,
+      set: (value) => {
+        if (inherits.activity?.color) {
+          inherits.activity.color = value
+          return
+        }
+
+        if (inherits.project) {
+          inherits.project.color = value
+        }
+      }
     }),
     //
     startedAt,

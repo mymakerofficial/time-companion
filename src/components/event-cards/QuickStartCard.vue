@@ -2,6 +2,7 @@
 import {type ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
 import {vProvideColor} from "@/directives/v-provide-color";
 import {Slash, Play} from "lucide-vue-next";
+import {formatDate} from "../../lib/time-utils";
 
 defineProps<{
   shadows: ReactiveCalendarEventShadow[]
