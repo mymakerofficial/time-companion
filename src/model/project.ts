@@ -39,6 +39,7 @@ export interface ProjectOptions {
 export function fromSerializedProject(serialized: SerializedProject): ProjectInit {
   return {
     id: serialized.id,
+    childActivities: [], // will be filled by activity deserialization
     displayName: serialized.displayName,
     color: serialized.color,
     lastUsed: new Date(serialized.lastUsed),

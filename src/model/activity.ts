@@ -31,9 +31,14 @@ export interface ActivityInit {
   lastUsed?: Date
 }
 
-export function fromSerializedActivity(serialized: SerializedActivity): ActivityInit {
+export interface ActivityDeserializationAssets {
+  projects: ReactiveProject[]
+}
+
+export function fromSerializedActivity(serialized: SerializedActivity, assets: ActivityDeserializationAssets): ActivityInit {
   return {
     id: serialized.id,
+    parentProject: assets.projects.find((it) => it.id === serialized.parentProjectId) ?? null,
     displayName: serialized.displayName,
     color: serialized.color,
     lastUsed: new Date(serialized.LastUsed),
@@ -65,7 +70,10 @@ export function createActivity(init: ActivityInit): ReactiveActivity {
 
   return reactive({
     id: computed(() => config.id),
-    parentProject: computed(() => config.parentProject),
+    parentProject: computed({
+      get: () => config.parentProject,
+      set: (value: Nullable<ReactiveProject>) => config.parentProject = value,
+    }),
     displayName: computed({
       get: () => config.displayName,
       set: (value: string) => config.displayName = value,

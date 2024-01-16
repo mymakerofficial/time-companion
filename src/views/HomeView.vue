@@ -16,6 +16,7 @@ import {useRemindersStore} from "@/stores/remiders-store";
 import {useCalendarStore} from "@/stores/calendar-store";
 import type {ID} from "@/lib/types";
 import ControlsHeader from "@/components/ControlsHeader.vue";
+import {isNotNull} from "@/lib/utils";
 
 const projectsStore = useProjectsStore()
 const remindersStore = useRemindersStore()
@@ -41,7 +42,12 @@ function handleEventSelected(id: ID) {
 
 const quickAccessShadows = computed(() => {
   return projectsStore.projects
-    .map((project) => createEventShadow({ project }))
+    .flatMap((project) => {
+      return [
+        ...project.childActivities.map((activity) => createEventShadow({ project, activity })),
+        createEventShadow({ project })
+      ]
+    })
     .reverse()
 })
 
@@ -49,7 +55,7 @@ const quickAccessShadows = computed(() => {
 
 <template>
   <main class="flex-grow grid grid-cols-2 h-screen">
-    <section class="border-r border-border h-full flex flex-col justify-between">
+    <section class="border-r border-border h-screen flex flex-col justify-between">
       <ControlsHeader />
       <div class="flex-1 overflow-y-auto">
         <CurrentEventCard

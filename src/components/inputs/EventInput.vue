@@ -61,10 +61,13 @@ const projectOptions = computed(() => projectsStore.projects.map((project) => ({
   value: project.id,
 })))
 
-const activityOptions = computed(() => projectsStore.activities.map((activity) => ({
-  label: activity.displayName,
-  value: activity.id,
-})))
+const activityOptions = computed(() => projectsStore.activities
+    .filter((activity) => isNull(activity.parentProject) || activity.parentProject === selectedProject.value)
+    .map((activity) => ({
+      label: activity.displayName,
+      value: activity.id,
+    }))
+)
 
 const options = computed(() => {
   if (isNull(selectedProject.value)) {
@@ -121,6 +124,7 @@ function addProject() {
 function addActivity() {
   const activity = createActivity({
     displayName: state.searchTerm,
+    parentProject: selectedProject.value,
   })
 
   projectsStore.addActivity(activity)

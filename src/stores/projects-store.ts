@@ -5,6 +5,7 @@ import type {ReactiveActivity, SerializedActivity} from "@/model/activity";
 import {createProject, fromSerializedProject} from "@/model/project";
 import {createActivity, fromSerializedActivity} from "@/model/activity";
 import {useLocalStorage} from "@/composables/use-local-storage";
+import {isNotNull} from "@/lib/utils";
 
 export interface ProjectsStore {
   projects: ReactiveProject[]
@@ -12,6 +13,8 @@ export interface ProjectsStore {
   init: () => void
   addProject: (project: ReactiveProject) => void
   addActivity: (activity: ReactiveActivity) => void
+  link: (project: ReactiveProject, activity: ReactiveActivity) => void
+  unlink: (project: ReactiveProject, activity: ReactiveActivity) => void
 }
 
 interface ProjectsStorageSerialized {
@@ -32,8 +35,8 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
 
     const serialized = storage.get()
 
-    projects.push(...serialized.projects.map((it: any) => createProject(fromSerializedProject(it))))
-    activities.push(...serialized.activities.map((it: any) => createActivity(fromSerializedActivity(it))))
+    addProjects(serialized.projects.map((it: any) => createProject(fromSerializedProject(it))))
+    addActivities(serialized.activities.map((it: any) => createActivity(fromSerializedActivity(it, { projects }))))
   }
 
   function store() {
@@ -57,6 +60,10 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     projects.push(project)
   }
 
+  function addProjects(projects: ReactiveProject[]) {
+    projects.forEach((it) => addProject(it))
+  }
+
   function addActivity(activity: ReactiveActivity) {
     if (activities.some((it) => it.id === activity.id)) {
       throw new Error(`Activity with id ${activity.id} already exists`)
@@ -67,6 +74,38 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     }
 
     activities.push(activity)
+
+    if (activity.parentProject) {
+      link(activity.parentProject, activity)
+    }
+  }
+
+  function addActivities(activities: ReactiveActivity[]) {
+    activities.forEach((it) => addActivity(it))
+  }
+
+  function unlink(project: ReactiveProject, activity: ReactiveActivity) {
+    const index = project.childActivities.findIndex((it) => it.id === activity.id)
+
+    if (index === -1) {
+      throw new Error(`Activity with id ${activity.id} does not exist in project ${project.id}`)
+    }
+
+    project.childActivities.splice(index, 1)
+    activity.parentProject = null
+  }
+
+  function link(project: ReactiveProject, activity: ReactiveActivity) {
+    if (isNotNull(activity.parentProject) && activity.parentProject.id !== project.id) {
+      unlink(activity.parentProject, activity)
+    }
+
+    if (project.childActivities.some((it) => it.id === activity.id)) {
+      throw new Error(`Activity with id ${activity.id} already exists in project ${project.id}`)
+    }
+
+    project.childActivities.push(activity)
+    activity.parentProject = project
   }
 
   return {
@@ -75,5 +114,7 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     init,
     addProject,
     addActivity,
+    link,
+    unlink,
   }
 })
