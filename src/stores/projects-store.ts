@@ -69,8 +69,8 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
       throw new Error(`Activity with id ${activity.id} already exists`)
     }
 
-    if (activities.some((it) => it.displayName === activity.displayName)) {
-      throw new Error(`Activity with displayName ${activity.displayName} already exists`)
+    if (activities.some((it) => it.displayName === activity.displayName && it.parentProject?.id === activity.parentProject?.id)) {
+      throw new Error(`Activity with displayName ${activity.displayName} and same parentProject already exists`)
     }
 
     activities.push(activity)
