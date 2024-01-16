@@ -16,6 +16,7 @@ import {useCalendarStore} from "@/stores/calendar-store";
 import type {ID} from "@/lib/types";
 import ControlsHeader from "@/components/ControlsHeader.vue";
 import DebugDialog from "@/components/DebugDialog.vue";
+import {isNotNull} from "@/lib/utils";
 
 const projectsStore = useProjectsStore()
 const remindersStore = useRemindersStore()
@@ -25,6 +26,10 @@ remindersStore.init()
 calendarStore.init()
 
 calendarStore.setActiveDay(now())
+
+const activeEventHasNoProject = computed(() => {
+  return calendarStore.activeDay.currentEvent?.project === null
+})
 
 function handleStartEvent(shadow?: ReactiveCalendarEventShadow) {
   calendarStore.activeDay.startEvent(shadow)
@@ -37,6 +42,15 @@ function handleRemoveEvent(event: ReactiveCalendarEvent) {
 }
 function handleEventSelected(id: ID) {
   calendarStore.activeDay.selectEventById(id)
+}
+function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
+  if (activeEventHasNoProject.value && isNotNull(calendarStore.activeDay.currentEvent)) {
+    calendarStore.activeDay.currentEvent.project = shadow.project
+    calendarStore.activeDay.currentEvent.activity = shadow.activity
+    return
+  }
+
+  calendarStore.activeDay.startEvent(shadow)
 }
 </script>
 
@@ -58,7 +72,8 @@ function handleEventSelected(id: ID) {
           @remove="handleRemoveEvent"
         />
         <QuickStartCard
-          @start="handleStartEvent"
+          :icon-pencil="activeEventHasNoProject"
+          @start="handleQuickStart"
         />
         <DebugDialog />
       </div>

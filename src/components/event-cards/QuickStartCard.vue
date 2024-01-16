@@ -7,10 +7,14 @@ import {useProjectsStore} from "@/stores/projects-store";
 import type {ReactiveProject} from "@/model/project";
 import type {ReactiveActivity} from "@/model/activity";
 import {useCalendarStore} from "@/stores/calendar-store";
-import {isNotNull, isNull} from "@/lib/utils";
+import {isNull} from "@/lib/utils";
 
 const emit = defineEmits<{
   start: [shadow: ReactiveCalendarEventShadow]
+}>()
+
+defineProps<{
+  iconPencil?: boolean
 }>()
 
 const projectsStore = useProjectsStore()
@@ -38,17 +42,7 @@ const shadows = computed(() => {
     .slice(0, maxShadows)
 })
 
-const activeEventHasNoProject = computed(() => {
-  return isNull(calendarStore.activeDay.currentEvent?.project)
-})
-
 function handleClick(shadow: ReactiveCalendarEventShadow) {
-  if (activeEventHasNoProject.value && isNotNull(calendarStore.activeDay.currentEvent)) {
-    calendarStore.activeDay.currentEvent.project = shadow.project
-    calendarStore.activeDay.currentEvent.activity = shadow.activity
-    return
-  }
-
   emit('start', shadow)
 }
 </script>
@@ -68,7 +62,7 @@ function handleClick(shadow: ReactiveCalendarEventShadow) {
           <Slash v-if="shadow.activity" class="size-4" />
           <span v-if="shadow.activity" class="truncate">{{ shadow.activity?.displayName }}</span>
         </span>
-        <PencilLine v-if="activeEventHasNoProject" class="size-4" />
+        <PencilLine v-if="iconPencil" class="size-4" />
         <Play v-else class="size-4" />
       </button>
     </div>
