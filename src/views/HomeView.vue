@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import CalendarView from "@/components/calendar/CalendarView.vue";
 import CalendarHeader from "@/components/CalendarHeader.vue";
-import HeaderBar from "@/components/HeaderBar.vue";
+import HeaderBar from "@/components/Sidebar.vue";
 import {computed} from "vue";
 import {now} from "@/lib/time-utils";
 import CurrentEventCard from "@/components/event-cards/CurrentEventCard.vue";
@@ -15,6 +15,7 @@ import {useProjectsStore} from "@/stores/projects-store";
 import {useRemindersStore} from "@/stores/remiders-store";
 import {useCalendarStore} from "@/stores/calendar-store";
 import type {ID} from "@/lib/types";
+import ControlsHeader from "@/components/ControlsHeader.vue";
 
 const projectsStore = useProjectsStore()
 const remindersStore = useRemindersStore()
@@ -47,43 +48,41 @@ const quickAccessShadows = computed(() => {
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen">
-    <HeaderBar />
-    <main class="grid grid-cols-2 h-[calc(100vh-3.5rem)]">
-      <section class="border-r border-border h-[calc(100vh-3.5rem)] flex flex-col justify-between">
-        <div class="flex-1 overflow-y-auto">
-          <CurrentEventCard
-            :event="calendarStore.activeDay.currentEvent"
-            @start-event="handleStartEvent"
-            @stop-event="handleStopEvent"
-          />
-          <RemindersContainer :reminders="remindersStore.reminders" />
-          <EditEventCard
-            v-if="calendarStore.activeDay.selectedEvent"
-            :event="calendarStore.activeDay.selectedEvent"
-            @continue="handleStartEvent"
-            @remove="handleRemoveEvent"
-          />
-          <QuickStartCard
-            :shadows="quickAccessShadows"
-            @start="handleStartEvent"
-          />
-        </div>
-        <div>
-          <DayReportCard
-            v-if="calendarStore.activeDay.day"
-            :report="calendarStore.activeDay.day.timeReport"
-          />
-        </div>
-      </section>
-      <section class="flex flex-col h-[calc(100vh-3.5rem)]">
-        <CalendarHeader />
-        <CalendarView
-          v-if="calendarStore.activeDay.day"
-          :events="calendarStore.activeDay.day.events"
-          @event-selected="handleEventSelected"
+  <main class="flex-grow grid grid-cols-2 h-screen">
+    <section class="border-r border-border h-full flex flex-col justify-between">
+      <ControlsHeader />
+      <div class="flex-1 overflow-y-auto">
+        <CurrentEventCard
+          :event="calendarStore.activeDay.currentEvent"
+          @start-event="handleStartEvent"
+          @stop-event="handleStopEvent"
         />
-      </section>
-    </main>
-  </div>
+        <RemindersContainer :reminders="remindersStore.reminders" />
+        <EditEventCard
+          v-if="calendarStore.activeDay.selectedEvent"
+          :event="calendarStore.activeDay.selectedEvent"
+          @continue="handleStartEvent"
+          @remove="handleRemoveEvent"
+        />
+        <QuickStartCard
+          :shadows="quickAccessShadows"
+          @start="handleStartEvent"
+        />
+      </div>
+      <div>
+        <DayReportCard
+          v-if="calendarStore.activeDay.day"
+          :report="calendarStore.activeDay.day.timeReport"
+        />
+      </div>
+    </section>
+    <section class="flex flex-col h-screen">
+      <CalendarHeader />
+      <CalendarView
+        v-if="calendarStore.activeDay.day"
+        :events="calendarStore.activeDay.day.events"
+        @event-selected="handleEventSelected"
+      />
+    </section>
+  </main>
 </template>
