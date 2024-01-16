@@ -7,7 +7,7 @@ import CurrentEventCard from "@/components/event-cards/CurrentEventCard.vue";
 import EditEventCard from "@/components/event-cards/EditEventCard.vue";
 import RemindersContainer from "@/components/RemindersContainer.vue";
 import type {ReactiveCalendarEvent} from "@/model/calendar-event";
-import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
+import type {ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
 import DayReportCard from "@/components/event-cards/DayReportCard.vue";
 import QuickStartCard from "@/components/event-cards/QuickStartCard.vue";
 import {useProjectsStore} from "@/stores/projects-store";
@@ -56,7 +56,7 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
 
 <template>
   <main class="flex-grow grid grid-cols-12 h-screen">
-    <section class="col-span-8 border-r border-border h-screen flex flex-col justify-between">
+    <section class="col-span-7 border-r border-border h-screen flex flex-col justify-between">
       <ControlsHeader />
       <div class="flex-1 overflow-y-auto">
         <CurrentEventCard
@@ -84,7 +84,7 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
         />
       </div>
     </section>
-    <section class="col-span-4 flex flex-col h-screen">
+    <section class="col-span-5 flex flex-col h-screen">
       <CalendarHeader />
       <CalendarView
         v-if="calendarStore.activeDay.day"
