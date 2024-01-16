@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import CalendarView from "@/components/calendar/CalendarView.vue";
 import CalendarHeader from "@/components/CalendarHeader.vue";
-import HeaderBar from "@/components/Sidebar.vue";
 import {computed} from "vue";
 import {now} from "@/lib/time-utils";
 import CurrentEventCard from "@/components/event-cards/CurrentEventCard.vue";
@@ -16,7 +15,7 @@ import {useRemindersStore} from "@/stores/remiders-store";
 import {useCalendarStore} from "@/stores/calendar-store";
 import type {ID} from "@/lib/types";
 import ControlsHeader from "@/components/ControlsHeader.vue";
-import {isNotNull} from "@/lib/utils";
+import DebugDialog from "@/components/DebugDialog.vue";
 
 const projectsStore = useProjectsStore()
 const remindersStore = useRemindersStore()
@@ -74,6 +73,7 @@ const quickAccessShadows = computed(() => {
           :shadows="quickAccessShadows"
           @start="handleStartEvent"
         />
+        <DebugDialog />
       </div>
       <div>
         <DayReportCard
