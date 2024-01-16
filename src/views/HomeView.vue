@@ -41,8 +41,8 @@ function handleEventSelected(id: ID) {
 </script>
 
 <template>
-  <main class="flex-grow grid grid-cols-2 h-screen">
-    <section class="border-r border-border h-screen flex flex-col justify-between">
+  <main class="flex-grow grid grid-cols-12 h-screen">
+    <section class="col-span-8 border-r border-border h-screen flex flex-col justify-between">
       <ControlsHeader />
       <div class="flex-1 overflow-y-auto">
         <CurrentEventCard
@@ -69,7 +69,7 @@ function handleEventSelected(id: ID) {
         />
       </div>
     </section>
-    <section class="flex flex-col h-screen">
+    <section class="col-span-4 flex flex-col h-screen">
       <CalendarHeader />
       <CalendarView
         v-if="calendarStore.activeDay.day"
