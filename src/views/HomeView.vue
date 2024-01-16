@@ -38,18 +38,6 @@ function handleRemoveEvent(event: ReactiveCalendarEvent) {
 function handleEventSelected(id: ID) {
   calendarStore.activeDay.selectEventById(id)
 }
-
-const quickAccessShadows = computed(() => {
-  return projectsStore.projects
-    .flatMap((project) => {
-      return [
-        ...project.childActivities.map((activity) => createEventShadow({ project, activity })),
-        createEventShadow({ project })
-      ]
-    })
-    .reverse()
-})
-
 </script>
 
 <template>
@@ -70,7 +58,6 @@ const quickAccessShadows = computed(() => {
           @remove="handleRemoveEvent"
         />
         <QuickStartCard
-          :shadows="quickAccessShadows"
           @start="handleStartEvent"
         />
         <DebugDialog />

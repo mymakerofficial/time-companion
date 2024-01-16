@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {Button} from "@/components/ui/button";
 import {computed, reactive, watch} from "vue";
-import {useNow} from "@vueuse/core";
+import {useNow, watchDebounced} from "@vueuse/core";
 import {MoreVertical} from "lucide-vue-next";
 import TimeDurationInput from "@/components/inputs/TimeDurationInput.vue";
 import {formatTimeDiff, minutesSinceStartOfDay, minutesSinceStartOfDayToDate} from "@/lib/time-utils";
@@ -45,6 +45,21 @@ watch(() => state.activity, (value) => {
 watch(() => state.note, (value) => {
   runIf(props.event, isNotNull, () => props.event!.note = value)
 })
+
+watchDebounced(() => state.project, (value) => {
+  if (isNull(value)) {
+    return
+  }
+
+  value.lastUsedNow()
+}, { debounce: 500 })
+watchDebounced(() => state.activity, (value) => {
+  if (isNull(value)) {
+    return
+  }
+
+  value.lastUsedNow()
+}, { debounce: 500 })
 
 watch(() => props.event, (value) => {
   if (isNull(value)) {

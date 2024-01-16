@@ -1,16 +1,39 @@
 <script setup lang="ts">
-import {type ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
+import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
 import {vProvideColor} from "@/directives/v-provide-color";
 import {Slash, Play} from "lucide-vue-next";
-import {formatDate} from "../../lib/time-utils";
-
-defineProps<{
-  shadows: ReactiveCalendarEventShadow[]
-}>()
+import {computed} from "vue";
+import {useProjectsStore} from "@/stores/projects-store";
+import type {ReactiveProject} from "@/model/project";
+import type {ReactiveActivity} from "@/model/activity";
 
 const emit = defineEmits<{
   start: [shadow: ReactiveCalendarEventShadow]
 }>()
+
+const projectsStore = useProjectsStore()
+
+const maxActivitiesPerProject = 3
+const maxShadows = 12
+
+function byLastUsed(a: ReactiveProject | ReactiveActivity, b: ReactiveProject | ReactiveActivity) {
+  return a.lastUsed > b.lastUsed ? -1 : 1
+}
+
+const shadows = computed(() => {
+  return projectsStore.projects
+    .flatMap((project) => {
+      return [
+        ...project.childActivities.sort(byLastUsed).map((activity) => createEventShadow({ project, activity })).slice(0, maxActivitiesPerProject),
+        createEventShadow({ project })
+      ]
+    })
+    .sort((a, b) => byLastUsed(
+      a.activity ?? a.project,
+      b.activity ?? b.project
+    ))
+    .slice(0, maxShadows)
+})
 
 function handleStart(shadow: ReactiveCalendarEventShadow) {
   emit('start', shadow)
@@ -24,7 +47,7 @@ function handleStart(shadow: ReactiveCalendarEventShadow) {
         v-for="(shadow, index) in shadows"
         :key="index"
         @click="handleStart(shadow)"
-        v-provide-color="shadow.project.color"
+        v-provide-color="shadow.color"
         class="px-8 py-4 min-w-52 rounded-md flex flex-row justify-between items-center gap-4 bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-medium tracking-wide text-start"
       >
         <span class="flex flex-row items-center gap-1 max-w-56">
