@@ -4,7 +4,7 @@ import {Calendar, Clock, Settings} from "lucide-vue-next";
 </script>
 
 <template>
-  <div class="w-16 h-screen border-r border-border">
+  <div class="min-w-16 h-screen border-r border-border">
     <div class="h-16 border-b border-border flex justify-center items-center">
       <Clock class="size-5" />
     </div>
