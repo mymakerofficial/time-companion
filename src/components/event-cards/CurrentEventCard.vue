@@ -81,6 +81,12 @@ watch(() => props.event, (value) => {
   state.activity = value?.activity ?? null
   state.note = value?.note ?? ''
 })
+watch(() => props.event?.project, (value) => {
+  state.project = value ?? null
+})
+watch(() => props.event?.activity, (value) => {
+  state.activity = value ?? null
+})
 
 function handleStartStop() {
   if (isNull(props.event)) {
