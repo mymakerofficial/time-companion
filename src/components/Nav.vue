@@ -29,9 +29,9 @@ defineProps<{
               is="a"
               :href="href"
               @click="navigate"
-              :variant="isActive ? 'ghost' : 'default'"
+              variant="ghost"
               size="icon"
-              :class="isActive && 'dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white'"
+              :class="{'dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white': isActive}"
             >
               <component :is="link.icon" class="size-5" />
             </Button>
