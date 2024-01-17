@@ -51,7 +51,7 @@ watch(selectedActivity, () => {
 
 watch(noteModel, (value) => {
   state.searchTerm = value
-})
+}, { immediate: true })
 watch(() => state.searchTerm, (value) => {
   noteModel.value = value
 })
