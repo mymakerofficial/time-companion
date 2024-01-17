@@ -10,6 +10,7 @@
     "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false"
   },
   "dependencies": {
+    "@tanstack/vue-table": "^8.11.6",
     "@types/color": "^3.0.6",
     "@vueuse/core": "^10.6.1",
     "class-variance-authority": "^0.7.0",
