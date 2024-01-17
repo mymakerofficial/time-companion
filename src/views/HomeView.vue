@@ -8,9 +8,7 @@ import EditEventCard from "@/components/event-cards/EditEventCard.vue";
 import RemindersContainer from "@/components/RemindersContainer.vue";
 import type {ReactiveCalendarEvent} from "@/model/calendar-event";
 import type {ReactiveCalendarEventShadow} from "@/model/calendar-event-shadow";
-import DayReportCard from "@/components/event-cards/DayReportCard.vue";
 import QuickStartCard from "@/components/event-cards/QuickStartCard.vue";
-import {useProjectsStore} from "@/stores/projects-store";
 import {useRemindersStore} from "@/stores/remiders-store";
 import {useCalendarStore} from "@/stores/calendar-store";
 import type {ID} from "@/lib/types";
@@ -18,7 +16,6 @@ import ControlsHeader from "@/components/ControlsHeader.vue";
 import DebugDialog from "@/components/DebugDialog.vue";
 import {isNotNull} from "@/lib/utils";
 
-const projectsStore = useProjectsStore()
 const remindersStore = useRemindersStore()
 const calendarStore = useCalendarStore()
 
@@ -56,7 +53,7 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
 
 <template>
   <main class="flex-grow grid grid-cols-12 h-screen">
-    <section class="col-span-7 border-r border-border h-screen flex flex-col justify-between">
+    <section class="col-span-7 border-r border-border h-screen flex flex-col">
       <ControlsHeader />
       <div class="flex-1 overflow-y-auto">
         <CurrentEventCard
@@ -64,7 +61,9 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
           @start-event="handleStartEvent"
           @stop-event="handleStopEvent"
         />
-        <RemindersContainer :reminders="remindersStore.reminders" />
+        <RemindersContainer
+          :reminders="remindersStore.reminders"
+        />
         <EditEventCard
           v-if="calendarStore.activeDay.selectedEvent"
           :event="calendarStore.activeDay.selectedEvent"
@@ -76,12 +75,6 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
           @start="handleQuickStart"
         />
         <DebugDialog />
-      </div>
-      <div>
-        <DayReportCard
-          v-if="calendarStore.activeDay.day"
-          :report="calendarStore.activeDay.day.timeReport"
-        />
       </div>
     </section>
     <section class="col-span-5 flex flex-col h-screen">

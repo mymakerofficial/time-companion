@@ -19,14 +19,14 @@ defineProps<{
   <component is="nav" class="flex flex-col items-center gap-4 py-4">
     <template v-for="link in links" :key="link.label">
       <Tooltip :delay-duration="0">
-        <TooltipTrigger>
+        <TooltipTrigger as="div">
           <RouterLink
             :to="link.to"
             custom
             v-slot="{ isActive, href, navigate }"
           >
             <Button
-              is="a"
+              as="a"
               :href="href"
               @click="navigate"
               variant="ghost"

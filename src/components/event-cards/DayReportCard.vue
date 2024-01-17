@@ -12,7 +12,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <div v-if="isNotEmpty(report.projects)" class="border-t border-border">
+  <div v-if="isNotEmpty(report.projects)">
     <div class="flex flex-row justify-between items-center px-8 py-4">
       <div>
         <h3 class="text-md font-medium tracking-wide">Total Time</h3>
