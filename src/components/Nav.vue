@@ -4,12 +4,14 @@ import type {RouteLocationRaw} from "vue-router";
 import type {Icon} from "lucide-vue-next";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 
+export interface NavLink {
+  label: string
+  to: RouteLocationRaw
+  icon: Icon
+}
+
 defineProps<{
-  links: {
-    label: string
-    to: RouteLocationRaw
-    icon: Icon
-  }
+  links: NavLink[]
 }>()
 </script>
 
@@ -27,7 +29,7 @@ defineProps<{
               is="a"
               :href="href"
               @click="navigate"
-              :variant="isActive && 'ghost'"
+              :variant="isActive ? 'ghost' : 'default'"
               size="icon"
               :class="isActive && 'dark:bg-muted dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-white'"
             >

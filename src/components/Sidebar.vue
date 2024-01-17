@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import {Calendar, Settings} from "lucide-vue-next";
 import logo from '@/assets/logo.png'
-import Nav from "@/components/Nav.vue";
+import Nav, {type NavLink} from "@/components/Nav.vue";
 
-const links = [
+const links: NavLink[] = [
   {label: 'Dashboard', to: { name: 'home' }, icon: Calendar},
   {label: 'Settings', to: { name: 'settings' }, icon: Settings},
 ]
-
 </script>
 
 <template>
