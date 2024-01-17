@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type {NavLink} from "@/components/nav/nav-link";
-import PageSidebar from "@/components/nav/PageSidebar.vue";
 import HorizontalNav from "@/components/nav/HorizontalNav.vue";
 
 const links: NavLink[] = [
