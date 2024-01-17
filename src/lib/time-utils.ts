@@ -3,9 +3,11 @@ import localizedFormat from 'dayjs/plugin/localizedFormat'
 import customParseFormat from 'dayjs/plugin/customParseFormat'
 import type {Maybe} from "@/lib/utils";
 import {isNotDefined} from "@/lib/utils";
+import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(localizedFormat)
 dayjs.extend(customParseFormat)
+dayjs.extend(relativeTime)
 
 export function now(): Date {
   return new Date()
@@ -36,6 +38,10 @@ export function formatTimeDiff(
   const prefix = diff < 0 ? '-' : ''
 
   return prefix + dayjs().startOf('day').add(diff).format(format)
+}
+
+export function fromNow(date: Date): string {
+  return dayjs(date).fromNow()
 }
 
 export function minutesSinceStartOfDay(date: Maybe<Date>): number {

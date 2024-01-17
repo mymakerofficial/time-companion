@@ -18,15 +18,13 @@ function toString(color: { h: number, s: number, l: number }) {
   return `${color.h} ${color.s}% ${color.l}%`
 }
 
-function update(el: HTMLElement, color: Maybe<string>) {
+export function getColorStyleVariables(color: Maybe<string>) {
   if (isNotDefined(color)) {
-    el.style.removeProperty('--primary')
-    el.style.removeProperty('--primary-foreground')
-    return
+    return {}
   }
 
   if (isNotDefined(colors[color as keyof typeof colors])) {
-    return
+    return {}
   }
 
   const surfaceShade = 400
@@ -35,8 +33,17 @@ function update(el: HTMLElement, color: Maybe<string>) {
   const surfaceColor = getHsl(color, surfaceShade)
   const foregroundColor = getHsl(color, foregroundShade)
 
-  el.style.setProperty('--primary', toString(surfaceColor))
-  el.style.setProperty('--primary-foreground', toString(foregroundColor))
+  return {
+    '--primary': toString(surfaceColor),
+    '--primary-foreground': toString(foregroundColor),
+  }
+}
+
+function update(el: HTMLElement, color: Maybe<string>) {
+  const style = getColorStyleVariables(color)
+
+  el.style.setProperty('--primary', style['--primary'] ?? null)
+  el.style.setProperty('--primary-foreground', style['--primary-foreground'] ?? null)
 }
 
 export const vProvideColor = {
