@@ -6,12 +6,12 @@ const router = createRouter({
     {
       path: '/',
       name: 'app-dashboard',
-      component: () => import('../views/app/DashboardView.vue')
+      component: () => import('../views/app/dashboard/DashboardView.vue')
     },
     {
       path: '/report',
       name: 'app-report',
-      component: () => import('../views/app/ReportView.vue')
+      component: () => import('../views/app/report/ReportView.vue')
     },
     {
       path: '/settings',
@@ -24,17 +24,17 @@ const router = createRouter({
         {
           path: 'projects',
           name: 'app-settings-projects',
-          component: () => import('../views/app/settings/SettingProjectsView.vue'),
+          component: () => import('../views/app/settings/SettingsProjectsView.vue'),
         },
         {
           path: 'reminders',
           name: 'app-settings-reminders',
-          component: () => import('../views/app/settings/SettingRemindersView.vue'),
+          component: () => import('../views/app/settings/SettingsRemindersView.vue'),
         },
         {
           path: 'appearance',
           name: 'app-settings-appearance',
-          component: () => import('../views/app/settings/SettingAppearanceView.vue'),
+          component: () => import('../views/app/settings/SettingsAppearanceView.vue'),
         },
       ]
     }

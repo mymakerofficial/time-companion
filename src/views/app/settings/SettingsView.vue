@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import type {NavLink} from "@/components/nav/nav-link";
-import HorizontalNav from "@/components/nav/HorizontalNav.vue";
+import type {NavLink} from "@/components/common/layout/nav/nav-link";
+import HorizontalNav from "@/components/common/layout/nav/HorizontalNav.vue";
+import ResponsiveContainer from "@/components/common/layout/ResponsiveContainer.vue";
 
 const links: NavLink[] = [
   {label: 'Projects', to: { name: 'app-settings-projects' }},
@@ -10,12 +11,12 @@ const links: NavLink[] = [
 </script>
 
 <template>
-  <main class="w-2/3 mx-auto grid grid-cols-8">
+  <ResponsiveContainer as="main" >
     <div class="col-span-2 sticky top-0 h-screen">
       <HorizontalNav :links="links" class="py-16" />
     </div>
     <section class="col-span-6">
       <RouterView />
     </section>
-  </main>
+  </ResponsiveContainer>
 </template>

@@ -2,9 +2,9 @@ import {v4 as uuid} from "uuid";
 import {computed, reactive} from "vue";
 import type {Nullable} from "@/lib/utils";
 import type {HasId, ID} from "@/lib/types";
-import {randomTailwindColor} from "@/lib/color-utils";
+import {randomTailwindColor} from "@/lib/colorUtils";
 import type {ReactiveActivity} from "@/model/activity";
-import {now} from "@/lib/time-utils";
+import {now} from "@/lib/timeUtils";
 
 export interface SerializedProject {
   id: string

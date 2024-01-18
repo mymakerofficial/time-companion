@@ -1,5 +1,5 @@
 import {isNotDefined, type Nullable} from "@/lib/utils";
-import {isEmpty, sumOf} from "@/lib/list-utils";
+import {isEmpty, sumOf} from "@/lib/listUtils";
 
 /**
  * Parses any single human-readable duration input into a number of minutes

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import AppSidebar from "@/components/nav/AppSidebar.vue";
+import AppSidebar from "@/components/common/layout/AppSidebar.vue";
 import {TooltipProvider} from "radix-vue"
-import type {NavLink} from "@/components/nav/nav-link";
+import type {NavLink} from "@/components/common/layout/nav/nav-link";
 import {Archive, Calendar, Settings} from "lucide-vue-next";
 
 const links: NavLink[] = [
