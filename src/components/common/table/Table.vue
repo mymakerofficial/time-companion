@@ -1,23 +1,32 @@
-<script setup lang="ts" generic="T">
+<script setup lang="ts" generic="TData">
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {isNotEmpty} from "@/lib/listUtils";
 import {
   useVueTable,
   FlexRender,
   getCoreRowModel,
+  type TableOptions,
 } from "@tanstack/vue-table";
-import {ColumnDef} from "@tanstack/table-core/build/lib/types";
 import NoEntries from "@/components/common/table/NoEntries.vue";
 
+declare module "@tanstack/table-core" {
+  // eslint-disable-next-line unused-imports/no-unused-vars
+  interface ColumnMeta<TData> {
+    className?: string
+  }
+}
+
 const props = defineProps<{
-  data: T[]
-  columns: ColumnDef<T>[]
+  data: TableOptions<TData>['data']
+  columns: TableOptions<TData>['columns']
+  options?: Partial<TableOptions<TData>>
 }>()
 
 const table = useVueTable({
-  data: props.data,
-  columns: props.columns,
+  get data() { return props.data },
+  get columns() { return props.columns },
   getCoreRowModel: getCoreRowModel(),
+  ...props.options,
 })
 </script>
 
@@ -26,7 +35,7 @@ const table = useVueTable({
     <Table>
       <TableHeader>
         <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
-          <TableHead v-for="header in headerGroup.headers" :key="header.id">
+          <TableHead v-for="header in headerGroup.headers" :key="header.id" :class="header.column.columnDef.meta?.className">
             <FlexRender v-if="!header.isPlaceholder" :render="header.column.columnDef.header" :props="header.getContext()" />
           </TableHead>
         </TableRow>
@@ -34,9 +43,9 @@ const table = useVueTable({
       <TableBody>
         <template v-if="isNotEmpty(table.getRowModel().rows)">
           <TableRow
-              v-for="row in table.getRowModel().rows"
-              :key="row.id"
-              :data-state="row.getIsSelected() && 'selected'"
+            v-for="row in table.getRowModel().rows"
+            :key="row.id"
+            :data-state="row.getIsSelected() && 'selected'"
           >
             <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
               <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
