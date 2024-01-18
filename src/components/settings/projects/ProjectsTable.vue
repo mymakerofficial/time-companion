@@ -6,7 +6,8 @@ import type {ProjectRow} from "@/components/settings/projects/types";
 import {projectsColumns} from "@/components/settings/projects/projectsColumns";
 import Table from "@/components/common/table/Table.vue";
 import type {ReactiveActivity} from "@/model/activity";
-import {type ExpandedState, getExpandedRowModel, type TableOptions} from "@tanstack/vue-table";
+import {getSortedRowModel, getExpandedRowModel} from "@tanstack/vue-table";
+import type {ExpandedState, SortingState, TableOptions} from '@tanstack/vue-table'
 
 const props = defineProps<{
   projects: ReactiveProject[]
@@ -35,19 +36,28 @@ function toProjectRow(project: ReactiveProject): ProjectRow {
 
 const data = computed(() => props.projects.map(toProjectRow))
 
+const sorting = ref<SortingState>()
 const expanded = ref<ExpandedState>()
 
 const tableOptions: Partial<TableOptions<ProjectRow>> = {
   state: {
+    get sorting() { return sorting.value },
     get expanded() { return expanded.value }
   },
-  onExpandedChange: (updater) => {
+  onSortingChange: (updaterOrValue) => {
+    sorting.value =
+      typeof updaterOrValue === 'function'
+        ? updaterOrValue(sorting.value)
+        : updaterOrValue
+  },
+  onExpandedChange: (updaterOrValue) => {
     expanded.value =
-      typeof updater === 'function'
-        ? updater(expanded.value)
-        : updater
+      typeof updaterOrValue === 'function'
+        ? updaterOrValue(expanded.value)
+        : updaterOrValue
   },
   getSubRows: (row) => row.activities,
+  getSortedRowModel: getSortedRowModel(),
   getExpandedRowModel: getExpandedRowModel(),
 }
 </script>

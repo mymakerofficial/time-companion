@@ -1,14 +1,35 @@
 import {createColumnHelper} from "@tanstack/vue-table";
 import {getColorStyleVariables} from "@/directives/vProvideColor";
 import {isNotNull} from "@/lib/utils";
-import {CheckCircle2, ChevronsDownUp, ChevronsUpDown, Circle, MoreHorizontal, Slash} from "lucide-vue-next";
+import {
+  ArrowDown,
+  ArrowUp,
+  CheckCircle2,
+  ChevronsDownUp,
+  ChevronsUpDown,
+  Circle,
+  MoreHorizontal,
+  Slash
+} from "lucide-vue-next";
 import {Button} from "@/components/ui/button";
 import type {ProjectRow} from "@/components/settings/projects/types";
+import {Column} from "@tanstack/table-core/src/types";
+
+function getHeader(column: Column<ProjectRow>, label: string) {
+  return <>
+    <Button onClick={() => column.toggleSorting()} variant="ghost" class="flex gap-1 items-center">
+      <span>{ label }</span>
+      { !column.getIsSorted() && <ChevronsUpDown class="size-3"/> }
+      { column.getIsSorted() === 'desc' && <ArrowUp class="size-3"/> }
+      { column.getIsSorted() === 'asc' && <ArrowDown class="size-3"/> }
+    </Button>
+  </>
+}
 
 const columnHelper = createColumnHelper<ProjectRow>()
 export const projectsColumns = [
   columnHelper.accessor('name', {
-    header: 'Name',
+    header: ({ column }) => getHeader(column, 'Name'),
     cell: (info) => <>
       <span class="flex items-center gap-2">
         <span>{info.getValue()[0]}</span>
@@ -25,7 +46,7 @@ export const projectsColumns = [
   }),
   columnHelper.accessor('billable', {
     header: 'Billable',
-    cell: (info) => isNotNull(info.getValue()) ? info.getValue() ? <CheckCircle2 class="size-5" /> : <Circle class="size-5" /> : null, // i dont like ternary operators
+    cell: (info) => isNotNull(info.getValue()) && <>{ info.getValue() ? <CheckCircle2 class="size-5" /> : <Circle class="size-5" /> }</>, // i dont like ternary operators
   }),
   columnHelper.accessor('lastUsed', {
     header: 'Last Used',
@@ -34,7 +55,7 @@ export const projectsColumns = [
     id: 'actions',
     cell: ({ row }) => <>
       <span class="flex justify-end gap-1 items-center">
-        { row.getCanExpand() && <Button onClick={() => row.toggleExpanded()} variant="ghost" size="icon">{row.getIsExpanded() ? <ChevronsDownUp class="size-5" /> : <ChevronsUpDown class="size-5" />}</Button> }
+        { row.getCanExpand() && <Button onClick={() => row.toggleExpanded()} variant="ghost" size="icon">{ row.getIsExpanded() ? <ChevronsDownUp class="size-5" /> : <ChevronsUpDown class="size-5" /> }</Button> }
         <Button variant="ghost" size="icon"><MoreHorizontal class="size-5" /></Button>
       </span>
     </>,
