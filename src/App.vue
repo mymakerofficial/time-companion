@@ -4,6 +4,17 @@ import AppSidebar from "@/components/common/layout/AppSidebar.vue";
 import {TooltipProvider} from "radix-vue"
 import type {NavLink} from "@/components/common/layout/nav/nav-link";
 import {Archive, Calendar, Settings} from "lucide-vue-next";
+import {now} from "@/lib/timeUtils";
+import {useCalendarStore} from "@/stores/calendarStore";
+import {useRemindersStore} from "@/stores/remidersStore";
+
+const calendarStore = useCalendarStore()
+const remindersStore = useRemindersStore()
+
+remindersStore.init()
+calendarStore.init()
+
+calendarStore.setActiveDay(now())
 
 const links: NavLink[] = [
   {label: 'Dashboard', to: { name: 'app-dashboard' }, icon: Calendar},

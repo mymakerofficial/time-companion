@@ -2,7 +2,6 @@
 import CalendarView from "@/components/common/calendar/CalendarView.vue";
 import CalendarHeader from "@/components/dashboard/layout/CalendarHeader.vue";
 import {computed} from "vue";
-import {now} from "@/lib/timeUtils";
 import CurrentEventCard from "@/components/dashboard/cards/CurrentEventCard.vue";
 import EditEventCard from "@/components/dashboard/cards/EditEventCard.vue";
 import RemindersContainer from "@/components/dashboard/cards/RemindersContainer.vue";
@@ -18,11 +17,6 @@ import {isNotNull} from "@/lib/utils";
 
 const remindersStore = useRemindersStore()
 const calendarStore = useCalendarStore()
-
-remindersStore.init()
-calendarStore.init()
-
-calendarStore.setActiveDay(now())
 
 const activeEventHasNoProject = computed(() => {
   return calendarStore.activeDay.currentEvent?.project === null
