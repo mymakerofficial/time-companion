@@ -11,6 +11,7 @@ import type {ExpandedState, SortingState, TableOptions} from '@tanstack/vue-tabl
 import {isDefined, type Nullable} from "@/lib/utils";
 import type {ID} from "@/lib/types";
 import EditProjectDialog from "@/components/settings/projects/dialog/EditProjectDialog.vue";
+import EditActivityDialog from "@/components/settings/projects/dialog/EditActivityDialog.vue";
 
 const props = defineProps<{
   projects: ReactiveProject[]
@@ -46,7 +47,7 @@ function toProjectRow(project: ReactiveProject): ProjectRow {
 
 const projectsColumns = createProjectsColumns({
   onOpenEditProjectDialog: (id) => state.editingProjectId = id,
-  onOpenEditActivityDialog: () => {},
+  onOpenEditActivityDialog: (id) => state.editingActivityId = id,
 })
 
 const data = computed(() => props.projects.map(toProjectRow))
@@ -80,4 +81,5 @@ const tableOptions: Partial<TableOptions<ProjectRow>> = {
 <template>
   <Table :data="data" :columns="projectsColumns" :options="tableOptions" />
   <EditProjectDialog :id="state.editingProjectId" @close="state.editingProjectId = null" />
+  <EditActivityDialog :id="state.editingActivityId" @close="state.editingActivityId = null" />
 </template>
