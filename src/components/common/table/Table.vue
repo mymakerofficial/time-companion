@@ -9,13 +9,6 @@ import {
 } from "@tanstack/vue-table";
 import NoEntries from "@/components/common/table/NoEntries.vue";
 
-declare module "@tanstack/table-core" {
-  // eslint-disable-next-line unused-imports/no-unused-vars
-  interface ColumnMeta<TData> {
-    className?: string
-  }
-}
-
 const props = defineProps<{
   data: TableOptions<TData>['data']
   columns: TableOptions<TData>['columns']
@@ -35,7 +28,7 @@ const table = useVueTable({
     <Table>
       <TableHeader>
         <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
-          <TableHead v-for="header in headerGroup.headers" :key="header.id" :class="header.column.columnDef.meta?.className">
+          <TableHead v-for="header in headerGroup.headers" :key="header.id" :class="(header.column.columnDef.meta as any)?.className">
             <FlexRender v-if="!header.isPlaceholder" :render="header.column.columnDef.header" :props="header.getContext()" />
           </TableHead>
         </TableRow>

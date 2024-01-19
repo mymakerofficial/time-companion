@@ -13,7 +13,7 @@ import {
 } from "lucide-vue-next";
 import {Button} from "@/components/ui/button";
 import type {ProjectRow} from "@/components/settings/projects/types";
-import {Column} from "@tanstack/table-core/src/types";
+import type {Column} from "@tanstack/table-core";
 
 function getHeader(column: Column<ProjectRow>, label: string) {
   return <>

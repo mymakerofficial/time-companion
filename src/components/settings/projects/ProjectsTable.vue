@@ -8,6 +8,7 @@ import Table from "@/components/common/table/Table.vue";
 import type {ReactiveActivity} from "@/model/activity";
 import {getSortedRowModel, getExpandedRowModel} from "@tanstack/vue-table";
 import type {ExpandedState, SortingState, TableOptions} from '@tanstack/vue-table'
+import {isDefined} from "@/lib/utils";
 
 const props = defineProps<{
   projects: ReactiveProject[]
@@ -16,7 +17,7 @@ const props = defineProps<{
 function toActivityRow(activity: ReactiveActivity): ProjectRow {
   return {
     id: activity.id,
-    name: [activity.parentProject.displayName, activity.displayName],
+    name: [activity.parentProject?.displayName, activity.displayName].filter(isDefined),
     billable: null,
     color: activity.color,
     lastUsed: fromNow(activity.lastUsed),
@@ -36,8 +37,8 @@ function toProjectRow(project: ReactiveProject): ProjectRow {
 
 const data = computed(() => props.projects.map(toProjectRow))
 
-const sorting = ref<SortingState>()
-const expanded = ref<ExpandedState>()
+const sorting = ref<SortingState>([])
+const expanded = ref<ExpandedState>({})
 
 const tableOptions: Partial<TableOptions<ProjectRow>> = {
   state: {
