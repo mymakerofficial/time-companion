@@ -50,7 +50,9 @@ function handleRemove() {
     return
   }
 
-  // ...
+  projectsStore.removeActivity(activity.value)
+
+  open.value = false
 }
 
 function handleSubmit() {

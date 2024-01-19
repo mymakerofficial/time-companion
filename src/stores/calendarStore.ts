@@ -1,6 +1,6 @@
 import {defineStore} from "pinia";
 import type {ReactiveCalendarDay, SerializedCalendarDay} from "@/model/calendarDay";
-import {reactive, watch} from "vue";
+import {reactive, readonly, type Ref, ref, watch} from "vue";
 import {useProjectsStore} from "@/stores/projectsStore";
 import {createDay, fromSerializedDay} from "@/model/calendarDay";
 import {useLocalStorage} from "@/composables/useLocalStorage";
@@ -10,6 +10,7 @@ import {isSameDay} from "@/lib/timeUtils";
 import dayjs from "dayjs";
 
 export interface CalendarStore {
+  isInitialized: Readonly<Ref<boolean>>
   days: ReactiveCalendarDay[]
   activeDay: Nullable<ReactiveCalendarDay>
   init: () => void
@@ -25,12 +26,14 @@ export const useCalendarStore = defineStore('calendar', () => {
   const projectsStore = useProjectsStore()
   const storage = useLocalStorage<CalendarStorageSerialized>('time-companion-calendar-store', { days: [] })
 
-  const days = reactive<ReactiveCalendarDay[]>([])
+  const isInitialized = ref(false)
 
+  const days = reactive<ReactiveCalendarDay[]>([])
   const activeDay = useActiveDay(days)
 
   function init() {
     // reset state
+    isInitialized.value = false
     days.length = 0
 
     // projects need to be initialized first
@@ -44,6 +47,8 @@ export const useCalendarStore = defineStore('calendar', () => {
     }
 
     days.push(...serialized.days.map((it: any) => createDay(fromSerializedDay(it, assets))))
+
+    isInitialized.value = true
   }
 
   function store() {
@@ -80,6 +85,7 @@ export const useCalendarStore = defineStore('calendar', () => {
   }
 
   return {
+    isInitialized: readonly(isInitialized),
     days,
     activeDay,
     init,

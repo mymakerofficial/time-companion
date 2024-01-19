@@ -50,7 +50,9 @@ function handleRemove() {
     return
   }
 
-  // ...
+  projectsStore.removeProject(project.value)
+
+  open.value = false
 }
 
 function handleSubmit() {
