@@ -7,4 +7,5 @@ export interface ProjectRow {
   color: Nullable<string>
   lastUsed: string
   activities?: ProjectRow[]
+  isProject: boolean
 }
