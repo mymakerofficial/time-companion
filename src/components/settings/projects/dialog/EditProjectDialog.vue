@@ -6,6 +6,8 @@ import {computed, reactive, watch} from "vue";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {useReferenceById} from "@/composables/useReferenceById";
+import {Combobox} from "@/components/common/inputs/combobox/Combobox.vue";
+import ColorSelect from "@/components/common/inputs/colorSelect/ColorSelect.vue";
 
 const props = defineProps<{
   id: Nullable<string>
@@ -71,7 +73,7 @@ function handleSubmit() {
   <BaseDialog v-model:open="open" title="Edit Project" description="Edit the project.">
     <div class="flex flex-col gap-4">
       <Input v-model="state.displayName" placeholder="Name" />
-      <Input v-model="state.color" placeholder="Color" />
+      <ColorSelect v-model="state.color" />
       <div class="flex flex-row gap-4 justify-end">
         <Button variant="destructive" @click="handleRemove">Delete</Button>
         <Button @click="handleSubmit">Save</Button>
