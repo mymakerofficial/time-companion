@@ -46,6 +46,10 @@ const open = computed({
   }
 })
 
+function close() {
+  open.value = false
+}
+
 function handleRemove() {
   if (isNull(activity.value)) {
     return
@@ -53,7 +57,7 @@ function handleRemove() {
 
   projectsStore.removeActivity(activity.value)
 
-  open.value = false
+  close()
 }
 
 function handleSubmit() {
@@ -64,7 +68,7 @@ function handleSubmit() {
   activity.value.displayName = state.displayName
   activity.value.color = state.color
 
-  open.value = false
+  close()
 }
 </script>
 
@@ -74,9 +78,14 @@ function handleSubmit() {
       <div>Parent Project: {{ activity?.parentProject?.displayName }}</div>
       <Input v-model="state.displayName" placeholder="Name" />
       <ColorSelect v-model="state.color" />
-      <div class="flex flex-row gap-4 justify-end">
-        <Button variant="destructive" @click="handleRemove">Delete</Button>
-        <Button @click="handleSubmit">Save</Button>
+      <div class="flex flex-row gap-4 justify-between">
+        <div class="flex flex-row gap-4">
+          <Button variant="destructive" @click="handleRemove">Delete</Button>
+        </div>
+        <div class="flex flex-row gap-4">
+          <Button variant="ghost" @click="close()">Cancel</Button>
+          <Button @click="handleSubmit">Save</Button>
+        </div>
       </div>
     </div>
   </BaseDialog>
