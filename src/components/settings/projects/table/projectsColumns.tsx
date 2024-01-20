@@ -3,6 +3,7 @@ import {getColorStyleVariables} from "@/directives/vProvideColor";
 import {isNotNull} from "@/lib/utils";
 import {
   ArrowDown,
+  ArrowDownUp,
   ArrowUp,
   CheckCircle2,
   ChevronsDownUp,
@@ -19,7 +20,7 @@ function getHeader(column: Column<ProjectRow>, label: string) {
   return <>
     <Button onClick={() => column.toggleSorting()} variant="ghost" class="flex gap-1 items-center">
       <span>{ label }</span>
-      { !column.getIsSorted() && <ChevronsUpDown class="size-3"/> }
+      { !column.getIsSorted() && <ArrowDownUp class="size-3"/> }
       { column.getIsSorted() === 'desc' && <ArrowUp class="size-3"/> }
       { column.getIsSorted() === 'asc' && <ArrowDown class="size-3"/> }
     </Button>
