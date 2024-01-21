@@ -3,12 +3,22 @@ import {useReferenceById} from "@/composables/useReferenceById";
 import {computed, reactive} from "vue";
 import type {ReactiveCalendarEventShadow} from "@/model/calendarEventShadow";
 import {isDefined, isNotNull, isNull, type Nullable} from "@/lib/utils";
-import {createEvent} from "@/model/calendarEvent";
+import {createEvent, type ReactiveCalendarEvent} from "@/model/calendarEvent";
 import {now} from "@/lib/timeUtils";
 import type {ID} from "@/lib/types";
 import {lastOf} from "@/lib/listUtils";
 
-export function useActiveDay(days: ReactiveCalendarDay[]) {
+export interface ReactiveActiveDay {
+  day: Nullable<ReactiveCalendarDay>
+  setActiveDay: (day: ReactiveCalendarDay) => void
+  currentEvent: Nullable<ReactiveCalendarEvent>
+  selectedEvent: Nullable<ReactiveCalendarEvent>
+  startEvent: (shadow?: ReactiveCalendarEventShadow) => void
+  stopEvent: () => void
+  selectEventById: (id: ID) => void
+}
+
+export function useActiveDay(days: ReactiveCalendarDay[]): ReactiveActiveDay {
   const activeDay = useReferenceById(days)
 
   const state = reactive({
@@ -88,13 +98,13 @@ export function useActiveDay(days: ReactiveCalendarDay[]) {
     state.currentEventId = event.id
   }
 
-  return {
-    day: activeDay,
+  return reactive({
+    day: computed(() => activeDay.value),
     setActiveDay,
     currentEvent,
     selectedEvent,
     startEvent,
     stopEvent,
     selectEventById,
-  }
+  })
 }

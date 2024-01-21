@@ -4,7 +4,7 @@ import {reactive, readonly, type Ref, ref, watch} from "vue";
 import {useProjectsStore} from "@/stores/projectsStore";
 import {createDay, fromSerializedDay} from "@/model/calendarDay";
 import {useLocalStorage} from "@/composables/useLocalStorage";
-import {useActiveDay} from "@/composables/useActiveDay";
+import {type ReactiveActiveDay, useActiveDay} from "@/composables/useActiveDay";
 import type {Nullable} from "@/lib/utils";
 import {isSameDay} from "@/lib/timeUtils";
 import dayjs from "dayjs";
@@ -12,7 +12,7 @@ import dayjs from "dayjs";
 export interface CalendarStore {
   isInitialized: Readonly<Ref<boolean>>
   days: ReactiveCalendarDay[]
-  activeDay: Nullable<ReactiveCalendarDay>
+  activeDay: Nullable<ReactiveActiveDay>
   init: () => void
   addDay: (day: ReactiveCalendarDay) => void
   setActiveDay: (date: Date) => void
@@ -22,7 +22,7 @@ interface CalendarStorageSerialized {
   days: SerializedCalendarDay[]
 }
 
-export const useCalendarStore = defineStore('calendar', () => {
+export const useCalendarStore = defineStore('calendar', (): CalendarStore => {
   const projectsStore = useProjectsStore()
   const storage = useLocalStorage<CalendarStorageSerialized>('time-companion-calendar-store', { days: [] })
 
