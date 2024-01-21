@@ -3,10 +3,12 @@ import {colorNames} from "@/components/common/inputs/colorSelect/constants";
 import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
 import type {Nullable} from "@/lib/utils";
 import {vProvideColor} from "@/directives/vProvideColor";
+import type {ComboboxOption} from "@/components/common/inputs/combobox/types";
+import {computed} from "vue";
 
 const model = defineModel<Nullable<string>>({ required: true, default: null })
 
-const options = [{
+const options: ComboboxOption[] = [{
     value: null,
     label: 'None',
   },
@@ -14,7 +16,7 @@ const options = [{
     value,
     label,
   }))
-];
+]
 </script>
 
 <template>

@@ -2,7 +2,7 @@
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription} from "@/components/ui/dialog";
 import {isDefined} from "@/lib/utils";
 
-const open = defineModel('open', { required: true })
+const open = defineModel<boolean>('open', { required: true })
 
 defineProps<{
   title?: string

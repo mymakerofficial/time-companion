@@ -2,7 +2,6 @@
 import { Check, ChevronsUpDown } from 'lucide-vue-next'
 
 import { ref } from 'vue'
-import {cn, isDefined, type Nullable} from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
   Popover,
@@ -10,10 +9,9 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from "@/components/ui/command";
-import type {SelectEvent} from "radix-vue/dist/Combobox/ComboboxItem";
 import type {ComboboxOption} from "@/components/common/inputs/combobox/types";
 
-const model = defineModel<Nullable<ComboboxOption['value']>>({ required: true, default: null })
+const model = defineModel<ComboboxOption['value']>({ required: true, default: null })
 
 withDefaults(defineProps<{
   options: ComboboxOption[]
@@ -21,7 +19,6 @@ withDefaults(defineProps<{
   searchPlaceholder?: string
   emptyLabel?: string
 }>(), {
-  options: [],
   placeholder: '',
   searchPlaceholder: 'Search...',
   emptyLabel: '',
@@ -29,11 +26,13 @@ withDefaults(defineProps<{
 
 const open = ref(false)
 
-function filterFn(option: ComboboxOption, search: string) {
-  return option.label.toLowerCase().includes(search.toLowerCase())
+function filterFunction(list: object[], searchTerm: string): object[] {
+  return list.filter((it) => {
+    return (it as ComboboxOption).label.toLowerCase().includes(searchTerm.toLowerCase())
+  })
 }
 
-function handleSelect(event: SelectEvent) {
+function handleSelect(event: any) { // event should be SelectEvent, but it doesn't import properly
   model.value = event.detail.value.value
   open.value = false
 }
@@ -54,14 +53,15 @@ function handleSelect(event: SelectEvent) {
       </Button>
     </PopoverTrigger>
     <PopoverContent class="w-52 p-0">
-      <Command :filter-function="filterFn">
+      <!-- @vue-ignore filterFunction is correct! -->
+      <Command :filter-function="filterFunction">
         <CommandInput :placeholder="searchPlaceholder" />
         <CommandEmpty>{{ emptyLabel }}</CommandEmpty>
         <CommandList>
           <CommandGroup>
             <CommandItem
               v-for="option in options"
-              :key="option.value"
+              :key="option.value ?? 'null'"
               :value="option"
               @select="handleSelect"
             >

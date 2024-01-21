@@ -1,4 +1,6 @@
+import type {Nullable} from "@/lib/utils";
+
 export interface ComboboxOption {
   label: string
-  value: string
+  value: Nullable<string>
 }

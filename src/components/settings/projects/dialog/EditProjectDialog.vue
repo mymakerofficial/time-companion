@@ -6,7 +6,6 @@ import {computed, reactive, watch} from "vue";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {useReferenceById} from "@/composables/useReferenceById";
-import {Combobox} from "@/components/common/inputs/combobox/Combobox.vue";
 import ColorSelect from "@/components/common/inputs/colorSelect/ColorSelect.vue";
 
 const props = defineProps<{
