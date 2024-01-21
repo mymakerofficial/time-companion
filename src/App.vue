@@ -7,6 +7,7 @@ import {Archive, Calendar, Settings} from "lucide-vue-next";
 import {now} from "@/lib/timeUtils";
 import {useCalendarStore} from "@/stores/calendarStore";
 import {useRemindersStore} from "@/stores/remidersStore";
+import DialogProvider from "@/components/common/dialog/DialogProvider.vue";
 
 const calendarStore = useCalendarStore()
 const remindersStore = useRemindersStore()
@@ -24,6 +25,7 @@ const links: NavLink[] = [
 </script>
 
 <template>
+  <DialogProvider />
   <TooltipProvider>
     <div class="flex flex-row w-full">
       <AppSidebar :links="links" />

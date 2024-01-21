@@ -7,6 +7,7 @@ import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {useReferenceById} from "@/composables/useReferenceById";
 import ColorSelect from "@/components/common/inputs/colorSelect/ColorSelect.vue";
+import {whenever} from "@vueuse/core";
 
 const props = defineProps<{
   id: Nullable<string>
@@ -20,6 +21,7 @@ const projectsStore = useProjectsStore()
 const project = useReferenceById(projectsStore.projects)
 
 const state = reactive({
+  open: true,
   displayName: '',
   color: null as Nullable<string>,
 })
@@ -33,21 +35,12 @@ watch(() => props.id, (id) => {
 
   state.displayName = project.value.displayName
   state.color = project.value.color
-})
+}, { immediate: true })
 
-const open = computed({
-  get() {
-    return isNotNull(project.value)
-  },
-  set(value) {
-    if (!value) {
-      emit('close')
-    }
-  }
-})
+whenever(() => !state.open, () => emit('close'))
 
 function close() {
-  open.value = false
+  state.open = false
 }
 
 function handleRemove() {
@@ -73,7 +66,7 @@ function handleSubmit() {
 </script>
 
 <template>
-  <BaseDialog v-model:open="open" title="Edit Project" description="Edit the project.">
+  <BaseDialog v-model:open="state.open" title="Edit Project" description="Edit the project.">
     <div class="flex flex-col gap-4">
       <Input v-model="state.displayName" placeholder="Name" />
       <ColorSelect v-model="state.color" />
