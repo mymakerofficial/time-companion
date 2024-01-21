@@ -13,6 +13,7 @@ function handleClose(dialog: VNode) {
 
 <template>
   <template v-for="(dialog, index) in dialogStore.dialogs" :key="index">
+    <!-- @vue-ignore -->
     <Component :is="dialog" @close="() => handleClose(dialog)"  />
   </template>
 </template>

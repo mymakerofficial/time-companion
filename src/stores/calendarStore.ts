@@ -12,7 +12,7 @@ import dayjs from "dayjs";
 export interface CalendarStore {
   isInitialized: Readonly<Ref<boolean>>
   days: ReactiveCalendarDay[]
-  activeDay: Nullable<ReactiveActiveDay>
+  activeDay: ReactiveActiveDay
   init: () => void
   addDay: (day: ReactiveCalendarDay) => void
   setActiveDay: (date: Date) => void

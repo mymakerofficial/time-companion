@@ -17,9 +17,12 @@ export const useDialogStore = defineStore('dialog', () => {
 
   function closeDialog(dialog: VNode) {
     const index = dialogs.indexOf(dialog)
-    if (index >= 0) {
-      dialogs.splice(index, 1)
+
+    if (index === -1) {
+      throw new Error('Failed to close provided dialog')
     }
+
+    dialogs.splice(index, 1)
   }
 
   return {
