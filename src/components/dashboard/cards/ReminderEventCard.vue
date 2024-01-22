@@ -6,7 +6,7 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import {computed} from "vue";
 import {vProvideColor} from "@/directives/vProvideColor";
-import {isDefined, isNotDefined} from "@/lib/utils";
+import {isDefined, isNotDefined, isNotNull} from "@/lib/utils";
 import type {ReactiveCalendarReminder} from "@/model/calendarReminder";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 
@@ -23,7 +23,7 @@ const timeLabel = computed(() => {
 })
 
 const hasButton = computed(() => {
-  return isDefined(props.reminder.actionLabel) && isDefined(props.reminder.onAction)
+  return isNotNull(props.reminder.actionLabel)
 })
 
 function handleTrigger() {

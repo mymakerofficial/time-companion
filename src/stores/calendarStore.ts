@@ -33,19 +33,19 @@ export const useCalendarStore = defineStore('calendar', (): CalendarStore => {
   const activeDay = useActiveDay(days)
 
   function init() {
-    // reset state
-    isInitialized.value = false
-    days.length = 0
+    if (isInitialized.value) {
+      return
+    }
 
     // projects need to be initialized first
     projectsStore.init()
-
-    const serialized = storage.get()
 
     const assets = {
       projects: projectsStore.projects,
       activities: projectsStore.activities,
     }
+
+    const serialized = storage.get()
 
     days.push(...serialized.days.map((it: any) => createDay(fromSerializedDay(it, assets))))
 

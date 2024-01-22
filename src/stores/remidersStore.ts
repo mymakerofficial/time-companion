@@ -1,10 +1,12 @@
 import {defineStore} from "pinia";
-import {reactive, watch} from "vue";
+import {reactive, readonly, type Ref, ref, watch} from "vue";
 import type {ReactiveCalendarReminder, SerializedCalendarReminder} from "@/model/calendarReminder";
 import {useLocalStorage} from "@/composables/useLocalStorage";
 import {createReminder, fromSerializedReminder} from "@/model/calendarReminder";
+import {useProjectsStore} from "@/stores/projectsStore";
 
 export interface RemindersStore {
+  isInitialized: Readonly<Ref<boolean>>
   reminders: ReactiveCalendarReminder[]
   init: () => void
   addReminder: (reminder: ReactiveCalendarReminder) => void
@@ -15,17 +17,31 @@ interface RemindersStorageSerialized {
 }
 
 export const useRemindersStore = defineStore('reminders', (): RemindersStore => {
+  const projectsStore = useProjectsStore()
   const storage = useLocalStorage<RemindersStorageSerialized>('time-companion-reminders-store', { reminders: [] })
+
+  const isInitialized = ref(false)
 
   const reminders = reactive<ReactiveCalendarReminder[]>([])
 
   function init() {
-    //reset
-    reminders.length = 0
+    if (isInitialized.value) {
+      return
+    }
+
+    // projects need to be initialized first
+    projectsStore.init()
+
+    const assets = {
+      projects: projectsStore.projects,
+      activities: projectsStore.activities,
+    }
 
     const serialized = storage.get()
 
-    reminders.push(...serialized.reminders.map((it: any) => createReminder(fromSerializedReminder(it))))
+    reminders.push(...serialized.reminders.map((it: any) => createReminder(fromSerializedReminder(it, assets))))
+
+    isInitialized.value = true
   }
 
   function store() {
@@ -49,6 +65,7 @@ export const useRemindersStore = defineStore('reminders', (): RemindersStore => 
   }
 
   return {
+    isInitialized: readonly(isInitialized),
     reminders,
     init,
     addReminder,

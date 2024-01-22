@@ -43,10 +43,9 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
   const activities = reactive<ReactiveActivity[]>([])
 
   function init() {
-    // reset
-    isInitialized.value = false
-    projects.length = 0
-    activities.length = 0
+    if (isInitialized.value) {
+      return
+    }
 
     const serialized = storage.get()
 
