@@ -5,7 +5,7 @@ export interface ProjectRow {
   name: string[]
   isBillable: Nullable<boolean>
   color: Nullable<string>
-  lastUsed: string
+  lastUsed: Date
   activities?: ProjectRow[]
   isProject: boolean
 }

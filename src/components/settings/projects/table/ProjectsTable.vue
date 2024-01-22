@@ -1,6 +1,5 @@
 <script setup lang="tsx">
 import {computed, ref} from "vue";
-import {fromNow} from "@/lib/timeUtils";
 import type {ReactiveProject} from "@/model/project";
 import type {ProjectRow} from "@/components/settings/projects/table/types";
 import {createProjectsColumns} from "@/components/settings/projects/table/projectsColumns";
@@ -25,7 +24,7 @@ function toActivityRow(activity: ReactiveActivity): ProjectRow {
     name: [activity.parentProject?.displayName, activity.displayName].filter(isDefined),
     isBillable: null,
     color: activity.color,
-    lastUsed: fromNow(activity.lastUsed),
+    lastUsed: activity.lastUsed,
     isProject: false,
   }
 }
@@ -36,7 +35,7 @@ function toProjectRow(project: ReactiveProject): ProjectRow {
     name: [project.displayName],
     isBillable: project.isBillable,
     color: project.color,
-    lastUsed: fromNow(project.lastUsed),
+    lastUsed: project.lastUsed,
     activities: project.childActivities.map(toActivityRow),
     isProject: true,
   }

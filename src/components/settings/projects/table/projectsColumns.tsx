@@ -1,30 +1,97 @@
-import {createColumnHelper} from "@tanstack/vue-table";
+import {createColumnHelper, type Row, type SortDirection} from "@tanstack/vue-table";
 import {getColorStyleVariables} from "@/directives/vProvideColor";
-import {isNotNull} from "@/lib/utils";
+import {isNull} from "@/lib/utils";
 import {
   ArrowDown,
   ArrowDownUp,
   ArrowUp,
-  CheckCircle2,
+  Check,
   ChevronsDownUp,
   ChevronsUpDown,
-  Circle,
   Pencil,
-  Slash
+  Slash,
+  X
 } from "lucide-vue-next";
 import {Button} from "@/components/ui/button";
 import type {ProjectRow} from "@/components/settings/projects/table/types";
 import type {Column} from "@tanstack/table-core";
+import type {Icon as LucideIcon} from "lucide-vue-next";
+import {fromNow} from "@/lib/timeUtils";
 
-function getHeader(column: Column<ProjectRow>, label: string) {
+function getSortableHeader(column: Column<ProjectRow>, label: string) {
+  const dir = column.getIsSorted() || 'none'
+
+  const icons: Record<'none' | SortDirection, LucideIcon> = {
+    'none': ArrowDownUp,
+    'desc': ArrowUp,
+    'asc': ArrowDown,
+  }
+
+  const Icon = icons[dir]
+
   return <>
     <Button onClick={() => column.toggleSorting()} variant="ghost" class="flex gap-1 items-center">
       <span>{ label }</span>
-      { !column.getIsSorted() && <ArrowDownUp class="size-3"/> }
-      { column.getIsSorted() === 'desc' && <ArrowUp class="size-3"/> }
-      { column.getIsSorted() === 'asc' && <ArrowDown class="size-3"/> }
+      <Icon class="size-3"/>
     </Button>
   </>
+}
+
+function getNameCell(value: ProjectRow['name']) {
+  const projectPart = <span>{value[0]}</span>
+  const activityPart = value[1] && <><Slash class="size-3"/><span>{value[1]}</span></>
+
+  return (
+    <span class="flex items-center gap-2">
+      { projectPart }
+      { activityPart }
+    </span>
+  )
+}
+
+function getColorCell(value: ProjectRow['color']) {
+  if (isNull(value)) {
+    return null
+  }
+
+  return <div style={getColorStyleVariables(value)} class="size-3 rounded-full bg-primary" />
+}
+
+function getBillableCell(value: ProjectRow['isBillable']) {
+  if (isNull(value)) {
+    return null
+  }
+
+  return value ? <Check class="size-4" /> : <X class="size-4 text-muted-foreground" />
+}
+
+function getLastUsedCell(value: ProjectRow['lastUsed']) {
+  if (isNull(value)) {
+    return null
+  }
+
+  return fromNow(value)
+}
+
+function getActionsCell(row: Row<ProjectRow>, options: ProjectColumnsOptions) {
+  const ExpandIcon = row.getIsExpanded() ? ChevronsDownUp : ChevronsUpDown
+  const expandButton = row.getCanExpand() && <Button onClick={() => row.toggleExpanded()} variant="ghost" size="icon"><ExpandIcon class="size-4" /></Button>
+
+  function handleClick() {
+    if (row.original.isProject) {
+      options.onOpenEditProjectDialog(row.original.id)
+    } else {
+      options.onOpenEditActivityDialog(row.original.id)
+    }
+  }
+  const editButton = <Button onClick={handleClick} variant="ghost" size="icon"><Pencil class="size-4" /></Button>
+
+  return (
+    <span class="flex justify-end gap-1 items-center">
+      { expandButton }
+      { editButton }
+    </span>
+  )
 }
 
 const columnHelper = createColumnHelper<ProjectRow>()
@@ -39,38 +106,26 @@ export function  createProjectsColumns(
 ) {
   return [
     columnHelper.accessor('name', {
-      header: ({ column }) => getHeader(column, 'Name'),
-      cell: (info) => <>
-      <span class="flex items-center gap-2">
-        <span>{info.getValue()[0]}</span>
-        {info.getValue()[1] && <>
-            <Slash class="size-3"/>
-            <span>{info.getValue()[1]}</span>
-        </>}
-      </span>
-      </>,
+      header: ({ column }) => getSortableHeader(column, 'Name'),
+      cell: (info) => getNameCell(info.getValue()),
     }),
     columnHelper.accessor('color', {
-      header: 'Color',
-      cell: (info) => info.getValue() && <div style={getColorStyleVariables(info.getValue())} class="size-3 rounded-full bg-primary" />,
+      header: ({ column }) => getSortableHeader(column, 'Color'),
+      cell: (info) => getColorCell(info.getValue()),
     }),
     columnHelper.accessor('isBillable', {
-      header: 'Billable',
-      cell: (info) => isNotNull(info.getValue()) && <>{ info.getValue() ? <CheckCircle2 class="size-4" /> : <Circle class="size-4" /> }</>, // i dont like ternary operators
+      header: ({ column }) => getSortableHeader(column, 'Billable'),
+      cell: (info) => getBillableCell(info.getValue()),
     }),
     columnHelper.accessor('lastUsed', {
-      header: 'Last Used',
+      header: ({ column }) => getSortableHeader(column, 'Last used'),
+      cell: (info) => getLastUsedCell(info.getValue()),
     }),
     columnHelper.display({
       id: 'actions',
-      cell: ({ row }) => <>
-      <span class="flex justify-end gap-1 items-center">
-        { row.getCanExpand() && <Button onClick={() => row.toggleExpanded()} variant="ghost" size="icon">{ row.getIsExpanded() ? <ChevronsDownUp class="size-4" /> : <ChevronsUpDown class="size-4" /> }</Button> }
-        <Button onClick={() => row.original.isProject ? options.onOpenEditProjectDialog(row.original.id) : options.onOpenEditActivityDialog(row.original.id)} variant="ghost" size="icon"><Pencil class="size-4" /></Button>
-      </span>
-      </>,
+      cell: ({ row }) => getActionsCell(row, options),
       meta: {
-        className: 'w-10',
+        className: 'w-0',
       }
     })
   ]
