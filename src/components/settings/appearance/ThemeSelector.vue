@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type {ComboboxOption} from "@/components/common/inputs/combobox/types";
 import RadioGroup from "@/components/ui/radio-group/RadioGroup.vue";
 import RadioGroupItem from "@/components/ui/radio-group/RadioGroupItem.vue";
 import Label from "@/components/ui/label/Label.vue";
@@ -8,11 +7,12 @@ import {vProvideColor} from "@/directives/vProvideColor";
 import {useProjectsStore} from "@/stores/projectsStore";
 import {useCalendarStore} from "@/stores/calendarStore";
 import {computed} from "vue";
+import {isNotNull} from "@/lib/utils";
 
 const calendarStore = useCalendarStore()
 const projectsStore = useProjectsStore()
 
-const themes: ComboboxOption[] = [
+const themes = [
   {
     value: 'dark',
     label: 'Dark',
@@ -29,8 +29,8 @@ const theme = useColorMode({
 })
 
 const eventColors = computed(() => {
-  if (calendarStore.activeDay?.day.events.length >= 3) {
-    return calendarStore.activeDay?.day.events
+  if (isNotNull(calendarStore.activeDay.day) && calendarStore.activeDay.day.events.length >= 3) {
+    return calendarStore.activeDay.day.events
       .slice(-3)
       .map((event) => event.color)
       .reverse() ?? []
