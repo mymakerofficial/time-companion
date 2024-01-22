@@ -23,7 +23,7 @@ function toActivityRow(activity: ReactiveActivity): ProjectRow {
   return {
     id: activity.id,
     name: [activity.parentProject?.displayName, activity.displayName].filter(isDefined),
-    billable: null,
+    isBillable: null,
     color: activity.color,
     lastUsed: fromNow(activity.lastUsed),
     isProject: false,
@@ -34,7 +34,7 @@ function toProjectRow(project: ReactiveProject): ProjectRow {
   return {
     id: project.id,
     name: [project.displayName],
-    billable: true,
+    isBillable: project.isBillable,
     color: project.color,
     lastUsed: fromNow(project.lastUsed),
     activities: project.childActivities.map(toActivityRow),

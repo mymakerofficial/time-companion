@@ -11,6 +11,7 @@ export interface SerializedProject {
   childActivityIds: string[]
   displayName: string
   color: Nullable<string>
+  isBillable: boolean
   lastUsed: string // ISO string
 }
 
@@ -18,6 +19,7 @@ export interface ReactiveProject extends Readonly<HasId> {
   childActivities: ReactiveActivity[]
   displayName: string
   color: Nullable<string>
+  isBillable: boolean
   readonly lastUsed: Date
   lastUsedNow: () => void
   //
@@ -29,6 +31,7 @@ export interface ProjectInit {
   childActivities?: ReactiveActivity[]
   displayName?: string
   color?: Nullable<string>
+  isBillable?: boolean
   lastUsed?: Date
 }
 
@@ -42,6 +45,7 @@ export function fromSerializedProject(serialized: SerializedProject): ProjectIni
     childActivities: [], // will be filled by activity deserialization
     displayName: serialized.displayName,
     color: serialized.color,
+    isBillable: serialized.isBillable,
     lastUsed: new Date(serialized.lastUsed),
   }
 }
@@ -52,6 +56,7 @@ export function createProject(init: ProjectInit, options?: Partial<ProjectOption
     childActivities: init.childActivities ?? [],
     displayName: init.displayName ?? '',
     color: init.color ?? (options?.randomColor ? randomTailwindColor() : null),
+    isBillable: init.isBillable ?? true,
     lastUsed: init.lastUsed ?? now(),
   })
 
@@ -65,6 +70,7 @@ export function createProject(init: ProjectInit, options?: Partial<ProjectOption
       childActivityIds: config.childActivities.map(it => it.id),
       displayName: config.displayName,
       color: config.color,
+      isBillable: config.isBillable,
       lastUsed: config.lastUsed.toISOString(),
     }
   }
@@ -79,6 +85,10 @@ export function createProject(init: ProjectInit, options?: Partial<ProjectOption
     color: computed({
       get: () => config.color,
       set: (value: Nullable<string>) => config.color = value,
+    }),
+    isBillable: computed({
+      get: () => config.isBillable,
+      set: (value: boolean) => config.isBillable = value,
     }),
     lastUsed: computed(() => config.lastUsed),
     lastUsedNow,

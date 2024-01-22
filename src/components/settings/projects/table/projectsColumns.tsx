@@ -54,7 +54,7 @@ export function  createProjectsColumns(
       header: 'Color',
       cell: (info) => info.getValue() && <div style={getColorStyleVariables(info.getValue())} class="size-3 rounded-full bg-primary" />,
     }),
-    columnHelper.accessor('billable', {
+    columnHelper.accessor('isBillable', {
       header: 'Billable',
       cell: (info) => isNotNull(info.getValue()) && <>{ info.getValue() ? <CheckCircle2 class="size-4" /> : <Circle class="size-4" /> }</>, // i dont like ternary operators
     }),

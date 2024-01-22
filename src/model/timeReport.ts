@@ -3,6 +3,8 @@ import type {ReactiveCalendarEvent} from "@/model/calendarEvent";
 import type {ProjectTimeReportInit, ReactiveProjectTimeReport} from "@/model/projectTimeReport";
 import type {Nullable} from "@/lib/utils";
 import {createProjectTimeReport} from "@/model/projectTimeReport";
+import {isNull} from "@/lib/utils";
+import type {ID} from "@/lib/types";
 
 export interface ReactiveTimeReport {
   readonly date: Date
@@ -25,31 +27,39 @@ export function createTimeReport(init: TimeReportInit): ReactiveTimeReport {
   })
 
   const projects = computed(() => {
-    const projects = new Map<Nullable<string>, ProjectTimeReportInit>()
+    const projectReports = new Map<ID, ProjectTimeReportInit>()
 
-    for (const event of inherits.events) {
+    inherits.events.forEach((event) => {
       if (!event.hasStarted) {
-        continue
+        return
       }
 
-      const key = event.project?.id ?? null
-      const project = projects.get(key)
+      if (isNull(event.project)) {
+        return
+      }
 
-      if (project) {
-        project.durationMinutes += event.durationMinutes
+      if (!event.project.isBillable) {
+        return
+      }
+
+      const key = event.project.id
+      const projectReport = projectReports.get(key)
+
+      if (projectReport) {
+        projectReport.durationMinutes += event.durationMinutes
         if (!event.hasEnded) {
-          project.isOngoing = true
+          projectReport.isOngoing = true
         }
       } else {
-        projects.set(key, {
+        projectReports.set(key, {
           project: event.project,
           durationMinutes: event.durationMinutes,
           isOngoing: !event.hasEnded,
         })
       }
-    }
+    })
 
-    return Array.from(projects.values()).map(it => createProjectTimeReport(it))
+    return Array.from(projectReports.values()).map(it => createProjectTimeReport(it))
   })
 
   const totalDurationMinutes = computed(() => projects.value.reduce((acc, it) => acc + it.durationMinutes, 0))
