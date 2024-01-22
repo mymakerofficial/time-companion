@@ -3,7 +3,7 @@
 @tailwind utilities;
  
 @layer base {
-  :root {
+  [data-theme="light"] {
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
 
@@ -34,7 +34,7 @@
     --radius: 0.5rem;
   }
 
-  :root[class~="dark"] {
+  [data-theme="dark"] {
     color-scheme: dark;
 
     --background:0 0% 3.9%;
@@ -64,6 +64,7 @@
     --border:0 0% 14.9%;
     --input:0 0% 14.9%;
     --ring:0 0% 83.1%;
+    --radius: 0.5rem;
   }
 }
  
