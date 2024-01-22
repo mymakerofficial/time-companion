@@ -5,7 +5,7 @@ import type {ReactiveActivity, SerializedActivity} from "@/model/activity";
 import {createProject, fromSerializedProject} from "@/model/project";
 import {createActivity, fromSerializedActivity} from "@/model/activity";
 import {useLocalStorage} from "@/composables/useLocalStorage";
-import {isNotNull} from "@/lib/utils";
+import {isNotNull, isNull, type Nullable, takeIf} from "@/lib/utils";
 import {useCalendarStore} from "@/stores/calendarStore";
 
 export interface ProjectsStore {
@@ -13,18 +13,19 @@ export interface ProjectsStore {
   projects: ReactiveProject[]
   activities: ReactiveActivity[]
   init: () => void
-  addProject: (project: ReactiveProject) => void
-  addActivity: (activity: ReactiveActivity) => void
+  getProjectById: (id: ReactiveProject['id']) => Nullable<ReactiveProject>
+  getActivityById: (id: ReactiveActivity['id']) => Nullable<ReactiveActivity>
+  addProject: (project: Nullable<ReactiveProject>) => void
+  addActivity: (activity: Nullable<ReactiveActivity>) => void
   /**
    * Removes a project and all its child activities from the store. Also removes the project and child activities from all events in calendarStore.
    */
-  removeProject: (project: ReactiveProject) => void
+  removeProject: (project: Nullable<ReactiveProject>) => void
   /**
    * Removes an activity from the store and removes the activity from all events in calendarStore.
    */
-  removeActivity: (activity: ReactiveActivity) => void
-  link: (project: ReactiveProject, activity: ReactiveActivity) => void
-  unlink: (project: ReactiveProject, activity: ReactiveActivity) => void
+  removeActivity: (activity: Nullable<ReactiveActivity>) => void
+  link: (project: Nullable<ReactiveProject>, activity: Nullable<ReactiveActivity>) => void
 }
 
 interface ProjectsStorageSerialized {
@@ -64,8 +65,42 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
 
   watch([() => projects, () => activities], store, {deep: true})
 
-  function addProject(project: ReactiveProject) {
-    if (activities.some((it) => it.id === project.id)) {
+  function getProjectIndexById(id: ReactiveProject['id']) {
+    const index = projects.findIndex((it) => it.id === id)
+
+    if (index === -1) {
+      return null
+    }
+
+    return index
+  }
+
+  function getProjectById(id: ReactiveProject['id']) {
+    const index = getProjectIndexById(id)
+    return takeIf(index, isNotNull, projects[index!])
+  }
+
+  function getActivityIndexById(id: ReactiveActivity['id']) {
+    const index = activities.findIndex((it) => it.id === id)
+
+    if (index === -1) {
+      return null
+    }
+
+    return index
+  }
+
+  function getActivityById(id: ReactiveActivity['id']) {
+    const index = getActivityIndexById(id)
+    return takeIf(index, isNotNull, activities[index!])
+  }
+
+  function addProject(project: Nullable<ReactiveProject>) {
+    if (isNull(project)) {
+      return
+    }
+
+    if (isNotNull(getProjectById(project.id))) {
       throw new Error(`Activity with id ${project.id} already exists`)
     }
 
@@ -80,8 +115,12 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     projects.forEach((it) => addProject(it))
   }
 
-  function addActivity(activity: ReactiveActivity) {
-    if (activities.some((it) => it.id === activity.id)) {
+  function addActivity(activity: Nullable<ReactiveActivity>) {
+    if(isNull(activity)) {
+      return
+    }
+
+    if (isNotNull(getActivityById(activity.id))) {
       throw new Error(`Activity with id ${activity.id} already exists`)
     }
 
@@ -100,7 +139,11 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     activities.forEach((it) => addActivity(it))
   }
 
-  function removeActivity(activity: ReactiveActivity) {
+  function removeActivity(activity:  Nullable<ReactiveActivity>) {
+    if (isNull(activity)) {
+      return
+    }
+
     if (!calendarStore.isInitialized) {
       throw new Error('Tried to remove activity before calendarStore was initialized. This should not happen.')
     }
@@ -109,13 +152,16 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
       throw new Error('Tried to remove activity before projectsStore was initialized. This should not happen.')
     }
 
-    if (!activities.some((it) => it.id === activity.id)) {
+    if (isNull(getActivityById(activity.id))) {
       throw new Error(`Activity with id ${activity.id} does not exist in projectsStore`)
     }
 
     if (isNotNull(activity.parentProject)) {
       unlink(activity.parentProject, activity)
     }
+
+
+    // remove activities from events
 
     calendarStore.days.forEach((day) => {
       day.events.forEach((event) => {
@@ -125,14 +171,22 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
       })
     })
 
-    const index = activities.findIndex((it) => it.id === activity.id)
+    // remove activity from list
 
-    if (index === -1) {
+    const index = getActivityIndexById(activity.id)
+
+    if (isNull(index)) {
       throw new Error(`Something went wrong while removing activity ${activity.id} from projectsStore`)
     }
+
+    activities.splice(index, 1)
   }
 
-  function removeProject(project: ReactiveProject) {
+  function removeProject(project: Nullable<ReactiveProject>) {
+    if (isNull(project)) {
+      return
+    }
+
     if (!calendarStore.isInitialized) {
       throw new Error('Tried to remove project before calendarStore was initialized. This should not happen.')
     }
@@ -147,25 +201,32 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
 
     project.childActivities.forEach((it) => removeActivity(it))
 
+    // remove project from events
+
     calendarStore.days.forEach((day) => {
       day.events.forEach((event) => {
         if (event.project?.id === project.id) {
-          console.log(`Removing project ${project.id} from event ${event.id}`)
           event.project = null
         }
       })
     })
 
-    const index = projects.findIndex((it) => it.id === project.id)
+    // remove project from list
 
-    if (index === -1) {
+    const index = getProjectIndexById(project.id)
+
+    if (isNull(index)) {
       throw new Error(`Something went wrong while removing project ${project.id} from projectsStore`)
     }
 
     projects.splice(index, 1)
   }
 
-  function unlink(project: ReactiveProject, activity: ReactiveActivity) {
+  function unlink(project: Nullable<ReactiveProject>, activity: Nullable<ReactiveActivity>) {
+    if (isNull(project) || isNull(activity)) {
+      return
+    }
+
     const index = project.childActivities.findIndex((it) => it.id === activity.id)
 
     if (index === -1) {
@@ -176,7 +237,13 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     activity.parentProject = null
   }
 
-  function link(project: ReactiveProject, activity: ReactiveActivity) {
+  function link(project: Nullable<ReactiveProject>, activity: Nullable<ReactiveActivity>) {
+    if (isNull(project) || isNull(activity)) {
+      return
+    }
+
+    // TODO: handle events with activity and project
+
     if (isNotNull(activity.parentProject) && activity.parentProject.id !== project.id) {
       unlink(activity.parentProject, activity)
     }
@@ -194,11 +261,12 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     projects,
     activities,
     init,
+    getProjectById,
+    getActivityById,
     addProject,
     addActivity,
     removeProject,
     removeActivity,
     link,
-    unlink,
   }
 })
