@@ -160,15 +160,12 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
       unlink(activity.parentProject, activity)
     }
 
-
     // remove activities from events
 
-    calendarStore.days.forEach((day) => {
-      day.events.forEach((event) => {
-        if (event.activity?.id === activity.id) {
-          event.activity = null
-        }
-      })
+    calendarStore.forEachEvent((event) => {
+      if (event.activity?.id === activity.id) {
+        event.activity = null
+      }
     })
 
     // remove activity from list
@@ -203,12 +200,10 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
 
     // remove project from events
 
-    calendarStore.days.forEach((day) => {
-      day.events.forEach((event) => {
-        if (event.project?.id === project.id) {
-          event.project = null
-        }
-      })
+    calendarStore.forEachEvent((event) => {
+      if (event.project?.id === project.id) {
+        event.project = null
+      }
     })
 
     // remove project from list
@@ -242,18 +237,24 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
       return
     }
 
-    // TODO: handle events with activity and project
+    if (project.childActivities.some((it) => it.id === activity.id)) {
+      throw new Error(`Activity with id ${activity.id} already exists in project ${project.id}`)
+    }
 
     if (isNotNull(activity.parentProject) && activity.parentProject.id !== project.id) {
       unlink(activity.parentProject, activity)
     }
 
-    if (project.childActivities.some((it) => it.id === activity.id)) {
-      throw new Error(`Activity with id ${activity.id} already exists in project ${project.id}`)
-    }
-
     project.childActivities.push(activity)
     activity.parentProject = project
+
+    // change project of all events with this activity
+
+    calendarStore.forEachEvent((event) => {
+      if (event.activity?.id === activity.id) {
+        event.project = project
+      }
+    })
   }
 
   return {

@@ -5,9 +5,9 @@ import {useProjectsStore} from "@/stores/projectsStore";
 import {createDay, fromSerializedDay} from "@/model/calendarDay";
 import {useLocalStorage} from "@/composables/useLocalStorage";
 import {type ReactiveActiveDay, useActiveDay} from "@/composables/useActiveDay";
-import type {Nullable} from "@/lib/utils";
 import {isSameDay} from "@/lib/timeUtils";
 import dayjs from "dayjs";
+import type {ReactiveCalendarEvent} from "@/model/calendarEvent";
 
 export interface CalendarStore {
   isInitialized: Readonly<Ref<boolean>>
@@ -16,6 +16,7 @@ export interface CalendarStore {
   init: () => void
   addDay: (day: ReactiveCalendarDay) => void
   setActiveDay: (date: Date) => void
+  forEachEvent: (block: (event: ReactiveCalendarEvent) => void) => void
 }
 
 interface CalendarStorageSerialized {
@@ -84,6 +85,10 @@ export const useCalendarStore = defineStore('calendar', (): CalendarStore => {
     activeDay.setActiveDay(newDay)
   }
 
+  function forEachEvent(block: (event: ReactiveCalendarEvent) => void) {
+    days.forEach((day) => day.events.forEach(block))
+  }
+
   return {
     isInitialized: readonly(isInitialized),
     days,
@@ -91,5 +96,6 @@ export const useCalendarStore = defineStore('calendar', (): CalendarStore => {
     init,
     addDay,
     setActiveDay,
+    forEachEvent,
   }
 })
