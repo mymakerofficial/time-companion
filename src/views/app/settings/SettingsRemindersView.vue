@@ -6,6 +6,7 @@ import {useDialogStore} from "@/stores/dialogStore";
 import NewReminderDialog from "@/components/settings/reminders/dialog/NewReminderDialog.vue";
 import RemindersTable from "@/components/settings/reminders/table/RemindersTable.vue";
 import TableActions from "@/components/common/table/TableActions.vue";
+import {PlusCircle} from "lucide-vue-next";
 
 const remindersStore = useRemindersStore()
 const dialogStore = useDialogStore()
@@ -19,7 +20,7 @@ function openNewReminderDialog() {
   <div class="py-16 px-8">
     <SettingsHeader title="Reminders" description="Manage your reminders" />
     <TableActions>
-      <Button size="sm" @click="openNewReminderDialog">Add Reminder</Button>
+      <Button @click="openNewReminderDialog" size="sm" class="gap-2"><PlusCircle class="size-4" />Add Reminder</Button>
     </TableActions>
     <RemindersTable :reminders="remindersStore.reminders" />
   </div>

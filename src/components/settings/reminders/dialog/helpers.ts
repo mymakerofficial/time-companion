@@ -10,7 +10,7 @@ import type {ReactiveProject} from "@/model/project";
 import type {ReactiveActivity} from "@/model/activity";
 import {createEventShadow} from "@/model/calendarEventShadow";
 import {minutesSinceStartOfDay, minutesSinceStartOfDayToDate} from "@/lib/timeUtils";
-import {isNotNull, isNull} from "@/lib/utils";
+import {isDefined, isNotNull, isNull} from "@/lib/utils";
 
 export interface ReminderFormState {
   displayText: ReactiveCalendarReminder['displayText'],
@@ -28,7 +28,7 @@ export function createReminderForm(reminder?: Maybe<ReactiveCalendarReminder>): 
   return {
     displayText: reminder?.displayText ?? '',
     color: reminder?.color ?? null,
-    remindAtMinutes: minutesSinceStartOfDay(reminder?.remindAt) ?? 720,
+    remindAtMinutes: isDefined(reminder) ? minutesSinceStartOfDay(reminder.remindAt) : 720,
     remindMinutesBefore: reminder?.remindMinutesBefore ?? 30,
     remindMinutesAfter: reminder?.remindMinutesAfter ?? 30,
     repeatOn: reminder?.repeatOn ?? createRepeatOnWeekdays([true, true, true, true, true, false, false]),

@@ -1,6 +1,7 @@
 import type {ReactiveProject} from "@/model/project";
 import {createProject} from "@/model/project";
 import type {Maybe} from "@/lib/utils";
+import {randomTailwindColor} from "@/lib/colorUtils";
 
 export interface ProjectForm {
   displayName: ReactiveProject['displayName'],
@@ -11,8 +12,8 @@ export interface ProjectForm {
 export function createProjectForm(project?: Maybe<ReactiveProject>): ProjectForm {
   return {
     displayName: project?.displayName ?? '',
-    color: project?.color ?? null,
-    isBillable: project?.isBillable ?? false,
+    color: project?.color ?? randomTailwindColor(),
+    isBillable: project?.isBillable ?? true,
   }
 }
 

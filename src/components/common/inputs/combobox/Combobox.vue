@@ -49,8 +49,13 @@ function handleSelect(event: any) { // event should be SelectEvent, but it doesn
         :aria-expanded="open"
         class="w-52 justify-start"
       >
-        <slot name="triggerLeading" v-bind="options.find((it) => it.value === model)" />
-        {{ options.find((it) => it.value === model)?.label ?? placeholder }}
+        <template v-if="options.some((it) => it.value === model)">
+          <slot name="triggerLeading" v-bind="options.find((it) => it.value === model)" />
+          {{ options.find((it) => it.value === model)?.label }}
+        </template>
+        <template v-else>
+          <span class="text-muted-foreground">{{ placeholder }}</span>
+        </template>
         <ChevronsUpDown class="ml-auto size-4 shrink-0 opacity-50" />
       </Button>
     </PopoverTrigger>

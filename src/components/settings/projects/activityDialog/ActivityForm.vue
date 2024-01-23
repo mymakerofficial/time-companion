@@ -6,7 +6,7 @@ import ColorSelect from "@/components/common/inputs/colorSelect/ColorSelect.vue"
 import type {ComboboxOption} from "@/components/common/inputs/combobox/types";
 import {useProjectsStore} from "@/stores/projectsStore";
 import {ActivityForm} from "@/components/settings/projects/activityDialog/helpers";
-import Label from "../../../ui/label/Label.vue";
+import Label from "@/components/ui/label/Label.vue";
 
 defineProps<{
   form: ActivityForm
@@ -23,7 +23,7 @@ const projectOptions: ComboboxOption[] = projectsStore.projects.map((project) =>
 <template>
   <div class="flex flex-col gap-4">
     <div class="flex flex-row items-center gap-2">
-      <Combobox v-model="form.projectId" :options="projectOptions" />
+      <Combobox v-model="form.projectId" :options="projectOptions" placeholder="Select Project" />
       <Slash class="size-4" />
       <Input v-model="form.displayName" placeholder="Name" />
     </div>
