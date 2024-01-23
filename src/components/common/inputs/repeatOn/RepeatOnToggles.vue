@@ -6,7 +6,7 @@ import {computed} from "vue";
 
 const model = defineModel<RepeatOnWeekdays>({ required: true })
 
-const keys = computed(() => Object.keys(model) as (keyof RepeatOnWeekdays)[])
+const keys = computed(() => Object.keys(model.value) as (keyof RepeatOnWeekdays)[])
 </script>
 
 <template>
