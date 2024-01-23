@@ -1,14 +1,18 @@
-import type {WritableComputedRef} from "vue";
+import type {WatchSource, WritableComputedRef} from "vue";
 import type {HasId, ID} from "@/lib/types";
-import {computed, ref} from "vue";
+import {computed, ref, watch} from "vue";
 import type {Nullable} from "@/lib/utils";
-import {isNull} from "@/lib/utils";
+import {isDefined, isNull} from "@/lib/utils";
 
-export function useReferenceById<T extends HasId>(collection: T[]) {
-  const id = ref<Nullable<ID>>(null)
+export function useReferenceById<T extends HasId>(collection: T[], idSource?: WatchSource<Nullable<ID>>) {
+  const id = ref<Nullable<ID>>()
 
   function referenceBy(newId: Nullable<ID>) {
     id.value = newId
+  }
+
+  if (idSource) {
+    watch(idSource, referenceBy, {immediate: true})
   }
 
   const value = computed<Nullable<T>>({
@@ -31,7 +35,13 @@ export function useReferenceById<T extends HasId>(collection: T[]) {
   }) as WritableComputedRef<Nullable<T>> & { referenceBy: typeof referenceBy }
 
   Object.defineProperty(value, 'referenceBy', {
-    value: referenceBy,
+    value: (newValue: Nullable<ID>) => {
+      if (isDefined(idSource)) {
+        throw Error('Tried to use referenceBy on a reference by id object that is referenced by a watch source.')
+      }
+
+      referenceBy(newValue)
+    },
     writable: false,
     enumerable: false,
     configurable: false,

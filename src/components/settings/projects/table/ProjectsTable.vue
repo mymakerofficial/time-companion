@@ -11,35 +11,14 @@ import {isDefined} from "@/lib/utils";
 import EditProjectDialog from "@/components/settings/projects/dialog/EditProjectDialog.vue";
 import EditActivityDialog from "@/components/settings/projects/dialog/EditActivityDialog.vue";
 import {useDialogStore} from "@/stores/dialogStore";
+import {toProjectRow} from "@/components/settings/projects/table/helpers";
+import {updater} from "@/helpers/table/tableHelpers";
 
 const props = defineProps<{
   projects: ReactiveProject[]
 }>()
 
 const dialogStore = useDialogStore()
-
-function toActivityRow(activity: ReactiveActivity): ProjectRow {
-  return {
-    id: activity.id,
-    name: [activity.parentProject?.displayName, activity.displayName].filter(isDefined),
-    isBillable: null,
-    color: activity.color,
-    lastUsed: activity.lastUsed,
-    isProject: false,
-  }
-}
-
-function toProjectRow(project: ReactiveProject): ProjectRow {
-  return {
-    id: project.id,
-    name: [project.displayName],
-    isBillable: project.isBillable,
-    color: project.color,
-    lastUsed: project.lastUsed,
-    activities: project.childActivities.map(toActivityRow),
-    isProject: true,
-  }
-}
 
 const projectsColumns = createProjectsColumns({
   onOpenEditProjectDialog: (id) => {
@@ -60,18 +39,8 @@ const tableOptions: Partial<TableOptions<ProjectRow>> = {
     get sorting() { return sorting.value },
     get expanded() { return expanded.value }
   },
-  onSortingChange: (updaterOrValue) => {
-    sorting.value =
-      typeof updaterOrValue === 'function'
-        ? updaterOrValue(sorting.value)
-        : updaterOrValue
-  },
-  onExpandedChange: (updaterOrValue) => {
-    expanded.value =
-      typeof updaterOrValue === 'function'
-        ? updaterOrValue(expanded.value)
-        : updaterOrValue
-  },
+  onSortingChange: (updaterOrValue) => updater(updaterOrValue, sorting),
+  onExpandedChange: (updaterOrValue) => updater(updaterOrValue, expanded),
   getSubRows: (row) => row.activities,
   getSortedRowModel: getSortedRowModel(),
   getExpandedRowModel: getExpandedRowModel(),

@@ -10,6 +10,7 @@ export interface RemindersStore {
   reminders: ReactiveCalendarReminder[]
   init: () => void
   addReminder: (reminder: ReactiveCalendarReminder) => void
+  removeReminder: (reminder: ReactiveCalendarReminder) => void
 }
 
 interface RemindersStorageSerialized {
@@ -64,10 +65,21 @@ export const useRemindersStore = defineStore('reminders', (): RemindersStore => 
     reminders.push(reminder)
   }
 
+  function removeReminder(reminder: ReactiveCalendarReminder) {
+    const index = reminders.findIndex((it) => it.id === reminder.id)
+
+    if (index === -1) {
+      throw new Error(`Reminder with id ${reminder.id} does not exist`)
+    }
+
+    reminders.splice(index, 1)
+  }
+
   return {
     isInitialized: readonly(isInitialized),
     reminders,
     init,
     addReminder,
+    removeReminder,
   }
 })

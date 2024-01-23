@@ -4,8 +4,10 @@ import SettingsHeader from "@/components/settings/layout/SettingsHeader.vue";
 import {Button} from "@/components/ui/button";
 import {useDialogStore} from "@/stores/dialogStore";
 import NewReminderDialog from "@/components/settings/reminders/dialog/NewReminderDialog.vue";
+import RemindersTable from "@/components/settings/reminders/table/RemindersTable.vue";
+import TableActions from "@/components/common/table/TableActions.vue";
 
-const reminderStore = useRemindersStore()
+const remindersStore = useRemindersStore()
 const dialogStore = useDialogStore()
 
 function openNewReminderDialog() {
@@ -16,7 +18,9 @@ function openNewReminderDialog() {
 <template>
   <div class="py-16 px-8">
     <SettingsHeader title="Reminders" description="Manage your reminders" />
-    <Button @click="openNewReminderDialog">Add Reminder</Button>
-    <pre>{{ reminderStore.reminders.map((it) => it.toSerialized()) }}</pre>
+    <TableActions>
+      <Button size="sm" @click="openNewReminderDialog">Add Reminder</Button>
+    </TableActions>
+    <RemindersTable :reminders="remindersStore.reminders" />
   </div>
 </template>

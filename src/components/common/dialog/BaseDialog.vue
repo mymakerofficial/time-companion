@@ -5,7 +5,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter
 } from "@/components/ui/dialog";
 import {isDefined} from "@/lib/utils";
 
@@ -25,9 +24,9 @@ defineProps<{
         <DialogDescription v-if="isDefined(description)">{{ description }}</DialogDescription>
       </DialogHeader>
       <slot />
-      <DialogFooter>
+      <div class="mt-1.5">
         <slot name="footer" />
-      </DialogFooter>
+      </div>
     </DialogContent>
   </Dialog>
 </template>
