@@ -52,7 +52,7 @@ const eventColors = computed(() => {
   <RadioGroup v-model="theme">
     <div class="flex flex-wrap gap-8">
         <template v-for="theme in themes" :key="theme.value">
-          <div class="aspect-video w-2/5 flex flex-col rounded-md border has-[aria-checked=true]:border-primary overflow-hidden">
+          <div class="aspect-video w-2/5 flex flex-col rounded-md border overflow-hidden">
             <div :data-theme="theme.value" class="flex-grow overflow-hidden border-b bg-background text-foreground">
               <div class="grid grid-cols-12 h-full">
                 <div class="col-span-7 border-r h-full flex flex-col">
