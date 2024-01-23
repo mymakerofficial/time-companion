@@ -9,6 +9,7 @@ import {getSortedRowModel, type SortingState, type TableOptions} from "@tanstack
 import type {ProjectRow} from "@/components/settings/projects/table/types";
 import Table from "@/components/common/table/Table.vue";
 import {updater} from "@/helpers/table/tableHelpers";
+import type {ReminderRow} from "@/components/settings/reminders/table/types";
 
 const props = defineProps<{
   reminders: ReactiveCalendarReminder[]
@@ -26,12 +27,11 @@ const data = computed(() => props.reminders.map(toReminderRow))
 
 const sorting = ref<SortingState>([])
 
-const tableOptions: Partial<TableOptions<ProjectRow>> = {
+const tableOptions: Partial<TableOptions<ReminderRow>> = {
   state: {
     get sorting() { return sorting.value },
   },
   onSortingChange: (updaterOrValue) => updater(updaterOrValue, sorting),
-  getSubRows: (row) => row.activities,
   getSortedRowModel: getSortedRowModel(),
 }
 </script>

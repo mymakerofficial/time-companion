@@ -1,12 +1,11 @@
-import {createColumnHelper, Row, SortDirection} from "@tanstack/vue-table";
+import {createColumnHelper, type Row, type SortDirection} from "@tanstack/vue-table";
 import type {Column} from "@tanstack/table-core";
-import type {ProjectRow} from "@/components/settings/projects/table/types";
 import type {Icon as LucideIcon} from "lucide-vue-next";
-import {ArrowDown, ArrowDownUp, ArrowUp, ChevronsDownUp, ChevronsUpDown, Pencil} from "lucide-vue-next";
+import {ArrowDown, ArrowDownUp, ArrowUp, Pencil} from "lucide-vue-next";
 import {Button} from "@/components/ui/button";
 import type {ReminderRow} from "@/components/settings/reminders/table/types";
 
-function getSortableHeader(column: Column<ProjectRow>, label: string) {
+function getSortableHeader(column: Column<ReminderRow>, label: string) {
   const dir = column.getIsSorted() || 'none'
 
   const icons: Record<'none' | SortDirection, LucideIcon> = {

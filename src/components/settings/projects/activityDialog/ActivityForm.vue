@@ -5,7 +5,7 @@ import {Slash} from "lucide-vue-next";
 import ColorSelect from "@/components/common/inputs/colorSelect/ColorSelect.vue";
 import type {ComboboxOption} from "@/components/common/inputs/combobox/types";
 import {useProjectsStore} from "@/stores/projectsStore";
-import {ActivityForm} from "@/components/settings/projects/activityDialog/helpers";
+import type {ActivityForm} from "@/components/settings/projects/activityDialog/helpers";
 import Label from "@/components/ui/label/Label.vue";
 
 defineProps<{

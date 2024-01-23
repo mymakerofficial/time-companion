@@ -5,7 +5,7 @@ import type {ReactiveActivity, SerializedActivity} from "@/model/activity";
 import {createProject, fromSerializedProject} from "@/model/project";
 import {createActivity, fromSerializedActivity} from "@/model/activity";
 import {useLocalStorage} from "@/composables/useLocalStorage";
-import {isNotNull, isNull, type Nullable, takeIf} from "@/lib/utils";
+import {isNotDefined, isNotNull, isNull, type Maybe, type Nullable, takeIf} from "@/lib/utils";
 import {useCalendarStore} from "@/stores/calendarStore";
 
 export interface ProjectsStore {
@@ -13,19 +13,19 @@ export interface ProjectsStore {
   projects: ReactiveProject[]
   activities: ReactiveActivity[]
   init: () => void
-  getProjectById: (id: ReactiveProject['id']) => Nullable<ReactiveProject>
-  getActivityById: (id: ReactiveActivity['id']) => Nullable<ReactiveActivity>
-  addProject: (project: Nullable<ReactiveProject>) => void
-  addActivity: (activity: Nullable<ReactiveActivity>) => void
+  getProjectById: (id: Maybe<ReactiveProject['id']>) => Nullable<ReactiveProject>
+  getActivityById: (id: Maybe<ReactiveActivity['id']>) => Nullable<ReactiveActivity>
+  addProject: (project: Maybe<ReactiveProject>) => void
+  addActivity: (activity: Maybe<ReactiveActivity>) => void
   /**
    * Removes a project and all its child activities from the store. Also removes the project and child activities from all events in calendarStore.
    */
-  removeProject: (project: Nullable<ReactiveProject>) => void
+  removeProject: (project: Maybe<ReactiveProject>) => void
   /**
    * Removes an activity from the store and removes the activity from all events in calendarStore.
    */
-  removeActivity: (activity: Nullable<ReactiveActivity>) => void
-  link: (project: Nullable<ReactiveProject>, activity: Nullable<ReactiveActivity>) => void
+  removeActivity: (activity: Maybe<ReactiveActivity>) => void
+  link: (project: Maybe<ReactiveProject>, activity: Maybe<ReactiveActivity>) => void
 }
 
 interface ProjectsStorageSerialized {
@@ -64,7 +64,7 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
 
   watch([() => projects, () => activities], store, {deep: true})
 
-  function getProjectIndexById(id: ReactiveProject['id']) {
+  function getProjectIndexById(id: Maybe<ReactiveProject['id']>) {
     const index = projects.findIndex((it) => it.id === id)
 
     if (index === -1) {
@@ -74,12 +74,12 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     return index
   }
 
-  function getProjectById(id: ReactiveProject['id']) {
+  function getProjectById(id: Maybe<ReactiveProject['id']>) {
     const index = getProjectIndexById(id)
     return takeIf(index, isNotNull, projects[index!])
   }
 
-  function getActivityIndexById(id: ReactiveActivity['id']) {
+  function getActivityIndexById(id: Maybe<ReactiveActivity['id']>) {
     const index = activities.findIndex((it) => it.id === id)
 
     if (index === -1) {
@@ -89,13 +89,13 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     return index
   }
 
-  function getActivityById(id: ReactiveActivity['id']) {
+  function getActivityById(id: Maybe<ReactiveActivity['id']>) {
     const index = getActivityIndexById(id)
     return takeIf(index, isNotNull, activities[index!])
   }
 
-  function addProject(project: Nullable<ReactiveProject>) {
-    if (isNull(project)) {
+  function addProject(project: Maybe<ReactiveProject>) {
+    if (isNotDefined(project)) {
       return
     }
 
@@ -114,8 +114,8 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     projects.forEach((it) => addProject(it))
   }
 
-  function addActivity(activity: Nullable<ReactiveActivity>) {
-    if(isNull(activity)) {
+  function addActivity(activity: Maybe<ReactiveActivity>) {
+    if(isNotDefined(activity)) {
       return
     }
 
@@ -138,8 +138,8 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     activities.forEach((it) => addActivity(it))
   }
 
-  function removeActivity(activity:  Nullable<ReactiveActivity>) {
-    if (isNull(activity)) {
+  function removeActivity(activity:  Maybe<ReactiveActivity>) {
+    if (isNotDefined(activity)) {
       return
     }
 
@@ -178,8 +178,8 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     activities.splice(index, 1)
   }
 
-  function removeProject(project: Nullable<ReactiveProject>) {
-    if (isNull(project)) {
+  function removeProject(project: Maybe<ReactiveProject>) {
+    if (isNotDefined(project)) {
       return
     }
 
@@ -216,8 +216,8 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     projects.splice(index, 1)
   }
 
-  function unlink(project: Nullable<ReactiveProject>, activity: Nullable<ReactiveActivity>) {
-    if (isNull(project) || isNull(activity)) {
+  function unlink(project: Maybe<ReactiveProject>, activity: Maybe<ReactiveActivity>) {
+    if (isNotDefined(project) || isNotDefined(activity)) {
       return
     }
 
@@ -231,8 +231,8 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     activity.parentProject = null
   }
 
-  function link(project: Nullable<ReactiveProject>, activity: Nullable<ReactiveActivity>) {
-    if (isNull(project) || isNull(activity)) {
+  function link(project: Maybe<ReactiveProject>, activity: Maybe<ReactiveActivity>) {
+    if (isNotDefined(project) || isNotDefined(activity)) {
       return
     }
 
