@@ -20,7 +20,7 @@ const emit = defineEmits<{
 }>()
 
 const projectsStore = useProjectsStore()
-const project = useReferenceById(projectsStore.projects)
+const project = useReferenceById(projectsStore.projects, () => props.id)
 
 const state = reactive({
   open: true,
@@ -29,9 +29,7 @@ const state = reactive({
   isBillable: false as boolean,
 })
 
-watch(() => props.id, (id) => {
-  project.referenceBy(id)
-
+watch(project, () => {
   if (isNull(project.value)) {
     return
   }

@@ -19,28 +19,15 @@ export interface ReactiveActiveDay {
 }
 
 export function useActiveDay(days: ReactiveCalendarDay[]): ReactiveActiveDay {
-  const activeDay = useReferenceById(days)
-
   const state = reactive({
     currentEventId: null as Nullable<ID>,
     selectedEventId: null as Nullable<ID>,
   })
 
-  const currentEvent = computed(() => {
-    if (isNull(activeDay.value) || isNull(state.currentEventId)) {
-      return null
-    }
+  const activeDay = useReferenceById(days)
 
-    return activeDay.value?.events.find(it => it.id === state.currentEventId) || null
-  })
-
-  const selectedEvent = computed(() => {
-    if (isNull(activeDay.value) || isNull(state.selectedEventId)) {
-      return null
-    }
-
-    return activeDay.value?.events.find(it => it.id === state.selectedEventId) || null
-  })
+  const currentEvent = useReferenceById(() => activeDay.value?.events, () => state.currentEventId)
+  const selectedEvent = useReferenceById(() => activeDay.value?.events, () => state.selectedEventId)
 
   function setActiveDay(day: ReactiveCalendarDay) {
     activeDay.referenceBy(day.id)

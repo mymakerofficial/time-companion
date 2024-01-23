@@ -22,7 +22,7 @@ const emit = defineEmits<{
 }>()
 
 const projectsStore = useProjectsStore()
-const activity = useReferenceById(projectsStore.activities)
+const activity = useReferenceById(projectsStore.activities, () => props.id)
 
 const projectOptions: ComboboxOption[] = projectsStore.projects.map((project) => ({
   value: project.id,
@@ -36,9 +36,7 @@ const state = reactive({
   color: null as Nullable<string>,
 })
 
-watch(() => props.id, (id) => {
-  activity.referenceBy(id)
-
+watch(activity, () => {
   if (isNull(activity.value)) {
     return
   }

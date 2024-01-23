@@ -12,6 +12,7 @@ import {Popover, PopoverContent} from "@/components/ui/popover";
 import {PopoverAnchor} from "radix-vue";
 import {Slash, CornerDownLeft} from "lucide-vue-next";
 import {useProjectsStore} from "@/stores/projectsStore";
+import {syncRefs} from "@vueuse/core";
 
 const projectModel = defineModel<Nullable<ReactiveProject>>('project', { required: true })
 const activityModel = defineModel<Nullable<ReactiveActivity>>('activity', { required: true })
@@ -32,22 +33,11 @@ const state = reactive({
 
 const focused = computed(() => state.searchFocused || state.tagInputFocused)
 
-const selectedProject = useReferenceById(projectsStore.projects)
-const selectedActivity = useReferenceById(projectsStore.activities)
+const selectedProject = useReferenceById(projectsStore.projects, () => projectModel.value?.id ?? null)
+const selectedActivity = useReferenceById(projectsStore.activities, () => activityModel.value?.id ?? null)
 
-watch(projectModel, (value) => {
-  selectedProject.referenceBy(value?.id ?? null)
-}, { immediate: true })
-watch(selectedProject, () => {
-  projectModel.value = selectedProject.value
-})
-
-watch(activityModel, (value) => {
-  selectedActivity.referenceBy(value?.id ?? null)
-}, { immediate: true })
-watch(selectedActivity, () => {
-  activityModel.value = selectedActivity.value
-})
+syncRefs(selectedProject, projectModel)
+syncRefs(selectedActivity, activityModel)
 
 watch(noteModel, (value) => {
   if (isNotDefined(value)) {
