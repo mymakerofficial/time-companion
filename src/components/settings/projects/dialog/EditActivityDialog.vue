@@ -85,15 +85,15 @@ function handleSubmit() {
 
 <template>
   <BaseDialog v-model:open="state.open" title="Edit Activity" description="Activities are just for you.">
-    <div class="flex flex-col gap-8">
-      <div class="flex flex-col gap-4">
-        <div class="flex flex-row items-center gap-2">
-          <Combobox v-model="state.projectId" :options="projectOptions" />
-          <Slash class="size-4" />
-          <Input v-model="state.displayName" placeholder="Name" />
-        </div>
-        <ColorSelect v-model="state.color" />
+    <div class="flex flex-col gap-4">
+      <div class="flex flex-row items-center gap-2">
+        <Combobox v-model="state.projectId" :options="projectOptions" />
+        <Slash class="size-4" />
+        <Input v-model="state.displayName" placeholder="Name" />
       </div>
+      <ColorSelect v-model="state.color" />
+    </div>
+    <template #footer>
       <div class="flex flex-row gap-4 justify-between">
         <div class="flex flex-row gap-4">
           <Button variant="destructive" @click="handleRemove">Delete</Button>
@@ -103,6 +103,6 @@ function handleSubmit() {
           <Button @click="handleSubmit">Save</Button>
         </div>
       </div>
-    </div>
+    </template>
   </BaseDialog>
 </template>

@@ -68,6 +68,7 @@ function handleRemove() {
           v-model:project="state.project"
           v-model:activity="state.activity"
           v-model:note="state.note"
+          class="w-full"
         />
       </div>
       <div class="flex flex-row items-center">

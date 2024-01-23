@@ -2,7 +2,7 @@ import type {HasId, ID} from "@/lib/types";
 import {computed, reactive} from "vue";
 import {v4 as uuid} from "uuid";
 import type {Nullable} from "@/lib/utils";
-import {isNotDefined, isNotNull, isNull} from "@/lib/utils";
+import {isNotNull, isNull} from "@/lib/utils";
 import {formatDate, parseDate} from "@/lib/timeUtils";
 import type {ReactiveCalendarEventShadow} from "@/model/calendarEventShadow";
 import type {ReactiveProject} from "@/model/project";
@@ -19,6 +19,16 @@ export enum ReminderActionType {
   STOP_CURRENT_EVENT = 'STOP_CURRENT_EVENT',
 }
 
+export interface RepeatOnWeekdays {
+  monday: boolean,
+  tuesday: boolean,
+  wednesday: boolean,
+  thursday: boolean,
+  friday: boolean,
+  saturday: boolean,
+  sunday: boolean,
+}
+
 export interface SerializedCalendarReminder {
   id: string
   displayText: string
@@ -26,7 +36,7 @@ export interface SerializedCalendarReminder {
   remindAt: string // THH:mm:ss
   remindMinutesBefore: number
   remindMinutesAfter: number
-  repeat: boolean[]
+  repeatOn: boolean[] // [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
   actionType: ReminderActionType
   actionTargetProjectId: Nullable<string>
   actionTargetActivityId: Nullable<string>
@@ -38,7 +48,7 @@ export interface ReactiveCalendarReminder extends Readonly<HasId> {
   remindAt: Date
   remindMinutesBefore: number
   remindMinutesAfter: number
-  repeat: boolean[]
+  repeatOn: RepeatOnWeekdays
   actionType: ReminderActionType
   actionTargetShadow: Nullable<ReactiveCalendarEventShadow>
   readonly actionLabel: Nullable<string>
@@ -55,7 +65,7 @@ export interface CalendarReminderInit {
   remindAt?: Date
   remindMinutesBefore?: number
   remindMinutesAfter?: number
-  repeat?: boolean[]
+  repeatOn?: RepeatOnWeekdays
   actionType: ReminderActionType
   actionTargetShadow: Nullable<ReactiveCalendarEventShadow>
 }
@@ -63,6 +73,18 @@ export interface CalendarReminderInit {
 export interface ReminderDeserializationAssets {
   projects: ReactiveProject[]
   activities: ReactiveActivity[]
+}
+
+export function createRepeatOnWeekdays(list: boolean[]): RepeatOnWeekdays {
+  return {
+    monday: list[0] ?? true,
+    tuesday: list[1] ?? true,
+    wednesday: list[2] ?? true,
+    thursday: list[3] ?? true,
+    friday: list[4] ?? true,
+    saturday: list[5] ?? true,
+    sunday: list[6] ?? true,
+  }
 }
 
 export function fromSerializedReminder(serialized: SerializedCalendarReminder, assets: ReminderDeserializationAssets): CalendarReminderInit {
@@ -94,7 +116,7 @@ export function fromSerializedReminder(serialized: SerializedCalendarReminder, a
     remindAt: parseDate(serialized.remindAt, DATE_FORMAT),
     remindMinutesBefore: serialized.remindMinutesBefore,
     remindMinutesAfter: serialized.remindMinutesAfter,
-    repeat: serialized.repeat,
+    repeatOn: createRepeatOnWeekdays(serialized.repeatOn),
     actionType: serialized.actionType as ReminderActionType,
     actionTargetShadow: getTargetShadow(),
   }
@@ -110,7 +132,7 @@ export function createReminder(init: CalendarReminderInit): ReactiveCalendarRemi
     remindAt: init.remindAt ?? new Date(),
     remindMinutesBefore: init.remindMinutesBefore ?? 30,
     remindMinutesAfter: init.remindMinutesAfter ?? 30,
-    repeat: init.repeat ?? [true, true, true, true, true, true, true],
+    repeatOn: init.repeatOn ?? createRepeatOnWeekdays([true, true, true, true, true, true, true]),
     actionType: init.actionType,
     actionTargetShadow: init.actionTargetShadow,
   })
@@ -124,7 +146,7 @@ export function createReminder(init: CalendarReminderInit): ReactiveCalendarRemi
       case ReminderActionType.NO_ACTION:
         return null
       case ReminderActionType.START_EVENT:
-        return `Start ${config.actionTargetShadow?.project.displayName}`
+        return `Start ${config.actionTargetShadow?.project.displayName} now`
       case ReminderActionType.CONTINUE_PREVIOUS_EVENT:
         return 'Continue'
       case ReminderActionType.STOP_CURRENT_EVENT:
@@ -178,7 +200,15 @@ export function createReminder(init: CalendarReminderInit): ReactiveCalendarRemi
       remindAt: formatDate(config.remindAt, DATE_FORMAT),
       remindMinutesBefore: config.remindMinutesBefore,
       remindMinutesAfter: config.remindMinutesAfter,
-      repeat: config.repeat,
+      repeatOn: [
+        config.repeatOn.monday,
+        config.repeatOn.tuesday,
+        config.repeatOn.wednesday,
+        config.repeatOn.thursday,
+        config.repeatOn.friday,
+        config.repeatOn.saturday,
+        config.repeatOn.sunday,
+      ],
       actionType: config.actionType,
       actionTargetProjectId: config.actionTargetShadow?.project.id ?? null,
       actionTargetActivityId: config.actionTargetShadow?.activity?.id ?? null,
@@ -207,9 +237,9 @@ export function createReminder(init: CalendarReminderInit): ReactiveCalendarRemi
       get: () => config.remindMinutesAfter,
       set: (value) => config.remindMinutesAfter = value,
     }),
-    repeat: computed({
-      get: () => config.repeat,
-      set: (value) => config.repeat = value,
+    repeatOn: computed({
+      get: () => config.repeatOn,
+      set: (value) => config.repeatOn = value,
     }),
     actionType: computed({
       get: () => config.actionType,

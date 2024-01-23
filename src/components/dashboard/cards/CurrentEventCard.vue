@@ -118,7 +118,7 @@ const durationLabel = computed(() => {
           v-model:activity="state.activity"
           v-model:note="state.note"
           placeholder="what are you working on?..."
-          class="bg-primary text-primary-foreground border-none"
+          class="w-full bg-primary text-primary-foreground border-none"
         />
       </div>
       <div class="flex flex-row items-center gap-8">

@@ -4,7 +4,7 @@ import {createActivity, type ReactiveActivity} from "@/model/activity";
 import {useReferenceById} from "@/composables/useReferenceById";
 import {computed, reactive, watch} from "vue";
 import AutocompleteCombobox from "@/components/common/inputs/AutocompleteCombobox.vue";
-import {cn, isNotNull, isNull, type Nullable, takeIf} from "@/lib/utils";
+import {cn, isNotDefined, isNotNull, isNull, type Nullable, takeIf} from "@/lib/utils";
 import {vProvideColor} from "@/directives/vProvideColor";
 import {isEmpty} from "@/lib/listUtils";
 import AutoGrowInput from "@/components/common/inputs/AutoGrowInput.vue";
@@ -15,7 +15,7 @@ import {useProjectsStore} from "@/stores/projectsStore";
 
 const projectModel = defineModel<Nullable<ReactiveProject>>('project', { required: true })
 const activityModel = defineModel<Nullable<ReactiveActivity>>('activity', { required: true })
-const noteModel = defineModel<string>('note', { required: true })
+const noteModel = defineModel<string>('note', { required: false })
 
 const props = defineProps<{
   placeholder?: string
@@ -50,6 +50,9 @@ watch(selectedActivity, () => {
 })
 
 watch(noteModel, (value) => {
+  if (isNotDefined(value)) {
+    return
+  }
   state.searchTerm = value
 }, { immediate: true })
 watch(() => state.searchTerm, (value) => {
@@ -202,7 +205,7 @@ const color = computed(() => {
       <PopoverAnchor>
         <div
           :data-focused="focused"
-          :class="cn('inline-flex flex-row items-center justify-between w-full rounded-md border border-input bg-background p-1 font-medium text-xl ring-offset-background data-[focused=true]:ring-2 data-[focused=true]:ring-ring data-[focused=true]:ring-offset-2', props.class ?? '')"
+          :class="cn('inline-flex flex-row items-center justify-between rounded-md border border-input bg-background p-1 font-medium text-xl ring-offset-background data-[focused=true]:ring-2 data-[focused=true]:ring-ring data-[focused=true]:ring-offset-2', props.class ?? '')"
         >
           <div class="flex-grow flex flex-row items-center gap-1">
             <div v-if="tags.length" v-provide-color="color" class="px-3 py-1 flex flex-row items-center gap-1 text-xl font-medium bg-primary text-primary-foreground rounded-md">

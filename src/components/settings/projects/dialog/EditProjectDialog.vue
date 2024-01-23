@@ -72,24 +72,24 @@ function handleSubmit() {
 
 <template>
   <BaseDialog v-model:open="state.open" title="Edit Project" description="Projects are what your time counts towards">
-    <div class="flex flex-col gap-8">
-      <div class="flex flex-col gap-4">
-        <Input v-model="state.displayName" placeholder="Name" />
-        <ColorSelect v-model="state.color" />
-        <div class="flex flex-row items-center justify-between rounded-lg border p-4">
-          <div class="space-y-0.5">
-            <Label class="text-base">
-              Billable
-            </Label>
-            <p class="text-sm text-muted-foreground">
-              Does this project count towards your tracked time?
-            </p>
-          </div>
-          <div>
-            <Switch v-model:checked="state.isBillable" />
-          </div>
+    <div class="flex flex-col gap-4">
+      <Input v-model="state.displayName" placeholder="Name" />
+      <ColorSelect v-model="state.color" />
+      <div class="flex flex-row items-center justify-between rounded-lg border p-4">
+        <div class="space-y-0.5">
+          <Label class="text-base">
+            Billable
+          </Label>
+          <p class="text-sm text-muted-foreground">
+            Does this project count towards your tracked time?
+          </p>
+        </div>
+        <div>
+          <Switch v-model:checked="state.isBillable" />
         </div>
       </div>
+    </div>
+    <template #footer>
       <div class="flex flex-row gap-4 justify-between">
         <div class="flex flex-row gap-4">
           <Button variant="destructive" @click="handleRemove">Delete</Button>
@@ -99,6 +99,6 @@ function handleSubmit() {
           <Button @click="handleSubmit">Save</Button>
         </div>
       </div>
-    </div>
+    </template>
   </BaseDialog>
 </template>
