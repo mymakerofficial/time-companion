@@ -2,7 +2,7 @@
 import { Check, ChevronsUpDown } from 'lucide-vue-next'
 
 import { ref } from 'vue'
-import { Button } from '@/components/ui/button'
+import {Button, buttonVariants} from '@/components/ui/button'
 import {
   Popover,
   PopoverContent,
@@ -18,10 +18,12 @@ withDefaults(defineProps<{
   placeholder?: string
   searchPlaceholder?: string
   emptyLabel?: string
+  variant?: NonNullable<Parameters<typeof buttonVariants>[0]>['variant']
 }>(), {
   placeholder: '',
   searchPlaceholder: 'Search...',
   emptyLabel: '',
+  variant: 'outline',
 })
 
 const open = ref(false)
@@ -42,7 +44,7 @@ function handleSelect(event: any) { // event should be SelectEvent, but it doesn
   <Popover v-model:open="open">
     <PopoverTrigger as-child>
       <Button
-        variant="outline"
+        :variant="variant"
         role="combobox"
         :aria-expanded="open"
         class="w-52 justify-start"

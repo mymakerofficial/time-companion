@@ -1,4 +1,4 @@
-import type {Nullable} from "@/lib/utils";
+import type {Maybe, Nullable} from "@/lib/utils";
 import {
   createReminder,
   createRepeatOnWeekdays,
@@ -24,7 +24,7 @@ export interface ReminderFormState {
   actionTargetActivity: Nullable<ReactiveActivity>,
 }
 
-export function createReminderForm(reminder?: ReactiveCalendarReminder): ReminderFormState {
+export function createReminderForm(reminder?: Maybe<ReactiveCalendarReminder>): ReminderFormState {
   return {
     displayText: reminder?.displayText ?? '',
     color: reminder?.color ?? null,

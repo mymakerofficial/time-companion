@@ -4,12 +4,10 @@ import type {ReactiveProject} from "@/model/project";
 import type {ProjectRow} from "@/components/settings/projects/table/types";
 import {createProjectsColumns} from "@/components/settings/projects/table/projectsColumns";
 import Table from "@/components/common/table/Table.vue";
-import type {ReactiveActivity} from "@/model/activity";
 import {getSortedRowModel, getExpandedRowModel} from "@tanstack/vue-table";
 import type {ExpandedState, SortingState, TableOptions} from '@tanstack/vue-table'
-import {isDefined} from "@/lib/utils";
-import EditProjectDialog from "@/components/settings/projects/dialog/EditProjectDialog.vue";
-import EditActivityDialog from "@/components/settings/projects/dialog/EditActivityDialog.vue";
+import EditProjectDialog from "@/components/settings/projects/projectDialog/EditProjectDialog.vue";
+import EditActivityDialog from "@/components/settings/projects/activityDialog/EditActivityDialog.vue";
 import {useDialogStore} from "@/stores/dialogStore";
 import {toProjectRow} from "@/components/settings/projects/table/helpers";
 import {updater} from "@/helpers/table/tableHelpers";
