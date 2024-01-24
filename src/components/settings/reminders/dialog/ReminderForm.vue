@@ -39,7 +39,7 @@ const showColorInput = computed(() => {
     </div>
     <div v-if="showTargetInput" class="grid grid-cols-4 items-center gap-4">
       <Label class="text-right">Start project</Label>
-      <EventInput v-model:project="form.actionTargetProject" :activity="form.actionTargetActivity" class="col-span-3" />
+      <EventInput v-model:project="form.actionTargetProject" v-model:activity="form.actionTargetActivity" class="col-span-3" />
     </div>
     <div v-if="showColorInput" class="grid grid-cols-4 items-center gap-4">
       <Label class="text-right">Color</Label>
