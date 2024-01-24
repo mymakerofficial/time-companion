@@ -57,17 +57,31 @@ export function createReminderFromForm(form: ReminderFormState) {
 }
 
 export function patchReminderWithForm(reminder: ReactiveCalendarReminder, form: ReminderFormState) {
-  const shadow = form.actionType === ReminderActionType.START_EVENT && isNotNull(form.actionTargetProject) ? createEventShadow({
-    project: form.actionTargetProject,
-    activity: form.actionTargetActivity,
-  }) : null
-
   reminder.displayText = form.displayText
-  reminder.color = isNull(shadow) ? form.color : null
+  reminder.color = form.actionType !== ReminderActionType.START_EVENT ? form.color : null
   reminder.remindAt = minutesSinceStartOfDayToDate(form.remindAtMinutes)
   reminder.remindMinutesBefore = form.remindMinutesBefore
   reminder.remindMinutesAfter = form.remindMinutesAfter
   reminder.repeatOn = form.repeatOn
   reminder.actionType = form.actionType
-  reminder.actionTargetShadow = shadow
+
+  if (form.actionType !== ReminderActionType.START_EVENT) {
+    reminder.actionTargetShadow = null
+    return
+  }
+
+  if (isNull(form.actionTargetProject)) {
+    return
+  }
+
+  if (isNull(reminder.actionTargetShadow)) {
+    reminder.actionTargetShadow = createEventShadow({
+      project: form.actionTargetProject,
+      activity: form.actionTargetActivity,
+    })
+    return
+  }
+
+  reminder.actionTargetShadow.project = form.actionTargetProject
+  reminder.actionTargetShadow.activity = form.actionTargetActivity
 }
