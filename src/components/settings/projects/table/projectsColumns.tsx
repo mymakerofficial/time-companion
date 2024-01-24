@@ -17,25 +17,7 @@ import type {ProjectRow} from "@/components/settings/projects/table/types";
 import type {Column} from "@tanstack/table-core";
 import type {Icon as LucideIcon} from "lucide-vue-next";
 import {fromNow} from "@/lib/timeUtils";
-
-function getSortableHeader(column: Column<ProjectRow>, label: string) {
-  const dir = column.getIsSorted() || 'none'
-
-  const icons: Record<'none' | SortDirection, LucideIcon> = {
-    'none': ArrowDownUp,
-    'desc': ArrowUp,
-    'asc': ArrowDown,
-  }
-
-  const Icon = icons[dir]
-
-  return <>
-    <Button onClick={() => column.toggleSorting()} variant="ghost" class="flex gap-1 items-center">
-      <span>{ label }</span>
-      <Icon class="size-3"/>
-    </Button>
-  </>
-}
+import {getSortableHeader} from "@/helpers/table/tableHelpers";
 
 function getNameCell(value: ProjectRow['name']) {
   const projectPart = <span>{value[0]}</span>
