@@ -18,6 +18,7 @@ import type {Column} from "@tanstack/table-core";
 import type {Icon as LucideIcon} from "lucide-vue-next";
 import {fromNow} from "@/lib/timeUtils";
 import {getSortableHeader} from "@/helpers/table/tableHelpers";
+import {useI18n} from "vue-i18n";
 
 function getNameCell(value: ProjectRow['name']) {
   const projectPart = <span>{value[0]}</span>
@@ -86,21 +87,23 @@ interface ProjectColumnsOptions {
 export function  createProjectsColumns(
   options: ProjectColumnsOptions
 ) {
+  const { t } = useI18n()
+
   return [
     columnHelper.accessor('name', {
-      header: ({ column }) => getSortableHeader(column, 'Name'),
+      header: ({ column }) => getSortableHeader(column, t('settings.projects.table.columns.name')),
       cell: (info) => getNameCell(info.getValue()),
     }),
     columnHelper.accessor('color', {
-      header: ({ column }) => getSortableHeader(column, 'Color'),
+      header: ({ column }) => getSortableHeader(column, t('settings.projects.table.columns.color')),
       cell: (info) => getColorCell(info.getValue()),
     }),
     columnHelper.accessor('isBillable', {
-      header: ({ column }) => getSortableHeader(column, 'Billable'),
+      header: ({ column }) => getSortableHeader(column, t('settings.projects.table.columns.isBillable')),
       cell: (info) => getBillableCell(info.getValue()),
     }),
     columnHelper.accessor('lastUsed', {
-      header: ({ column }) => getSortableHeader(column, 'Last used'),
+      header: ({ column }) => getSortableHeader(column, t('settings.projects.table.columns.lastUsed')),
       cell: (info) => getLastUsedCell(info.getValue()),
     }),
     columnHelper.display({

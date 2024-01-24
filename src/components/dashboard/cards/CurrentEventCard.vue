@@ -126,7 +126,7 @@ const durationLabel = computed(() => {
         <time class="text-2xl font-medium tracking-wide w-24">{{ durationLabel }}</time>
       </div>
       <div class="flex flex-row items-center gap-2">
-        <Button @click="handleStartStop" variant="inverted">{{ state.isRunning ? 'Stop' : 'Start' }}</Button>
+        <Button @click="handleStartStop" variant="inverted">{{ state.isRunning ? $t('dashboard.controls.stopEvent') : $t('dashboard.controls.startEvent') }}</Button>
         <Button variant="ghost" size="icon"><MoreVertical /></Button>
       </div>
     </div>

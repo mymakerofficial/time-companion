@@ -5,12 +5,14 @@ import type {ReminderRow} from "@/components/settings/reminders/table/types";
 import {getSortableHeader} from "@/helpers/table/tableHelpers";
 import {formatDate} from "@/lib/timeUtils";
 import {repeatOnWeekdaysToReadableString} from "@/lib/reminderUtils";
-import {typeNames} from "@/components/settings/reminders/dialog/constants";
+import {useI18n} from "vue-i18n";
 
 function getReminderActionCell(value: ReminderRow['action']) {
+  const { t } = useI18n()
+
   return (
     <span class="flex flex-row items-center gap-2">
-      <span>{typeNames[value.type]}</span>
+      <span>{ t(`reminder.actionType.${value.type}`) }</span>
       { value.targetProject && <><ArrowRight class="size-3"/><span>{value.targetProject?.displayName}</span></> }
       { value.targetActivity && <><Slash class="size-3"/><span>{value.targetActivity?.displayName}</span></> }
     </span>
@@ -32,20 +34,22 @@ interface RemindersColumnsOptions {
 export function  createRemindersColumns(
   options: RemindersColumnsOptions
 ) {
+  const { t } = useI18n()
+
   return [
     columnHelper.accessor('name', {
-      header: ({ column }) => getSortableHeader(column, 'Name'),
+      header: ({ column }) => getSortableHeader(column, t('settings.reminders.table.columns.name')),
     }),
     columnHelper.accessor('remindAt', {
-      header: ({ column }) => getSortableHeader(column, 'Time'),
+      header: ({ column }) => getSortableHeader(column, t('settings.reminders.table.columns.remindAt')),
       cell: (info) => formatDate(info.getValue(), 'HH:mm'),
     }),
     columnHelper.accessor('repeatOn', {
-      header: 'Repeat on',
+      header: t('settings.reminders.table.columns.repeatOn'),
       cell: (info) => repeatOnWeekdaysToReadableString(info.getValue()),
     }),
     columnHelper.accessor('action', {
-      header: 'Action',
+      header: t('settings.reminders.table.columns.action'),
       cell: (info) => getReminderActionCell(info.getValue()),
     }),
     columnHelper.display({

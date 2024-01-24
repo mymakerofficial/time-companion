@@ -12,15 +12,11 @@ defineProps<{
 
 <template>
   <div class="flex flex-col gap-4">
-    <Input v-model="form.displayName" placeholder="Name" />
+    <Input v-model="form.displayName" :placeholder="$t('dialog.project.form.displayName.placeholder')" />
     <div class="flex flex-row items-center justify-between rounded-lg border p-4">
       <div class="space-y-0.5">
-        <Label class="text-base">
-          Color
-        </Label>
-        <p class="text-sm text-muted-foreground">
-          Give your life some color!
-        </p>
+        <Label class="text-base">{{ $t('dialog.project.form.color.label') }}</Label>
+        <p class="text-sm text-muted-foreground">{{ $t('dialog.project.form.color.description') }}</p>
       </div>
       <div>
         <ColorSelect v-model="form.color" variant="ghost" />
@@ -28,12 +24,8 @@ defineProps<{
     </div>
     <div class="flex flex-row items-center justify-between rounded-lg border p-4">
       <div class="space-y-0.5">
-        <Label class="text-base">
-          Billable
-        </Label>
-        <p class="text-sm text-muted-foreground">
-          Does this project count towards your tracked time?
-        </p>
+        <Label class="text-base">{{ $t('dialog.project.form.isBillable.label') }}</Label>
+        <p class="text-sm text-muted-foreground">{{ $t('dialog.project.form.isBillable.description') }}</p>
       </div>
       <div>
         <Switch v-model:checked="form.isBillable" />

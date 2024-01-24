@@ -18,9 +18,15 @@ function openNewReminderDialog() {
 
 <template>
   <div class="py-16 px-8">
-    <SettingsHeader title="Reminders" description="Manage your reminders" />
+    <SettingsHeader
+      :title="$t('settings.reminders.title')"
+      :description="$t('settings.reminders.description')"
+    />
     <TableActions>
-      <Button @click="openNewReminderDialog" size="sm" class="gap-2"><PlusCircle class="size-4" />Add Reminder</Button>
+      <Button @click="openNewReminderDialog" size="sm" class="gap-2">
+        <PlusCircle class="size-4" />
+        <span>{{ $t('settings.reminders.controls.createReminder') }}</span>
+      </Button>
     </TableActions>
     <RemindersTable :reminders="remindersStore.reminders" />
   </div>

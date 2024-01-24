@@ -30,12 +30,16 @@ function handleSubmit() {
 </script>
 
 <template>
-  <BaseDialog v-model:open="open" title="New Activity" description="Activities are just for you.">
+  <BaseDialog
+    v-model:open="open"
+    :title="$t('dialog.activity.new.title')"
+    :description="$t('dialog.activity.new.description')"
+  >
     <ActivityForm :form="form" />
     <template #footer>
       <div class="flex flex-row justify-end gap-4">
-        <Button variant="ghost" @click="close()">Cancel</Button>
-        <Button @click="handleSubmit">Create</Button>
+        <Button variant="ghost" @click="close()">{{ $t('dialog.activity.controls.cancel') }}</Button>
+        <Button @click="handleSubmit">{{ $t('dialog.activity.controls.create') }}</Button>
       </div>
     </template>
   </BaseDialog>

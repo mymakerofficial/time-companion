@@ -30,12 +30,16 @@ function handleSubmit() {
 </script>
 
 <template>
-  <BaseDialog v-model:open="open" title="New Project" description="Projects are what your time counts towards">
+  <BaseDialog
+    v-model:open="open"
+    :title="$t('dialog.project.new.title')"
+    :description="$t('dialog.project.new.description')"
+  >
     <ProjectForm :form="form" />
     <template #footer>
       <div class="flex flex-row justify-end gap-4">
-        <Button variant="ghost" @click="close()">Cancel</Button>
-        <Button @click="handleSubmit">Create</Button>
+        <Button variant="ghost" @click="close()">{{ $t('dialog.project.controls.cancel') }}</Button>
+        <Button @click="handleSubmit">{{ $t('dialog.project.controls.create') }}</Button>
       </div>
     </template>
   </BaseDialog>

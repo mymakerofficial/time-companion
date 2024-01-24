@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/popover'
 import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from "@/components/ui/command";
 import type {ComboboxOption} from "@/components/common/inputs/combobox/types";
+import {useI18n} from "vue-i18n";
 
 const model = defineModel<ComboboxOption['value']>({ required: true, default: null })
 
@@ -20,9 +21,6 @@ withDefaults(defineProps<{
   emptyLabel?: string
   variant?: NonNullable<Parameters<typeof buttonVariants>[0]>['variant']
 }>(), {
-  placeholder: '',
-  searchPlaceholder: 'Search...',
-  emptyLabel: '',
   variant: 'outline',
 })
 
@@ -62,8 +60,8 @@ function handleSelect(event: any) { // event should be SelectEvent, but it doesn
     <PopoverContent class="w-52 p-0">
       <!-- @vue-ignore filterFunction is correct! -->
       <Command :filter-function="filterFunction">
-        <CommandInput :placeholder="searchPlaceholder" />
-        <CommandEmpty>{{ emptyLabel }}</CommandEmpty>
+        <CommandInput :placeholder="searchPlaceholder ?? $t('common.placeholders.search')" />
+        <CommandEmpty>{{ emptyLabel ?? $t('common.placeholders.searchEmpty') }}</CommandEmpty>
         <CommandList>
           <CommandGroup>
             <CommandItem

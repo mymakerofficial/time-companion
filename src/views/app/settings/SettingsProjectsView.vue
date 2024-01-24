@@ -23,10 +23,19 @@ function openNewActivityDialog() {
 
 <template>
   <div class="py-16 px-8">
-    <SettingsHeader title="Projects" description="Manage your projects and activities" />
+    <SettingsHeader
+      :title="$t('settings.projects.title')"
+      :description="$t('settings.projects.description')"
+    />
     <TableActions>
-      <Button @click="openNewActivityDialog" variant="outline" size="sm" class="gap-2"><PlusCircle class="size-4" />Add Activity</Button>
-      <Button @click="openNewProjectDialog" size="sm" class="gap-2"><PlusCircle class="size-4" />Add Project</Button>
+      <Button @click="openNewActivityDialog" variant="outline" size="sm" class="gap-2">
+        <PlusCircle class="size-4" />
+        <span>{{ $t('settings.projects.controls.createActivity') }}</span>
+      </Button>
+      <Button @click="openNewProjectDialog" size="sm" class="gap-2">
+        <PlusCircle class="size-4" />
+        <span>{{ $t('settings.projects.controls.createProject') }}</span>
+      </Button>
     </TableActions>
     <ProjectsTable :projects="projectsStore.projects" />
   </div>

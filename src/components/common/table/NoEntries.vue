@@ -8,7 +8,7 @@ import {TableCell, TableRow} from "@/components/ui/table";
       :colspan="4"
       class="h-24 text-center text-muted-foreground italic"
     >
-      *crickets*
+      {{ $t('common.placeholder.noEntries') }}
     </TableCell>
   </TableRow>
 </template>

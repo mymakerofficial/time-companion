@@ -5,7 +5,10 @@ import ThemeSelector from "@/components/settings/appearance/ThemeSelector.vue";
 
 <template>
   <div class="py-16 px-8">
-    <SettingsHeader title="Appearance" description="Customize the look and feel of the app" />
+    <SettingsHeader
+      :title="$t('settings.appearance.title')"
+      :description="$t('settings.appearance.description')"
+    />
     <ThemeSelector />
   </div>
 </template>

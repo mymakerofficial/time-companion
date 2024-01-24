@@ -1,5 +1,6 @@
 import type {RepeatOnWeekdays} from "@/model/calendarReminder";
 
+// TODO i18n
 export const weekDayNames: Record<keyof RepeatOnWeekdays, string> = {
   ['monday']: 'Mo',
   ['tuesday']: 'Tu',

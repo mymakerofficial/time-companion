@@ -80,11 +80,11 @@ function handleRemove() {
         <TimeDurationInput v-if="event.hasEnded" v-model="state.durationMinutes" placeholder="00:00" class="w-20 text-center font-medium text-xl border-none" />
       </div>
       <div class="flex flex-row items-center gap-2">
-        <Button v-if="isNotNull(event.project)" @click="handleContinue()">Continue</Button>
+        <Button v-if="isNotNull(event.project)" @click="handleContinue()">{{ $t('dashboard.controls.continueEvent') }}</Button>
         <DropdownMenu>
           <DropdownMenuTrigger><Button variant="ghost" size="icon"><MoreVertical /></Button></DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem @click="handleRemove()">Delete</DropdownMenuItem>
+            <DropdownMenuItem @click="handleRemove()">{{ $t('dashboard.controls.deleteEvent') }}</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

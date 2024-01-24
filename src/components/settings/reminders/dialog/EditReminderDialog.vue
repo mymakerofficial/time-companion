@@ -52,16 +52,20 @@ function handleSubmit() {
 </script>
 
 <template>
-  <BaseDialog v-model:open="open" title="New Reminder" description="Use reminders to remind you of upcoming events.">
+  <BaseDialog
+    v-model:open="open"
+    :title="$t('dialog.reminder.edit.title')"
+    :description="$t('dialog.reminder.edit.description')"
+  >
     <ReminderForm :form="form" />
     <template #footer>
       <div class="flex flex-row gap-4 justify-between">
         <div class="flex flex-row gap-4">
-          <Button variant="destructive" @click="handleRemove">Delete</Button>
+          <Button variant="destructive" @click="handleRemove">{{ $t('dialog.reminder.controls.delete') }}</Button>
         </div>
         <div class="flex flex-row gap-4">
-          <Button variant="ghost" @click="close()">Cancel</Button>
-          <Button @click="handleSubmit">Save</Button>
+          <Button variant="ghost" @click="close()">{{ $t('dialog.reminder.controls.cancel') }}</Button>
+          <Button @click="handleSubmit">{{ $t('dialog.reminder.controls.save') }}</Button>
         </div>
       </div>
     </template>

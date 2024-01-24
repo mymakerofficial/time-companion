@@ -12,16 +12,7 @@ import {isNotNull} from "@/lib/utils";
 const calendarStore = useCalendarStore()
 const projectsStore = useProjectsStore()
 
-const themes = [
-  {
-    value: 'dark',
-    label: 'Dark',
-  },
-  {
-    value: 'light',
-    label: 'Light',
-  },
-]
+const themes = ['dark', 'light']
 
 const theme = useColorMode({
   attribute: 'data-theme',
@@ -53,7 +44,7 @@ const eventColors = computed(() => {
     <div class="flex flex-wrap gap-8">
         <template v-for="theme in themes" :key="theme.value">
           <div class="aspect-video w-2/5 flex flex-col rounded-md border overflow-hidden">
-            <div :data-theme="theme.value" class="flex-grow overflow-hidden border-b bg-background text-foreground">
+            <div :data-theme="theme" class="flex-grow overflow-hidden border-b bg-background text-foreground">
               <div class="grid grid-cols-12 h-full">
                 <div class="col-span-7 border-r h-full flex flex-col">
                   <div class="h-3 border-b flex justify-between items-center px-2">
@@ -118,8 +109,8 @@ const eventColors = computed(() => {
               </div>
             </div>
             <div class="p-4 flex flex-row items-center gap-4">
-              <RadioGroupItem :value="theme.value" :id="`theme-option-${theme.value}`" />
-              <Label :for="`theme-option-${theme.value}`">{{ theme.label }}</Label>
+              <RadioGroupItem :value="theme" :id="`theme-option-${theme}`" />
+              <Label :for="`theme-option-${theme}`">{{ $t(`settings.appearance.theme.${theme}`) }}</Label>
             </div>
           </div>
         </template>

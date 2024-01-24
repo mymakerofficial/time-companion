@@ -51,7 +51,7 @@ function handleDismiss() {
             <Button variant="ghost" size="icon"><MoreVertical /></Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem @click="handleDismiss()">Dismiss</DropdownMenuItem>
+            <DropdownMenuItem @click="handleDismiss()">{{ $t('dashboard.controls.dismissReminder') }}</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

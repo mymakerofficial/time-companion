@@ -1,11 +1,11 @@
 <script setup lang="tsx">
-import {colorNames} from "@/components/common/inputs/colorSelect/constants";
 import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
 import type {Nullable} from "@/lib/utils";
 import {vProvideColor} from "@/directives/vProvideColor";
 import type {ComboboxOption} from "@/components/common/inputs/combobox/types";
-import {optionsFromRecord} from "@/helpers/combobox/comboboxHelpers";
 import {buttonVariants} from "@/components/ui/button";
+import {useI18n} from "vue-i18n";
+import {colors} from "@/lib/colorUtils";
 
 const model = defineModel<Nullable<string>>({ required: true, default: null })
 
@@ -13,11 +13,17 @@ defineProps<{
   variant?: NonNullable<Parameters<typeof buttonVariants>[0]>['variant']
 }>()
 
-const options: ComboboxOption[] = [{
+const { t } = useI18n()
+
+const options: ComboboxOption[] = [
+  {
     value: null,
-    label: 'None',
+    label: t('common.colors.noColor'),
   },
-  ...optionsFromRecord(colorNames),
+  ...colors.map(color => ({
+    value: color,
+    label: t(`common.colors.${color}`),
+  })),
 ]
 </script>
 

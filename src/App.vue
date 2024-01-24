@@ -8,6 +8,7 @@ import {now} from "@/lib/timeUtils";
 import {useCalendarStore} from "@/stores/calendarStore";
 import {useRemindersStore} from "@/stores/remidersStore";
 import DialogProvider from "@/components/common/dialog/DialogProvider.vue";
+import {useI18n} from "vue-i18n";
 
 const calendarStore = useCalendarStore()
 const remindersStore = useRemindersStore()
@@ -17,10 +18,12 @@ calendarStore.init()
 
 calendarStore.setActiveDay(now())
 
+const { t } = useI18n()
+
 const links: NavLink[] = [
-  {label: 'Dashboard', to: { name: 'app-dashboard' }, icon: Calendar},
-  {label: 'Report', to: { name: 'app-report' }, icon: Archive},
-  {label: 'Settings', to: { name: 'app-settings' }, icon: Settings},
+  {label: t('app.nav.dashboard'), to: { name: 'app-dashboard' }, icon: Calendar},
+  {label: t('app.nav.report'), to: { name: 'app-report' }, icon: Archive},
+  {label: t('app.nav.settings'), to: { name: 'app-settings' }, icon: Settings},
 ]
 </script>
 
