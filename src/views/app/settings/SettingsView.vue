@@ -3,14 +3,16 @@ import type {NavLink} from "@/components/common/layout/nav/nav-link";
 import HorizontalNav from "@/components/common/layout/nav/HorizontalNav.vue";
 import ResponsiveContainer from "@/components/common/layout/ResponsiveContainer.vue";
 import {useI18n} from "vue-i18n";
+import {computed} from "vue";
 
 const { t } = useI18n()
 
-const links: NavLink[] = [
+const links = computed<NavLink[]>(() => [
   { label: t('settings.projects.title'), to: { name: 'app-settings-projects' } },
   { label: t('settings.reminders.title'), to: { name: 'app-settings-reminders' } },
   { label: t('settings.appearance.title'), to: { name: 'app-settings-appearance' } },
-]
+  { label: t('settings.locale.title'), to: { name: 'app-settings-locale' } },
+])
 </script>
 
 <template>

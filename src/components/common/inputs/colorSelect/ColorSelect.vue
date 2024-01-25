@@ -6,6 +6,7 @@ import type {ComboboxOption} from "@/components/common/inputs/combobox/types";
 import {buttonVariants} from "@/components/ui/button";
 import {useI18n} from "vue-i18n";
 import {colors} from "@/lib/colorUtils";
+import {computed} from "vue";
 
 const model = defineModel<Nullable<string>>({ required: true, default: null })
 
@@ -15,7 +16,7 @@ defineProps<{
 
 const { t } = useI18n()
 
-const options: ComboboxOption[] = [
+const options = computed<ComboboxOption[]>(() => [
   {
     value: null,
     label: t('common.colors.noColor'),
@@ -24,7 +25,7 @@ const options: ComboboxOption[] = [
     value: color,
     label: t(`common.colors.${color}`),
   })),
-]
+])
 </script>
 
 <template>

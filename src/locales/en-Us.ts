@@ -41,6 +41,10 @@ export default {
       pink: 'Pink',
       rose: 'Rose',
     },
+    locales: {
+      'en-US': 'English',
+      'de-Informal': 'German (Informal)',
+    },
   },
   app: {
     nav: {
@@ -143,7 +147,17 @@ export default {
         dark: 'Dark',
         light: 'Light',
       }
-    }
+    },
+    locale: {
+      title: 'Localization',
+      description: 'Customize the language of the app',
+      sections: {
+        language: {
+          title: 'Language',
+          description: 'Set the language of the app',
+        }
+      }
+    },
   },
   dialog: {
     project: {

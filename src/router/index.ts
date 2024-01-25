@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import {createRouter, createWebHistory} from 'vue-router'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,6 +35,11 @@ const router = createRouter({
           path: 'appearance',
           name: 'app-settings-appearance',
           component: () => import('../views/app/settings/SettingsAppearanceView.vue'),
+        },
+        {
+          path: 'locale',
+          name: 'app-settings-locale',
+          component: () => import('../views/app/settings/SettingsLocaleView.vue'),
         },
       ]
     }
