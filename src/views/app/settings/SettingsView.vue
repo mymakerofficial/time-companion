@@ -16,7 +16,7 @@ const links = computed<NavLink[]>(() => [
 </script>
 
 <template>
-  <ResponsiveContainer as="main" >
+  <ResponsiveContainer as="main" class="grid grid-cols-8">
     <div class="col-span-2 sticky top-0 h-screen">
       <HorizontalNav :links="links" class="py-16" />
     </div>

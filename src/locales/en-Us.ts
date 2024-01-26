@@ -17,6 +17,7 @@ export default {
       lastUsed: 'Last used',
     },
     placeholders: {
+      select: 'Select...',
       search: 'Search...',
       searchEmpty: 'No results',
       noEntries: '*crickets*',

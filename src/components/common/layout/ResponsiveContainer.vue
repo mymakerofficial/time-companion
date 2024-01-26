@@ -9,7 +9,7 @@ withDefaults(defineProps<{
 </script>
 
 <template>
-  <component :is="as ?? 'div'" :class="cn('w-2/3 mx-auto grid grid-cols-8', $attrs.class ?? '')">
+  <component :is="as ?? 'div'" :class="cn('w-2/3 mx-auto', $attrs.class ?? '')">
     <slot />
   </component>
 </template>

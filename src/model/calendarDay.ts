@@ -1,12 +1,11 @@
 import type {HasId, ID} from "@/lib/types";
 import type {EventDeserializationAssets, ReactiveCalendarEvent, SerializedCalendarEvent} from "@/model/calendarEvent";
+import {createEvent, fromSerializedEvent} from "@/model/calendarEvent";
 import {v4 as uuid} from "uuid";
 import {computed, reactive} from "vue";
 import {firstOf} from "@/lib/listUtils";
-import {createTimeReport, type ReactiveTimeReport} from "@/model/timeReport";
 import type {Nullable} from "@/lib/utils";
 import {formatDate, parseDate} from "@/lib/timeUtils";
-import {createEvent, fromSerializedEvent} from "@/model/calendarEvent";
 
 const DATE_FORMAT = 'YYYY-MM-DD'
 
@@ -19,7 +18,6 @@ export interface SerializedCalendarDay {
 export interface ReactiveCalendarDay extends Readonly<HasId> {
   readonly date: Date
   readonly events: ReactiveCalendarEvent[]
-  readonly timeReport: ReactiveTimeReport
   readonly startedAt: Nullable<Date>
   addEvent: (event: ReactiveCalendarEvent) => void
   removeEvent: (event: ReactiveCalendarEvent) => void
@@ -59,11 +57,6 @@ export function createDay(init: CalendarDayInit): ReactiveCalendarDay {
     events: init.events ?? [],
   })
 
-  const timeReport = createTimeReport({
-    date: config.date,
-    events: inherits.events,
-  })
-
   const startedAt = computed(() => firstOf(inherits.events)?.startedAt || null)
 
   function addEvent(event: ReactiveCalendarEvent) {
@@ -90,8 +83,6 @@ export function createDay(init: CalendarDayInit): ReactiveCalendarDay {
     date: computed(() => config.date),
     //
     events: computed(() => inherits.events),
-    //
-    timeReport: computed(() => timeReport),
     //
     startedAt: computed(() => startedAt.value),
     //

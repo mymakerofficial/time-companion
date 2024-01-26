@@ -17,6 +17,7 @@ export default {
       lastUsed: 'Zuletzt verwendet',
     },
     placeholders: {
+      select: 'Auswählen...',
       search: 'Suche...',
       searchEmpty: 'Keine Ergebnisse',
       noEntries: '*Stille*',
