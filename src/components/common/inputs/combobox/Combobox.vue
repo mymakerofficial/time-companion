@@ -1,30 +1,29 @@
 <script setup lang="ts">
-import { Check, ChevronsUpDown } from 'lucide-vue-next'
+import {Check, ChevronsUpDown} from 'lucide-vue-next'
 
-import { ref } from 'vue'
+import {computed, ref} from 'vue'
 import {Button, buttonVariants} from '@/components/ui/button'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+import {Popover, PopoverContent, PopoverTrigger,} from '@/components/ui/popover'
 import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from "@/components/ui/command";
 import type {ComboboxOption} from "@/components/common/inputs/combobox/types";
-import {useI18n} from "vue-i18n";
+import {isDefined} from "@/lib/utils";
 
-const model = defineModel<ComboboxOption['value']>({ required: true, default: null })
+const model = defineModel<ComboboxOption['value'] | ComboboxOption['value'][]>({ required: true, default: null })
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   options: ComboboxOption[]
+  multiple?: boolean
+  label?: string
+  emptyLabel?: string
   placeholder?: string
   searchPlaceholder?: string
-  emptyLabel?: string
   variant?: NonNullable<Parameters<typeof buttonVariants>[0]>['variant']
 }>(), {
   variant: 'outline',
 })
 
 const open = ref(false)
+const searchTerm = ref('')
 
 function filterFunction(list: object[], searchTerm: string): object[] {
   return list.filter((it) => {
@@ -32,10 +31,54 @@ function filterFunction(list: object[], searchTerm: string): object[] {
   })
 }
 
-function handleSelect(event: any) { // event should be SelectEvent, but it doesn't import properly
-  model.value = event.detail.value.value
-  open.value = false
+function isSelected(option: ComboboxOption): boolean {
+  if (props.multiple && Array.isArray(model.value)) {
+    return model.value.includes(option.value)
+  }
+
+  return model.value === option.value
 }
+
+function handleSelect(event: any) { // event should be SelectEvent, but it doesn't import properly
+  if (props.multiple && Array.isArray(model.value)) {
+    if (model.value.includes(event.detail.value.value)) {
+      model.value = model.value.filter((it) => it !== event.detail.value.value)
+    } else {
+      model.value = [...model.value, event.detail.value.value]
+    }
+    searchTerm.value = ''
+  } else {
+    model.value = event.detail.value.value
+    open.value = false
+  }
+}
+
+const selectedOptions = computed(() => {
+  if (props.multiple && Array.isArray(model.value)) {
+    return props.options.filter(isSelected)
+  }
+
+  return props.options.find(isSelected)
+})
+
+const label = computed(() => {
+  if (isDefined(props.label)) {
+    return props.label
+  }
+
+  return props.options
+    .filter(isSelected)
+    .map((it) => it.label)
+    .join(', ')
+})
+
+const showLabel = computed(() => {
+  if (isDefined(props.label)) {
+    return true
+  }
+
+  return props.options.some(isSelected)
+})
 </script>
 
 <template>
@@ -47,19 +90,19 @@ function handleSelect(event: any) { // event should be SelectEvent, but it doesn
         :aria-expanded="open"
         class="w-52 justify-start"
       >
-        <template v-if="options.some((it) => it.value === model)">
-          <slot name="triggerLeading" v-bind="options.find((it) => it.value === model)" />
-          {{ options.find((it) => it.value === model)?.label }}
+        <template v-if="showLabel">
+          <slot name="triggerLeading" v-bind="selectedOptions" />
+          {{ label }}
         </template>
         <template v-else>
-          <span class="text-muted-foreground">{{ placeholder }}</span>
+          <span class="text-muted-foreground">{{ placeholder ?? $t('common.placeholders.select') }}</span>
         </template>
         <ChevronsUpDown class="ml-auto size-4 shrink-0 opacity-50" />
       </Button>
     </PopoverTrigger>
     <PopoverContent class="w-52 p-0">
       <!-- @vue-ignore filterFunction is correct! -->
-      <Command :filter-function="filterFunction">
+      <Command v-model:search-term="searchTerm" :filter-function="filterFunction">
         <CommandInput :placeholder="searchPlaceholder ?? $t('common.placeholders.search')" />
         <CommandEmpty>{{ emptyLabel ?? $t('common.placeholders.searchEmpty') }}</CommandEmpty>
         <CommandList>
@@ -73,7 +116,7 @@ function handleSelect(event: any) { // event should be SelectEvent, but it doesn
               <slot name="optionLeading" v-bind="option" />
               {{ option.label }}
               <Check
-                :data-active="model === option.value"
+                :data-active="isSelected(option)"
                 class="ml-auto size-4 opacity-0 data-[active=true]:opacity-100"
               />
             </CommandItem>
