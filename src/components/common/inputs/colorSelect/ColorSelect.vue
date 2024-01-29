@@ -17,7 +17,7 @@ defineProps<{
 
 const { t } = useI18n()
 
-const options = computed<ComboboxOption[]>(() => [
+const options = computed<ComboboxOption<Nullable<string>>[]>(() => [
   {
     value: null,
     label: t('common.colors.noColor'),

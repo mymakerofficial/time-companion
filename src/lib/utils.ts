@@ -10,6 +10,9 @@ export type Nullable<T> = T | null
 export type Optional<T> = T | undefined
 export type Maybe<T> = Nullable<Optional<T>>
 
+export type MaybeArray<T> = T | T[]
+export type MaybeFunction<T> = T | ((...args: any[]) => T)
+
 export function isNull<T>(value: Nullable<T>): value is null {
   return value === null
 }
@@ -48,6 +51,6 @@ export function isCallable(maybeFunction: unknown | ((...args: any[]) => any)): 
   return typeof maybeFunction === 'function'
 }
 
-export function getOrRun<T>(valueOrFunction: (() => T) | T): T {
+export function getOrRun<T>(valueOrFunction: MaybeFunction<T>): T {
   return isCallable(valueOrFunction) ? valueOrFunction() : valueOrFunction
 }

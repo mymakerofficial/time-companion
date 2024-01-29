@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="TValue extends string | number | symbol | null">
 import {Check, ChevronsUpDown} from 'lucide-vue-next'
 
 import {computed, ref} from 'vue'
@@ -6,12 +6,13 @@ import {Button, buttonVariants} from '@/components/ui/button'
 import {Popover, PopoverContent, PopoverTrigger,} from '@/components/ui/popover'
 import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from "@/components/ui/command";
 import type {ComboboxOption} from "@/components/common/inputs/combobox/types";
-import {isDefined} from "@/lib/utils";
+import {getOrRun, isDefined, type MaybeArray} from "@/lib/utils";
+import {asArray} from "@/lib/listUtils";
 
-const model = defineModel<ComboboxOption['value'] | ComboboxOption['value'][]>({ required: true, default: null })
+const model = defineModel<MaybeArray<TValue>>({ required: true, default: null })
 
 const props = withDefaults(defineProps<{
-  options: ComboboxOption[]
+  options: ComboboxOption<TValue>[]
   multiple?: boolean
   label?: string
   emptyLabel?: string
@@ -27,16 +28,12 @@ const searchTerm = ref('')
 
 function filterFunction(list: object[], searchTerm: string): object[] {
   return list.filter((it) => {
-    return (it as ComboboxOption).label.toLowerCase().includes(searchTerm.toLowerCase())
+    return (it as ComboboxOption<TValue>).label.toLowerCase().includes(searchTerm.toLowerCase())
   })
 }
 
-function isSelected(option: ComboboxOption): boolean {
-  if (props.multiple && Array.isArray(model.value)) {
-    return model.value.includes(option.value)
-  }
-
-  return model.value === option.value
+function isSelected(option: ComboboxOption<TValue>): boolean {
+  return asArray(model.value).includes(option.value)
 }
 
 function handleSelect(event: any) { // event should be SelectEvent, but it doesn't import properly
@@ -66,8 +63,7 @@ const label = computed(() => {
     return props.label
   }
 
-  return props.options
-    .filter(isSelected)
+  return asArray(selectedOptions.value)
     .map((it) => it.label)
     .join(', ')
 })
