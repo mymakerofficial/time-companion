@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup lang="tsx">
 import {useProjectsStore} from "@/stores/projectsStore";
 import {computed, ref} from "vue";
 import ResponsiveContainer from "@/components/common/layout/ResponsiveContainer.vue";
@@ -11,44 +11,49 @@ import {
 } from "@tanstack/vue-table";
 import Table from "@/components/common/table/Table.vue";
 import {getSortableHeader, updater} from "@/helpers/table/tableHelpers";
-import type {ProjectRow} from "@/components/settings/projects/table/types";
 import TableVisibilitySelect from "@/components/common/table/TableVisibilitySelect.vue";
 import {useI18n} from "vue-i18n";
+import {formatDate, formatMinutes} from "@/lib/timeUtils";
+import {type DayTimeReport, calculateTimeReport} from "@/lib/timeReport/calculateTimeReport";
+import {useCalendarStore} from "@/stores/calendarStore";
 
 const { t } = useI18n()
 
+const calendarStore = useCalendarStore()
 const projectsStore = useProjectsStore();
 
-type Column = {
-  [key: string]: object
-}
-
-const columnHelper = createColumnHelper<Column>()
+const columnHelper = createColumnHelper<DayTimeReport>()
 
 const columns = computed(() => [
   columnHelper.accessor('date', {
     header: ({ column }) => getSortableHeader(column, t('report.table.columns.date')),
-    cell: () => 0,
+    cell: (info) => formatDate(info.getValue(), 'dddd DD.MM.YYYY'),
     enableHiding: false,
+    meta: {
+      className: 'border-r font-medium',
+    },
   }),
   ...projectsStore.projects.map((project) => columnHelper.display({
-    id: `project-${project.id}`,
+    id: project.id,
     header: () => project.displayName,
-    cell: () => 0,
+    cell: ({ row }) => formatMinutes(row.original.entries.find((it) => it.project.id === project.id)?.timeMinutes ?? 0),
   })),
-  columnHelper.accessor('total', {
+  columnHelper.accessor('totalBillableTimeMinutes', {
     header: () => t('report.table.columns.totalDuration'),
-    cell: () => 0,
+    cell: (info) => formatMinutes(info.getValue()),
     enableHiding: false,
+    meta: {
+      className: 'border-l font-medium',
+    },
   }),
 ])
 
-const data = ref<Column[]>([])
+const data = calendarStore.days.map((day) => calculateTimeReport(day, projectsStore.projects))
 
 const sorting = ref<SortingState>([])
 const columnVisibility = ref<VisibilityState>({})
 
-const tableOptions: Partial<TableOptions<Column>> = {
+const tableOptions: Partial<TableOptions<DayTimeReport>> = {
   state: {
     get sorting() { return sorting.value },
     get columnVisibility() { return columnVisibility.value },
@@ -61,7 +66,7 @@ const tableOptions: Partial<TableOptions<Column>> = {
 
 <template>
   <ResponsiveContainer class="mt-16">
-    <Table :data="data" :columns="columns" :options="tableOptions">
+    <Table :data="data" :columns="columns" :options="tableOptions" class="[&_tbody_>_tr:nth-child(odd)]:bg-muted/20 [&_tbody_>_tr:nth-child(odd):hover]:bg-muted/60">
       <template #actions="{ table }">
         <TableActions>
           <div>

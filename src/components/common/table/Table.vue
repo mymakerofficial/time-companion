@@ -10,6 +10,7 @@ import {
 import NoEntries from "@/components/common/table/NoEntries.vue";
 
 const props = defineProps<{
+  class?: string
   data: TableOptions<TData>['data']
   columns: TableOptions<TData>['columns']
   options?: Partial<TableOptions<TData>>
@@ -26,7 +27,7 @@ const table = useVueTable({
 <template>
   <slot name="actions" :table="table" />
   <div class="rounded-md overflow-hidden">
-    <Table>
+    <Table :class="props.class">
       <TableHeader>
         <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">
           <TableHead v-for="header in headerGroup.headers" :key="header.id" :class="(header.column.columnDef.meta as any)?.className">
@@ -41,7 +42,7 @@ const table = useVueTable({
             :key="row.id"
             :data-state="row.getIsSelected() && 'selected'"
           >
-            <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
+            <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id" :class="(cell.column.columnDef.meta as any)?.className">
               <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
             </TableCell>
           </TableRow>
