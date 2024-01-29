@@ -17,6 +17,19 @@ export function sumOf(values: Maybe<number[]>): number {
   return values.reduce((acc, value) => acc + value, 0)
 }
 
+// if given an array, returns the array, if given a single value, returns an array with that value
+export function asArray<T>(value: Maybe<T | T[]>): T[] {
+  if (isNotDefined(value)) {
+    return []
+  }
+
+  if (Array.isArray(value)) {
+    return value
+  }
+
+  return [value]
+}
+
 export function firstOf<T>(values: Maybe<T[]>): Maybe<T> {
   if (isEmpty(values)) {
     return null

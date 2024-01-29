@@ -91,7 +91,7 @@ const showLabel = computed(() => {
         class="w-52 justify-start"
       >
         <template v-if="showLabel">
-          <slot name="triggerLeading" v-bind="selectedOptions" />
+          <slot name="triggerLeading" :selected="selectedOptions" />
           {{ label }}
         </template>
         <template v-else>
@@ -113,7 +113,7 @@ const showLabel = computed(() => {
               :value="option"
               @select="handleSelect"
             >
-              <slot name="optionLeading" v-bind="option" />
+              <slot name="optionLeading" :option="option" />
               {{ option.label }}
               <Check
                 :data-active="isSelected(option)"
