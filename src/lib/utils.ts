@@ -43,3 +43,11 @@ export function takeIf<T, G>(condition: G, predicate: (condition: G) => boolean,
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
 }
+
+export function isCallable(maybeFunction: unknown | ((...args: any[]) => any)): maybeFunction is (...args: any[]) => void {
+  return typeof maybeFunction === 'function'
+}
+
+export function getOrRun<T>(valueOrFunction: (() => T) | T): T {
+  return isCallable(valueOrFunction) ? valueOrFunction() : valueOrFunction
+}

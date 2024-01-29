@@ -3,6 +3,7 @@ import type {Table, VisibilityState} from "@tanstack/vue-table";
 import {computed} from "vue";
 import type {ComboboxOption} from "@/components/common/inputs/combobox/types";
 import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
+import {getOrRun} from "@/lib/utils";
 
 const props = defineProps<{
   table: Table<TData>
@@ -14,7 +15,7 @@ const options = computed<ComboboxOption[]>(() => {
     .filter((column) => column.getCanHide())
     .map((column) => ({
       value: column.id,
-      label: column.columnDef.header?.() ?? column.id,
+      label: getOrRun(column.columnDef.header) ?? column.id,
     }))
 })
 
