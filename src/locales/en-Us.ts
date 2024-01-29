@@ -1,5 +1,8 @@
 export default {
   common: {
+    labels: {
+      columns: 'Columns',
+    },
     controls: {
       start: 'Start',
       stop: 'Stop',
@@ -107,6 +110,14 @@ export default {
       continueEvent: '@:common.controls.continue',
       deleteEvent: '@:common.controls.delete',
       dismissReminder: '@:common.controls.dismiss',
+    }
+  },
+  report: {
+    table: {
+      columns: {
+        date: 'Date',
+        totalDuration: 'Total',
+      }
     }
   },
   settings: {

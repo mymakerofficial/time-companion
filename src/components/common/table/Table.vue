@@ -24,6 +24,7 @@ const table = useVueTable({
 </script>
 
 <template>
+  <slot name="actions" :table="table" />
   <div class="rounded-md overflow-hidden">
     <Table>
       <TableHeader>
@@ -45,7 +46,7 @@ const table = useVueTable({
             </TableCell>
           </TableRow>
         </template>
-        <NoEntries v-else />
+        <NoEntries :col-span="columns.length" v-else />
       </TableBody>
     </Table>
   </div>
