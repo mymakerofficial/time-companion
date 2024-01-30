@@ -83,3 +83,13 @@ export function combineDateAndTime(date: Date, time: Date): Date {
 export function isSameDay(date1: Date, date2: Date): boolean {
   return dayjs(date1).isSame(date2, 'day')
 }
+
+// returns a list of days in the month of the given date
+export function daysInMonth(date: Date): Date[] {
+  const daysInMonth = dayjs(date).daysInMonth()
+  const days = []
+  for (let i = 1; i <= daysInMonth; i++) {
+    days.push(dayjs(date).set('date', i).toDate())
+  }
+  return days
+}
