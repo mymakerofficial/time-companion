@@ -118,6 +118,12 @@ export default {
         date: 'Datum',
         totalDuration: 'Gesamtzeit',
       }
+    },
+    empty: {
+      noProjects: {
+        title: 'Nichts zu sehen',
+        description: { term: 'Du hast noch keine Projekte. {0} um lost zu legen.', createProject: 'Erstelle eins'},
+      }
     }
   },
   settings: {

@@ -16,6 +16,10 @@ import {useI18n} from "vue-i18n";
 import {formatDate, formatMinutes} from "@/lib/timeUtils";
 import {type DayTimeReport, calculateTimeReport} from "@/lib/timeReport/calculateTimeReport";
 import {useCalendarStore} from "@/stores/calendarStore";
+import {isNotEmpty} from "@/lib/listUtils";
+import {Button} from "@/components/ui/button";
+import {useOpenDialog} from "@/composables/useOpenDialog";
+import NewProjectDialog from "@/components/settings/projects/projectDialog/NewProjectDialog.vue";
 
 const { t } = useI18n()
 
@@ -66,14 +70,26 @@ const tableOptions: Partial<TableOptions<DayTimeReport>> = {
 
 <template>
   <ResponsiveContainer class="mt-16">
-    <Table :data="data" :columns="columns" :options="tableOptions" class="[&_tbody_>_tr:nth-child(odd)]:bg-muted/20 [&_tbody_>_tr:nth-child(odd):hover]:bg-muted/60">
-      <template #actions="{ table }">
-        <TableActions>
-          <div>
-            <TableVisibilitySelect :table="table" :label="$t('project.title', 2)" />
-          </div>
-        </TableActions>
-      </template>
-    </Table>
+    <template v-if="isNotEmpty(projectsStore.projects)">
+      <Table :data="data" :columns="columns" :options="tableOptions" class="[&_tbody_>_tr:nth-child(odd)]:bg-muted/20 [&_tbody_>_tr:nth-child(odd):hover]:bg-muted/60">
+        <template #actions="{ table }">
+          <TableActions>
+            <div>
+              <TableVisibilitySelect :table="table" :label="$t('project.title', 2)" />
+            </div>
+          </TableActions>
+        </template>
+      </Table>
+    </template>
+    <template v-else>
+      <div class="flex flex-col gap-4">
+        <h1 class="text-2xl font-medium">{{ $t('report.empty.noProjects.title') }}</h1>
+        <p class="text-muted-foreground">
+          <i18n-t keypath="report.empty.noProjects.description.term">
+            <Button @click="useOpenDialog(NewProjectDialog)" variant="link" class="p-0">{{ $t('report.empty.noProjects.description.createProject') }}</Button>
+          </i18n-t>
+        </p>
+      </div>
+    </template>
   </ResponsiveContainer>
 </template>

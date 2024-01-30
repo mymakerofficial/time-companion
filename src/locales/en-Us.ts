@@ -118,6 +118,12 @@ export default {
         date: 'Date',
         totalDuration: 'Total',
       }
+    },
+    empty: {
+      noProjects: {
+        title: 'No time tracked yet.',
+        description: { term: 'You dont have any projects yet. {0} to start tracking time.', createProject: 'Create one'},
+      }
     }
   },
   settings: {
