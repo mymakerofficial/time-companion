@@ -15,11 +15,5 @@ const options = computed<ComboboxOption[]>(() => localeStore.availableLocales.ma
 </script>
 
 <template>
-  <section>
-    <div class="mb-8 space-y-2">
-      <h3 class="text-lg tracking-tight font-medium text-foreground">{{ $t('settings.locale.sections.language.title') }}</h3>
-      <p class="text-sm text-muted-foreground">{{ $t('settings.locale.sections.language.description') }}</p>
-    </div>
-    <Combobox v-model="localeStore.locale" :options="options" />
-  </section>
+  <Combobox v-model="localeStore.locale" :options="options" />
 </template>

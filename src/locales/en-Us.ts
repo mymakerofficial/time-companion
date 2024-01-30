@@ -45,6 +45,10 @@ export default {
       pink: 'Pink',
       rose: 'Rose',
     },
+    themes: {
+      dark: 'Dark',
+      light: 'Light',
+    },
     locales: {
       'en-US': 'English',
       'de-Informal': 'German (Informal)',
@@ -161,20 +165,16 @@ export default {
     appearance: {
       title: 'Appearance',
       description: 'Customize the look and feel of the app',
-      theme: {
-        dark: 'Dark',
-        light: 'Light',
-      }
-    },
-    locale: {
-      title: 'Localization',
-      description: 'Customize the language of the app',
       sections: {
+        theme: {
+          title: 'Theme',
+          description: 'Are you joining the dark side?',
+        },
         language: {
           title: 'Language',
-          description: 'Set the language of the app',
+          description: 'What language do you speak?',
         }
-      }
+      },
     },
   },
   dialog: {

@@ -36,11 +36,6 @@ const router = createRouter({
           name: 'app-settings-appearance',
           component: () => import('../views/app/settings/SettingsAppearanceView.vue'),
         },
-        {
-          path: 'locale',
-          name: 'app-settings-locale',
-          component: () => import('../views/app/settings/SettingsLocaleView.vue'),
-        },
       ]
     }
   ]

@@ -45,6 +45,10 @@ export default {
       pink: 'Pink',
       rose: 'Rose',
     },
+    themes: {
+      dark: 'Dunkel',
+      light: 'Hell',
+    },
     locales: {
       'en-US': 'Englisch',
       'de-Informal': 'Deutsch (Du)',
@@ -160,19 +164,15 @@ export default {
     },
     appearance: {
       title: 'Aussehen',
-      description: 'Passe das Aussehen der App an',
-      theme: {
-        dark: 'Dunkel',
-        light: 'Hell',
-      }
-    },
-    locale: {
-      title: 'Lokalisierung',
-      description: 'Passe die Sprache der App an',
+      description: 'Mach dir die Welt, wie sie dir gefällt.',
       sections: {
+        theme: {
+          title: 'Thema',
+          description: 'Schließe dich der dunklen Seite an?',
+        },
         language: {
           title: 'Sprache',
-          description: 'Passe die Sprache der App an',
+          description: 'Sprache ändern',
         }
       }
     },
