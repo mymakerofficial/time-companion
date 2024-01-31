@@ -7,9 +7,10 @@ import {buttonVariants} from "@/components/ui/button";
 import {useI18n} from "vue-i18n";
 import {colors} from "@/lib/colorUtils";
 import {computed} from "vue";
-import {asArray, firstOf} from "@/lib/listUtils";
+import {firstOf} from "@/lib/listUtils";
 
 const model = defineModel<Nullable<string>>({ required: true, default: null })
+const open = defineModel<boolean>('open', { required: false, default: false })
 
 defineProps<{
   variant?: NonNullable<Parameters<typeof buttonVariants>[0]>['variant']
@@ -30,9 +31,12 @@ const options = computed<ComboboxOption<Nullable<string>>[]>(() => [
 </script>
 
 <template>
-  <Combobox v-model="model" :options="options" :variant="variant">
-    <template #triggerLeading="{ selected }">
-      <div v-provide-color="firstOf(asArray(selected))?.value" class="mr-2 size-2 rounded-full bg-primary"/>
+  <Combobox v-model="model" :options="options" :variant="variant" v-model:open="open">
+    <template v-if="$slots.trigger" #trigger="{ selected }">
+      <slot name="trigger" :selected="firstOf(selected)" />
+    </template>
+    <template v-else #triggerLeading="{ selected }">
+      <div v-provide-color="firstOf(selected)?.value" class="mr-2 size-2 rounded-full bg-primary"/>
     </template>
     <template #optionLeading="{ option }">
       <div v-provide-color="option.value" class="mr-2 size-2 rounded-full bg-primary"/>

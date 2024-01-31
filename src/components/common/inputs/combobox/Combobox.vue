@@ -3,13 +3,16 @@ import {Check, ChevronsUpDown} from 'lucide-vue-next'
 
 import {computed, ref} from 'vue'
 import {Button, buttonVariants} from '@/components/ui/button'
-import {Popover, PopoverContent, PopoverTrigger,} from '@/components/ui/popover'
+import {Popover, PopoverContent,} from '@/components/ui/popover'
 import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from "@/components/ui/command";
 import type {ComboboxOption} from "@/components/common/inputs/combobox/types";
-import {getOrRun, isDefined, type MaybeArray} from "@/lib/utils";
-import {asArray} from "@/lib/listUtils";
+import {isDefined, type MaybeArray} from "@/lib/utils";
+import {asArray, isArray} from "@/lib/listUtils";
+import {PopoverAnchor} from "radix-vue";
+import {useToggle} from "@vueuse/core";
 
 const model = defineModel<MaybeArray<TValue>>({ required: true, default: null })
+const open = defineModel<boolean>('open',{ required: false, default: false })
 
 const props = withDefaults(defineProps<{
   options: ComboboxOption<TValue>[]
@@ -23,7 +26,8 @@ const props = withDefaults(defineProps<{
   variant: 'outline',
 })
 
-const open = ref(false)
+const toggleOpen = useToggle(open)
+
 const searchTerm = ref('')
 
 function filterFunction(list: object[], searchTerm: string): object[] {
@@ -37,7 +41,7 @@ function isSelected(option: ComboboxOption<TValue>): boolean {
 }
 
 function handleSelect(event: any) { // event should be SelectEvent, but it doesn't import properly
-  if (props.multiple && Array.isArray(model.value)) {
+  if (props.multiple && isArray(model.value)) {
     if (model.value.includes(event.detail.value.value)) {
       model.value = model.value.filter((it) => it !== event.detail.value.value)
     } else {
@@ -51,7 +55,7 @@ function handleSelect(event: any) { // event should be SelectEvent, but it doesn
 }
 
 const selectedOptions = computed(() => {
-  if (props.multiple && Array.isArray(model.value)) {
+  if (props.multiple && isArray(model.value)) {
     return props.options.filter(isSelected)
   }
 
@@ -79,24 +83,27 @@ const showLabel = computed(() => {
 
 <template>
   <Popover v-model:open="open">
-    <PopoverTrigger as-child>
-      <Button
-        :variant="variant"
-        role="combobox"
-        :aria-expanded="open"
-        class="w-52 justify-start"
-      >
-        <template v-if="showLabel">
-          <slot name="triggerLeading" :selected="selectedOptions" />
-          {{ label }}
-        </template>
-        <template v-else>
-          <span class="text-muted-foreground">{{ placeholder ?? $t('common.placeholders.select') }}</span>
-        </template>
-        <ChevronsUpDown class="ml-auto size-4 shrink-0 opacity-50" />
-      </Button>
-    </PopoverTrigger>
-    <PopoverContent class="w-52 p-0">
+    <PopoverAnchor as-child>
+      <slot name="trigger" :selected="selectedOptions">
+        <Button
+          :variant="variant"
+          role="combobox"
+          :aria-expanded="open"
+          class="w-52 justify-start"
+          @click="toggleOpen"
+        >
+          <template v-if="showLabel">
+            <slot name="triggerLeading" :selected="selectedOptions" />
+            {{ label }}
+          </template>
+          <template v-else>
+            <span class="text-muted-foreground">{{ placeholder ?? $t('common.placeholders.select') }}</span>
+          </template>
+          <ChevronsUpDown class="ml-auto size-4 shrink-0 opacity-50" />
+        </Button>
+      </slot>
+    </PopoverAnchor>
+    <PopoverContent class="w-52 p-0" align="start">
       <!-- @vue-ignore filterFunction is correct! -->
       <Command v-model:search-term="searchTerm" :filter-function="filterFunction">
         <CommandInput :placeholder="searchPlaceholder ?? $t('common.placeholders.search')" />
