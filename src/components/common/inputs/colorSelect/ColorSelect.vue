@@ -1,5 +1,5 @@
 <script setup lang="tsx">
-import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
+import Combobox from "@/components/common/inputs/combobox/ComboboxOld.vue";
 import type {Nullable} from "@/lib/utils";
 import {vProvideColor} from "@/directives/vProvideColor";
 import type {ComboboxOption} from "@/components/common/inputs/combobox/types";

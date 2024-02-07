@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
+import Combobox from "@/components/common/inputs/combobox/ComboboxOld.vue";
 import {Slash} from "lucide-vue-next";
 import type {ComboboxOption} from "@/components/common/inputs/combobox/types";
 import {useProjectsStore} from "@/stores/projectsStore";

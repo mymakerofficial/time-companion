@@ -2,8 +2,7 @@
 import type {Table, VisibilityState} from "@tanstack/vue-table";
 import {computed} from "vue";
 import type {ComboboxOption} from "@/components/common/inputs/combobox/types";
-import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
-import type {ID} from "@/lib/types";
+import Combobox from "@/components/common/inputs/combobox/ComboboxOld.vue";
 import {getOrRun} from "@/lib/utils";
 
 const props = defineProps<{

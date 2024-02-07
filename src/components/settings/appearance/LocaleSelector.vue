@@ -2,7 +2,7 @@
 import {useLocaleStore} from "@/stores/settings/localeStore";
 import type {ComboboxOption} from "@/components/common/inputs/combobox/types";
 import {useI18n} from "vue-i18n";
-import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
+import Combobox from "@/components/common/inputs/combobox/ComboboxOld.vue";
 import {computed} from "vue";
 
 const localeStore = useLocaleStore()

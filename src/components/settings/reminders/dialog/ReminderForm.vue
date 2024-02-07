@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {Input} from "@/components/ui/input";
-import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
+import Combobox from "@/components/common/inputs/combobox/ComboboxOld.vue";
 import EventInput from "@/components/common/inputs/EventInput.vue";
 import TimeDurationInput from "@/components/common/inputs/TimeDurationInput.vue";
 import RepeatOnToggles from "@/components/common/inputs/repeatOn/RepeatOnToggles.vue";
