@@ -1,5 +1,5 @@
 import type {Maybe, MaybeArray} from "@/lib/utils";
-import {isDefined, isNotDefined} from "@/lib/utils";
+import {isDefined, isNotDefined, isNull} from "@/lib/utils";
 
 export function isArray<T>(value: Maybe<MaybeArray<T>>): value is T[] {
   return Array.isArray(value)
@@ -38,6 +38,10 @@ export function sumOf(values: Maybe<number[]>): number {
 
 // if given an array, returns the array, if given a single value, returns an array with that value
 export function asArray<T>(value: Maybe<MaybeArray<T>>): T[] {
+  if (isNull(value)) {
+    return [null] as T[]
+  }
+
   if (isNotDefined(value)) {
     return []
   }
