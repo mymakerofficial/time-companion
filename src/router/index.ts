@@ -37,7 +37,12 @@ const router = createRouter({
           component: () => import('../views/app/settings/SettingsAppearanceView.vue'),
         },
       ]
-    }
+    },
+    {
+      path: '/playground',
+      name: 'playground',
+      component: () => import('../views/PlaygroundView.vue')
+    },
   ]
 })
 
