@@ -5,7 +5,7 @@ export type AcceptableValue = string | number | boolean | object | null
 type Wrapped<TValue> = { original: TValue }
 </script>
 
-<script setup lang="ts" generic="TValue extends AcceptableValue">
+<script setup lang="ts" generic="TValue extends AcceptableValue, TMultiple extends boolean">
 import {cn, isDefined, type MaybeArray, type Nullable} from "@/lib/utils";
 import {ComboboxRoot, PopoverAnchor} from "radix-vue";
 import {Popover, PopoverContent} from "@/components/ui/popover";
@@ -16,13 +16,13 @@ import {useToggle} from "@vueuse/core";
 import {asArray, isArray, isNotEmpty} from "@/lib/listUtils";
 import {computed} from "vue";
 
-const model = defineModel<Nullable<MaybeArray<TValue>>>({ required: true, default: null })
+const model = defineModel<TMultiple extends true ? TValue[] : TValue>({ required: true, default: null })
 const searchTerm = defineModel<string>('searchTerm', { required: false, default: '' })
 const open = defineModel<boolean>('open', { required: false, default: false })
 
 const props = withDefaults(defineProps<{
   options: TValue[]
-  multiple?: boolean
+  multiple?: TMultiple
   displayValue?: (option: TValue) => string;
   filterFunction?: (list: TValue[], query: string) => TValue[];
   variant?: NonNullable<Parameters<typeof buttonVariants>[0]>['variant']
@@ -34,10 +34,12 @@ const props = withDefaults(defineProps<{
   emptyLabel?: string
   noInput?: boolean
 }>(), {
-  multiple: false,
   variant: 'outline',
-  noInput: false,
 })
+
+const emit = defineEmits<{
+  'selected': [value: typeof model.value]
+}>()
 
 defineOptions({
   inheritAttrs: false
@@ -89,8 +91,10 @@ function handleSelect(option: TValue) {
       model.value.push(option)
     }
   } else {
-    model.value = option
+    (model.value as TValue) = option
   }
+
+  emit('selected', model.value)
 }
 
 const filteredOptions = computed(() => filterFunction(props.options, searchTerm.value))
@@ -116,7 +120,6 @@ const primitiveModel = computed(() => wrapModel(model.value))
   <ComboboxRoot
     :model-value="primitiveModel"
     v-model:search-term="searchTerm"
-    :multiple="multiple"
     open
   >
     <Popover v-model:open="open">
