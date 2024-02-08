@@ -33,6 +33,7 @@ const props = withDefaults(defineProps<{
   searchLabel?: string
   emptyLabel?: string
   noInput?: boolean
+  preventClose?: boolean
 }>(), {
   variant: 'outline',
 })
@@ -99,6 +100,18 @@ function handleSelect(option: TValue) {
   emit('selected', model.value)
 }
 
+function handleUpdateClose(value: boolean) {
+  if (value) {
+    return
+  }
+
+  if (props.preventClose) {
+    return
+  }
+
+  open.value = false
+}
+
 const filteredOptions = computed(() => filterFunction(props.options, searchTerm.value))
 
 // radix's Combobox doesn't support null as a value, so to support any value, we need to wrap it
@@ -124,7 +137,7 @@ const primitiveModel = computed(() => wrapModel(model.value))
     v-model:search-term="searchTerm"
     open
   >
-    <Popover v-model:open="open">
+    <Popover :open="open" @update:open="handleUpdateClose">
       <PopoverAnchor as-child>
         <slot name="anchor" :value="model" :toggle-open="toggleOpen">
           <Button
@@ -150,7 +163,10 @@ const primitiveModel = computed(() => wrapModel(model.value))
           </Button>
         </slot>
       </PopoverAnchor>
-      <PopoverContent :class="cn('w-[200px] p-0', popoverClass)" align="start">
+      <PopoverContent
+        :class="cn('w-[200px] p-0', popoverClass)"
+        align="start"
+      >
         <div class="flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground">
           <CommandInput
             v-if="!noInput"
@@ -162,7 +178,7 @@ const primitiveModel = computed(() => wrapModel(model.value))
             </slot>
           </CommandEmpty>
           <CommandList>
-            <CommandGroup>
+            <div class="p-1">
               <CommandItem
                 v-for="option in filteredOptions"
                 :key="options.findIndex((it) => it === option) /* keep the index stable */"
@@ -180,7 +196,7 @@ const primitiveModel = computed(() => wrapModel(model.value))
                   />
                 </slot>
               </CommandItem>
-            </CommandGroup>
+            </div>
           </CommandList>
         </div>
       </PopoverContent>
