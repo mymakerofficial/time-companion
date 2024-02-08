@@ -16,7 +16,7 @@ import {useToggle} from "@vueuse/core";
 import {asArray, isArray, isNotEmpty} from "@/lib/listUtils";
 import {computed} from "vue";
 
-const model = defineModel<TMultiple extends true ? TValue[] : TValue>({ required: true, default: null })
+const model = defineModel<TMultiple extends true ? TValue[] : Nullable<TValue>>({ required: true, default: null })
 const searchTerm = defineModel<string>('searchTerm', { required: false, default: '' })
 const open = defineModel<boolean>('open', { required: false, default: false })
 
