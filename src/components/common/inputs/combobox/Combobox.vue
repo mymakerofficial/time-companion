@@ -79,7 +79,9 @@ const label = computed(() => {
     .join(', ')
 })
 
-const showLabel = computed(() => isDefined(props.label) || isNotEmpty(asArray(model.value)))
+const showLabel = computed(() => {
+  return isNotEmpty(label.value)
+})
 
 // we handle selecting ourselves for more flexibility and to get around some radix weirdness
 function handleSelect(option: TValue) {
