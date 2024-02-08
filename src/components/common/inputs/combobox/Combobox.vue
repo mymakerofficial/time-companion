@@ -1,18 +1,22 @@
+<script lang="ts">
+type PrimitiveAcceptableValue = string | number | true | false | object
+export type AcceptableValue = string | number | boolean | object | null
+
+type Wrapped<TValue> = { value: TValue }
+</script>
+
 <script setup lang="ts" generic="TValue extends AcceptableValue">
-import {cn, isDefined, type MaybeArray} from "@/lib/utils";
+import {cn, isDefined, type MaybeArray, type Nullable} from "@/lib/utils";
 import {ComboboxRoot, PopoverAnchor} from "radix-vue";
 import {Popover, PopoverContent} from "@/components/ui/popover";
 import {CommandEmpty, CommandInput, CommandItem, CommandList} from "@/components/ui/command";
 import {Button, buttonVariants} from "@/components/ui/button";
 import {Check, ChevronsUpDown} from 'lucide-vue-next'
-import {useToggle} from "@vueuse/core";
-import {asArray, isNotEmpty} from "@/lib/listUtils";
-import {computed} from "vue";
+import {useToggle, watchIgnorable} from "@vueuse/core";
+import {asArray, isArray, isNotEmpty} from "@/lib/listUtils";
+import {computed, ref, watch} from "vue";
 
-export type AcceptableValue = string | number | boolean | object
-
-// TODO Figure out nullability
-const model = defineModel<MaybeArray<TValue>>({ required: true, default: null })
+const model = defineModel<Nullable<MaybeArray<TValue>>>({ required: true, default: null })
 const searchTerm = defineModel<string>('searchTerm', { required: false, default: '' })
 const open = defineModel<boolean>('open', { required: false, default: false })
 
@@ -73,15 +77,67 @@ const label = computed(() => {
     .join(', ')
 })
 
-const showLabel = computed(() => isDefined(props.label) || isNotEmpty(model.value))
+const showLabel = computed(() => isDefined(props.label) || isNotEmpty(asArray(model.value)))
+
+// radix's Combobox doesn't support null as a value, so to support any value, we need to wrap it
+// TODO simplify this
+// TODO selecting using the keyboard doesn't work
+
+function wrapSingle(value: Nullable<TValue>) {
+  return { value } as Wrapped<TValue>
+}
+
+function unwrapSingle(value: Wrapped<TValue>) {
+  return value.value as TValue
+}
+
+function wrapMultiple(value: Array<TValue>) {
+  return value.map(wrapSingle)
+}
+
+function unwrapMultiple(value: Array<Wrapped<TValue>>) {
+  return value.map(unwrapSingle)
+}
+
+function wrapModel(value: Nullable<MaybeArray<TValue>>) {
+  return( isArray(value) ? wrapMultiple(value) : wrapSingle(value)) as PrimitiveAcceptableValue
+}
+
+function unwrapModel(value: PrimitiveAcceptableValue) {
+  return isArray(value) ? unwrapMultiple(value as Array<Wrapped<TValue>>) : unwrapSingle(value as Wrapped<TValue>)
+}
+
+// we cant use a computed here because it would not react to updates when given an array
+const primitiveModel = ref(wrapModel(model.value))
+
+const { ignoreUpdates: ignoreModelUpdate } = watchIgnorable(model, (value) => {
+  ignorePrimitiveUpdate(() => {
+    primitiveModel.value = wrapModel(value)
+  })
+}, { deep: true })
+
+const { ignoreUpdates: ignorePrimitiveUpdate } = watchIgnorable(primitiveModel, (value) => {
+  ignoreModelUpdate(() => {
+    model.value = unwrapModel(value)
+  })
+}, { deep: true })
+
+function primitiveFilterFunction(list: string[] | number[] | false[] | true[] | object[], query: string) {
+  return wrapMultiple(filterFunction(unwrapMultiple(list as Array<Wrapped<TValue>>), query)) as string[] | number[] | false[] | true[] | object[]
+}
+
+function primitiveDisplayValue(value: PrimitiveAcceptableValue) {
+  return getOptionLabel(unwrapSingle(value as Wrapped<TValue>))
+}
 </script>
 
 <template>
   <ComboboxRoot
-    v-model="rootModel"
+    v-model="primitiveModel"
     v-model:search-term="searchTerm"
     :multiple="multiple"
-    :filter-function="filterFunction"
+    :filter-function="primitiveFilterFunction"
+    :display-value="primitiveDisplayValue"
     open
   >
     <Popover v-model:open="open">
@@ -110,7 +166,7 @@ const showLabel = computed(() => isDefined(props.label) || isNotEmpty(model.valu
           </Button>
         </slot>
       </PopoverAnchor>
-      <PopoverContent :class="cn('w-[200px] p-0', popoverClass)">
+      <PopoverContent :class="cn('w-[200px] p-0', popoverClass)" align="start">
         <div class="flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground">
           <CommandInput
             v-if="!noInput"
@@ -126,7 +182,7 @@ const showLabel = computed(() => isDefined(props.label) || isNotEmpty(model.valu
               <CommandItem
                 v-for="(option, index) in options"
                 :key="index"
-                :value="option"
+                :value="wrapSingle(option)"
               >
                 <slot name="option" :value="option">
                   <slot name="optionLeading" :value="option" />
