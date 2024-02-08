@@ -1,41 +1,40 @@
 <script setup lang="ts" generic="TData">
 import type {Table, VisibilityState} from "@tanstack/vue-table";
 import {computed} from "vue";
-import type {ComboboxOption} from "@/components/common/inputs/combobox/types";
-import Combobox from "@/components/common/inputs/combobox/ComboboxOld.vue";
+import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
 import {getOrRun} from "@/lib/utils";
+import type {Column} from "@tanstack/table-core";
 
 const props = defineProps<{
   table: Table<TData>
   label?: string
 }>()
 
-const options = computed(() => {
-  return props.table.getAllColumns()
-    .filter((column) => column.getCanHide())
-    .map((column): ComboboxOption => ({
-      value: column.id,
-      label: getOrRun(column.columnDef.header),
-    }))
-})
+const columns = computed<Column<TData>[]>(() =>
+  props.table.getAllColumns().filter((column) => column.getCanHide())
+)
 
-const selected = computed<string[]>({
-  get() {
-    return options.value
-      .filter((option) => props.table.getColumn(option.value)?.getIsVisible())
-      .map((option) => option.value)
-  },
-  set(value) {
-    props.table.setColumnVisibility(() => {
-      return options.value.reduce((acc, option) => {
-        acc[option.value] = value.includes(option.value)
-        return acc
-      }, {} as VisibilityState)
-    })
-  },
-})
+const selected = computed(() =>
+  columns.value.filter((column) => props.table.getColumn(column.id)?.getIsVisible())
+)
+
+function update(value: Column<TData>[]) {
+  props.table.setColumnVisibility(() =>
+    columns.value.reduce((acc, column) => {
+      acc[column.id] = value.includes(column)
+      return acc
+    }, {} as VisibilityState)
+  )
+}
 </script>
 
 <template>
-  <Combobox multiple v-model="selected" :options="options" :label="label ?? $t('common.labels.columns')" />
+  <Combobox
+    v-model="selected"
+    :options="columns"
+    :display-value="(column) => getOrRun(column.columnDef.header)"
+    @selected="update"
+    multiple
+    :label="label ?? $t('common.labels.columns')"
+  />
 </template>

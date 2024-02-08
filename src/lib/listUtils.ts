@@ -11,6 +11,10 @@ export function isNotArray<T>(value: Maybe<MaybeArray<T>>): value is Maybe<T> {
 
 // if given an array, returns true if the array is empty, if not given an array, returns true if the value is null or undefined
 export function isEmpty<T>(value: Maybe<MaybeArray<T>>): value is Maybe<[]> {
+  if (typeof value === 'string') {
+    return value.length === 0
+  }
+
   if (isNotArray(value)) {
     return isNotDefined(value)
   }
@@ -20,6 +24,10 @@ export function isEmpty<T>(value: Maybe<MaybeArray<T>>): value is Maybe<[]> {
 
 // if given an array, returns true if the array is not empty, if not given an array, returns true if the value is not null or undefined
 export function isNotEmpty<T>(value: Maybe<MaybeArray<T>>): value is [T, ...T[]] {
+  if (typeof value === 'string') {
+    return value.length > 0
+  }
+
   if (isNotArray(value)) {
     return isDefined(value)
   }
