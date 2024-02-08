@@ -1,5 +1,5 @@
 import type {Maybe, MaybeArray} from "@/lib/utils";
-import {isDefined, isNotDefined} from "@/lib/utils";
+import {isDefined, isNotDefined, isNull} from "@/lib/utils";
 
 export function isArray<T>(value: Maybe<MaybeArray<T>>): value is T[] {
   return Array.isArray(value)
@@ -11,6 +11,10 @@ export function isNotArray<T>(value: Maybe<MaybeArray<T>>): value is Maybe<T> {
 
 // if given an array, returns true if the array is empty, if not given an array, returns true if the value is null or undefined
 export function isEmpty<T>(value: Maybe<MaybeArray<T>>): value is Maybe<[]> {
+  if (typeof value === 'string') {
+    return value.length === 0
+  }
+
   if (isNotArray(value)) {
     return isNotDefined(value)
   }
@@ -20,6 +24,10 @@ export function isEmpty<T>(value: Maybe<MaybeArray<T>>): value is Maybe<[]> {
 
 // if given an array, returns true if the array is not empty, if not given an array, returns true if the value is not null or undefined
 export function isNotEmpty<T>(value: Maybe<MaybeArray<T>>): value is [T, ...T[]] {
+  if (typeof value === 'string') {
+    return value.length > 0
+  }
+
   if (isNotArray(value)) {
     return isDefined(value)
   }
@@ -38,6 +46,10 @@ export function sumOf(values: Maybe<number[]>): number {
 
 // if given an array, returns the array, if given a single value, returns an array with that value
 export function asArray<T>(value: Maybe<MaybeArray<T>>): T[] {
+  if (isNull(value)) {
+    return [null] as T[]
+  }
+
   if (isNotDefined(value)) {
     return []
   }

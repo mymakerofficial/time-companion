@@ -9,18 +9,10 @@ import {Label} from "@/components/ui/label";
 import {computed} from "vue";
 import {ReminderActionType} from "@/model/calendarReminder";
 import type {ReminderFormState} from "@/components/settings/reminders/dialog/helpers";
-import {useI18n} from "vue-i18n";
 
 const props = defineProps<{
   form: ReminderFormState
 }>()
-
-const { t } = useI18n()
-
-const actionTypeOptions = Object.keys(ReminderActionType).map((key) => ({
-  label: t(`reminder.actionType.${key}`),
-  value: ReminderActionType[key as keyof typeof ReminderActionType],
-}))
 
 const showTargetInput = computed(() => {
   return props.form.actionType === ReminderActionType.START_EVENT
@@ -39,7 +31,11 @@ const showColorInput = computed(() => {
     </div>
     <div class="grid grid-cols-4 items-center gap-4">
       <Label class="text-right">{{ $t('dialog.reminder.form.actionType.label') }}</Label>
-      <Combobox v-model="form.actionType" :options="actionTypeOptions" />
+      <Combobox
+        v-model="form.actionType"
+        :options="Object.keys(ReminderActionType)"
+        :display-value="(value) => $t(`reminder.actionType.${value}`)"
+      />
     </div>
     <div v-if="showTargetInput" class="grid grid-cols-4 items-center gap-4">
       <Label class="text-right">{{ $t('dialog.reminder.form.actionTarget.label') }}</Label>
