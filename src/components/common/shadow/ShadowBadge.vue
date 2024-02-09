@@ -32,6 +32,7 @@ const slashVariants = cva(
 
 <template>
   <Badge
+    v-if="props.shadow || $slots.leading || $slots.project || $slots.activity || $slots.part || $slots.trailing"
     :variant="props.variant"
     :size="props.size"
     :color="shadow?.color"
