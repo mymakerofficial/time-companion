@@ -8,6 +8,7 @@ import type {ReactiveProject} from "@/model/project";
 import type {ReactiveActivity} from "@/model/activity";
 import {useCalendarStore} from "@/stores/calendarStore";
 import {isNull} from "@/lib/utils";
+import {useQuickAccess} from "@/composables/useQuickAccess";
 
 const emit = defineEmits<{
   start: [shadow: ReactiveCalendarEventShadow]
@@ -17,30 +18,7 @@ defineProps<{
   iconPencil?: boolean
 }>()
 
-const projectsStore = useProjectsStore()
-const calendarStore = useCalendarStore()
-
-const maxActivitiesPerProject = 3
-const maxShadows = 12
-
-function byLastUsed(a: ReactiveProject | ReactiveActivity, b: ReactiveProject | ReactiveActivity) {
-  return a.lastUsed > b.lastUsed ? -1 : 1
-}
-
-const shadows = computed(() => {
-  return projectsStore.projects
-    .flatMap((project) => {
-      return [
-        ...project.childActivities.sort(byLastUsed).map((activity) => createEventShadow({ project, activity })).slice(0, maxActivitiesPerProject),
-        createEventShadow({ project })
-      ]
-    })
-    .sort((a, b) => byLastUsed(
-      a.activity ?? a.project,
-      b.activity ?? b.project
-    ))
-    .slice(0, maxShadows)
-})
+const shadows = useQuickAccess()
 
 function handleClick(shadow: ReactiveCalendarEventShadow) {
   emit('start', shadow)
