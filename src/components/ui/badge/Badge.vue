@@ -6,13 +6,14 @@ import {vProvideColor} from '@/directives/vProvideColor'
 
 const props = defineProps<{
   variant?: BadgeVariants['variant']
+  size?: BadgeVariants['size']
   class?: HTMLAttributes['class']
   color?: Nullable<string>
 }>()
 </script>
 
 <template>
-  <div v-provide-color="color" :class="cn(badgeVariants({ variant }), props.class)">
+  <div v-provide-color="color" :class="cn(badgeVariants({ variant, size }), props.class)">
     <slot />
   </div>
 </template>
