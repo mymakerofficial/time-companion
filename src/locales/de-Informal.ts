@@ -2,6 +2,8 @@ export default {
   common: {
     labels: {
       columns: 'Spalten',
+      yes: 'Ja',
+      no: 'Nein',
     },
     controls: {
       start: 'Start',

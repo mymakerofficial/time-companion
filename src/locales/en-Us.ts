@@ -2,6 +2,8 @@ export default {
   common: {
     labels: {
       columns: 'Columns',
+      yes: 'Yes',
+      no: 'No',
     },
     controls: {
       start: 'Start',
