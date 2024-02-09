@@ -4,11 +4,13 @@ import type {Nullable} from "@/lib/utils";
 import {computed, reactive} from "vue";
 import type {CalendarEventInit, ReactiveCalendarEvent} from "@/model/calendarEvent";
 import {createEvent} from "@/model/calendarEvent";
+import {isDefined} from "@/lib/utils";
 
 export interface ReactiveCalendarEventShadow {
   project: ReactiveProject
   activity: Nullable<ReactiveActivity>
   readonly color: ReactiveProject['color']
+  readonly combinedName: string
   createEvent: (init?: CalendarEventInit) => ReactiveCalendarEvent
 }
 
@@ -35,7 +37,7 @@ export function createEventShadow(init: CalendarEventShadowInit): ReactiveCalend
     project: inherits.project,
     activity: inherits.activity,
     color: computed(() => inherits.activity?.color ?? inherits.project.color),
-    //
+    combinedName: computed(() => `${inherits?.project.displayName}${isDefined(inherits?.activity) ? '/' : ''}${inherits?.activity?.displayName ?? ''}`),
     createEvent: create,
   })
 }
