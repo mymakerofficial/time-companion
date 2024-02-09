@@ -20,17 +20,10 @@ import {fromNow} from "@/lib/timeUtils";
 import {getSortableHeader} from "@/helpers/table/tableHelpers";
 import {useI18n} from "vue-i18n";
 import {Badge} from "@/components/ui/badge";
+import ShadowBadge from "@/components/common/shadow/ShadowBadge.vue";
 
-function getNameCell(value: ProjectRow['name']) {
-  const projectPart = <span>{value[0]}</span>
-  const activityPart = value[1] && <><Slash class="size-3"/><span>{value[1]}</span></>
-
-  return (
-    <span class="flex items-center gap-2">
-      { projectPart }
-      { activityPart }
-    </span>
-  )
+function getNameCell(value: ProjectRow['shadow']) {
+  return <ShadowBadge shadow={value} variant="skeleton" size="md" class="font-medium" />
 }
 
 function getColorCell(value: ProjectRow['color']) {
@@ -102,7 +95,7 @@ export function  createProjectsColumns(
   const { t } = useI18n()
 
   return [
-    columnHelper.accessor('name', {
+    columnHelper.accessor('shadow', {
       header: ({ column }) => getSortableHeader(column, t('settings.projects.table.columns.name')),
       cell: (info) => getNameCell(info.getValue()),
     }),
