@@ -164,7 +164,7 @@ const primitiveModel = computed(() => wrapModel(model.value))
         </slot>
       </PopoverAnchor>
       <PopoverContent
-        :class="cn('w-[200px] p-0', popoverClass)"
+        :class="cn('min-w-[200px] w-[200px] p-0', popoverClass)"
         align="start"
       >
         <div class="flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground">
@@ -190,10 +190,12 @@ const primitiveModel = computed(() => wrapModel(model.value))
                   <slot name="optionLabel" :value="option">
                     <span class="truncate">{{ getDisplayValue(option) }}</span>
                   </slot>
-                  <Check
-                    :data-active="isSelected(option)"
-                    class="ml-auto size-4 opacity-0 data-[active=true]:opacity-100"
-                  />
+                  <span class="ml-auto">
+                    <Check
+                      :data-active="isSelected(option)"
+                      class="ml-2 size-4 opacity-0 data-[active=true]:opacity-100"
+                    />
+                  </span>
                 </slot>
               </CommandItem>
             </div>
