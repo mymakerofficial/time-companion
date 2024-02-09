@@ -1,17 +1,15 @@
 <script setup lang="ts">
 import {cn} from '@/lib/utils'
-import {Primitive, type PrimitiveProps} from "radix-vue";
 import {computed, type HTMLAttributes} from "vue";
 
 const model = defineModel<string | number>({ required: false })
 
-const props = withDefaults(defineProps<Omit<PrimitiveProps, 'asChild'> & {
+const props = withDefaults(defineProps<{
   type?: HTMLAttributes['inputmode']
   placeholder?: HTMLAttributes['placeholder']
   class?: HTMLAttributes['class']
   inputClass?: HTMLAttributes['class']
 }>(), {
-  as: 'input',
   type: 'text',
   class: '',
   inputClass: '',
@@ -25,12 +23,11 @@ const containerProps = computed(() => {
 })
 
 const inputProps = computed(() => {
-  const { as, type, placeholder, inputClass } = props
+  const { type, placeholder, inputClass } = props
   return {
-    as,
     type,
     placeholder,
-    class: cn('h-full w-full first:pl-3 last:pr-3 py-2 bg-transparent  file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50', inputClass)
+    class: cn('h-full w-full first:pl-3 last:pr-3 py-2 bg-transparent file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50', inputClass)
   }
 })
 </script>
@@ -38,10 +35,12 @@ const inputProps = computed(() => {
 <template>
   <div v-bind="containerProps">
     <slot name="leading" />
-    <Primitive
-      v-model="model"
-      v-bind="inputProps"
-    />
+    <slot name="input" v-bind="inputProps">
+      <input
+        v-model="model"
+        v-bind="inputProps"
+      />
+    </slot>
     <slot name="trailing" />
   </div>
 </template>
