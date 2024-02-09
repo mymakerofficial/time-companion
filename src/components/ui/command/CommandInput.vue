@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { type HTMLAttributes, computed } from 'vue'
 import { Search } from 'lucide-vue-next'
-import { ComboboxInput, type ComboboxInputProps, useForwardProps } from 'radix-vue'
+import ComboboxInput from "@/components/common/inputs/combobox/ComboboxInput.vue";
+import { type ComboboxInputProps, useForwardProps } from 'radix-vue'
 import { cn } from '@/lib/utils'
 
 defineOptions({
