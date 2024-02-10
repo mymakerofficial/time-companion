@@ -12,7 +12,7 @@ const disabled = ref(!props.autoFocus)
 onMounted(() => {
   setTimeout(() => {
     disabled.value = false
-  }, 1)
+  }, 2)
 })
 
 const delegatedProps = computed(() => {
