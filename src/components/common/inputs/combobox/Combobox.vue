@@ -25,6 +25,7 @@ const props = withDefaults(defineProps<{
   multiple?: TMultiple
   displayValue?: (option: TValue) => string;
   filterFunction?: (list: TValue[], query: string) => TValue[];
+  getKey?: (option: TValue) => string | number;
   variant?: NonNullable<Parameters<typeof buttonVariants>[0]>['variant']
   triggerClass?: string
   popoverClass?: string
@@ -68,6 +69,14 @@ function filterFunction(list: TValue[], query: string): TValue[] {
   return list.filter((option) => {
     return getDisplayValue(option).toLowerCase().includes(query.toLowerCase())
   })
+}
+
+function getKey(option: TValue): string | number {
+  if (isDefined(props.getKey)) {
+    return props.getKey(option)
+  }
+
+  return props.options.findIndex((it) => it === option)
 }
 
 const label = computed(() => {
@@ -181,7 +190,7 @@ const primitiveModel = computed(() => wrapModel(model.value))
             <div class="p-1">
               <CommandItem
                 v-for="option in filteredOptions"
-                :key="options.findIndex((it) => it === option) /* keep the index stable */"
+                :key="getKey(option) /* keep the index stable */"
                 :value="wrap(option) /* radix doesn't support null */"
                 @click.prevent="() => handleSelect(option) /* override default behavior */"
               >
