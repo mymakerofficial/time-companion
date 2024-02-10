@@ -1,21 +1,39 @@
 import {useProjectsStore} from "@/stores/projectsStore";
 import type {ReactiveProject} from "@/model/project";
 import type {ReactiveActivity} from "@/model/activity";
-import {computed} from "vue";
-import {createEventShadow} from "@/model/calendarEventShadow";
+import {type  MaybeRefOrGetter, ref, toRefs, toValue, watchEffect} from "vue";
+import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendarEventShadow";
+import type {Nullable} from "@/lib/utils";
+import {isNull} from "@/lib/utils";
 
 function byLastUsed(a: ReactiveProject | ReactiveActivity, b: ReactiveProject | ReactiveActivity) {
   return a.lastUsed > b.lastUsed ? -1 : 1
 }
 
-export function useQuickAccess() {
+export interface UseQuickAccessOptions {
+  maxActivitiesPerProject: number
+  maxShadows: number
+  // only return shadows with the given project
+  project: Nullable<ReactiveProject>
+  // don't include the given shadow
+  exclude: Nullable<ReactiveCalendarEventShadow>
+}
+
+export function useQuickAccess(options?: MaybeRefOrGetter<Partial<UseQuickAccessOptions>>) {
   const { projects } = useProjectsStore()
 
-  const maxActivitiesPerProject = 3
-  const maxShadows = 12
+  const shadows = ref<ReactiveCalendarEventShadow[]>([])
 
-  return computed(() => {
-    return projects
+  watchEffect(() => {
+    const {
+      maxActivitiesPerProject = 3,
+      maxShadows = 12,
+      project: projectFilter = null,
+      exclude = null,
+    } = toValue(options ?? {})
+
+    shadows.value = projects
+      .filter((project) => isNull(projectFilter) || project === projectFilter)
       .flatMap((project) => {
         return [
           ...project.childActivities.sort(byLastUsed).map((activity) => createEventShadow({ project, activity })).slice(0, maxActivitiesPerProject),
@@ -27,5 +45,11 @@ export function useQuickAccess() {
         b.activity ?? b.project
       ))
       .slice(0, maxShadows)
+      .filter((shadow) =>
+        shadow.project !== exclude?.project ||
+        shadow.activity !== exclude?.activity
+      )
   })
+
+  return shadows
 }
