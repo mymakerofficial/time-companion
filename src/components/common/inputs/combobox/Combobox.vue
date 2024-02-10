@@ -26,6 +26,7 @@ const props = withDefaults(defineProps<{
   displayValue?: (option: TValue) => string;
   filterFunction?: (list: TValue[], query: string) => TValue[];
   getKey?: (option: TValue) => string | number;
+  limit?: number
   variant?: NonNullable<Parameters<typeof buttonVariants>[0]>['variant']
   triggerClass?: string
   popoverClass?: string
@@ -36,6 +37,7 @@ const props = withDefaults(defineProps<{
   noInput?: boolean
   preventClose?: boolean
 }>(), {
+  limit: Infinity,
   variant: 'outline',
 })
 
@@ -134,7 +136,10 @@ function handleUpdateClose(value: boolean) {
   open.value = false
 }
 
-const filteredOptions = computed(() => filterFunction(props.options, searchTerm.value))
+const filteredOptions = computed(() =>
+  filterFunction(props.options, searchTerm.value)
+  .slice(0, props.limit) // limit the number of options (default: Infinity)
+)
 
 // radix's Combobox doesn't support null as a value, so to support any value, we need to wrap it
 
