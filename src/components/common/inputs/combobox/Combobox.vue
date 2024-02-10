@@ -13,12 +13,12 @@ import {CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from
 import {Button, buttonVariants} from "@/components/ui/button";
 import {Check, ChevronsUpDown} from 'lucide-vue-next'
 import {useToggle} from "@vueuse/core";
-import {asArray, isArray, isNotEmpty} from "@/lib/listUtils";
+import {asArray, isArray, isEmpty, isNotEmpty} from "@/lib/listUtils";
 import {computed} from "vue";
 
 const model = defineModel<TMultiple extends true ? TValue[] : Nullable<TValue>>({ required: true, default: null })
 const searchTerm = defineModel<string>('searchTerm', { required: false, default: '' })
-const open = defineModel<boolean>('open', { required: false, default: false })
+const openModel = defineModel<boolean>('open', { required: false, default: false })
 
 const props = withDefaults(defineProps<{
   options: TValue[]
@@ -47,7 +47,20 @@ defineOptions({
   inheritAttrs: false
 })
 
-const toggleOpen = useToggle(open)
+const toggleOpen = useToggle(openModel)
+
+const open = computed({
+  get() {
+    if (isEmpty(props.options)) {
+      return false
+    }
+
+    return openModel.value
+  },
+  set(value) {
+    openModel.value = value
+  }
+})
 
 function isSelected(option: TValue): boolean {
   return asArray(model.value).includes(option)
