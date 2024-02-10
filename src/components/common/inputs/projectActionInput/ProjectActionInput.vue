@@ -55,6 +55,7 @@ const open = computed(() => {
     :get-key="(shadow) => [shadow.project?.id, shadow.activity?.id].join('-')"
     :open="open"
     v-model:search-term="searchTerm"
+    :limit="6"
     no-input
     prevent-close
     popover-class="w-auto"
