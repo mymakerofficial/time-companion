@@ -1,19 +1,50 @@
 <script setup lang="ts">
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import {Input} from "@/components/ui/input";
 import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
 import ComboboxInput from "@/components/common/inputs/combobox/ComboboxInput.vue";
-import type {Nullable} from "@/lib/utils";
+import {isNotNull, type Nullable} from "@/lib/utils";
 import {useQuickAccess} from "@/composables/useQuickAccess";
 import type {ReactiveCalendarEventShadow} from "@/model/calendarEventShadow";
 import ShadowBadge from "@/components/common/shadow/ShadowBadge.vue";
+import {isNotEmpty} from "@/lib/listUtils";
+import {useFocus} from "@vueuse/core";
 
-const open = ref(false)
 const searchTerm = ref('')
+const input = ref()
+const { focused: inputFocused } = useFocus(input)
 
 const selected = ref<Nullable<ReactiveCalendarEventShadow>>(null)
 
-const shadows = useQuickAccess()
+const shadows = useQuickAccess(() => ({
+  maxActivitiesPerProject: isNotNull(selected.value) || isNotEmpty(searchTerm.value) ? Infinity : undefined,
+  maxShadows: isNotNull(selected.value) || isNotEmpty(searchTerm.value) ? Infinity : undefined,
+  project: selected.value?.project ?? null,
+  exclude: selected.value ?? null,
+}))
+
+function handleBackspace() {
+  if (selected.value?.activity) {
+    selected.value.activity = null
+    return
+  }
+
+  if (selected.value?.project) {
+    selected.value = null
+  }
+}
+
+const open = computed(() => {
+  if (inputFocused.value === false) {
+    return false
+  }
+
+  if (selected.value?.activity) {
+    return false
+  }
+
+  return true
+})
 </script>
 
 <template>
@@ -21,8 +52,9 @@ const shadows = useQuickAccess()
     v-model="selected"
     :options="shadows"
     :display-value="(shadow) => shadow.combinedName"
+    :get-key="(shadow) => [shadow.project?.id, shadow.activity?.id].join('-')"
     :open="open"
-    :search-term="searchTerm"
+    v-model:search-term="searchTerm"
     no-input
     prevent-close
     popover-class="w-auto"
@@ -34,11 +66,9 @@ const shadows = useQuickAccess()
         </template>
         <template #input="props">
           <ComboboxInput
+            ref="input"
             v-model="searchTerm"
-            @focusin="open = true"
-            @focusout="open = false"
-            @keydown="open = true"
-            @keyup.backspace="() => {if (selected) {selected = null; open = false}}"
+            @keyup.backspace="handleBackspace"
             v-bind="props"
           />
         </template>
