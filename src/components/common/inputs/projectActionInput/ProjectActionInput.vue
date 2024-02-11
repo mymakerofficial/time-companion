@@ -23,7 +23,13 @@ const shadows = useQuickAccess(() => ({
   exclude: selected.value ?? null,
 }))
 
-function handleBackspace() {
+function handleBackspace(event: KeyboardEvent) {
+  const target = event.target as HTMLInputElement
+
+  if (target.selectionStart !== 0 || target.selectionEnd !== 0) {
+    return
+  }
+
   if (selected.value?.activity) {
     // replace with new shadow, otherwise the color will not update
     selected.value = createEventShadow({
@@ -72,7 +78,7 @@ const open = computed(() => {
           <ComboboxInput
             ref="input"
             v-model="searchTerm"
-            @keyup.backspace="handleBackspace"
+            @keydown.backspace="handleBackspace"
             v-bind="props"
           />
         </template>
