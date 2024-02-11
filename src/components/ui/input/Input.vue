@@ -3,9 +3,11 @@ import {cn} from '@/lib/utils'
 import {computed, type HTMLAttributes, useAttrs} from "vue";
 import {useEmitAsProps} from "radix-vue";
 import InputPrimitive from "@/components/ui/input/InputPrimitive.vue";
+import {inputContainerVariants, inputInputVariants, type InputVariants} from "@/components/ui/input/index";
 
 const props = withDefaults(defineProps<{
   modelValue: string | number
+  size?: InputVariants['size']
   type?: HTMLAttributes['inputmode']
   class?: HTMLAttributes['class']
   inputClass?: HTMLAttributes['class']
@@ -26,20 +28,21 @@ defineOptions({
 const attrs = useAttrs()
 
 const containerProps = computed(() => {
-  const { class: className } = props
+  const { size, class: className } = props
+
   return {
-    class: cn('flex items-center h-10 w-full overflow-hidden rounded-md border border-input bg-background text-sm ring-offset-background placeholder:text-muted-foreground has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2', className)
+    class: cn(inputContainerVariants({ size }), className)
   }
 })
 
 const inputProps = computed(() => {
-  const { type, inputClass } = props
+  const { type, size, inputClass } = props
 
   return {
     modelValue: props.modelValue,
     ...useEmitAsProps(emit),
     type,
-    class: cn('h-full w-full first:pl-3 last:pr-3 py-2 bg-transparent file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50', inputClass),
+    class: cn(inputInputVariants({ size }), inputClass),
     ...attrs,
   }
 })
