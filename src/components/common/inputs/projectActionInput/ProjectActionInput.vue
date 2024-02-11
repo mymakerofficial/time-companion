@@ -11,15 +11,19 @@ import {isNotEmpty} from "@/lib/listUtils";
 import {useFocus} from "@vueuse/core";
 import type {ReactiveProject} from "@/model/project";
 import type {ReactiveActivity} from "@/model/activity";
+import {projectActionInputBadgeVariants} from "@/components/common/inputs/projectActionInput/variants";
 
 const projectModel = defineModel<Nullable<ReactiveProject>>('project', { required: false, default: null })
 const activityModel = defineModel<Nullable<ReactiveActivity>>('activity', { required: false, default: null })
 const searchTerm = defineModel<string>('note', { required: false, default: '' })
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
+  size?: 'sm' | 'md' | 'lg'
   class?: HTMLAttributes['class']
   placeholder?: HTMLAttributes['placeholder']
-}>()
+}>(), {
+  size: 'md'
+})
 
 defineOptions({
   inheritAttrs: false
@@ -116,12 +120,13 @@ const placeholder = computed(() => {
       <Input
         v-model="searchTerm"
         @keydown.backspace="handleBackspace"
+        :size="size"
         :placeholder="placeholder"
         :class="props.class"
         v-bind="$attrs"
       >
         <template #leading>
-          <ShadowBadge :shadow="selected" variant="default" size="md" class="mx-1.5 rounded-sm" />
+          <ShadowBadge :shadow="selected" variant="default" :size="size" :class="projectActionInputBadgeVariants({ size })" />
         </template>
         <template #input="props">
           <ComboboxInput ref="input" v-bind="props" />
