@@ -5,7 +5,7 @@ import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
 import ComboboxInput from "@/components/common/inputs/combobox/ComboboxInput.vue";
 import {isNotNull, type Nullable} from "@/lib/utils";
 import {useQuickAccess} from "@/composables/useQuickAccess";
-import type {ReactiveCalendarEventShadow} from "@/model/calendarEventShadow";
+import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendarEventShadow";
 import ShadowBadge from "@/components/common/shadow/ShadowBadge.vue";
 import {isNotEmpty} from "@/lib/listUtils";
 import {useFocus} from "@vueuse/core";
@@ -25,7 +25,10 @@ const shadows = useQuickAccess(() => ({
 
 function handleBackspace() {
   if (selected.value?.activity) {
-    selected.value.activity = null
+    // replace with new shadow, otherwise the color will not update
+    selected.value = createEventShadow({
+      project: selected.value.project
+    })
     return
   }
 
