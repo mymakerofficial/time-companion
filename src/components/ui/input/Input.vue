@@ -6,12 +6,13 @@ import InputPrimitive from "@/components/ui/input/InputPrimitive.vue";
 import {inputContainerVariants, inputInputVariants, type InputVariants} from "@/components/ui/input/index";
 
 const props = withDefaults(defineProps<{
-  modelValue: string | number
+  modelValue?: string | number
   size?: InputVariants['size']
   type?: HTMLAttributes['inputmode']
   class?: HTMLAttributes['class']
   inputClass?: HTMLAttributes['class']
 }>(), {
+  modelValue: '',
   type: 'text',
   class: '',
   inputClass: '',
