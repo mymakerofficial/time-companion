@@ -70,17 +70,15 @@ const open = computed(() => {
     popover-class="w-auto"
   >
     <template #anchor>
-      <Input>
+      <Input
+        v-model="searchTerm"
+        @keydown.backspace="handleBackspace"
+      >
         <template #leading>
           <ShadowBadge :shadow="selected" variant="default" size="md" class="mx-1.5 rounded-sm" />
         </template>
         <template #input="props">
-          <ComboboxInput
-            ref="input"
-            v-model="searchTerm"
-            @keydown.backspace="handleBackspace"
-            v-bind="props"
-          />
+          <ComboboxInput ref="input" v-bind="props" />
         </template>
       </Input>
     </template>

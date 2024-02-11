@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import {cn} from '@/lib/utils'
-import {computed, type HTMLAttributes} from "vue";
-
-const model = defineModel<string | number>({ required: false })
+import {computed, type HTMLAttributes, useAttrs} from "vue";
+import {useEmitAsProps} from "radix-vue";
+import InputPrimitive from "@/components/ui/input/InputPrimitive.vue";
 
 const props = withDefaults(defineProps<{
+  modelValue: string | number
   type?: HTMLAttributes['inputmode']
-  placeholder?: HTMLAttributes['placeholder']
   class?: HTMLAttributes['class']
   inputClass?: HTMLAttributes['class']
 }>(), {
@@ -14,6 +14,16 @@ const props = withDefaults(defineProps<{
   class: '',
   inputClass: '',
 })
+
+const emit = defineEmits<{
+  'update:modelValue': [value: string | number]
+}>()
+
+defineOptions({
+  inheritAttrs: false
+})
+
+const attrs = useAttrs()
 
 const containerProps = computed(() => {
   const { class: className } = props
@@ -23,11 +33,14 @@ const containerProps = computed(() => {
 })
 
 const inputProps = computed(() => {
-  const { type, placeholder, inputClass } = props
+  const { type, inputClass } = props
+
   return {
+    modelValue: props.modelValue,
+    ...useEmitAsProps(emit),
     type,
-    placeholder,
-    class: cn('h-full w-full first:pl-3 last:pr-3 py-2 bg-transparent file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50', inputClass)
+    class: cn('h-full w-full first:pl-3 last:pr-3 py-2 bg-transparent file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50', inputClass),
+    ...attrs,
   }
 })
 </script>
@@ -36,10 +49,7 @@ const inputProps = computed(() => {
   <div v-bind="containerProps">
     <slot name="leading" />
     <slot name="input" v-bind="inputProps">
-      <input
-        v-model="model"
-        v-bind="inputProps"
-      />
+      <InputPrimitive v-bind="inputProps" />
     </slot>
     <slot name="trailing" />
   </div>
