@@ -7,7 +7,7 @@ export const projectActionInputBadgeVariants = cva(
       size: {
         sm: 'ml-0.5 mr-2 rounded-sm',
         md: 'mx-1.5 rounded-sm',
-        lg: 'mx-1 rounded-md',
+        lg: 'ml-1 mr-3 rounded-md',
       },
     },
     defaultVariants: {

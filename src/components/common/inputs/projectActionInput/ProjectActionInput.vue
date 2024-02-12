@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import {computed, type HTMLAttributes, ref, useAttrs} from "vue";
+import {computed, type HTMLAttributes, ref, useAttrs, watch} from "vue";
 import {Input} from "@/components/ui/input";
 import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
 import ComboboxInput from "@/components/common/inputs/combobox/ComboboxInput.vue";
-import {cn, isNotDefined, isNotNull, isNull, type Nullable} from "@/lib/utils";
+import {isNotDefined, isNotNull, isNull, type Nullable} from "@/lib/utils";
 import {useQuickAccess} from "@/composables/useQuickAccess";
 import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendarEventShadow";
 import ShadowBadge from "@/components/common/shadow/ShadowBadge.vue";
@@ -12,17 +12,21 @@ import {useFocus} from "@vueuse/core";
 import type {ReactiveProject} from "@/model/project";
 import type {ReactiveActivity} from "@/model/activity";
 import {projectActionInputBadgeVariants} from "@/components/common/inputs/projectActionInput/variants";
+import type {BadgeVariants} from "@/components/ui/badge";
 
 const projectModel = defineModel<Nullable<ReactiveProject>>('project', { required: false, default: null })
 const activityModel = defineModel<Nullable<ReactiveActivity>>('activity', { required: false, default: null })
 const searchTerm = defineModel<string>('note', { required: false, default: '' })
 
 const props = withDefaults(defineProps<{
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg',
+  variant?: NonNullable<BadgeVariants>['variant'],
   class?: HTMLAttributes['class']
+  wrapperClass?: HTMLAttributes['class']
   placeholder?: HTMLAttributes['placeholder']
 }>(), {
-  size: 'md'
+  size: 'md',
+  variant: 'default',
 })
 
 defineOptions({
@@ -115,10 +119,10 @@ const placeholder = computed(() => {
     no-input
     prevent-close
     popover-class="w-auto"
+    :class="props.wrapperClass"
   >
     <template #anchor>
       <Input
-        v-model="searchTerm"
         @keydown.backspace="handleBackspace"
         :size="size"
         :placeholder="placeholder"
@@ -126,7 +130,7 @@ const placeholder = computed(() => {
         v-bind="$attrs"
       >
         <template #leading>
-          <ShadowBadge :shadow="selected" variant="default" :size="size" :class="projectActionInputBadgeVariants({ size })" />
+          <ShadowBadge :shadow="selected" :variant="variant" :size="size" :class="projectActionInputBadgeVariants({ size })" />
         </template>
         <template #input="props">
           <ComboboxInput ref="input" v-bind="props" />
