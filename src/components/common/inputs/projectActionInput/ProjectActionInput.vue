@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, type HTMLAttributes, ref, useAttrs, watch} from "vue";
+import {computed, type HTMLAttributes, onMounted, ref, useAttrs, watch} from "vue";
 import {Input} from "@/components/ui/input";
 import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
 import ComboboxInput from "@/components/common/inputs/combobox/ComboboxInput.vue";
@@ -16,7 +16,7 @@ import type {BadgeVariants} from "@/components/ui/badge";
 
 const projectModel = defineModel<Nullable<ReactiveProject>>('project', { required: false, default: null })
 const activityModel = defineModel<Nullable<ReactiveActivity>>('activity', { required: false, default: null })
-const searchTerm = defineModel<string>('note', { required: false, default: '' })
+const noteModel = defineModel<string>('note', { required: false, default: '' })
 
 const props = withDefaults(defineProps<{
   size?: 'sm' | 'md' | 'lg',
@@ -31,6 +31,20 @@ const props = withDefaults(defineProps<{
 
 defineOptions({
   inheritAttrs: false
+})
+
+const searchTerm = ref('')
+
+onMounted(() => {
+  // wait for the combobox, so it doesn't reset the value
+  setTimeout(() => {
+    watch(noteModel, (value) => {
+      searchTerm.value = value
+    }, { immediate: true })
+  }, 2)
+  watch(searchTerm, (value) => {
+    noteModel.value = value
+  })
 })
 
 const input = ref()
