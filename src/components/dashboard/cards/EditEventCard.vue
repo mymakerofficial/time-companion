@@ -7,8 +7,8 @@ import {minutesSinceStartOfDay, minutesSinceStartOfDayToDate} from "@/lib/timeUt
 import {isNotNull} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent";
 import type {ReactiveCalendarEventShadow} from "@/model/calendarEventShadow";
-import EventInput from "@/components/common/inputs/EventInput.vue";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
+import ProjectActionInput from "@/components/common/inputs/projectActionInput/ProjectActionInput.vue";
 
 const props = defineProps<{
   event: ReactiveCalendarEvent
@@ -64,10 +64,11 @@ function handleRemove() {
   <div class="p-8 border-b border-border">
     <div class="flex flex-row justify-between items-center gap-4">
       <div class="flex-grow">
-        <EventInput
+        <ProjectActionInput
           v-model:project="state.project"
           v-model:activity="state.activity"
           v-model:note="state.note"
+          size="lg"
           class="w-full"
         />
       </div>
