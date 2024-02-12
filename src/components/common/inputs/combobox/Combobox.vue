@@ -14,7 +14,7 @@ import {Button, buttonVariants} from "@/components/ui/button";
 import {Check, ChevronsUpDown} from 'lucide-vue-next'
 import {useToggle} from "@vueuse/core";
 import {asArray, isArray, isEmpty, isNotEmpty} from "@/lib/listUtils";
-import {computed} from "vue";
+import {computed, type HTMLAttributes} from "vue";
 
 const model = defineModel<TMultiple extends true ? TValue[] : Nullable<TValue>>({ required: true, default: null })
 const searchTerm = defineModel<string>('searchTerm', { required: false, default: '' })
@@ -28,10 +28,11 @@ const props = withDefaults(defineProps<{
   getKey?: (option: TValue) => string | number;
   limit?: number
   variant?: NonNullable<Parameters<typeof buttonVariants>[0]>['variant']
-  triggerClass?: string
-  popoverClass?: string
+  class?: HTMLAttributes['class']
+  triggerClass?: HTMLAttributes['class']
+  popoverClass?: HTMLAttributes['class']
   label?: string
-  placeholder?: string
+  placeholder?: HTMLAttributes['placeholder']
   searchLabel?: string
   emptyLabel?: string
   noInput?: boolean
@@ -163,6 +164,7 @@ const primitiveModel = computed(() => wrapModel(model.value))
     :model-value="primitiveModel"
     v-model:search-term="searchTerm"
     open
+    :class="props.class"
   >
     <Popover :open="open" @update:open="handleUpdateClose">
       <PopoverAnchor as-child>
