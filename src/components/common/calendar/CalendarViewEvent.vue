@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 import {useNow} from "@vueuse/core";
 import {minutesToGridRows} from "@/lib/calendarUtils";
 import {vProvideColor} from "@/directives/vProvideColor";
-import type {ReactiveCalendarEvent} from "@/model/calendarEvent";
+import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 
 const props = defineProps<{
   event: ReactiveCalendarEvent

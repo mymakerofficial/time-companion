@@ -3,10 +3,11 @@ import {useReferenceById} from "@/composables/useReferenceById";
 import {computed, reactive} from "vue";
 import type {ReactiveCalendarEventShadow} from "@/model/calendarEventShadow";
 import {isDefined, isNotNull, isNull, type Nullable} from "@/lib/utils";
-import {createEvent, type ReactiveCalendarEvent} from "@/model/calendarEvent";
-import {now} from "@/lib/timeUtils";
+import {now} from "@/lib/neoTime";
 import type {ID} from "@/lib/types";
 import {lastOf} from "@/lib/listUtils";
+import {createEvent} from "@/model/calendarEvent/model";
+import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 
 export interface ReactiveActiveDay {
   day: Nullable<ReactiveCalendarDay>

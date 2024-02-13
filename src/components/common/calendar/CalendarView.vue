@@ -5,7 +5,7 @@ import {formatHours, timeStringToDate} from "@/lib/timeUtils";
 import CalendarViewEvent from "@/components/common/calendar/CalendarViewEvent.vue";
 import CalendarViewPointer from "@/components/common/calendar/CalendarViewPointer.vue";
 import CalendarViewArea from "@/components/common/calendar/CalendarViewArea.vue";
-import type {ReactiveCalendarEvent} from "@/model/calendarEvent";
+import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 
 const props = defineProps<{
   events: ReactiveCalendarEvent[]

@@ -5,7 +5,7 @@ import {computed} from "vue";
 import CurrentEventCard from "@/components/dashboard/cards/CurrentEventCard.vue";
 import EditEventCard from "@/components/dashboard/cards/EditEventCard.vue";
 import RemindersContainer from "@/components/dashboard/cards/RemindersContainer.vue";
-import type {ReactiveCalendarEvent} from "@/model/calendarEvent";
+import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import type {ReactiveCalendarEventShadow} from "@/model/calendarEventShadow";
 import QuickStartCard from "@/components/dashboard/cards/QuickStartCard.vue";
 import {useRemindersStore} from "@/stores/remidersStore";

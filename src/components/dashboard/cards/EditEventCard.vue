@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import {MoreVertical} from "lucide-vue-next";
+import {ArrowRight, MoreVertical} from "lucide-vue-next";
 import {Button} from "@/components/ui/button";
-import {computed, reactive} from "vue";
-import TimeDurationInput from "@/components/common/inputs/TimeDurationInput.vue";
-import {minutesSinceStartOfDay, minutesSinceStartOfDayToDate} from "@/lib/timeUtils";
+import {reactive} from "vue";
 import {isNotNull} from "@/lib/utils";
-import type {ReactiveCalendarEvent} from "@/model/calendarEvent";
+import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import type {ReactiveCalendarEventShadow} from "@/model/calendarEventShadow";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import ProjectActionInput from "@/components/common/inputs/projectActionInput/ProjectActionInput.vue";
+import TimeInput from "@/components/common/inputs/timeInput/TimeInput.vue";
+import {mapWritable} from "@/model/modelHelpers";
 
 const props = defineProps<{
   event: ReactiveCalendarEvent
@@ -20,35 +20,14 @@ const emit = defineEmits<{
 }>()
 
 const state = reactive({
-  project: computed({
-    get() { return props.event.project },
-    set(value) { props.event.project = value }
-  }),
-
-  activity: computed({
-    get() { return props.event.activity },
-    set(value) { props.event.activity = value }
-  }),
-
-  note: computed({
-    get() { return props.event.note },
-    set(value) { props.event.note = value }
-  }),
-
-  startedAtMinutes: computed({
-    get() { return minutesSinceStartOfDay(props.event.startedAt) },
-    set(value) { props.event.startedAt = minutesSinceStartOfDayToDate(value) }
-  }),
-
-  endedAtMinutes: computed({
-    get() { return minutesSinceStartOfDay(props.event.endedAt) },
-    set(value) { props.event.endedAt = minutesSinceStartOfDayToDate(value) }
-  }),
-
-  durationMinutes: computed({
-    get() { return props.event.durationMinutes },
-    set(value) { props.event.durationMinutes = value }
-  }),
+  ...mapWritable(props.event, [
+    'project',
+    'activity',
+    'note',
+    'startedAt',
+    'endedAt',
+    'duration'
+  ])
 })
 
 function handleContinue() {
@@ -72,14 +51,15 @@ function handleRemove() {
           class="w-full"
         />
       </div>
-      <div class="flex flex-row items-center">
-        <TimeDurationInput v-if="event.hasStarted" v-model="state.startedAtMinutes" placeholder="00:00" class="w-16 text-center font-medium text-sm border-none" />
-        <span v-if="event.hasEnded" class="text-accent">-</span>
-        <TimeDurationInput v-if="event.hasEnded"  v-model="state.endedAtMinutes" placeholder="00:00" class="w-16 text-center font-medium text-sm border-none" />
+      <div class="flex flex-row items-center gap-2">
+        <TimeInput v-if="event.hasStarted" v-model="state.startedAt" placeholder="00:00" size="lg" class="w-20" />
+        <ArrowRight v-show="event.hasEnded" class="size-4" />
+        <TimeInput v-if="event.hasEnded"  v-model="state.endedAt" placeholder="00:00" size="lg" class="w-20" />
       </div>
-      <div>
-        <TimeDurationInput v-if="event.hasEnded" v-model="state.durationMinutes" placeholder="00:00" class="w-20 text-center font-medium text-xl border-none" />
-      </div>
+      <!-- TODO add duration input -->
+      <!--<div>
+        <TimeInput v-if="event.hasEnded" v-model="state.duration" placeholder="00:00" class="w-20 text-center font-medium text-xl border-none" />
+      </div>-->
       <div class="flex flex-row items-center gap-2">
         <Button v-if="isNotNull(event.project)" @click="handleContinue()">{{ $t('dashboard.controls.continueEvent') }}</Button>
         <DropdownMenu>

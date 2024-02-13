@@ -3,14 +3,13 @@ import {Button} from "@/components/ui/button";
 import {computed, reactive, watch} from "vue";
 import {useNow, watchDebounced} from "@vueuse/core";
 import {MoreVertical} from "lucide-vue-next";
-import TimeDurationInput from "@/components/common/inputs/TimeDurationInput.vue";
-import {formatTimeDiff, minutesSinceStartOfDay, minutesSinceStartOfDayToDate} from "@/lib/timeUtils";
-import {isNotDefined, isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
+import {isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent";
 import type {ReactiveProject} from "@/model/project";
 import type {ReactiveActivity} from "@/model/activity";
-import dayjs from "dayjs";
 import ProjectActionInput from "@/components/common/inputs/projectActionInput/ProjectActionInput.vue";
+import TimeInput from "@/components/common/inputs/timeInput/TimeInput.vue";
+import type {LocalDateTime} from "@js-joda/core";
 
 const props = defineProps<{
   event: Nullable<ReactiveCalendarEvent>
@@ -28,9 +27,9 @@ const state = reactive({
   activity: props.event?.activity ?? null as Nullable<ReactiveActivity>,
   note: props.event?.note ?? '',
 
-  startedAtMinutes: computed({
-    get() { return minutesSinceStartOfDay(props.event?.startedAt) },
-    set(value: number) { runIf(props.event, isNotNull, () => props.event!.startedAt = minutesSinceStartOfDayToDate(value)) }
+  startedAt: computed<Nullable<LocalDateTime>>({
+    get() { return props.event?.startedAt ?? null },
+    set(value) { runIf(props.event, isNotNull, () => props.event!.startedAt = value) }
   }),
 
   isRunning: computed(() => isNotNull(props.event) && props.event.hasStarted && !props.event.hasEnded)
@@ -96,17 +95,18 @@ function handleStartStop() {
   }
 }
 
-const durationLabel = computed(() => {
-  if (
-    isNotDefined(props.event?.startedAt) ||
-    dayjs(props.event!.startedAt).isAfter(now.value)
-  ) {
-    return '00:00:00'
-  }
-
-  // time between now and startedAt in HH:mm:ss
-  return formatTimeDiff(props.event!.startedAt, now.value)
-})
+// TODO add duration label
+// const durationLabel = computed(() => {
+//   if (
+//     isNotDefined(props.event?.startedAt) ||
+//     dayjs(props.event!.startedAt).isAfter(now.value)
+//   ) {
+//     return '00:00:00'
+//   }
+//
+//   // time between now and startedAt in HH:mm:ss
+//   return formatTimeDiff(props.event!.startedAt, now.value)
+// })
 </script>
 
 <template>
@@ -123,8 +123,8 @@ const durationLabel = computed(() => {
         />
       </div>
       <div class="flex flex-row items-center gap-8">
-        <TimeDurationInput v-if="state.isRunning" v-model="state.startedAtMinutes" class="w-16 text-center font-medium text-sm border-none bg-primary text-primary-foreground" />
-        <time class="text-2xl font-medium tracking-wide w-24">{{ durationLabel }}</time>
+        <TimeInput v-if="state.isRunning" v-model="state.startedAt" size="lg" class="w-20 border-none bg-primary text-primary-foreground" />
+        <!--<time class="text-2xl font-medium tracking-wide w-24">{{ durationLabel }}</time>-->
       </div>
       <div class="flex flex-row items-center gap-2">
         <Button @click="handleStartStop" variant="inverted">{{ state.isRunning ? $t('dashboard.controls.stopEvent') : $t('dashboard.controls.startEvent') }}</Button>

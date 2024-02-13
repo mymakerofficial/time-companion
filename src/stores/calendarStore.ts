@@ -1,13 +1,14 @@
 import {defineStore} from "pinia";
-import type {ReactiveCalendarDay, SerializedCalendarDay} from "@/model/calendarDay";
+import type {ReactiveCalendarDay, SerializedCalendarDay} from "@/model/calendarDay/types";
 import {reactive, readonly, type Ref, ref, watch} from "vue";
 import {useProjectsStore} from "@/stores/projectsStore";
-import {createDay, fromSerializedDay} from "@/model/calendarDay";
+import {createDay} from "@/model/calendarDay/model";
 import {useLocalStorage} from "@/composables/useLocalStorage";
 import {type ReactiveActiveDay, useActiveDay} from "@/composables/useActiveDay";
 import {isSameDay} from "@/lib/timeUtils";
-import dayjs from "dayjs";
-import type {ReactiveCalendarEvent} from "@/model/calendarEvent";
+import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
+import {fromSerializedDay} from "@/model/calendarDay/serializer";
+import {today} from "@/lib/neoTime";
 
 export interface CalendarStore {
   isInitialized: Readonly<Ref<boolean>>
@@ -77,7 +78,7 @@ export const useCalendarStore = defineStore('calendar', (): CalendarStore => {
     }
 
     const newDay = createDay({
-      date: dayjs(date).startOf('day').toDate(),
+      date: today(),
     })
 
     addDay(newDay)

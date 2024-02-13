@@ -1,7 +1,7 @@
 import type {ReactiveProject} from "@/model/project";
 import type {ReactiveCalendarDay} from "@/model/calendarDay";
 import {sumOf} from "@/lib/listUtils";
-import type {ReactiveCalendarEvent} from "@/model/calendarEvent";
+import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import {minutesSinceStartOfDay, now} from "@/lib/timeUtils";
 
 export interface TimeReportProjectEntry {

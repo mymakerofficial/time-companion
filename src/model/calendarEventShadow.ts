@@ -1,10 +1,10 @@
 import type {ReactiveProject} from "@/model/project";
 import type {ReactiveActivity} from "@/model/activity";
 import type {Nullable} from "@/lib/utils";
-import {computed, reactive} from "vue";
-import type {CalendarEventInit, ReactiveCalendarEvent} from "@/model/calendarEvent";
-import {createEvent} from "@/model/calendarEvent";
 import {isDefined} from "@/lib/utils";
+import {computed, reactive} from "vue";
+import type {CalendarEventInit, ReactiveCalendarEvent} from "@/model/calendarEvent/types";
+import {createEvent} from "@/model/calendarEvent/model";
 
 export interface ReactiveCalendarEventShadow {
   project: ReactiveProject
