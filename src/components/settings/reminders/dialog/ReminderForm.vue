@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {Input} from "@/components/ui/input";
 import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
-import EventInput from "@/components/common/inputs/EventInput.vue";
 import TimeDurationInput from "@/components/common/inputs/TimeDurationInput.vue";
 import RepeatOnToggles from "@/components/common/inputs/repeatOn/RepeatOnToggles.vue";
 import ColorSelect from "@/components/common/inputs/colorSelect/ColorSelect.vue";
@@ -9,6 +8,7 @@ import {Label} from "@/components/ui/label";
 import {computed} from "vue";
 import {ReminderActionType} from "@/model/calendarReminder";
 import type {ReminderFormState} from "@/components/settings/reminders/dialog/helpers";
+import ProjectActionInput from "@/components/common/inputs/projectActionInput/ProjectActionInput.vue";
 
 const props = defineProps<{
   form: ReminderFormState
@@ -39,7 +39,7 @@ const showColorInput = computed(() => {
     </div>
     <div v-if="showTargetInput" class="grid grid-cols-4 items-center gap-4">
       <Label class="text-right">{{ $t('dialog.reminder.form.actionTarget.label') }}</Label>
-      <EventInput v-model:project="form.actionTargetProject" v-model:activity="form.actionTargetActivity" class="col-span-3" />
+      <ProjectActionInput v-model:project="form.actionTargetProject" v-model:activity="form.actionTargetActivity" wrapper-class="col-span-3" />
     </div>
     <div v-if="showColorInput" class="grid grid-cols-4 items-center gap-4">
       <Label class="text-right">{{ $t('dialog.reminder.form.color.label') }}</Label>

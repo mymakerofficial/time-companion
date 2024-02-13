@@ -7,10 +7,10 @@ import TimeDurationInput from "@/components/common/inputs/TimeDurationInput.vue"
 import {formatTimeDiff, minutesSinceStartOfDay, minutesSinceStartOfDayToDate} from "@/lib/timeUtils";
 import {isNotDefined, isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent";
-import EventInput from "@/components/common/inputs/EventInput.vue";
 import type {ReactiveProject} from "@/model/project";
 import type {ReactiveActivity} from "@/model/activity";
 import dayjs from "dayjs";
+import ProjectActionInput from "@/components/common/inputs/projectActionInput/ProjectActionInput.vue";
 
 const props = defineProps<{
   event: Nullable<ReactiveCalendarEvent>
@@ -113,11 +113,12 @@ const durationLabel = computed(() => {
   <div class="p-8 bg-primary text-primary-foreground flex flex-col gap-2 border-b border-border">
     <div class="flex flex-row justify-between items-center gap-8">
       <div class="flex-grow">
-        <EventInput
+        <ProjectActionInput
           v-model:project="state.project"
           v-model:activity="state.activity"
           v-model:note="state.note"
           placeholder="what are you working on?..."
+          size="lg"
           class="w-full bg-primary text-primary-foreground border-none"
         />
       </div>

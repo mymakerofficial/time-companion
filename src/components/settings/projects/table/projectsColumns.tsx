@@ -7,7 +7,7 @@ import {
   ArrowUp,
   Check,
   ChevronsDownUp,
-  ChevronsUpDown,
+  ChevronsUpDown, Coffee, Coins, Dot, Paintbrush,
   Pencil,
   Slash,
   X
@@ -19,17 +19,11 @@ import type {Icon as LucideIcon} from "lucide-vue-next";
 import {fromNow} from "@/lib/timeUtils";
 import {getSortableHeader} from "@/helpers/table/tableHelpers";
 import {useI18n} from "vue-i18n";
+import {Badge} from "@/components/ui/badge";
+import ShadowBadge from "@/components/common/shadow/ShadowBadge.vue";
 
-function getNameCell(value: ProjectRow['name']) {
-  const projectPart = <span>{value[0]}</span>
-  const activityPart = value[1] && <><Slash class="size-3"/><span>{value[1]}</span></>
-
-  return (
-    <span class="flex items-center gap-2">
-      { projectPart }
-      { activityPart }
-    </span>
-  )
+function getNameCell(value: ProjectRow['shadow']) {
+  return <ShadowBadge shadow={value} variant="skeleton" size="md" class="font-medium" />
 }
 
 function getColorCell(value: ProjectRow['color']) {
@@ -37,7 +31,11 @@ function getColorCell(value: ProjectRow['color']) {
     return null
   }
 
-  return <div style={getColorStyleVariables(value)} class="size-3 rounded-full bg-primary" />
+  const { t } = useI18n()
+
+  const label = t(`common.colors.${value}`)
+
+  return <Badge color={value} variant="ghost"><Paintbrush class="size-3" />{label}</Badge>
 }
 
 function getBillableCell(value: ProjectRow['isBillable']) {
@@ -45,7 +43,14 @@ function getBillableCell(value: ProjectRow['isBillable']) {
     return null
   }
 
-  return value ? <Check class="size-4" /> : <X class="size-4 text-muted-foreground" />
+  const { t } = useI18n()
+
+  const color = value ? 'green' : 'rose'
+  const label = value ? t(`common.labels.yes`) : t(`common.labels.no`)
+
+  const Icon = value ? Coins : Coffee
+
+  return <Badge color={color} variant="ghost"><Icon class="size-3" />{label}</Badge>
 }
 
 function getLastUsedCell(value: ProjectRow['lastUsed']) {
@@ -90,7 +95,7 @@ export function  createProjectsColumns(
   const { t } = useI18n()
 
   return [
-    columnHelper.accessor('name', {
+    columnHelper.accessor('shadow', {
       header: ({ column }) => getSortableHeader(column, t('settings.projects.table.columns.name')),
       cell: (info) => getNameCell(info.getValue()),
     }),
