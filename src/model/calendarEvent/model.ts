@@ -89,7 +89,11 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
 
   return reactive({
     ...mapReadonly(ctx, ['id']),
-    ...mapWritable(ctx, ['note', 'project', 'activity']),
+    ...mapWritable(ctx, [
+      'note',
+      'project',
+      'activity'
+    ]),
     projectDisplayName: computed({
       get: () => ctx.project?.displayName ?? '',
       set: (value) => runIf(ctx.project, isNotNull, () => ctx.project!.displayName = value)

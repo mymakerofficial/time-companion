@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@js-joda/core": "^5.6.1",
+    "@js-joda/locale_en": "^4.8.11",
     "@tanstack/vue-table": "^8.11.6",
     "@types/color": "^3.0.6",
     "@vee-validate/zod": "^4.12.4",

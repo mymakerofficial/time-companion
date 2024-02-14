@@ -30,11 +30,15 @@ export function createDay(init: CalendarDayInit): ReactiveCalendarDay {
     return serializeDay(ctx)
   }
 
-  return {
-    ...mapReadonly(ctx, ['id', 'date', 'events']),
+  return reactive({
+    ...mapReadonly(ctx, [
+      'id',
+      'date',
+      'events'
+    ]),
     startedAt,
     addEvent,
     removeEvent,
     toSerialized,
-  }
+  })
 }

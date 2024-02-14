@@ -1,4 +1,5 @@
 import {DateTimeFormatter, Duration, LocalDate, LocalDateTime, LocalTime} from "@js-joda/core";
+import {Locale} from "@js-joda/locale_en";
 
 // obtain the current LocalDate
 export function today() {
@@ -28,6 +29,10 @@ export function minutes(minutes: number) {
 // obtain a Duration from given seconds
 export function seconds(seconds: number) {
   return Duration.ofSeconds(seconds);
+}
+
+export function withFormat(pattern: string) {
+  return DateTimeFormatter.ofPattern(pattern).withLocale(Locale.UK);
 }
 
 // parse a string to a LocalDate
@@ -80,4 +85,17 @@ export function isAfter(start: LocalDateTime, end: LocalDateTime) {
 
 export function durationBetween(start: LocalDateTime, end: LocalDateTime) {
   return Duration.between(start, end)
+}
+
+export function sumOfDurations(durations: Duration[]) {
+  return durations.reduce((acc, duration) => acc.plus(duration), Duration.ZERO)
+}
+
+// returns a list of all days in the month and year of the given date
+export function daysInMonth(date: LocalDate): LocalDate[] {
+  const monthLength = date.lengthOfMonth()
+
+  return Array.from({ length: monthLength }, (_, i) => {
+    return date.withDayOfMonth(i + 1)
+  })
 }
