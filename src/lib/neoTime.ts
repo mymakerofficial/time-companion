@@ -99,7 +99,7 @@ export function sumOfDurations(durations: Duration[]) {
 export function daysInMonth(date: LocalDate): LocalDate[] {
   const monthLength = date.lengthOfMonth()
 
-  return Array.from({ length: monthLength }, (_, i) => {
+  return Array.from({length: monthLength}, (_, i) => {
     return date.withDayOfMonth(i + 1)
   })
 }

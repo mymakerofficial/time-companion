@@ -6,6 +6,7 @@ import {useI18n} from "vue-i18n";
 import type {ReactiveProject} from "@/model/project/";
 import {Minus} from "lucide-vue-next";
 import {formatDate, formatDuration, withFormat} from "@/lib/neoTime";
+import {Duration} from "@js-joda/core";
 
 function getDateCell(value: DayTimeReport['date']) {
   // TODO i18n
@@ -20,22 +21,24 @@ function getDateCell(value: DayTimeReport['date']) {
 }
 
 function getProjectCell(row: Row<DayTimeReport>, project: ReactiveProject) {
-  const value = row.original.entries.find((it) => it.project.id === project.id)?.duration ?? 0
+  const duration = row.original.entries
+    .find((it) => it.project.id === project.id)
+    ?.duration ?? Duration.ZERO
 
-  if (value === 0) {
+  if (duration.isZero()) {
     return <span class="text-muted-foreground"><Minus class="size-3" /></span>
   } else {
     // TODO humanize
-    return formatDuration(value)
+    return formatDuration(duration)
   }
 }
 
-function getTotalCell(value: DayTimeReport['totalBillableDuration']) {
-  if (value === 0) {
+function getTotalCell(duration: DayTimeReport['totalBillableDuration']) {
+  if (duration.isZero()) {
     return <span class="text-muted-foreground"><Minus class="size-3" /></span>
   } else {
     // TODO humanize
-    return formatDuration(value)
+    return formatDuration(duration)
   }
 }
 
