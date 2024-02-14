@@ -4,7 +4,7 @@ import {vProvideColor} from "@/directives/vProvideColor";
 import {Slash, Play, PencilLine} from "lucide-vue-next";
 import {computed} from "vue";
 import {useProjectsStore} from "@/stores/projectsStore";
-import type {ReactiveProject} from "@/model/project";
+import type {ReactiveProject} from "@/model/project/";
 import type {ReactiveActivity} from "@/model/activity";
 import {useCalendarStore} from "@/stores/calendarStore";
 import {isNull} from "@/lib/utils";

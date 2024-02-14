@@ -16,9 +16,7 @@ function getTargetShadow({
   actionType,
   targetProjectId,
   targetActivityId,
-}: {
-  projects: ReminderDeserializationAssets['projects']
-  activities: ReminderDeserializationAssets['activities']
+}: ReminderDeserializationAssets & {
   actionType: ReminderActionType
   targetProjectId: Nullable<string>
   targetActivityId: Nullable<string>
@@ -36,6 +34,7 @@ function getTargetShadow({
   const project = projects.find(whereId(targetProjectId)) ?? null
 
   if (isNull(project)) {
+    // this should never happen lol
     return null
   }
 

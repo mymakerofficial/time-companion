@@ -89,6 +89,10 @@ export function lastOf<T>(value: Maybe<MaybeArray<T>>): Maybe<T> {
 }
 
 // returns a predicate function that checks if the id of the given object is equal to the given id
-export function whereId(id: ID) {
+export function whereId(id: Maybe<ID>) {
+  if (isNotDefined(id)) {
+    return () => false
+  }
+
   return (it: HasId) => it.id === id
 }

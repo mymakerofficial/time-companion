@@ -40,7 +40,7 @@ export interface SerializedCalendarReminder {
   startAt: string // ISO Time (THH:mm:ss)
   remindBefore: string // ISO Duration (PThhHmmMssS)
   remindAfter: string // ISO Duration (PThhHmmMssS)
-  actionType: keyof typeof ReminderActionType
+  actionType: ReminderActionType
   actionTargetProjectId: Nullable<string>
   actionTargetActivityId: Nullable<string>
 }

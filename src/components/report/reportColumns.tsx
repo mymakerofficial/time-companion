@@ -4,7 +4,7 @@ import {createColumnHelper, type Row} from "@tanstack/vue-table";
 import type {DayTimeReport} from "@/lib/timeReport/calculateTimeReport";
 import {useProjectsStore} from "@/stores/projectsStore";
 import {useI18n} from "vue-i18n";
-import type {ReactiveProject} from "@/model/project";
+import type {ReactiveProject} from "@/model/project/";
 import {Minus} from "lucide-vue-next";
 
 const projectsStore = useProjectsStore()

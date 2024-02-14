@@ -1,6 +1,6 @@
 import {ReminderActionType} from "@/model/calendarReminder";
 import type {Nullable} from "@/lib/utils";
-import type {ReactiveProject} from "@/model/project";
+import type {ReactiveProject} from "@/model/project/";
 import type {ReactiveActivity} from "@/model/activity";
 import type {LocalTime} from "@js-joda/core";
 

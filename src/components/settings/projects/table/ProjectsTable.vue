@@ -1,6 +1,6 @@
 <script setup lang="tsx">
 import {computed, ref} from "vue";
-import type {ReactiveProject} from "@/model/project";
+import type {ReactiveProject} from "@/model/project/";
 import type {ProjectRow} from "@/components/settings/projects/table/types";
 import {createProjectsColumns} from "@/components/settings/projects/table/projectsColumns";
 import Table from "@/components/common/table/Table.vue";

@@ -21,8 +21,8 @@ export function createReminder(init: CalendarReminderInit): ReactiveCalendarRemi
     startAt: init.startAt ?? timeNow(),
     remindBefore: init.remindBefore ?? minutes(30),
     remindAfter: init.remindAfter ?? minutes(30),
-    actionType: init.actionType,
-    actionTargetShadow: init.actionTargetShadow,
+    actionType: init.actionType ?? ReminderActionType.NO_ACTION,
+    actionTargetShadow: init.actionTargetShadow ?? null,
     isDismissed: false,
   })
 

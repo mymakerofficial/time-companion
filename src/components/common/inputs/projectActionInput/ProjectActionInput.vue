@@ -9,7 +9,7 @@ import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calen
 import ShadowBadge from "@/components/common/shadow/ShadowBadge.vue";
 import {isNotEmpty} from "@/lib/listUtils";
 import {useFocus} from "@vueuse/core";
-import type {ReactiveProject} from "@/model/project";
+import type {ReactiveProject} from "@/model/project/";
 import type {ReactiveActivity} from "@/model/activity";
 import {projectActionInputBadgeVariants} from "@/components/common/inputs/projectActionInput/variants";
 import type {BadgeVariants} from "@/components/ui/badge";

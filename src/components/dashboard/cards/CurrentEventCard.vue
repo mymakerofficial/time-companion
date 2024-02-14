@@ -5,7 +5,7 @@ import {useNow, watchDebounced} from "@vueuse/core";
 import {MoreVertical} from "lucide-vue-next";
 import {isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent";
-import type {ReactiveProject} from "@/model/project";
+import type {ReactiveProject} from "@/model/project/";
 import type {ReactiveActivity} from "@/model/activity";
 import ProjectActionInput from "@/components/common/inputs/projectActionInput/ProjectActionInput.vue";
 import TimeInput from "@/components/common/inputs/timeInput/TimeInput.vue";

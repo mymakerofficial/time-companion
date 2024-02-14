@@ -1,4 +1,4 @@
-import type {ReactiveProject} from "@/model/project";
+import type {ReactiveProject} from "@/model/project/";
 import type {ReactiveActivity} from "@/model/activity";
 import type {Nullable} from "@/lib/utils";
 import {isDefined} from "@/lib/utils";

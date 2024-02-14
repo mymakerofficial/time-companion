@@ -1,8 +1,8 @@
 import {defineStore} from "pinia";
 import {reactive, readonly, type Ref, ref, watch} from "vue";
-import type {ReactiveProject, SerializedProject} from "@/model/project";
+import type {ReactiveProject, SerializedProject} from "@/model/project/";
 import type {ReactiveActivity, SerializedActivity} from "@/model/activity";
-import {createProject, fromSerializedProject} from "@/model/project";
+import {createProject, fromSerializedProject} from "@/model/project/";
 import {createActivity, fromSerializedActivity} from "@/model/activity";
 import {useLocalStorage} from "@/composables/useLocalStorage";
 import {isNotDefined, isNotNull, isNull, type Maybe, type Nullable, takeIf} from "@/lib/utils";

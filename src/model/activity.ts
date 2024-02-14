@@ -2,7 +2,7 @@ import {v4 as uuid} from "uuid";
 import {computed, reactive} from "vue";
 import type {HasId, ID} from "@/lib/types";
 import type {Nullable} from "@/lib/utils";
-import type {ReactiveProject} from "@/model/project";
+import type {ReactiveProject} from "@/model/project/";
 import {now} from "@/lib/timeUtils";
 
 export interface SerializedActivity {

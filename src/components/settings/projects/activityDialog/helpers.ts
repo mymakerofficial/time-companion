@@ -4,7 +4,7 @@ import type {ID} from "@/lib/types";
 import {createActivity} from "@/model/activity";
 import {useProjectsStore} from "@/stores/projectsStore";
 import {isNotNull} from "@/lib/utils";
-import type {ReactiveProject} from "@/model/project";
+import type {ReactiveProject} from "@/model/project/";
 
 export interface ActivityForm {
   displayName: ReactiveActivity['displayName'],
