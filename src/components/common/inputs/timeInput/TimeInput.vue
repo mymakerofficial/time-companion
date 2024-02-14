@@ -3,7 +3,7 @@ import {DateTimeFormatter, type Duration, type LocalDateTime, type LocalTime} fr
 import {ref, watch} from "vue";
 import {Input} from "@/components/ui/input";
 import {formatDateTime} from "@/lib/neoTime";
-import {parseTimeWithEquation} from "@/lib/parsers";
+import {parseHumanTimeWithEquation} from "@/lib/parsers";
 import {isNull} from "@/lib/utils";
 
 const model = defineModel<TValue>({ required: true })
@@ -22,7 +22,7 @@ function setInputFromModel() {
 }
 
 function handleChange() {
-  const parsed = parseTimeWithEquation(inputValue.value) // TODO handle error
+  const parsed = parseHumanTimeWithEquation(inputValue.value) // TODO handle error
 
   if (isNull(parsed)) {
     setInputFromModel()

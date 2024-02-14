@@ -1,5 +1,6 @@
 import type {Maybe, MaybeArray} from "@/lib/utils";
 import {isDefined, isNotDefined, isNull} from "@/lib/utils";
+import type {HasId, ID} from "@/lib/types";
 
 export function isArray<T>(value: Maybe<MaybeArray<T>>): value is T[] {
   return Array.isArray(value)
@@ -85,4 +86,9 @@ export function lastOf<T>(value: Maybe<MaybeArray<T>>): Maybe<T> {
   }
 
   return value[value.length - 1]
+}
+
+// returns a predicate function that checks if the id of the given object is equal to the given id
+export function whereId(id: ID) {
+  return (it: HasId) => it.id === id
 }

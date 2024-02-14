@@ -7,14 +7,14 @@ import {LocalTime} from "@js-joda/core";
  * @param value The input to parse
  * @returns LocalTime, or null if the duration could not be parsed
  * @example
- * parseTime('1.5h') // LocalTime.of(1, 30)
- * parseTime('1:30') // LocalTime.of(1, 30)
- * parseTime('130') // LocalTime.of(1, 30)
- * parseTime('1 30') // LocalTime.of(1, 30)
- * parseTime('90m') // LocalTime.of(1, 30)
- * parseTime('1h') // LocalTime.of(1, 0)
+ * parseHumanTime('1.5h') // LocalTime.of(1, 30)
+ * parseHumanTime('1:30') // LocalTime.of(1, 30)
+ * parseHumanTime('130') // LocalTime.of(1, 30)
+ * parseHumanTime('1 30') // LocalTime.of(1, 30)
+ * parseHumanTime('90m') // LocalTime.of(1, 30)
+ * parseHumanTime('1h') // LocalTime.of(1, 0)
  */
-export function parseTime(value: string): Nullable<LocalTime> {
+export function parseHumanTime(value: string): Nullable<LocalTime> {
   // match any valid input and extract the relevant parts in groups
   // whole.decimal | hour:minute | value unit
   const inputRegex = /^\s*((?<whole>\d{1,2})\.(?<decimal>\d+)?h?\s*$)|((?<hour>\d{1,2})(:|h| )?(?<minute>\d{2})?\s*$)|((?<value>\d+)\s*(?<unit>minute|min|m|hour|h)?\s*$)/gi
@@ -62,11 +62,11 @@ export function parseTime(value: string): Nullable<LocalTime> {
  * @param value The input to parse
  * @returns LocalTime, or null if the duration could not be parsed
  * @example
- * parseTimeEquation('08:00 + 30min') // LocalTime.of(8, 30)
- * parseTimeEquation('08:00 - 30min') // LocalTime.of(7, 30)
- * parseTimeEquation('08:00 + 1h + 30min') // LocalTime.of(9, 30)
+ * parseHumanTimeWithEquation('08:00 + 30min') // LocalTime.of(8, 30)
+ * parseHumanTimeWithEquation('08:00 - 30min') // LocalTime.of(7, 30)
+ * parseHumanTimeWithEquation('08:00 + 1h + 30min') // LocalTime.of(9, 30)
  */
-export function parseTimeWithEquation(value: string): Nullable<LocalTime> {
+export function parseHumanTimeWithEquation(value: string): Nullable<LocalTime> {
   // split the input into individual values and operators
   const inputRegex = /(?<operator>[+-])?\s*(?<value>\d+.?\d*\w*)/gi
 
@@ -80,7 +80,7 @@ export function parseTimeWithEquation(value: string): Nullable<LocalTime> {
     const {operator, value: rawValue} = match.groups!
 
     const isNegative = operator === '-'
-    const duration = parseTime(rawValue)
+    const duration = parseHumanTime(rawValue)
 
     return {
       value: duration,

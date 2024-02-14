@@ -1,37 +1,27 @@
-import type {Maybe, Nullable} from "@/lib/utils";
-import {
-  createReminder,
-  createRepeatOnWeekdays,
-  type ReactiveCalendarReminder,
-  ReminderActionType,
-  type RepeatOnWeekdays
-} from "@/model/calendarReminder";
-import type {ReactiveProject} from "@/model/project";
-import type {ReactiveActivity} from "@/model/activity";
+import type {Maybe} from "@/lib/utils";
+import {isNotNull, isNull} from "@/lib/utils";
+import {createReminder, type ReactiveCalendarReminder, ReminderActionType} from "@/model/calendarReminder";
 import {createEventShadow} from "@/model/calendarEventShadow";
-import {minutesSinceStartOfDay, minutesSinceStartOfDayToDate} from "@/lib/timeUtils";
-import {isDefined, isNotNull, isNull} from "@/lib/utils";
+import {minutes, timeNow} from "@/lib/neoTime";
 
-export interface ReminderFormState {
-  displayText: ReactiveCalendarReminder['displayText'],
-  color: ReactiveCalendarReminder['color'],
-  remindAtMinutes: number,
-  remindMinutesBefore: number,
-  remindMinutesAfter: number,
-  repeatOn: RepeatOnWeekdays,
-  actionType: ReminderActionType,
-  actionTargetProject: Nullable<ReactiveProject>,
-  actionTargetActivity: Nullable<ReactiveActivity>,
-}
+export type ReminderFormState = Pick<ReactiveCalendarReminder,
+  'displayText' |
+  'color' |
+  'startAt' |
+  'remindBefore' |
+  'remindAfter' |
+  'actionType' |
+  'actionTargetProject' |
+  'actionTargetActivity'
+>
 
 export function createReminderForm(reminder?: Maybe<ReactiveCalendarReminder>): ReminderFormState {
   return {
     displayText: reminder?.displayText ?? '',
     color: reminder?.color ?? null,
-    remindAtMinutes: isDefined(reminder) ? minutesSinceStartOfDay(reminder.remindAt) : 720,
-    remindMinutesBefore: reminder?.remindMinutesBefore ?? 30,
-    remindMinutesAfter: reminder?.remindMinutesAfter ?? 30,
-    repeatOn: reminder?.repeatOn ?? createRepeatOnWeekdays([true, true, true, true, true, false, false]),
+    startAt: reminder?.startAt ?? timeNow(),
+    remindBefore: reminder?.remindBefore ?? minutes(30),
+    remindAfter: reminder?.remindAfter ?? minutes(30),
     actionType: reminder?.actionType ?? ReminderActionType.START_EVENT,
     actionTargetProject: reminder?.actionTargetShadow?.project ?? null,
     actionTargetActivity: reminder?.actionTargetShadow?.activity ?? null,
@@ -47,10 +37,9 @@ export function createReminderFromForm(form: ReminderFormState) {
   return createReminder({
     displayText: form.displayText,
     color: isNull(shadow) ? form.color : null,
-    remindAt: minutesSinceStartOfDayToDate(form.remindAtMinutes),
-    remindMinutesBefore: form.remindMinutesBefore,
-    remindMinutesAfter: form.remindMinutesAfter,
-    repeatOn: form.repeatOn,
+    startAt: form.startAt,
+    remindBefore: form.remindBefore,
+    remindAfter: form.remindAfter,
     actionType: form.actionType,
     actionTargetShadow: shadow
   })
@@ -59,10 +48,9 @@ export function createReminderFromForm(form: ReminderFormState) {
 export function patchReminderWithForm(reminder: ReactiveCalendarReminder, form: ReminderFormState) {
   reminder.displayText = form.displayText
   reminder.color = form.actionType !== ReminderActionType.START_EVENT ? form.color : null
-  reminder.remindAt = minutesSinceStartOfDayToDate(form.remindAtMinutes)
-  reminder.remindMinutesBefore = form.remindMinutesBefore
-  reminder.remindMinutesAfter = form.remindMinutesAfter
-  reminder.repeatOn = form.repeatOn
+  reminder.startAt = form.startAt
+  reminder.remindBefore = form.remindBefore
+  reminder.remindAfter = form.remindAfter
   reminder.actionType = form.actionType
 
   if (form.actionType !== ReminderActionType.START_EVENT) {

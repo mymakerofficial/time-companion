@@ -6,6 +6,7 @@ import type {
   SerializedCalendarEvent
 } from "@/model/calendarEvent/types";
 import {isNotNull} from "@/lib/utils";
+import {whereId} from "@/lib/listUtils";
 
 export function fromSerializedEvent(serialized: SerializedCalendarEvent, assets: EventDeserializationAssets): CalendarEventInit {
   return {
@@ -13,8 +14,8 @@ export function fromSerializedEvent(serialized: SerializedCalendarEvent, assets:
     note: serialized.note,
     startedAt: isNotNull(serialized.startedAt) ? parseDateTime(serialized.startedAt) : null, // TODO handle null
     endedAt: isNotNull(serialized.endedAt) ? parseDateTime(serialized.endedAt) : null,
-    project: assets.projects.find((it) => it.id === serialized.projectId) ?? null,
-    activity: assets.activities.find((it) => it.id === serialized.activityId) ?? null,
+    project: assets.projects.find(whereId(serialized.projectId)) ?? null,
+    activity: assets.activities.find(whereId(serialized.activityId)) ?? null,
   }
 }
 
