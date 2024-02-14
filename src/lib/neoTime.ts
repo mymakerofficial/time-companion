@@ -83,6 +83,10 @@ export function isAfter(start: LocalDateTime, end: LocalDateTime) {
   return start.isAfter(end)
 }
 
+export function isSameDay(date1: LocalDate, date2: LocalDate) {
+  return date1.equals(date2)
+}
+
 export function durationBetween(start: LocalDateTime, end: LocalDateTime) {
   return Duration.between(start, end)
 }

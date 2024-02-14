@@ -5,10 +5,10 @@ import {useProjectsStore} from "@/stores/projectsStore";
 import {createDay} from "@/model/calendarDay/model";
 import {useLocalStorage} from "@/composables/useLocalStorage";
 import {type ReactiveActiveDay, useActiveDay} from "@/composables/useActiveDay";
-import {isSameDay} from "@/lib/timeUtils";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import {fromSerializedDay} from "@/model/calendarDay/serializer";
-import {today} from "@/lib/neoTime";
+import {isSameDay, today} from "@/lib/neoTime";
+import {whereDate} from "@/lib/listUtils";
 
 export interface CalendarStore {
   isInitialized: Readonly<Ref<boolean>>
@@ -70,7 +70,7 @@ export const useCalendarStore = defineStore('calendar', (): CalendarStore => {
   }
 
   function setActiveDay(date: Date) {
-    const existingDay = days.find((it) => isSameDay(it.date, date))
+    const existingDay = days.find(whereDate(date))
 
     if (existingDay) {
       activeDay.setActiveDay(existingDay)

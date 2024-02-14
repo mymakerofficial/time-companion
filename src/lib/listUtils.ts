@@ -1,6 +1,8 @@
 import type {Maybe, MaybeArray} from "@/lib/utils";
 import {isDefined, isNotDefined, isNull} from "@/lib/utils";
 import type {HasId, ID} from "@/lib/types";
+import type {LocalDate} from "@js-joda/core";
+import {isSameDay} from "@/lib/neoTime";
 
 export function isArray<T>(value: Maybe<MaybeArray<T>>): value is T[] {
   return Array.isArray(value)
@@ -89,10 +91,18 @@ export function lastOf<T>(value: Maybe<MaybeArray<T>>): Maybe<T> {
 }
 
 // returns a predicate function that checks if the id of the given object is equal to the given id
-export function whereId(id: Maybe<ID>) {
+export function whereId<T extends HasId>(id: Maybe<ID>) {
   if (isNotDefined(id)) {
     return () => false
   }
 
-  return (it: HasId) => it.id === id
+  return (it: T) => it.id === id
+}
+
+export function whereDate<T extends { date: LocalDate }>(date: Maybe<LocalDate>) {
+  if (isNotDefined(date)) {
+    return () => false
+  }
+
+  return (it: T) => isSameDay(it.date, date)
 }

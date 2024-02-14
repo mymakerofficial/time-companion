@@ -2,7 +2,7 @@ import type {ReactiveProject} from "@/model/project/";
 import type {ReactiveCalendarDay} from "@/model/calendarDay";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import {durationBetween, now, sumOfDurations} from "@/lib/neoTime";
-import type {Duration, LocalDate} from "@js-joda/core";
+import {Duration, LocalDate} from "@js-joda/core";
 
 export interface TimeReportProjectEntry {
   project: ReactiveProject
@@ -30,6 +30,14 @@ function calculateProjectDurationExact(project: ReactiveProject, events: Reactiv
       .filter((event) => event.project?.id === project.id)
       .map(eventDurationCalculator)
   )
+}
+
+export function createTimeReport(partial: Partial<DayTimeReport>): DayTimeReport {
+  return {
+    date: partial.date ?? LocalDate.EPOCH_0,
+    totalBillableDuration: partial.totalBillableDuration ?? Duration.ZERO,
+    entries: partial.entries ?? []
+  }
 }
 
 export interface TimeReportOptions {
@@ -60,9 +68,9 @@ export function calculateTimeReport(day: ReactiveCalendarDay, projects: Reactive
       .map((it) => it.duration)
   )
 
-  return {
+  return createTimeReport({
     date,
     totalBillableDuration,
     entries
-  }
+  })
 }

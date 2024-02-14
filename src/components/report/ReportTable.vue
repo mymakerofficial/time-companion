@@ -11,9 +11,9 @@ import {
 import Table from "@/components/common/table/Table.vue";
 import {updater} from "@/helpers/table/tableHelpers";
 import TableVisibilitySelect from "@/components/common/table/TableVisibilitySelect.vue";
-import {type DayTimeReport, calculateTimeReport} from "@/lib/timeReport/calculateTimeReport";
+import {type DayTimeReport, calculateTimeReport, createTimeReport} from "@/lib/timeReport/calculateTimeReport";
 import {useCalendarStore} from "@/stores/calendarStore";
-import {isNotEmpty} from "@/lib/listUtils";
+import {isNotEmpty, whereDate} from "@/lib/listUtils";
 import {Button} from "@/components/ui/button";
 import {useOpenDialog} from "@/composables/useOpenDialog";
 import NewProjectDialog from "@/components/settings/projects/projectDialog/NewProjectDialog.vue";
@@ -30,14 +30,12 @@ const yearLabel = formatDate(today(), withFormat('YYYY'))
 const dates = daysInMonth(today())
 
 const data = dates.map((date) => {
-  const day = calendarStore.days.find((it) => it.date.isEqual(date)) ?? null
+  const day = calendarStore.days.find(whereDate(date)) ?? null
 
   if (isNull(day)) {
-    return {
-      date,
-      totalBillableDuration: 0,
-      entries: [],
-    }
+    return createTimeReport({
+      date
+    })
   }
 
   return calculateTimeReport(day, projectsStore.projects)
