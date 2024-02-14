@@ -2,7 +2,7 @@
 import {Input} from "@/components/ui/input";
 import {ref, watch} from "vue";
 import {formatMinutes} from "@/lib/timeUtils";
-import {parseDurationEquation} from "@/lib/parsers";
+import {parseTimeWithEquation} from "@/lib/parsers";
 import {isNull} from "@/lib/utils";
 
 // duration in minutes
@@ -16,7 +16,7 @@ watch(() => model.value, (value) => {
 })
 
 function handleChange() {
-  const parsed = parseDurationEquation(inputValue.value)
+  const parsed = parseTimeWithEquation(inputValue.value)
 
   if (isNull(parsed)) {
     inputValue.value = formatMinutes(model.value)

@@ -1,12 +1,12 @@
-<script setup lang="ts">
-import {DateTimeFormatter, type LocalDateTime} from "@js-joda/core";
+<script setup lang="ts" generic="TValue extends LocalDateTime | LocalTime | Duration">
+import {DateTimeFormatter, type Duration, type LocalDateTime, type LocalTime} from "@js-joda/core";
 import {ref, watch} from "vue";
 import {Input} from "@/components/ui/input";
 import {formatDateTime} from "@/lib/neoTime";
-import {parseDurationEquation} from "@/lib/parsers";
+import {parseTimeWithEquation} from "@/lib/parsers";
 import {isNull} from "@/lib/utils";
 
-const model = defineModel<LocalDateTime>({ required: true })
+const model = defineModel<TValue>({ required: true })
 
 const inputValue = ref('')
 
@@ -22,16 +22,14 @@ function setInputFromModel() {
 }
 
 function handleChange() {
-  const parsed = parseDurationEquation(inputValue.value) // TODO handle error
+  const parsed = parseTimeWithEquation(inputValue.value) // TODO handle error
 
   if (isNull(parsed)) {
     setInputFromModel()
     return
   }
 
-  model.value = model.value
-    .withHour(parsed.hour())
-    .withMinute(parsed.minute())
+  model.value = model.value.with(parsed)
 }
 </script>
 

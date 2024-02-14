@@ -56,10 +56,6 @@ function handleRemove() {
         <ArrowRight v-show="event.hasEnded" class="size-4" />
         <TimeInput v-if="event.hasEnded"  v-model="state.endedAt" placeholder="00:00" size="lg" class="w-20" />
       </div>
-      <!-- TODO add duration input -->
-      <!--<div>
-        <TimeInput v-if="event.hasEnded" v-model="state.duration" placeholder="00:00" class="w-20 text-center font-medium text-xl border-none" />
-      </div>-->
       <div class="flex flex-row items-center gap-2">
         <Button v-if="isNotNull(event.project)" @click="handleContinue()">{{ $t('dashboard.controls.continueEvent') }}</Button>
         <DropdownMenu>

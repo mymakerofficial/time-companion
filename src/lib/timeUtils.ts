@@ -9,14 +9,17 @@ dayjs.extend(localizedFormat)
 dayjs.extend(customParseFormat)
 dayjs.extend(relativeTime)
 
+/** @deprecated switch to js-joda */
 export function now(): Date {
   return new Date()
 }
 
+/** @deprecated switch to js-joda */
 export function timeStringToDate(timeString: string, format = 'HH:mm:ss'): Date {
   return dayjs(timeString, format).toDate()
 }
 
+/** @deprecated switch to js-joda */
 export function formatDate(date: Maybe<Date>, format = 'HH:mm:ss') {
   if (isNotDefined(date)) {
     return ''
@@ -24,10 +27,12 @@ export function formatDate(date: Maybe<Date>, format = 'HH:mm:ss') {
   return dayjs(date).format(format)
 }
 
+/** @deprecated switch to js-joda */
 export function parseDate(dateString: string, format?: string): Date {
   return dayjs(dateString, format).toDate()
 }
 
+/** @deprecated switch to js-joda */
 export function formatTimeDiff(
   start: Date,
   end: Date,
@@ -40,10 +45,12 @@ export function formatTimeDiff(
   return prefix + dayjs().startOf('day').add(diff).format(format)
 }
 
+/** @deprecated switch to js-joda */
 export function fromNow(date: Date): string {
   return dayjs(date).fromNow()
 }
 
+/** @deprecated switch to js-joda */
 export function minutesSinceStartOfDay(date: Maybe<Date>): number {
   if (isNotDefined(date)) {
     return 0
@@ -53,10 +60,12 @@ export function minutesSinceStartOfDay(date: Maybe<Date>): number {
   return dayjs(date).diff(startOfDay, 'minute')
 }
 
+/** @deprecated switch to js-joda */
 export function minutesSinceStartOfDayToDate(minutes: number): Date {
   return dayjs().startOf('day').add(minutes, 'minute').toDate()
 }
 
+/** @deprecated switch to js-joda */
 export function formatMinutes(minutes: Maybe<number>, format = 'HH:mm'): string {
   if (isNotDefined(minutes)) {
     return ''
@@ -64,6 +73,7 @@ export function formatMinutes(minutes: Maybe<number>, format = 'HH:mm'): string 
   return dayjs().startOf('day').add(minutes, 'minute').format(format)
 }
 
+/** @deprecated switch to js-joda */
 export function formatHours(hours: Maybe<number>, format = 'HH:mm'): string {
   if (isNotDefined(hours)) {
     return ''
@@ -71,6 +81,7 @@ export function formatHours(hours: Maybe<number>, format = 'HH:mm'): string {
   return dayjs().startOf('day').add(hours, 'hours').format(format)
 }
 
+/** @deprecated switch to js-joda */
 export function combineDateAndTime(date: Date, time: Date): Date {
   return dayjs(date)
     .set('hour', dayjs(time).hour())
@@ -80,11 +91,15 @@ export function combineDateAndTime(date: Date, time: Date): Date {
     .toDate()
 }
 
+/** @deprecated switch to js-joda */
 export function isSameDay(date1: Date, date2: Date): boolean {
   return dayjs(date1).isSame(date2, 'day')
 }
 
-// returns a list of days in the month of the given date
+/**
+ * returns a list of days in the month of the given date
+ * @deprecated switch to js-joda
+*/
 export function daysInMonth(date: Date): Date[] {
   const daysInMonth = dayjs(date).daysInMonth()
   const days = []
