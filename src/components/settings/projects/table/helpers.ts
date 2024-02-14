@@ -1,4 +1,4 @@
-import type {ReactiveActivity} from "@/model/activity";
+import type {ReactiveActivity} from "@/model/activity/";
 import type {ProjectRow} from "@/components/settings/projects/table/types";
 import {isDefined} from "@/lib/utils";
 import type {ReactiveProject} from "@/model/project/";

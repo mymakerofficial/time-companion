@@ -1,7 +1,7 @@
 import type {Nullable} from "@/lib/utils";
 import type {HasId} from "@/lib/types";
 import type {ReactiveProject} from "@/model/project/";
-import type {ReactiveActivity} from "@/model/activity";
+import type {ReactiveActivity} from "@/model/activity/";
 import type {Duration, LocalDateTime} from "@js-joda/core";
 import type {ProjectsStore} from "@/stores/projectsStore";
 import type {createEventShadow} from "@/model/calendarEventShadow";

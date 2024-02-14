@@ -1,25 +1,25 @@
 import {useProjectsStore} from "@/stores/projectsStore";
 import type {ReactiveProject} from "@/model/project/";
-import type {ReactiveActivity} from "@/model/activity";
+import type {ReactiveActivity} from "@/model/activity/";
 import {type  MaybeRefOrGetter, ref, toRefs, toValue, watchEffect} from "vue";
 import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendarEventShadow";
 import type {Nullable} from "@/lib/utils";
 import {isNull} from "@/lib/utils";
 
 function byLastUsed(a: ReactiveProject | ReactiveActivity, b: ReactiveProject | ReactiveActivity) {
-  return a.lastUsed > b.lastUsed ? -1 : 1
+  return a.lastUsed.isAfter(b.lastUsed) ? -1 : 1
 }
 
 export interface UseQuickAccessOptions {
-  maxActivitiesPerProject: number
-  maxShadows: number
+  maxActivitiesPerProject?: number
+  maxShadows?: number
   // only return shadows with the given project
-  project: Nullable<ReactiveProject>
+  project?: Nullable<ReactiveProject>
   // don't include the given shadow
-  exclude: Nullable<ReactiveCalendarEventShadow>
+  exclude?: Nullable<ReactiveCalendarEventShadow>
 }
 
-export function useQuickAccess(options?: MaybeRefOrGetter<Partial<UseQuickAccessOptions>>) {
+export function useQuickAccess(options?: MaybeRefOrGetter<UseQuickAccessOptions>) {
   const { projects } = useProjectsStore()
 
   const shadows = ref<ReactiveCalendarEventShadow[]>([])

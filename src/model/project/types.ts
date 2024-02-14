@@ -1,5 +1,5 @@
 import type {HasId} from "@/lib/types";
-import type {ReactiveActivity} from "@/model/activity";
+import type {ReactiveActivity} from "@/model/activity/";
 import type {Nullable} from "@/lib/utils";
 import type {LocalDateTime} from "@js-joda/core";
 
