@@ -4,7 +4,7 @@ import {Button} from "@/components/ui/button";
 import {reactive} from "vue";
 import {isNotNull} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
-import type {ReactiveCalendarEventShadow} from "@/model/calendarEventShadow";
+import type {ReactiveCalendarEventShadow} from "@/model/eventShadow";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import ProjectActionInput from "@/components/common/inputs/projectActionInput/ProjectActionInput.vue";
 import TimeInput from "@/components/common/inputs/timeInput/TimeInput.vue";

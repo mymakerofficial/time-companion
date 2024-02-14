@@ -1,7 +1,7 @@
 import type {Maybe} from "@/lib/utils";
 import {isNotNull, isNull} from "@/lib/utils";
 import {createReminder, type ReactiveCalendarReminder, ReminderActionType} from "@/model/calendarReminder";
-import {createEventShadow} from "@/model/calendarEventShadow";
+import {createEventShadow} from "@/model/eventShadow";
 import {minutes, timeNow} from "@/lib/neoTime";
 
 export type ReminderFormState = Pick<ReactiveCalendarReminder,

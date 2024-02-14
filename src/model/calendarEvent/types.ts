@@ -4,7 +4,7 @@ import type {ReactiveProject} from "@/model/project/";
 import type {ReactiveActivity} from "@/model/activity/";
 import type {Duration, LocalDateTime} from "@js-joda/core";
 import type {ProjectsStore} from "@/stores/projectsStore";
-import type {createEventShadow} from "@/model/calendarEventShadow";
+import type {createEventShadow} from "@/model/eventShadow";
 import type {serializeEvent} from "@/model/calendarEvent/serializer";
 
 export interface CalendarEventContext extends HasId {

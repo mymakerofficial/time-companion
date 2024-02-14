@@ -1,5 +1,5 @@
 import {isNull, type Nullable} from "@/lib/utils";
-import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendarEventShadow";
+import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/eventShadow";
 import type {
   CalendarReminderContext,
   CalendarReminderInit,

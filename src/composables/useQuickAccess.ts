@@ -2,7 +2,7 @@ import {useProjectsStore} from "@/stores/projectsStore";
 import type {ReactiveProject} from "@/model/project/";
 import type {ReactiveActivity} from "@/model/activity/";
 import {type  MaybeRefOrGetter, ref, toRefs, toValue, watchEffect} from "vue";
-import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendarEventShadow";
+import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/eventShadow";
 import type {Nullable} from "@/lib/utils";
 import {isNull} from "@/lib/utils";
 

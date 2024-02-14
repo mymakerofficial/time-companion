@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/calendarEventShadow";
+import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/eventShadow";
 import {vProvideColor} from "@/directives/vProvideColor";
 import {Slash, Play, PencilLine} from "lucide-vue-next";
 import {computed} from "vue";

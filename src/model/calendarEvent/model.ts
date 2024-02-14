@@ -4,7 +4,7 @@ import {isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
 import type {LocalDateTime} from "@js-joda/core";
 import {Duration} from "@js-joda/core";
 import {durationBetween, isAfter, isBefore} from "@/lib/neoTime";
-import {createEventShadow} from "@/model/calendarEventShadow";
+import {createEventShadow} from "@/model/eventShadow";
 import type {CalendarEventContext, CalendarEventInit, ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import {serializeEvent} from "@/model/calendarEvent/serializer";
 import {mapReadonly, mapWritable} from "@/model/modelHelpers";
