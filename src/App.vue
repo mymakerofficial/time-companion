@@ -4,12 +4,12 @@ import AppSidebar from "@/components/common/layout/AppSidebar.vue";
 import {TooltipProvider} from "radix-vue"
 import type {NavLink} from "@/components/common/layout/nav/nav-link";
 import {Archive, Calendar, Settings} from "lucide-vue-next";
-import {now} from "@/lib/timeUtils";
 import {useCalendarStore} from "@/stores/calendarStore";
 import {useRemindersStore} from "@/stores/remidersStore";
 import DialogProvider from "@/components/common/dialog/DialogProvider.vue";
 import {useI18n} from "vue-i18n";
 import {computed} from "vue";
+import {today} from "@/lib/neoTime";
 
 const calendarStore = useCalendarStore()
 const remindersStore = useRemindersStore()
@@ -17,7 +17,7 @@ const remindersStore = useRemindersStore()
 remindersStore.init()
 calendarStore.init()
 
-calendarStore.setActiveDay(now())
+calendarStore.setActiveDay(today())
 
 const { t } = useI18n()
 

@@ -7,8 +7,9 @@ import {useLocalStorage} from "@/composables/useLocalStorage";
 import {type ReactiveActiveDay, useActiveDay} from "@/composables/useActiveDay";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import {fromSerializedDay} from "@/model/calendarDay/serializer";
-import {isSameDay, today} from "@/lib/neoTime";
-import {whereDate} from "@/lib/listUtils";
+import {whereDate, whereId} from "@/lib/listUtils";
+import type {LocalDate} from "@js-joda/core";
+import {isDefined} from "@/lib/utils";
 
 export interface CalendarStore {
   isInitialized: Readonly<Ref<boolean>>
@@ -62,23 +63,23 @@ export const useCalendarStore = defineStore('calendar', (): CalendarStore => {
   watch(() => days, store, {deep: true})
 
   function addDay(day: ReactiveCalendarDay) {
-    if (days.some((it) => it.id === day.id)) {
+    if (days.some(whereId(day.id))) {
       throw new Error(`Day with id ${day.id} already exists`)
     }
 
     days.push(day)
   }
 
-  function setActiveDay(date: Date) {
+  function setActiveDay(date: LocalDate) {
     const existingDay = days.find(whereDate(date))
 
-    if (existingDay) {
+    if (isDefined(existingDay)) {
       activeDay.setActiveDay(existingDay)
       return
     }
 
     const newDay = createDay({
-      date: today(),
+      date,
     })
 
     addDay(newDay)
