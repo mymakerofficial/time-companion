@@ -21,6 +21,7 @@ import {getSortableHeader} from "@/helpers/table/tableHelpers";
 import {useI18n} from "vue-i18n";
 import {Badge} from "@/components/ui/badge";
 import ShadowBadge from "@/components/common/shadow/ShadowBadge.vue";
+import {formatDateTime} from "@/lib/neoTime";
 
 function getNameCell(value: ProjectRow['shadow']) {
   return <ShadowBadge shadow={value} variant="skeleton" size="md" class="font-medium" />
@@ -58,7 +59,7 @@ function getLastUsedCell(value: ProjectRow['lastUsed']) {
     return null
   }
 
-  return fromNow(value)
+  return formatDateTime(value)
 }
 
 function getActionsCell(row: Row<ProjectRow>, options: ProjectColumnsOptions) {

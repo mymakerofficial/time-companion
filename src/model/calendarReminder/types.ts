@@ -3,6 +3,7 @@ import type {Nullable} from "@/lib/utils";
 import type {ReactiveCalendarEventShadow} from "@/model/eventShadow";
 import type {Duration, LocalTime} from "@js-joda/core";
 import type {ProjectsStore} from "@/stores/projectsStore";
+import {Temporal} from "temporal-polyfill";
 
 export enum ReminderActionType {
   NO_ACTION = 'NO_ACTION',
@@ -14,9 +15,9 @@ export enum ReminderActionType {
 export interface CalendarReminderContext extends HasId {
   displayText: string
   color: Nullable<string>
-  startAt: LocalTime,
-  remindBefore: Duration,
-  remindAfter: Duration,
+  startAt: Temporal.PlainTime,
+  remindBefore: Temporal.Duration,
+  remindAfter: Temporal.Duration,
   actionType: ReminderActionType
   actionTargetShadow: Nullable<ReactiveCalendarEventShadow>
   isDismissed: boolean

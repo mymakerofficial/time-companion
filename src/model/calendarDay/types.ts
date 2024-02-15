@@ -7,14 +7,15 @@ import type {
 } from "@/model/calendarEvent/types";
 import type {Nullable} from "@/lib/utils";
 import type {serializeDay} from "@/model/calendarDay/serializer";
+import {Temporal} from "temporal-polyfill";
 
 export interface CalendarDayContext extends HasId {
-  date: LocalDate
+  date: Temporal.PlainDate
   events: ReactiveCalendarEvent[]
 }
 
 export interface ReactiveCalendarDay extends CalendarDayContext {
-  readonly startedAt: Nullable<LocalDateTime>
+  readonly startedAt: Nullable<Temporal.PlainDateTime>
   addEvent: (event: ReactiveCalendarEvent) => void
   removeEvent: (event: ReactiveCalendarEvent) => void
   toSerialized: () => ReturnType<typeof serializeDay>

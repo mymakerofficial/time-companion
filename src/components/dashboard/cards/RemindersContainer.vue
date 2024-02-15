@@ -3,7 +3,7 @@ import ReminderEventCard from "@/components/dashboard/cards/ReminderEventCard.vu
 import {computed} from "vue";
 import type {ReactiveCalendarReminder} from "@/model/calendarReminder";
 import {useTimeNow} from "@/composables/useNow";
-import {minutes} from "@/lib/neoTime";
+import {isAfter, isBefore, minutes} from "@/lib/neoTime";
 
 const props = defineProps<{
   reminders: ReactiveCalendarReminder[]
@@ -20,10 +20,10 @@ const filteredReminders = computed(() => {
       return false
     }
 
-    const startAt = reminder.startAt.minus(reminder.remindBefore)
-    const endAt = reminder.startAt.plus(reminder.remindAfter)
+    const startAt = reminder.startAt.subtract(reminder.remindBefore)
+    const endAt = reminder.startAt.add(reminder.remindAfter)
 
-    return now.value.isAfter(startAt) && now.value.isBefore(endAt)
+    return isAfter(now.value, startAt) && isBefore(now.value, endAt)
   })
 })
 </script>

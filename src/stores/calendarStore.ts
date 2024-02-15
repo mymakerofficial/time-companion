@@ -10,6 +10,7 @@ import {fromSerializedDay} from "@/model/calendarDay/serializer";
 import {whereDate, whereId} from "@/lib/listUtils";
 import type {LocalDate} from "@js-joda/core";
 import {isDefined} from "@/lib/utils";
+import {Temporal} from "temporal-polyfill";
 
 export interface CalendarStore {
   isInitialized: Readonly<Ref<boolean>>
@@ -17,7 +18,7 @@ export interface CalendarStore {
   activeDay: ReactiveActiveDay
   init: () => void
   addDay: (day: ReactiveCalendarDay) => void
-  setActiveDay: (date: Date) => void
+  setActiveDay: (date: Temporal.PlainDate) => void
   forEachEvent: (block: (event: ReactiveCalendarEvent) => void) => void
 }
 
@@ -70,7 +71,7 @@ export const useCalendarStore = defineStore('calendar', (): CalendarStore => {
     days.push(day)
   }
 
-  function setActiveDay(date: LocalDate) {
+  function setActiveDay(date: Temporal.PlainDate) {
     const existingDay = days.find(whereDate(date))
 
     if (isDefined(existingDay)) {

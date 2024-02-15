@@ -19,7 +19,7 @@ const now = useTimeNow({
 
 const timeLabel = computed(() => {
   // TODO humanize duration
-  return `in ${durationBetween(now.value, props.reminder.startAt).toMinutes()}min`
+  return `in ${durationBetween(now.value, props.reminder.startAt).minutes}min`
 })
 
 const hasButton = computed(() => {

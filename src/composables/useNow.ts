@@ -1,23 +1,28 @@
-import {ref} from "vue";
-import {now, useIntervalFn} from "@vueuse/core";
-import {seconds, timeNow, today} from "@/lib/neoTime";
-import type {Duration} from "@js-joda/core";
+import {type Ref, ref} from "vue";
+import {useIntervalFn} from "@vueuse/core";
+import {now, seconds, timeNow, today} from "@/lib/neoTime";
+import {Temporal} from "temporal-polyfill";
 
 export interface UseNowOptions {
   // Update interval
-  interval?: Duration
+  interval?: Temporal.Duration
 }
 
-function usePrimitiveNow<T>(options: UseNowOptions, getter: () => T) {
+function usePrimitiveNow<
+  T extends
+  Temporal.PlainDate |
+  Temporal.PlainTime |
+  Temporal.PlainDateTime
+>(options: UseNowOptions, getter: () => T) {
   const {
     interval = seconds(1)
   } = options
 
-  const now = ref(getter())
+  const now = ref<T>(getter()) as Ref<T>
 
   const update = () => now.value = getter()
 
-  useIntervalFn(update, interval.toMillis())
+  useIntervalFn(update, interval.milliseconds)
 
   return now
 }

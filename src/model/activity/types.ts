@@ -3,12 +3,13 @@ import type {Nullable} from "@/lib/utils";
 import type {ReactiveProject} from "@/model/project/";
 import type {LocalDateTime} from "@js-joda/core";
 import type {ProjectsStore} from "@/stores/projectsStore";
+import {Temporal} from "temporal-polyfill";
 
 export interface ActivityContext extends HasId {
   displayName: string
   color: Nullable<string>
   parentProject: Nullable<ReactiveProject>
-  lastUsed: LocalDateTime
+  lastUsed: Temporal.PlainDateTime
 }
 
 export interface ReactiveActivity extends ActivityContext {

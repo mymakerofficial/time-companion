@@ -9,19 +9,19 @@ const props = defineProps<{
   endedAt: Nullable<Date>
 }>()
 
-const containerStyle = computed(() => {
-  const { startedAt, endedAt } = props
-
-  const startOffset = 2 // due to spacing at the top
-
-  const startRow = isNotNull(startedAt) ? minutesToGridRows(minutesSinceStartOfDay(startedAt)) + startOffset : 1
-  const endRow = isNotNull(endedAt) ? minutesToGridRows(minutesSinceStartOfDay(endedAt)) + startOffset : 290
-  const spanRows = endRow - startRow
-
-  return { gridRow: `${startRow} / span ${spanRows}` }
-})
+// const containerStyle = computed(() => {
+//   const { startedAt, endedAt } = props
+//
+//   const startOffset = 2 // due to spacing at the top
+//
+//   const startRow = isNotNull(startedAt) ? minutesToGridRows(minutesSinceStartOfDay(startedAt)) + startOffset : 1
+//   const endRow = isNotNull(endedAt) ? minutesToGridRows(minutesSinceStartOfDay(endedAt)) + startOffset : 290
+//   const spanRows = endRow - startRow
+//
+//   return { gridRow: `${startRow} / span ${spanRows}` }
+// })
 </script>
 
 <template>
-  <div class="bg-secondary/50 col-start-1 col-span-full" :style="containerStyle" />
+  <!--<div class="bg-secondary/50 col-start-1 col-span-full" :style="containerStyle" />-->
 </template>
