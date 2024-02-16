@@ -1,7 +1,107 @@
 import {DateTimeFormatter, Duration, LocalDate, LocalDateTime, LocalTime, nativeJs} from "@js-joda/core";
 import {Locale} from "@js-joda/locale_en";
 import {Temporal} from "temporal-polyfill";
-import {isDefined} from "@/lib/utils";
+
+export function isTemporalDate(date: any): date is Temporal.PlainDate {
+  return date instanceof Temporal.PlainDate
+}
+
+export function isTemporalTime(time: any): time is Temporal.PlainTime {
+  return time instanceof Temporal.PlainTime
+}
+
+export function isTemporalDateTime(dateTime: any): dateTime is Temporal.PlainDateTime {
+  return dateTime instanceof Temporal.PlainDateTime
+}
+
+export function isTemporalDuration(duration: any): duration is Temporal.Duration {
+  return duration instanceof Temporal.Duration
+}
+
+export function temporalToJoda(temporal: Temporal.PlainDate): LocalDate
+export function temporalToJoda(temporal: Temporal.PlainTime): LocalTime
+export function temporalToJoda(temporal: Temporal.PlainDateTime): LocalDateTime
+export function temporalToJoda(temporal: Temporal.Duration): Duration
+export function temporalToJoda(temporal: any): any {
+  if (isTemporalDate(temporal)) {
+    return LocalDate.of(temporal.year, temporal.month, temporal.day)
+  }
+
+  if (isTemporalTime(temporal)) {
+    return LocalTime.of(temporal.hour, temporal.minute, temporal.second)
+  }
+
+  if (isTemporalDateTime(temporal)) {
+    return LocalDateTime.of(
+      temporal.year,
+      temporal.month,
+      temporal.day,
+      temporal.hour,
+      temporal.minute,
+      temporal.second
+    )
+  }
+
+  if (isTemporalDuration(temporal)) {
+    return Duration.ofMillis(temporal.total({unit: 'milliseconds'}))
+  }
+}
+
+export function isJodaDate(date: any): date is LocalDate {
+  return date instanceof LocalDate
+}
+
+export function isJodaTime(time: any): time is LocalTime {
+  return time instanceof LocalTime
+}
+
+export function isJodaDateTime(dateTime: any): dateTime is LocalDateTime {
+  return dateTime instanceof LocalDateTime
+}
+
+export function isJodaDuration(duration: any): duration is Duration {
+  return duration instanceof Duration
+}
+
+export function jodaToTemporal(joda: LocalDate): Temporal.PlainDate
+export function jodaToTemporal(joda: LocalTime): Temporal.PlainTime
+export function jodaToTemporal(joda: LocalDateTime): Temporal.PlainDateTime
+export function jodaToTemporal(joda: Duration): Temporal.Duration
+export function jodaToTemporal(joda: any): any {
+  if (isJodaDate(joda)) {
+    return Temporal.PlainDate.from({
+      year: joda.year(),
+      month: joda.monthValue(),
+      day: joda.dayOfMonth()
+    })
+  }
+
+  if (isJodaTime(joda)) {
+    return Temporal.PlainTime.from({
+      hour: joda.hour(),
+      minute: joda.minute(),
+      second: joda.second(),
+    })
+  }
+
+  if (isJodaDateTime(joda)) {
+    return Temporal.PlainDateTime.from({
+      year: joda.year(),
+      month: joda.monthValue(),
+      day: joda.dayOfMonth(),
+      hour: joda.hour(),
+      minute: joda.minute(),
+      second: joda.second(),
+    })
+  }
+
+  if (isJodaDuration(joda)) {
+    return Temporal.Duration.from({
+      milliseconds: joda.toMillis()
+    })
+  }
+}
+
 
 // obtain the current LocalDate
 export function today() {
@@ -93,12 +193,11 @@ export function parseDuration(durationString: string) {
 }
 
 // format the Duration to a string
-export function formatDuration(duration: Temporal.Duration) {
+export function formatDuration(duration: Temporal.Duration, formatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_TIME) {
   return duration.toString()
 }
 
 export function isBefore<T extends Temporal.PlainDateTimeLike>(start: T, end: T) {
-  console.log(start, end)
   return Temporal.PlainTime.compare(start, end) < 0
 }
 
@@ -110,23 +209,18 @@ export function isSameDay(date1: Temporal.PlainDate, date2: Temporal.PlainDate) 
   return date1.equals(date2)
 }
 
-export function durationBetween<T extends Temporal.PlainDateTimeLike>(start: T, end: T) {
-  const startJoda = isDefined(start.year) && isDefined(start.month) && isDefined(start.day)  ?
-    LocalDateTime.of(start.year, start.month, start.day, start.hour, start.minute, start.second)
-    : LocalTime.of(start.hour, start.minute, start.second)
-  const endJoda = isDefined(end.year) && isDefined(end.month) && isDefined(end.day)  ?
-    LocalDateTime.of(end.year, end.month, end.day, end.hour, end.minute, end.second)
-    : LocalTime.of(end.hour, end.minute, end.second)
-
-  const duration = Duration.between(startJoda, endJoda)
-
-  return Temporal.Duration.from({
-    milliseconds: duration.toMillis()
-  })
+export function durationBetween(start: Temporal.PlainTime, end: Temporal.PlainTime): Temporal.Duration
+export function durationBetween(start: Temporal.PlainDate, end: Temporal.PlainDate): Temporal.Duration
+export function durationBetween(start: Temporal.PlainDateTime, end: Temporal.PlainDateTime): Temporal.Duration
+export function durationBetween(start: any, end: any) {
+  return jodaToTemporal(Duration.between(
+    temporalToJoda(start),
+    temporalToJoda(end)
+  ))
 }
 
 export function sumOfDurations(durations: Temporal.Duration[]) {
-  return durations.reduce((acc, duration) => acc.add(duration), Temporal.Duration.from({ milliseconds: 0 }))
+  return durations.reduce((acc, duration) => acc.add(duration), durationZero())
 }
 
 // returns a list of all days in the month and year of the given date
