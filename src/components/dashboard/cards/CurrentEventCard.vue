@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import {Button} from "@/components/ui/button";
 import {computed, reactive, watch} from "vue";
-import {useNow, watchDebounced} from "@vueuse/core";
+import { watchDebounced} from "@vueuse/core";
 import {MoreVertical} from "lucide-vue-next";
-import {isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
+import {isNotDefined, isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent";
 import type {ReactiveProject} from "@/model/project/";
 import type {ReactiveActivity} from "@/model/activity/";
 import ProjectActionInput from "@/components/common/inputs/projectActionInput/ProjectActionInput.vue";
 import TimeInput from "@/components/common/inputs/timeInput/TimeInput.vue";
-import type {LocalDateTime} from "@js-joda/core";
+import {useNow} from "@/composables/useNow";
+import {durationBetween, formatDuration, withFormat} from "@/lib/neoTime";
 
 const props = defineProps<{
   event: Nullable<ReactiveCalendarEvent>
@@ -20,7 +21,7 @@ const emit = defineEmits<{
   stopEvent: []
 }>()
 
-const now = useNow({ interval: 1000 }) // update every minute
+const now = useNow()
 
 const state = reactive({
   project: props.event?.project ?? null as Nullable<ReactiveProject>,
@@ -95,18 +96,13 @@ function handleStartStop() {
   }
 }
 
-// TODO add duration label
-// const durationLabel = computed(() => {
-//   if (
-//     isNotDefined(props.event?.startedAt) ||
-//     dayjs(props.event!.startedAt).isAfter(now.value)
-//   ) {
-//     return '00:00:00'
-//   }
-//
-//   // time between now and startedAt in HH:mm:ss
-//   return formatTimeDiff(props.event!.startedAt, now.value)
-// })
+const durationLabel = computed(() => {
+  if (isNull(props.event) || isNull(props.event.startedAt)) {
+    return '00:00:00'
+  }
+
+  return formatDuration(durationBetween(props.event.startedAt, now.value), withFormat('HH:mm:ss'))
+})
 </script>
 
 <template>
@@ -124,7 +120,7 @@ function handleStartStop() {
       </div>
       <div class="flex flex-row items-center gap-8">
         <TimeInput v-if="state.startedAt" v-model="state.startedAt" size="lg" class="w-20 border-none bg-primary text-primary-foreground" />
-        <!--<time class="text-2xl font-medium tracking-wide w-24">{{ durationLabel }}</time>-->
+        <time class="text-2xl font-medium tracking-wide w-24">{{ durationLabel }}</time>
       </div>
       <div class="flex flex-row items-center gap-2">
         <Button @click="handleStartStop" variant="inverted">{{ state.isRunning ? $t('dashboard.controls.stopEvent') : $t('dashboard.controls.startEvent') }}</Button>

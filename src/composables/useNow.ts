@@ -1,4 +1,4 @@
-import {type Ref, ref} from "vue";
+import {customRef, type Ref, ref} from "vue";
 import {useIntervalFn} from "@vueuse/core";
 import {now, seconds, timeNow, today} from "@/lib/neoTime";
 import {Temporal} from "temporal-polyfill";
@@ -18,13 +18,21 @@ function usePrimitiveNow<
     interval = seconds(1)
   } = options
 
-  const now = ref<T>(getter()) as Ref<T>
+  return customRef<T>((track, trigger) => {
+    setInterval(() => {
+      trigger()
+    }, interval.total({unit: 'milliseconds'}))
 
-  const update = () => now.value = getter()
-
-  useIntervalFn(update, interval.milliseconds)
-
-  return now
+    return {
+      get() {
+        track()
+        return getter()
+      },
+      set() {
+        // do nothing
+      }
+    }
+  })
 }
 
 export function useNow(options: UseNowOptions = {}) {
