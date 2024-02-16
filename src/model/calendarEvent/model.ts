@@ -1,9 +1,7 @@
 import {computed, reactive} from "vue";
 import {v4 as uuid} from "uuid";
-import {isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
-import type {LocalDateTime} from "@js-joda/core";
-import {Duration} from "@js-joda/core";
-import {durationBetween, isAfter, isBefore} from "@/lib/neoTime";
+import {isNotNull, isNull, runIf} from "@/lib/utils";
+import {durationBetween, durationZero, isAfter, isBefore} from "@/lib/neoTime";
 import {createEventShadow} from "@/model/eventShadow";
 import type {CalendarEventContext, CalendarEventInit, ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import {serializeEvent} from "@/model/calendarEvent/serializer";
@@ -19,7 +17,7 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
     activity: init.activity ?? null,
   })
 
-  const startedAt = computed<Nullable<LocalDateTime>>({
+  const startedAt = computed<CalendarEventContext['startedAt']>({
     get() { return ctx.startedAt },
     set(value) {
       if (isNull(value)) {
@@ -36,7 +34,7 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
     }
   })
 
-  const endedAt = computed<Nullable<LocalDateTime>>({
+  const endedAt = computed<CalendarEventContext['endedAt']>({
     get() { return ctx.endedAt },
     set(value) {
       if (isNull(value)) {
@@ -56,10 +54,10 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
     }
   })
 
-  const duration = computed<Duration>({
+  const duration = computed<ReactiveCalendarEvent['duration']>({
     get() {
       if (isNull(startedAt.value) || isNull(endedAt.value)) {
-        return Duration.ZERO
+        return durationZero()
       }
 
       return durationBetween(startedAt.value, endedAt.value)

@@ -1,4 +1,4 @@
-import type {ActivityContext, ActivityDeserializationAssets, ActivityInit, SerializedActivity} from "@/model/activity/";
+import type {ActivityContext, ActivityDeserializationAssets, ActivityInit, SerializedActivity} from "@/model/activity/types";
 import {whereId} from "@/lib/listUtils";
 import {formatDateTime, parseDateTime} from "@/lib/neoTime";
 

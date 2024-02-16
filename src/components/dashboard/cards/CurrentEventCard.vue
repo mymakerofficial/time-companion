@@ -27,7 +27,7 @@ const state = reactive({
   activity: props.event?.activity ?? null as Nullable<ReactiveActivity>,
   note: props.event?.note ?? '',
 
-  startedAt: computed<Nullable<LocalDateTime>>({
+  startedAt: computed<ReactiveCalendarEvent['startedAt']>({
     get() { return props.event?.startedAt ?? null },
     set(value) { runIf(props.event, isNotNull, () => props.event!.startedAt = value) }
   }),
@@ -123,7 +123,7 @@ function handleStartStop() {
         />
       </div>
       <div class="flex flex-row items-center gap-8">
-        <TimeInput v-if="state.isRunning" v-model="state.startedAt" size="lg" class="w-20 border-none bg-primary text-primary-foreground" />
+        <TimeInput v-if="state.startedAt" v-model="state.startedAt" size="lg" class="w-20 border-none bg-primary text-primary-foreground" />
         <!--<time class="text-2xl font-medium tracking-wide w-24">{{ durationLabel }}</time>-->
       </div>
       <div class="flex flex-row items-center gap-2">

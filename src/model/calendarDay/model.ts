@@ -3,13 +3,14 @@ import {v4 as uuid} from "uuid";
 import {firstOf} from "@/lib/listUtils";
 import {serializeDay} from "@/model/calendarDay/serializer";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
-import type {CalendarDayInit, ReactiveCalendarDay} from "@/model/calendarDay/types";
+import type {CalendarDayContext, CalendarDayInit, ReactiveCalendarDay} from "@/model/calendarDay/types";
 import {mapReadonly} from "@/model/modelHelpers";
+import {dateZero} from "@/lib/neoTime";
 
 export function createDay(init: CalendarDayInit): ReactiveCalendarDay {
-  const ctx = reactive({
+  const ctx = reactive<CalendarDayContext>({
     id: init.id ?? uuid(),
-    date: init.date,
+    date: init.date ?? dateZero(),
     events: init.events ?? [],
   })
 

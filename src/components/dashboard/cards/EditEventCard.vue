@@ -52,9 +52,9 @@ function handleRemove() {
         />
       </div>
       <div class="flex flex-row items-center gap-2">
-        <TimeInput v-if="event.hasStarted" v-model="state.startedAt" placeholder="00:00" size="lg" class="w-20" />
-        <ArrowRight v-show="event.hasEnded" class="size-4" />
-        <TimeInput v-if="event.hasEnded"  v-model="state.endedAt" placeholder="00:00" size="lg" class="w-20" />
+        <TimeInput v-if="state.startedAt" v-model="state.startedAt" placeholder="00:00" size="lg" class="w-20" />
+        <ArrowRight v-show="state.endedAt" class="size-4" />
+        <TimeInput v-if="state.endedAt"  v-model="state.endedAt" placeholder="00:00" size="lg" class="w-20" />
       </div>
       <div class="flex flex-row items-center gap-2">
         <Button v-if="isNotNull(event.project)" @click="handleContinue()">{{ $t('dashboard.controls.continueEvent') }}</Button>

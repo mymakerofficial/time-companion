@@ -5,9 +5,10 @@ import {type  MaybeRefOrGetter, ref, toRefs, toValue, watchEffect} from "vue";
 import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/eventShadow";
 import type {Nullable} from "@/lib/utils";
 import {isNull} from "@/lib/utils";
+import {isAfter} from "@/lib/neoTime";
 
 function byLastUsed(a: ReactiveProject | ReactiveActivity, b: ReactiveProject | ReactiveActivity) {
-  return a.lastUsed.isAfter(b.lastUsed) ? -1 : 1
+  return isAfter(a.lastUsed, b.lastUsed) ? -1 : 1
 }
 
 export interface UseQuickAccessOptions {

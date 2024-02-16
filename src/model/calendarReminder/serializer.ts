@@ -5,8 +5,8 @@ import type {
   CalendarReminderInit,
   ReminderDeserializationAssets,
   SerializedCalendarReminder
-} from "@/model/calendarReminder/index";
-import {ReminderActionType} from "@/model/calendarReminder/index";
+} from "@/model/calendarReminder/types";
+import {ReminderActionType} from "@/model/calendarReminder/types";
 import {formatDuration, formatTime, parseDuration, parseTime} from "@/lib/neoTime";
 import {whereId} from "@/lib/listUtils";
 

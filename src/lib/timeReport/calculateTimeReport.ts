@@ -1,30 +1,30 @@
 import type {ReactiveProject} from "@/model/project/";
 import type {ReactiveCalendarDay} from "@/model/calendarDay";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
-import {durationBetween, now, sumOfDurations} from "@/lib/neoTime";
-import {Duration, LocalDate} from "@js-joda/core";
+import {dateTimeZero, dateZero, durationBetween, durationZero, now, sumOfDurations} from "@/lib/neoTime";
+import {Temporal} from "temporal-polyfill";
 
 export interface TimeReportProjectEntry {
   project: ReactiveProject
-  duration: Duration
+  duration: Temporal.Duration
   isBillable: boolean
   isRunning: boolean
 }
 
 export interface DayTimeReport {
-  date: LocalDate
-  totalBillableDuration: Duration
+  date: Temporal.PlainDate
+  totalBillableDuration: Temporal.Duration
   entries: TimeReportProjectEntry[]
 }
 
-export type EventDurationCalculator = (event: ReactiveCalendarEvent) => Duration
-export type ProjectDurationCalculator = (project: ReactiveProject, events: ReactiveCalendarEvent[], eventDurationCalculator: EventDurationCalculator) => Duration
+export type EventDurationCalculator = (event: ReactiveCalendarEvent) => Temporal.Duration
+export type ProjectDurationCalculator = (project: ReactiveProject, events: ReactiveCalendarEvent[], eventDurationCalculator: EventDurationCalculator) => Temporal.Duration
 
-function calculateEventDurationExact(event: ReactiveCalendarEvent): Duration {
-  return durationBetween(event.startedAt, event.endedAt ?? now())
+function calculateEventDurationExact(event: ReactiveCalendarEvent): Temporal.Duration {
+  return durationBetween(event.startedAt ?? dateTimeZero(), event.endedAt ?? now())
 }
 
-function calculateProjectDurationExact(project: ReactiveProject, events: ReactiveCalendarEvent[], eventDurationCalculator: EventDurationCalculator): Duration {
+function calculateProjectDurationExact(project: ReactiveProject, events: ReactiveCalendarEvent[], eventDurationCalculator: EventDurationCalculator): Temporal.Duration {
   return sumOfDurations(
     events
       .filter((event) => event.project?.id === project.id)
@@ -34,8 +34,8 @@ function calculateProjectDurationExact(project: ReactiveProject, events: Reactiv
 
 export function createTimeReport(partial: Partial<DayTimeReport>): DayTimeReport {
   return {
-    date: partial.date ?? LocalDate.EPOCH_0,
-    totalBillableDuration: partial.totalBillableDuration ?? Duration.ZERO,
+    date: partial.date ?? dateZero(),
+    totalBillableDuration: partial.totalBillableDuration ?? durationZero(),
     entries: partial.entries ?? []
   }
 }

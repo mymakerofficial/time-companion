@@ -1,5 +1,4 @@
-import type {ProjectInit, SerializedProject} from "@/model/project/";
-import type {ProjectContext} from "@/model/project/";
+import type {ProjectInit, SerializedProject, ProjectContext} from "@/model/project/types";
 import {formatDateTime, parseDateTime} from "@/lib/neoTime";
 
 export function fromSerializedProject(serialized: SerializedProject): ProjectInit {

@@ -1,10 +1,10 @@
-<script setup lang="ts" generic="TValue extends LocalDateTime | LocalTime | Duration">
-import {DateTimeFormatter, type Duration, type LocalDateTime, type LocalTime} from "@js-joda/core";
+<script setup lang="ts" generic="TValue extends Temporal.PlainDateTime | Temporal.PlainTime">
 import {ref, watch} from "vue";
 import {Input} from "@/components/ui/input";
-import {formatDateTime} from "@/lib/neoTime";
+import {formatTime, withFormat} from "@/lib/neoTime";
 import {parseHumanTimeWithEquation} from "@/lib/parsers";
 import {isNull} from "@/lib/utils";
+import {Temporal} from "temporal-polyfill";
 
 const model = defineModel<TValue>({ required: true })
 
@@ -15,10 +15,7 @@ watch(() => model.value, () => {
 }, { immediate: true })
 
 function setInputFromModel() {
-  inputValue.value = formatDateTime(
-    model.value,
-    DateTimeFormatter.ofPattern('HH:mm')
-  )
+  inputValue.value = formatTime(model.value, withFormat('HH:mm'))
 }
 
 function handleChange() {
@@ -29,7 +26,7 @@ function handleChange() {
     return
   }
 
-  model.value = model.value.with(parsed)
+  model.value = model.value.with(parsed) as TValue
 }
 </script>
 

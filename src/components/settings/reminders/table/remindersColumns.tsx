@@ -4,7 +4,7 @@ import {Button} from "@/components/ui/button";
 import type {ReminderRow} from "@/components/settings/reminders/table/types";
 import {getSortableHeader} from "@/helpers/table/tableHelpers";
 import {useI18n} from "vue-i18n";
-import {formatTime} from "@/lib/neoTime";
+import {formatTime, withFormat} from "@/lib/neoTime";
 import {DateTimeFormatter} from "@js-joda/core";
 
 function getReminderActionCell(value: ReminderRow['action']) {
@@ -43,7 +43,7 @@ export function  createRemindersColumns(
     }),
     columnHelper.accessor('startAt', {
       header: ({ column }) => getSortableHeader(column, t('settings.reminders.table.columns.startAt')),
-      cell: (info) => formatTime(info.getValue(), DateTimeFormatter.ofPattern('HH:mm')),
+      cell: (info) => formatTime(info.getValue(), withFormat('HH:mm')),
     }),
     columnHelper.accessor('action', {
       header: t('settings.reminders.table.columns.action'),

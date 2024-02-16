@@ -1,6 +1,7 @@
 import {isNotDefined, type Nullable} from "@/lib/utils";
 import {isEmpty} from "@/lib/listUtils";
-import {LocalTime} from "@js-joda/core";
+import {Temporal} from "temporal-polyfill";
+import {timeZero} from "@/lib/neoTime";
 
 /**
  * Parses any single human-readable time input into LocalTime
@@ -14,7 +15,7 @@ import {LocalTime} from "@js-joda/core";
  * parseHumanTime('90m') // LocalTime.of(1, 30)
  * parseHumanTime('1h') // LocalTime.of(1, 0)
  */
-export function parseHumanTime(value: string): Nullable<LocalTime> {
+export function parseHumanTime(value: string): Nullable<Temporal.PlainTime> {
   // match any valid input and extract the relevant parts in groups
   // whole.decimal | hour:minute | value unit
   const inputRegex = /^\s*((?<whole>\d{1,2})\.(?<decimal>\d+)?h?\s*$)|((?<hour>\d{1,2})(:|h| )?(?<minute>\d{2})?\s*$)|((?<value>\d+)\s*(?<unit>minute|min|m|hour|h)?\s*$)/gi
@@ -38,20 +39,32 @@ export function parseHumanTime(value: string): Nullable<LocalTime> {
     // value is given as a decimal (e.g. 1.5)
     const hours = parseInt(whole)
     const minutes = parseInt(decimal) / 10 * 60
-    return LocalTime.of(hours, minutes)
+
+    return Temporal.PlainTime.from({
+      hour: hours,
+      minute: minutes
+    })
   }
 
   if (hour !== undefined) {
     // value is given in hours and minutes (e.g. 1:30)
     const hours = parseInt(hour)
     const minutes = parseInt(minute) || 0
-    return LocalTime.of(hours, minutes)
+
+    return Temporal.PlainTime.from({
+      hour: hours,
+      minute: minutes
+    })
   }
 
   if (valueString !== undefined) {
     // value is given in minutes or hours (e.g. 90m or 1h)
     const isMinutes = unit === 'm' || unit === 'min' || unit === 'minute'
-    return LocalTime.of(0).plusMinutes(parseInt(valueString) * (isMinutes ? 1 : 60))
+
+    // TODO switch to Temporal
+    // return LocalTime.of(0).plusMinutes(parseInt(valueString) * (isMinutes ? 1 : 60))
+
+    return timeZero()
   }
 
   return null
@@ -66,7 +79,7 @@ export function parseHumanTime(value: string): Nullable<LocalTime> {
  * parseHumanTimeWithEquation('08:00 - 30min') // LocalTime.of(7, 30)
  * parseHumanTimeWithEquation('08:00 + 1h + 30min') // LocalTime.of(9, 30)
  */
-export function parseHumanTimeWithEquation(value: string): Nullable<LocalTime> {
+export function parseHumanTimeWithEquation(value: string): Nullable<Temporal.PlainTime> {
   // split the input into individual values and operators
   const inputRegex = /(?<operator>[+-])?\s*(?<value>\d+.?\d*\w*)/gi
 
@@ -88,5 +101,6 @@ export function parseHumanTimeWithEquation(value: string): Nullable<LocalTime> {
     }
   })
 
+  // TODO actually calculate the result
   return values[0].value
 }

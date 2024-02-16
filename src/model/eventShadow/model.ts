@@ -1,7 +1,7 @@
 import {computed, reactive} from "vue";
-import type {CalendarEventInit} from "@/model/calendarEvent";
-import {createEvent} from "@/model/calendarEvent";
-import type {CalendarEventShadowInit, EventShadowContext, ReactiveCalendarEventShadow} from "@/model/eventShadow";
+import type {CalendarEventInit} from "@/model/calendarEvent/types";
+import {createEvent} from "@/model/calendarEvent/model";
+import type {CalendarEventShadowInit, EventShadowContext, ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
 import {mapWritable} from "@/model/modelHelpers";
 
 export function createEventShadow(init: CalendarEventShadowInit): ReactiveCalendarEventShadow {

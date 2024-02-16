@@ -1,7 +1,7 @@
 import {reactive} from "vue";
 import {v4 as uuid} from "uuid";
-import type {ActivityInit, ReactiveActivity, ActivityContext} from "@/model/activity/";
-import {serializeActivity} from "@/model/activity/";
+import type {ActivityInit, ReactiveActivity, ActivityContext} from "@/model/activity/types";
+import {serializeActivity} from "@/model/activity/serializer";
 import {now} from "@/lib/neoTime";
 import {mapReadonly, mapWritable} from "@/model/modelHelpers";
 

@@ -33,6 +33,26 @@ export function seconds(seconds: number) {
   return Temporal.Duration.from({ seconds })
 }
 
+export function durationZero() {
+  return Temporal.Duration.from({ milliseconds: 0 })
+}
+
+export function timeZero() {
+  return Temporal.PlainTime.from({ hour: 0, minute: 0, second: 0 })
+}
+
+export function dateZero() {
+  return Temporal.PlainDate.from({ year: 0, month: 1, day: 1 })
+}
+
+export function dateTimeZero() {
+  return Temporal.PlainDateTime.from({ year: 0, month: 1, day: 1, hour: 0, minute: 0, second: 0 })
+}
+
+export function isZeroDuration(duration: Temporal.Duration) {
+  return duration.total({unit: 'milliseconds'}) === 0
+}
+
 export function withFormat(pattern: string) {
   return DateTimeFormatter.ofPattern(pattern).withLocale(Locale.UK);
 }
@@ -53,13 +73,13 @@ export function parseTime(timeString: string, formatter: DateTimeFormatter = Dat
 }
 
 // format the LocalTime to a string
-export function formatTime(time: Temporal.PlainTime, formatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_TIME) {
+export function formatTime(time: Temporal.PlainTime | Temporal.PlainDateTime, formatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_TIME) {
   return time.toString()
 }
 
 // parse a string to a LocalDateTime
 export function parseDateTime(dateTimeString: string, formatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME) {
-  return Temporal.PlainDate.from(dateTimeString)
+  return Temporal.PlainDateTime.from(dateTimeString)
 }
 
 // format the LocalDateTime to a string

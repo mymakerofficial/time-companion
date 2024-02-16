@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, type HTMLAttributes, onMounted, ref, useAttrs, watch} from "vue";
+import {computed, type HTMLAttributes, onMounted, ref, watch} from "vue";
 import {Input} from "@/components/ui/input";
 import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
 import ComboboxInput from "@/components/common/inputs/combobox/ComboboxInput.vue";

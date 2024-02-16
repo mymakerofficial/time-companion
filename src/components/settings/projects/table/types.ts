@@ -5,7 +5,7 @@ import type {ReactiveProject} from "@/model/project";
 export interface ProjectRow {
   id: string
   shadow: ReactiveCalendarEventShadow
-  isBillable: ReactiveProject['isBillable']
+  isBillable: Nullable<boolean>
   color: ReactiveProject['color']
   lastUsed: ReactiveProject['lastUsed']
   activities?: ProjectRow[]

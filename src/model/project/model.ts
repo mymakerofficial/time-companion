@@ -1,10 +1,9 @@
 import {reactive} from "vue";
 import {v4 as uuid} from "uuid";
 import {randomTailwindColor} from "@/lib/colorUtils";
-import type {ProjectInit, ProjectOptions, ReactiveProject} from "@/model/project/";
+import type {ProjectInit, ProjectOptions, ReactiveProject, ProjectContext} from "@/model/project/types";
 import {now} from "@/lib/neoTime";
-import type {ProjectContext} from "@/model/project/";
-import {serializeProject} from "@/model/project/";
+import {serializeProject} from "@/model/project/serializer";
 import {mapReadonly, mapWritable} from "@/model/modelHelpers";
 
 export function createProject(init: ProjectInit, options?: ProjectOptions): ReactiveProject {

@@ -7,8 +7,11 @@ import type {
   CalendarReminderContext,
   CalendarReminderInit,
   ReactiveCalendarReminder,
-} from "@/model/calendarReminder/index";
-import {ReminderActionType, serializeReminder} from "@/model/calendarReminder/index";
+} from "@/model/calendarReminder/types";
+import {
+  ReminderActionType
+} from "@/model/calendarReminder/types";
+import {serializeReminder} from "@/model/calendarReminder/serializer";
 import {minutes, timeNow} from "@/lib/neoTime";
 
 export function createReminder(init: CalendarReminderInit): ReactiveCalendarReminder {
