@@ -157,44 +157,46 @@ export function withFormat(pattern: string) {
   return DateTimeFormatter.ofPattern(pattern).withLocale(Locale.UK);
 }
 
-// parse a string to a LocalDate
-export function parseDate(dateString: string) {
-  return Temporal.PlainDate.from(dateString)
+// parse a string to a Date
+export function parseDate(dateString: string, formatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE) {
+  return jodaToTemporal(LocalDate.parse(dateString, formatter))
 }
 
-// format the LocalDate to a string
+// format the Date to a string
 export function formatDate(date: Temporal.PlainDate, formatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE) {
-  return date.toString()
+  return temporalToJoda(date).format(formatter)
 }
 
-// parse a string to a LocalTime
+// parse a string to a Time
 export function parseTime(timeString: string, formatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_TIME) {
-  return Temporal.PlainTime.from(timeString)
+  return jodaToTemporal(LocalTime.parse(timeString, formatter))
 }
 
-// format the LocalTime to a string
-export function formatTime(time: Temporal.PlainTime | Temporal.PlainDateTime, formatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_TIME) {
-  return time.toString()
+export function formatTime(time: Temporal.PlainTime, formatter?: DateTimeFormatter): string
+export function formatTime(time: Temporal.PlainDateTime, formatter?: DateTimeFormatter): string
+// format the Time to a string
+export function formatTime(time: any, formatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_TIME) {
+  return temporalToJoda(time).format(formatter)
 }
 
-// parse a string to a LocalDateTime
+// parse a string to a DateTime
 export function parseDateTime(dateTimeString: string, formatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME) {
-  return Temporal.PlainDateTime.from(dateTimeString)
+  return jodaToTemporal(LocalTime.parse(dateTimeString, formatter))
 }
 
-// format the LocalDateTime to a string
+// format the DateTime to a string
 export function formatDateTime(dateTime: Temporal.PlainDateTime, formatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME) {
-  return dateTime.toString()
+  return temporalToJoda(dateTime).format(formatter)
 }
 
 // parse a string to a Duration
 export function parseDuration(durationString: string) {
-  return Temporal.Duration.from(durationString)
+  return jodaToTemporal(Duration.parse(durationString))
 }
 
 // format the Duration to a string
-export function formatDuration(duration: Temporal.Duration, formatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_TIME) {
-  return duration.toString()
+export function formatDuration(duration: Temporal.Duration) {
+  return temporalToJoda(duration).toString()
 }
 
 export function isBefore<T extends Temporal.PlainDateTimeLike>(start: T, end: T) {
