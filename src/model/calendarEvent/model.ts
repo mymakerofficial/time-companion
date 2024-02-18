@@ -1,7 +1,7 @@
 import {computed, reactive} from "vue";
 import {v4 as uuid} from "uuid";
 import {isNotNull, isNull, runIf} from "@/lib/utils";
-import {durationBetween, durationZero, isAfter, isBefore} from "@/lib/neoTime";
+import {dateTimeZero, durationBetween, durationZero, isAfter, isBefore} from "@/lib/neoTime";
 import {createEventShadow} from "@/model/eventShadow";
 import type {CalendarEventContext, CalendarEventInit, ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import {serializeEvent} from "@/model/calendarEvent/serializer";
@@ -11,7 +11,7 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
   const ctx = reactive<CalendarEventContext>({
     id: init.id ?? uuid(),
     note: init.note ?? '',
-    startAt: init.startAt ?? null,
+    startAt: init.startAt ?? dateTimeZero(),
     endAt: init.endAt ?? null,
     project: init.project ?? null,
     activity: init.activity ?? null,
@@ -20,12 +20,6 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
   const startAt = computed<CalendarEventContext['startAt']>({
     get() { return ctx.startAt },
     set(value) {
-      if (isNull(value)) {
-        ctx.startAt = null
-        ctx.endAt = null
-        return
-      }
-
       if (isNotNull(endAt.value) && isAfter(value, endAt.value)) {
         throw Error('Tried to set startAt to a value after endAt.')
       }
@@ -40,10 +34,6 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
       if (isNull(value)) {
         ctx.endAt = null
         return
-      }
-
-      if (isNull(startAt.value)) {
-        throw Error('Tried to set endAt without startAt.')
       }
 
       if (isBefore(value, startAt.value)) {

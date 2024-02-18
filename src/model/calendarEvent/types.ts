@@ -34,7 +34,7 @@ export interface SerializedCalendarEvent {
   projectId: Nullable<string>
   activityId: Nullable<string>
   note: string
-  startAt: Nullable<string> // ISO DateTime (YYYY-MM-DDTHH:mm:ss)
+  startAt: string // ISO DateTime (YYYY-MM-DDTHH:mm:ss)
   endAt: Nullable<string> // ISO DateTime (YYYY-MM-DDTHH:mm:ss)
 }
 

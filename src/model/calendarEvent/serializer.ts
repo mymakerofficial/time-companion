@@ -12,8 +12,8 @@ export function fromSerializedEvent(serialized: SerializedCalendarEvent, assets:
   return {
     id: serialized.id,
     note: serialized.note,
-    startAt: isNotNull(serialized.startAt) ? parseDateTime(serialized.startAt) : null, // TODO handle null
-    endAt: isNotNull(serialized.endAt) ? parseDateTime(serialized.endAt) : null,
+    startAt: parseDateTime(serialized.startAt),
+    endAt: isNotNull(serialized.endAt) ? parseDateTime(serialized.endAt) : null, // TODO handle null
     project: assets.projects.find(whereId(serialized.projectId)) ?? null,
     activity: assets.activities.find(whereId(serialized.activityId)) ?? null,
   }
@@ -25,7 +25,7 @@ export function serializeEvent(event: CalendarEventContext): SerializedCalendarE
     projectId: event.project?.id ?? null,
     activityId: event.activity?.id ?? null,
     note: event.note,
-    startAt: isNotNull(event.startAt) ? formatDateTime(event.startAt) : null, // TODO handle null
+    startAt: formatDateTime(event.startAt), // TODO handle null
     endAt: isNotNull(event.endAt) ? formatDateTime(event.endAt) : null,
   }
 }

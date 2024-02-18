@@ -10,7 +10,7 @@ import type {ReactiveActivity} from "@/model/activity/";
 import ProjectActionInput from "@/components/common/inputs/projectActionInput/ProjectActionInput.vue";
 import TimeInput from "@/components/common/inputs/timeInput/TimeInput.vue";
 import {useNow} from "@/composables/useNow";
-import {durationBetween, formatDuration, withFormat} from "@/lib/neoTime";
+import {dateTimeZero, durationBetween, formatDuration, withFormat} from "@/lib/neoTime";
 
 const props = defineProps<{
   event: Nullable<ReactiveCalendarEvent>
@@ -29,7 +29,7 @@ const state = reactive({
   note: props.event?.note ?? '',
 
   startAt: computed<ReactiveCalendarEvent['startAt']>({
-    get() { return props.event?.startAt ?? null },
+    get() { return props.event?.startAt ?? dateTimeZero() },
     set(value) { runIf(props.event, isNotNull, () => props.event!.startAt = value) }
   }),
 
