@@ -18,7 +18,7 @@ export interface ReactiveCalendarDay extends CalendarDayContext {
   readonly startAt: Nullable<ReactiveCalendarEvent['startAt']>
   addEvent: (event: ReactiveCalendarEvent) => void
   removeEvent: (event: ReactiveCalendarEvent) => void
-  toSerialized: () => ReturnType<typeof serializeDay>
+  toSerialized: () => SerializedCalendarDay
 }
 
 export type CalendarDayInit = Partial<CalendarDayContext>

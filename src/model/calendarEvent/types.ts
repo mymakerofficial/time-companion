@@ -4,7 +4,7 @@ import type {ReactiveProject} from "@/model/project/";
 import type {ReactiveActivity} from "@/model/activity/";
 import type {Duration, LocalDateTime} from "@js-joda/core";
 import type {ProjectsStore} from "@/stores/projectsStore";
-import type {createEventShadow} from "@/model/eventShadow";
+import type {createEventShadow, ReactiveCalendarEventShadow} from "@/model/eventShadow";
 import type {serializeEvent} from "@/model/calendarEvent/serializer";
 import {Temporal} from "temporal-polyfill";
 
@@ -23,8 +23,8 @@ export interface ReactiveCalendarEvent extends CalendarEventContext {
   readonly duration: Temporal.Duration
   readonly hasStarted: boolean
   readonly hasEnded: boolean
-  createShadow: () => ReturnType<typeof createEventShadow>
-  toSerialized: () => ReturnType<typeof serializeEvent>
+  createShadow: () => ReactiveCalendarEventShadow
+  toSerialized: () => SerializedCalendarEvent
 }
 
 export type CalendarEventInit = Partial<CalendarEventContext>
