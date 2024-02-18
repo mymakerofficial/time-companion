@@ -88,15 +88,15 @@ export default {
     properties: {
       displayText: '@:common.properties.displayName',
       color: '@:common.properties.color',
-      remindAt: 'Zeit',
-      remindMinutesBefore: 'Vorher anzeigen',
-      remindMinutesAfter: 'Nachher anzeigen',
+      startAt: 'Zeit',
+      remindBefore: 'Vorher anzeigen',
+      remindAfter: 'Nachher anzeigen',
       repeatOn: 'Wiederholen an',
       actionType: 'Aktion',
     },
     actionType: {
       'NO_ACTION': 'Keine Aktion',
-      'START_EVENT': 'Starte Ereignis',
+      'START_EVENT': 'Startet Projekt',
       'CONTINUE_PREVIOUS_EVENT': 'Vorheriges Ereignis fortsetzen',
       'STOP_CURRENT_EVENT': 'Aktuelles Ereignis beenden',
     }
@@ -158,7 +158,7 @@ export default {
       table: {
         columns: {
           name: '@:reminder.properties.displayText',
-          remindAt: '@:reminder.properties.remindAt',
+          startAt: '@:reminder.properties.startAt',
           repeatOn: '@:reminder.properties.repeatOn',
           action: '@:reminder.properties.actionType',
         }
@@ -262,22 +262,22 @@ export default {
           label: '@:reminder.properties.actionType'
         },
         actionTarget: {
-          label: 'Startet projekt'
+          label: 'Startet Projekt'
         },
         color: {
           label: '@:reminder.properties.color'
         },
-        remindAt: {
-          label: '@:reminder.properties.remindAt'
+        startAt: {
+          label: '@:reminder.properties.startAt'
         },
         repeatOn: {
           label: '@:reminder.properties.repeatOn'
         },
-        remindMinutesBefore: {
-          label: '@:reminder.properties.remindMinutesBefore'
+        remindBefore: {
+          label: '@:reminder.properties.remindBefore'
         },
-        remindMinutesAfter: {
-          label: '@:reminder.properties.remindMinutesAfter'
+        remindAfter: {
+          label: '@:reminder.properties.remindAfter'
         },
       }
     }

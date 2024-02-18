@@ -89,8 +89,8 @@ export default {
       displayText: '@:common.properties.displayName',
       color: '@:common.properties.color',
       startAt: 'Time',
-      remindMinutesBefore: 'Remind Before',
-      remindMinutesAfter: 'Remind After',
+      remindBefore: 'Remind Before',
+      remindAfter: 'Remind After',
       repeatOn: 'Repeat on',
       actionType: 'Action',
     },
@@ -273,11 +273,11 @@ export default {
         repeatOn: {
           label: '@:reminder.properties.repeatOn'
         },
-        remindMinutesBefore: {
-          label: '@:reminder.properties.remindMinutesBefore'
+        remindBefore: {
+          label: '@:reminder.properties.remindBefore'
         },
-        remindMinutesAfter: {
-          label: '@:reminder.properties.remindMinutesAfter'
+        remindAfter: {
+          label: '@:reminder.properties.remindAfter'
         },
       }
     }
