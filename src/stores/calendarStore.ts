@@ -8,9 +8,9 @@ import {type ReactiveActiveDay, useActiveDay} from "@/composables/useActiveDay";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import {fromSerializedDay} from "@/model/calendarDay/serializer";
 import {whereDate, whereId} from "@/lib/listUtils";
-import type {LocalDate} from "@js-joda/core";
 import {isDefined} from "@/lib/utils";
 import {Temporal} from "temporal-polyfill";
+import {useNotifyError} from "@/composables/useNotifyError";
 
 export interface CalendarStore {
   isInitialized: Readonly<Ref<boolean>>
@@ -48,20 +48,39 @@ export const useCalendarStore = defineStore('calendar', (): CalendarStore => {
       activities: projectsStore.activities,
     }
 
-    const serialized = storage.get()
+    try {
+      const serialized = storage.get()
 
-    days.push(...serialized.days.map((it: any) => createDay(fromSerializedDay(it, assets))))
+      days.push(...serialized.days.map((it: any) => createDay(fromSerializedDay(it, assets))))
 
-    isInitialized.value = true
+      isInitialized.value = true
+    } catch (error) {
+      useNotifyError({
+        title: 'Failed to load calendar',
+        message: 'Your calendar data could not be loaded. Data may be corrupted or missing.',
+        actions: [{
+          label: 'Delete calendar data',
+          handler: () => {
+            storage.clear()
+            init()
+          }
+        }],
+        error: error
+      })
+    }
   }
 
-  function store() {
+  function commit() {
+    if (!isInitialized.value) {
+      throw new Error('Tried to commit calendar store before it was initialized')
+    }
+
     storage.set({
       days: days.map((it) => it.toSerialized()),
     })
   }
 
-  watch(() => days, store, {deep: true})
+  watch(() => days, commit, {deep: true})
 
   function addDay(day: ReactiveCalendarDay) {
     if (days.some(whereId(day.id))) {

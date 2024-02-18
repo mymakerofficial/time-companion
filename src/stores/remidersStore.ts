@@ -4,6 +4,7 @@ import type {ReactiveCalendarReminder, SerializedCalendarReminder} from "@/model
 import {useLocalStorage} from "@/composables/useLocalStorage";
 import {createReminder, fromSerializedReminder} from "@/model/calendarReminder";
 import {useProjectsStore} from "@/stores/projectsStore";
+import {useNotifyError} from "@/composables/useNotifyError";
 
 export interface RemindersStore {
   isInitialized: Readonly<Ref<boolean>>
@@ -38,14 +39,33 @@ export const useRemindersStore = defineStore('reminders', (): RemindersStore => 
       activities: projectsStore.activities,
     }
 
-    const serialized = storage.get()
+    try {
+      const serialized = storage.get()
 
-    reminders.push(...serialized.reminders.map((it: any) => createReminder(fromSerializedReminder(it, assets))))
+      reminders.push(...serialized.reminders.map((it: any) => createReminder(fromSerializedReminder(it, assets))))
 
-    isInitialized.value = true
+      isInitialized.value = true
+    } catch (error) {
+      useNotifyError({
+        title: 'Failed to load reminders',
+        message: 'Your reminders data could not be loaded. Data may be corrupted or missing.',
+        actions: [{
+          label: 'Delete reminders data',
+          handler: () => {
+            storage.clear()
+            init()
+          }
+        }],
+        error
+      })
+    }
   }
 
   function store() {
+    if (!isInitialized.value) {
+      throw new Error('Tried to commit reminders store before it was initialized')
+    }
+
     storage.set({
       reminders: reminders.map((it) => it.toSerialized()),
     })

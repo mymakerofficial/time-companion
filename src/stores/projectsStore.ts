@@ -7,6 +7,7 @@ import {createActivity, fromSerializedActivity} from "@/model/activity/";
 import {useLocalStorage} from "@/composables/useLocalStorage";
 import {isNotDefined, isNotNull, isNull, type Maybe, type Nullable, takeIf} from "@/lib/utils";
 import {useCalendarStore} from "@/stores/calendarStore";
+import {useNotifyError} from "@/composables/useNotifyError";
 
 export interface ProjectsStore {
   isInitialized: Readonly<Ref<boolean>>
@@ -47,22 +48,42 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
       return
     }
 
-    const serialized = storage.get()
+    try {
+      const serialized = storage.get()
 
-    addProjects(serialized.projects.map((it: any) => createProject(fromSerializedProject(it))))
-    addActivities(serialized.activities.map((it: any) => createActivity(fromSerializedActivity(it, { projects }))))
+      addProjects(serialized.projects.map((it: any) => createProject(fromSerializedProject(it))))
+      addActivities(serialized.activities.map((it: any) => createActivity(fromSerializedActivity(it, { projects }))))
 
-    isInitialized.value = true
+      isInitialized.value = true
+    } catch(error) {
+      useNotifyError({
+        title: 'Failed to load projects',
+        message: 'Your projects and activity data could not be loaded. Data may be corrupted or missing.',
+        actions: [{
+          label: 'Delete projects data',
+          handler: () => {
+            storage.clear()
+            init()
+          }
+        }],
+        error
+      })
+    }
+
   }
 
-  function store() {
+  function commit() {
+    if (!isInitialized.value) {
+      throw new Error('Tried to commit projects store before it was initialized')
+    }
+
     storage.set({
       projects: projects.map((it) => it.toSerialized()),
       activities: activities.map((it) => it.toSerialized()),
     })
   }
 
-  watch([() => projects, () => activities], store, {deep: true})
+  watch([() => projects, () => activities], commit, {deep: true})
 
   function getProjectIndexById(id: Maybe<ReactiveProject['id']>) {
     const index = projects.findIndex((it) => it.id === id)
