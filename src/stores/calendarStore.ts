@@ -23,12 +23,13 @@ export interface CalendarStore {
 }
 
 interface CalendarStorageSerialized {
+  version: number
   days: SerializedCalendarDay[]
 }
 
 export const useCalendarStore = defineStore('calendar', (): CalendarStore => {
   const projectsStore = useProjectsStore()
-  const storage = useLocalStorage<CalendarStorageSerialized>('time-companion-calendar-store', { days: [] })
+  const storage = useLocalStorage<CalendarStorageSerialized>('time-companion-calendar-store', { version: 0, days: [] })
 
   const isInitialized = ref(false)
 
@@ -76,6 +77,7 @@ export const useCalendarStore = defineStore('calendar', (): CalendarStore => {
     }
 
     storage.set({
+      version: 1,
       days: days.map((it) => it.toSerialized()),
     })
   }

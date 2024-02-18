@@ -30,13 +30,14 @@ export interface ProjectsStore {
 }
 
 interface ProjectsStorageSerialized {
+  version: number
   projects: SerializedProject[]
   activities: SerializedActivity[]
 }
 
 export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
   const calendarStore = useCalendarStore()
-  const storage = useLocalStorage<ProjectsStorageSerialized>('time-companion-projects-store', { projects: [], activities: [] })
+  const storage = useLocalStorage<ProjectsStorageSerialized>('time-companion-projects-store', { version: 0, projects: [], activities: [] })
 
   const isInitialized = ref(false)
 
@@ -78,6 +79,7 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     }
 
     storage.set({
+      version: 1,
       projects: projects.map((it) => it.toSerialized()),
       activities: activities.map((it) => it.toSerialized()),
     })

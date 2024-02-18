@@ -15,12 +15,13 @@ export interface RemindersStore {
 }
 
 interface RemindersStorageSerialized {
+  version: number
   reminders: SerializedCalendarReminder[]
 }
 
 export const useRemindersStore = defineStore('reminders', (): RemindersStore => {
   const projectsStore = useProjectsStore()
-  const storage = useLocalStorage<RemindersStorageSerialized>('time-companion-reminders-store', { reminders: [] })
+  const storage = useLocalStorage<RemindersStorageSerialized>('time-companion-reminders-store', { version: 0, reminders: [] })
 
   const isInitialized = ref(false)
 
@@ -67,6 +68,7 @@ export const useRemindersStore = defineStore('reminders', (): RemindersStore => 
     }
 
     storage.set({
+      version: 1,
       reminders: reminders.map((it) => it.toSerialized()),
     })
   }
