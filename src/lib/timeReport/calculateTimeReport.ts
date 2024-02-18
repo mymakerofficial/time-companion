@@ -21,7 +21,7 @@ export type EventDurationCalculator = (event: ReactiveCalendarEvent) => Temporal
 export type ProjectDurationCalculator = (project: ReactiveProject, events: ReactiveCalendarEvent[], eventDurationCalculator: EventDurationCalculator) => Temporal.Duration
 
 function calculateEventDurationExact(event: ReactiveCalendarEvent): Temporal.Duration {
-  return durationBetween(event.startedAt ?? dateTimeZero(), event.endedAt ?? now())
+  return durationBetween(event.startAt ?? dateTimeZero(), event.endAt ?? now())
 }
 
 function calculateProjectDurationExact(project: ReactiveProject, events: ReactiveCalendarEvent[], eventDurationCalculator: EventDurationCalculator): Temporal.Duration {

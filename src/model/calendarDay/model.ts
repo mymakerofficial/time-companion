@@ -14,7 +14,7 @@ export function createDay(init: CalendarDayInit): ReactiveCalendarDay {
     events: init.events ?? [],
   })
 
-  const startedAt = computed(() => firstOf(ctx.events)?.startedAt ?? null)
+  const startAt = computed(() => firstOf(ctx.events)?.startAt ?? null)
 
   function addEvent(event: ReactiveCalendarEvent) {
     ctx.events.push(event)
@@ -37,7 +37,7 @@ export function createDay(init: CalendarDayInit): ReactiveCalendarDay {
       'date',
       'events'
     ]),
-    startedAt,
+    startAt,
     addEvent,
     removeEvent,
     toSerialized,

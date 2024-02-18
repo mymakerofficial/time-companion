@@ -11,64 +11,64 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
   const ctx = reactive<CalendarEventContext>({
     id: init.id ?? uuid(),
     note: init.note ?? '',
-    startedAt: init.startedAt ?? null,
-    endedAt: init.endedAt ?? null,
+    startAt: init.startAt ?? null,
+    endAt: init.endAt ?? null,
     project: init.project ?? null,
     activity: init.activity ?? null,
   })
 
-  const startedAt = computed<CalendarEventContext['startedAt']>({
-    get() { return ctx.startedAt },
+  const startAt = computed<CalendarEventContext['startAt']>({
+    get() { return ctx.startAt },
     set(value) {
       if (isNull(value)) {
-        ctx.startedAt = null
-        ctx.endedAt = null
+        ctx.startAt = null
+        ctx.endAt = null
         return
       }
 
-      if (isNotNull(endedAt.value) && isAfter(value, endedAt.value)) {
-        throw Error('Tried to set startedAt to a value after endedAt.')
+      if (isNotNull(endAt.value) && isAfter(value, endAt.value)) {
+        throw Error('Tried to set startAt to a value after endAt.')
       }
 
-      ctx.startedAt = value
+      ctx.startAt = value
     }
   })
 
-  const endedAt = computed<CalendarEventContext['endedAt']>({
-    get() { return ctx.endedAt },
+  const endAt = computed<CalendarEventContext['endAt']>({
+    get() { return ctx.endAt },
     set(value) {
       if (isNull(value)) {
-        ctx.endedAt = null
+        ctx.endAt = null
         return
       }
 
-      if (isNull(startedAt.value)) {
-        throw Error('Tried to set endedAt without startedAt.')
+      if (isNull(startAt.value)) {
+        throw Error('Tried to set endAt without startAt.')
       }
 
-      if (isBefore(value, startedAt.value)) {
-        throw Error('Tried to set endedAt to a value before startedAt.')
+      if (isBefore(value, startAt.value)) {
+        throw Error('Tried to set endAt to a value before startAt.')
       }
 
-      ctx.endedAt = value
+      ctx.endAt = value
     }
   })
 
   const duration = computed<ReactiveCalendarEvent['duration']>({
     get() {
-      if (isNull(startedAt.value) || isNull(endedAt.value)) {
+      if (isNull(startAt.value) || isNull(endAt.value)) {
         return durationZero()
       }
 
-      return durationBetween(startedAt.value, endedAt.value)
+      return durationBetween(startAt.value, endAt.value)
     },
     set(value) {
       // TODO
     }
   })
 
-  const hasStarted = computed(() => isNotNull(ctx.startedAt))
-  const hasEnded = computed(() => isNotNull(ctx.endedAt))
+  const hasStarted = computed(() => isNotNull(ctx.startAt))
+  const hasEnded = computed(() => isNotNull(ctx.endAt))
 
   function createShadow() {
     if (isNull(ctx.project)) {
@@ -113,8 +113,8 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
         }
       }
     }),
-    startedAt,
-    endedAt,
+    startAt,
+    endAt,
     duration,
     hasStarted,
     hasEnded,

@@ -62,7 +62,7 @@ export function useActiveDay(days: ReactiveCalendarDay[]): ReactiveActiveDay {
       return
     }
 
-    currentEvent.value.endedAt = now()
+    currentEvent.value.endAt = now()
 
     state.selectedEventId = currentEvent.value.id
     state.currentEventId = null
@@ -79,7 +79,7 @@ export function useActiveDay(days: ReactiveCalendarDay[]): ReactiveActiveDay {
 
     const event = createEvent({
       ...shadow?.createEvent(),
-      startedAt: now(),
+      startAt: now(),
     })
 
     activeDay.value.addEvent(event)

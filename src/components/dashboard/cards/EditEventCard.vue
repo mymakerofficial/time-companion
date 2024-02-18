@@ -24,8 +24,8 @@ const state = reactive({
     'project',
     'activity',
     'note',
-    'startedAt',
-    'endedAt',
+    'startAt',
+    'endAt',
     'duration'
   ])
 })
@@ -52,9 +52,9 @@ function handleRemove() {
         />
       </div>
       <div class="flex flex-row items-center gap-2">
-        <TimeInput v-if="state.startedAt" v-model="state.startedAt" placeholder="00:00" size="lg" class="w-20" />
-        <ArrowRight v-show="state.endedAt" class="size-4" />
-        <TimeInput v-if="state.endedAt"  v-model="state.endedAt" placeholder="00:00" size="lg" class="w-20" />
+        <TimeInput v-if="state.startAt" v-model="state.startAt" placeholder="00:00" size="lg" class="w-20" />
+        <ArrowRight v-show="state.endAt" class="size-4" />
+        <TimeInput v-if="state.endAt"  v-model="state.endAt" placeholder="00:00" size="lg" class="w-20" />
       </div>
       <div class="flex flex-row items-center gap-2">
         <Button v-if="isNotNull(event.project)" @click="handleContinue()">{{ $t('dashboard.controls.continueEvent') }}</Button>

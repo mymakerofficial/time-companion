@@ -12,8 +12,8 @@ export interface CalendarEventContext extends HasId {
   project: Nullable<ReactiveProject>
   activity: Nullable<ReactiveActivity>
   note: string
-  startedAt: Nullable<Temporal.PlainDateTime>
-  endedAt: Nullable<Temporal.PlainDateTime>
+  startAt: Nullable<Temporal.PlainDateTime>
+  endAt: Nullable<Temporal.PlainDateTime>
 }
 
 export interface ReactiveCalendarEvent extends CalendarEventContext {
@@ -34,8 +34,8 @@ export interface SerializedCalendarEvent {
   projectId: Nullable<string>
   activityId: Nullable<string>
   note: string
-  startedAt: Nullable<string> // ISO DateTime (YYYY-MM-DDTHH:mm:ss)
-  endedAt: Nullable<string> // ISO DateTime (YYYY-MM-DDTHH:mm:ss)
+  startAt: Nullable<string> // ISO DateTime (YYYY-MM-DDTHH:mm:ss)
+  endAt: Nullable<string> // ISO DateTime (YYYY-MM-DDTHH:mm:ss)
 }
 
 export type EventDeserializationAssets = Pick<ProjectsStore,

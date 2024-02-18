@@ -28,9 +28,9 @@ const state = reactive({
   activity: props.event?.activity ?? null as Nullable<ReactiveActivity>,
   note: props.event?.note ?? '',
 
-  startedAt: computed<ReactiveCalendarEvent['startedAt']>({
-    get() { return props.event?.startedAt ?? null },
-    set(value) { runIf(props.event, isNotNull, () => props.event!.startedAt = value) }
+  startAt: computed<ReactiveCalendarEvent['startAt']>({
+    get() { return props.event?.startAt ?? null },
+    set(value) { runIf(props.event, isNotNull, () => props.event!.startAt = value) }
   }),
 
   isRunning: computed(() => isNotNull(props.event) && props.event.hasStarted && !props.event.hasEnded)
@@ -97,11 +97,11 @@ function handleStartStop() {
 }
 
 const durationLabel = computed(() => {
-  if (isNull(props.event) || isNull(props.event.startedAt)) {
+  if (isNull(props.event) || isNull(props.event.startAt)) {
     return '00:00:00'
   }
 
-  return formatDuration(durationBetween(props.event.startedAt, now.value), withFormat('HH:mm:ss'))
+  return formatDuration(durationBetween(props.event.startAt, now.value), withFormat('HH:mm:ss'))
 })
 </script>
 
@@ -119,7 +119,7 @@ const durationLabel = computed(() => {
         />
       </div>
       <div class="flex flex-row items-center gap-8">
-        <TimeInput v-if="state.startedAt" v-model="state.startedAt" size="lg" class="w-20 border-none bg-primary text-primary-foreground" />
+        <TimeInput v-if="state.startAt" v-model="state.startAt" size="lg" class="w-20 border-none bg-primary text-primary-foreground" />
         <time class="text-2xl font-medium tracking-wide w-24">{{ durationLabel }}</time>
       </div>
       <div class="flex flex-row items-center gap-2">
