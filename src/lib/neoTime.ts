@@ -181,7 +181,7 @@ export function formatTime(time: any, formatter: DateTimeFormatter = DateTimeFor
 
 // parse a string to a DateTime
 export function parseDateTime(dateTimeString: string, formatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME) {
-  return jodaToTemporal(LocalTime.parse(dateTimeString, formatter))
+  return jodaToTemporal(LocalDateTime.parse(dateTimeString, formatter))
 }
 
 // format the DateTime to a string
@@ -195,7 +195,7 @@ export function parseDuration(durationString: string) {
 }
 
 // format the Duration to a string
-export function formatDuration(duration: Temporal.Duration) {
+export function formatDuration(duration: Temporal.Duration, formatter: any = null /* todo */) {
   return temporalToJoda(duration).toString()
 }
 

@@ -15,7 +15,7 @@ watch(() => model.value, () => {
 }, { immediate: true })
 
 function setInputFromModel() {
-  inputValue.value = formatTime(model.value, withFormat('HH:mm'))
+  inputValue.value = formatTime(model.value as Temporal.PlainTime, withFormat('HH:mm'))
 }
 
 function handleChange() {
