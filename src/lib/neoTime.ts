@@ -211,6 +211,14 @@ export function isSameDay(date1: Temporal.PlainDate, date2: Temporal.PlainDate) 
   return date1.equals(date2)
 }
 
+export function toPlainTime(dateTime: Temporal.PlainDateTime) {
+  return Temporal.PlainTime.from({
+    hour: dateTime.hour,
+    minute: dateTime.minute,
+    second: dateTime.second
+  })
+}
+
 export function durationBetween(start: Temporal.PlainTime, end: Temporal.PlainTime): Temporal.Duration
 export function durationBetween(start: Temporal.PlainDate, end: Temporal.PlainDate): Temporal.Duration
 export function durationBetween(start: Temporal.PlainDateTime, end: Temporal.PlainDateTime): Temporal.Duration
@@ -219,6 +227,16 @@ export function durationBetween(start: any, end: any) {
     temporalToJoda(start),
     temporalToJoda(end)
   ))
+}
+
+export function durationSinceStartOfDay(time: Temporal.PlainTime): Temporal.Duration
+export function durationSinceStartOfDay(time: Temporal.PlainDateTime): Temporal.Duration
+export function durationSinceStartOfDay(time: any) {
+  if (isTemporalDateTime(time)) {
+    return durationSinceStartOfDay(toPlainTime(time))
+  }
+
+  return durationBetween(timeZero(), time)
 }
 
 export function sumOfDurations(durations: Temporal.Duration[]) {

@@ -12,7 +12,7 @@ export interface CalendarEventContext extends HasId {
   project: Nullable<ReactiveProject>
   activity: Nullable<ReactiveActivity>
   note: string
-  startAt: Nullable<Temporal.PlainDateTime>
+  startAt: Temporal.PlainDateTime
   endAt: Nullable<Temporal.PlainDateTime>
 }
 

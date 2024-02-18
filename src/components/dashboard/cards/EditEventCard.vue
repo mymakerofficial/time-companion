@@ -19,17 +19,6 @@ const emit = defineEmits<{
   remove: [event: ReactiveCalendarEvent]
 }>()
 
-const state = reactive({
-  ...mapWritable(props.event, [
-    'project',
-    'activity',
-    'note',
-    'startAt',
-    'endAt',
-    'duration'
-  ])
-})
-
 function handleContinue() {
   emit('continue', props.event.createShadow())
 }
@@ -44,17 +33,17 @@ function handleRemove() {
     <div class="flex flex-row justify-between items-center gap-4">
       <div class="flex-grow">
         <ProjectActionInput
-          v-model:project="state.project"
-          v-model:activity="state.activity"
-          v-model:note="state.note"
+          v-model:project="event.project"
+          v-model:activity="event.activity"
+          v-model:note="event.note"
           size="lg"
           class="w-full"
         />
       </div>
       <div class="flex flex-row items-center gap-2">
-        <TimeInput v-if="state.startAt" v-model="state.startAt" placeholder="00:00" size="lg" class="w-20" />
-        <ArrowRight v-show="state.endAt" class="size-4" />
-        <TimeInput v-if="state.endAt"  v-model="state.endAt" placeholder="00:00" size="lg" class="w-20" />
+        <TimeInput v-if="event.startAt" v-model="event.startAt" placeholder="00:00" size="lg" class="w-20" />
+        <ArrowRight v-show="event.endAt" class="size-4" />
+        <TimeInput v-if="event.endAt"  v-model="event.endAt" placeholder="00:00" size="lg" class="w-20" />
       </div>
       <div class="flex flex-row items-center gap-2">
         <Button v-if="isNotNull(event.project)" @click="handleContinue()">{{ $t('dashboard.controls.continueEvent') }}</Button>

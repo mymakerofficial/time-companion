@@ -27,8 +27,14 @@ export function useActiveDay(days: ReactiveCalendarDay[]): ReactiveActiveDay {
 
   const activeDay = useReferenceById(days)
 
-  const currentEvent = useReferenceById(() => activeDay.value?.events, () => state.currentEventId)
-  const selectedEvent = useReferenceById(() => activeDay.value?.events, () => state.selectedEventId)
+  const currentEvent = useReferenceById(
+    () => activeDay.value?.events,
+    () => state.currentEventId
+  )
+  const selectedEvent = useReferenceById(
+    () => activeDay.value?.events,
+    () => state.selectedEventId
+  )
 
   function setActiveDay(day: ReactiveCalendarDay) {
     activeDay.referenceBy(day.id)
