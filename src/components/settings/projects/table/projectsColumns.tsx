@@ -1,27 +1,17 @@
-import {createColumnHelper, type Row, type SortDirection} from "@tanstack/vue-table";
-import {getColorStyleVariables} from "@/directives/vProvideColor";
+import {createColumnHelper, type Row} from "@tanstack/vue-table";
 import {isNull} from "@/lib/utils";
 import {
-  ArrowDown,
-  ArrowDownUp,
-  ArrowUp,
-  Check,
   ChevronsDownUp,
-  ChevronsUpDown, Coffee, Coins, Dot, Paintbrush,
-  Pencil,
-  Slash,
-  X
+  ChevronsUpDown, Coffee, Coins, Paintbrush,
+  Pencil
 } from "lucide-vue-next";
 import {Button} from "@/components/ui/button";
 import type {ProjectRow} from "@/components/settings/projects/table/types";
-import type {Column} from "@tanstack/table-core";
-import type {Icon as LucideIcon} from "lucide-vue-next";
-import {fromNow} from "@/lib/timeUtils";
 import {getSortableHeader} from "@/helpers/table/tableHelpers";
 import {useI18n} from "vue-i18n";
 import {Badge} from "@/components/ui/badge";
 import ShadowBadge from "@/components/common/shadow/ShadowBadge.vue";
-import {formatDateTime} from "@/lib/neoTime";
+import {formatDateTime, withFormat} from "@/lib/neoTime";
 
 function getNameCell(value: ProjectRow['shadow']) {
   return <ShadowBadge shadow={value} variant="skeleton" size="md" class="font-medium" />
@@ -59,7 +49,8 @@ function getLastUsedCell(value: ProjectRow['lastUsed']) {
     return null
   }
 
-  return formatDateTime(value)
+  // TODO i18n
+  return formatDateTime(value, withFormat('dd/MM/yyyy HH:mm'))
 }
 
 function getActionsCell(row: Row<ProjectRow>, options: ProjectColumnsOptions) {
