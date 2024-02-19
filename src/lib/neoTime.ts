@@ -1,6 +1,7 @@
 import {DateTimeFormatter, Duration, LocalDate, LocalDateTime, LocalTime, nativeJs} from "@js-joda/core";
 import {Locale} from "@js-joda/locale_en";
 import {Temporal} from "temporal-polyfill";
+import {fillZero, isNotNull, round} from "@/lib/utils";
 
 export function isTemporalDate(date: any): date is Temporal.PlainDate {
   return date instanceof Temporal.PlainDate
@@ -195,8 +196,20 @@ export function parseDuration(durationString: string) {
 }
 
 // format the Duration to a string
-export function formatDuration(duration: Temporal.Duration, formatter: any = null /* todo */) {
-  return temporalToJoda(duration).toString()
+export function formatDurationIso(duration: Temporal.Duration) {
+  return duration.toString()
+}
+
+export function formatDuration(duration: Temporal.Duration, options: { includeSeconds?: boolean } = {}) {
+  const {
+    includeSeconds = false
+  } = options
+
+  const hours = fillZero(round(duration.total({unit: 'hours'})), 2)
+  const minutes = fillZero(round(duration.total({unit: 'minutes'}) % 60), 2)
+  const seconds = fillZero(round(duration.total({unit: 'seconds'}) % 60), 2)
+
+  return [hours, minutes, includeSeconds ? seconds : null].filter(isNotNull).join(':')
 }
 
 export function isBefore<T extends Temporal.PlainDateTimeLike>(start: T, end: T) {

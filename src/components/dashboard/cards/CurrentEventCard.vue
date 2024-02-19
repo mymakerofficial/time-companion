@@ -3,14 +3,13 @@ import {Button} from "@/components/ui/button";
 import {computed, reactive, watch} from "vue";
 import { watchDebounced} from "@vueuse/core";
 import {MoreVertical} from "lucide-vue-next";
-import {isNotDefined, isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
+import {isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent";
 import type {ReactiveProject} from "@/model/project/";
 import type {ReactiveActivity} from "@/model/activity/";
 import ProjectActionInput from "@/components/common/inputs/projectActionInput/ProjectActionInput.vue";
-import TimeInput from "@/components/common/inputs/timeInput/TimeInput.vue";
 import {useNow} from "@/composables/useNow";
-import {dateTimeZero, durationBetween, formatDuration, withFormat} from "@/lib/neoTime";
+import {dateTimeZero, durationBetween, formatDuration, formatDurationIso, withFormat} from "@/lib/neoTime";
 import DateTimeInput from "@/components/common/inputs/timeInput/DateTimeInput.vue";
 
 const props = defineProps<{
@@ -102,7 +101,9 @@ const durationLabel = computed(() => {
     return '00:00:00'
   }
 
-  return formatDuration(durationBetween(props.event.startAt, now.value), withFormat('HH:mm:ss'))
+  return formatDuration(durationBetween(props.event.startAt, now.value), {
+    includeSeconds: true,
+  })
 })
 </script>
 

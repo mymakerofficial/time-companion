@@ -7,7 +7,7 @@ import type {
   SerializedCalendarReminder
 } from "@/model/calendarReminder/types";
 import {ReminderActionType} from "@/model/calendarReminder/types";
-import {formatDuration, formatTime, parseDuration, parseTime} from "@/lib/neoTime";
+import {formatDurationIso, formatTime, parseDuration, parseTime} from "@/lib/neoTime";
 import {whereId} from "@/lib/listUtils";
 
 function getTargetShadow({
@@ -70,8 +70,8 @@ export function serializeReminder(reminder: CalendarReminderContext): Serialized
     displayText: reminder.displayText,
     color: reminder.color,
     startAt: formatTime(reminder.startAt),
-    remindBefore: formatDuration(reminder.remindBefore),
-    remindAfter: formatDuration(reminder.remindAfter),
+    remindBefore: formatDurationIso(reminder.remindBefore),
+    remindAfter: formatDurationIso(reminder.remindAfter),
     actionType: reminder.actionType,
     actionTargetProjectId: reminder.actionTargetShadow?.project?.id ?? null,
     actionTargetActivityId: reminder.actionTargetShadow?.activity?.id ?? null,

@@ -5,7 +5,7 @@ import {useProjectsStore} from "@/stores/projectsStore";
 import {useI18n} from "vue-i18n";
 import type {ReactiveProject} from "@/model/project/";
 import {Minus} from "lucide-vue-next";
-import {durationZero, formatDate, formatDuration, isZeroDuration, withFormat} from "@/lib/neoTime";
+import {durationZero, formatDate, formatDuration, formatDurationIso, isZeroDuration, withFormat} from "@/lib/neoTime";
 import {Duration} from "@js-joda/core";
 
 function getDateCell(value: DayTimeReport['date']) {
