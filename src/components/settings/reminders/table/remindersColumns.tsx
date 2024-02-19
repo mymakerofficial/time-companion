@@ -3,13 +3,14 @@ import {ArrowRight, Pencil, Slash} from "lucide-vue-next";
 import {Button} from "@/components/ui/button";
 import type {ReminderRow} from "@/components/settings/reminders/table/types";
 import {getSortableHeader} from "@/helpers/table/tableHelpers";
-import {formatDate} from "@/lib/timeUtils";
-import {repeatOnWeekdaysToReadableString} from "@/lib/reminderUtils";
 import {useI18n} from "vue-i18n";
+import {formatTime, withFormat} from "@/lib/neoTime";
+import {DateTimeFormatter} from "@js-joda/core";
 
 function getReminderActionCell(value: ReminderRow['action']) {
   const { t } = useI18n()
 
+  // TODO use ShadowBadge component
   return (
     <span class="flex flex-row items-center gap-2">
       <span>{ t(`reminder.actionType.${value.type}`) }</span>
@@ -40,13 +41,9 @@ export function  createRemindersColumns(
     columnHelper.accessor('name', {
       header: ({ column }) => getSortableHeader(column, t('settings.reminders.table.columns.name')),
     }),
-    columnHelper.accessor('remindAt', {
-      header: ({ column }) => getSortableHeader(column, t('settings.reminders.table.columns.remindAt')),
-      cell: (info) => formatDate(info.getValue(), 'HH:mm'),
-    }),
-    columnHelper.accessor('repeatOn', {
-      header: t('settings.reminders.table.columns.repeatOn'),
-      cell: (info) => repeatOnWeekdaysToReadableString(info.getValue()),
+    columnHelper.accessor('startAt', {
+      header: ({ column }) => getSortableHeader(column, t('settings.reminders.table.columns.startAt')),
+      cell: (info) => formatTime(info.getValue(), withFormat('HH:mm')),
     }),
     columnHelper.accessor('action', {
       header: t('settings.reminders.table.columns.action'),

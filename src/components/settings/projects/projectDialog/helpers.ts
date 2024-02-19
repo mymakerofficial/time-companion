@@ -1,5 +1,5 @@
-import type {ReactiveProject} from "@/model/project";
-import {createProject} from "@/model/project";
+import type {ReactiveProject} from "@/model/project/";
+import {createProject} from "@/model/project/";
 import type {Maybe} from "@/lib/utils";
 import {randomTailwindColor} from "@/lib/colorUtils";
 

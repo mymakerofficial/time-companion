@@ -1,13 +1,16 @@
 import {defineStore} from "pinia";
-import type {ReactiveCalendarDay, SerializedCalendarDay} from "@/model/calendarDay";
+import type {ReactiveCalendarDay, SerializedCalendarDay} from "@/model/calendarDay/types";
 import {reactive, readonly, type Ref, ref, watch} from "vue";
 import {useProjectsStore} from "@/stores/projectsStore";
-import {createDay, fromSerializedDay} from "@/model/calendarDay";
+import {createDay} from "@/model/calendarDay/model";
 import {useLocalStorage} from "@/composables/useLocalStorage";
 import {type ReactiveActiveDay, useActiveDay} from "@/composables/useActiveDay";
-import {isSameDay} from "@/lib/timeUtils";
-import dayjs from "dayjs";
-import type {ReactiveCalendarEvent} from "@/model/calendarEvent";
+import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
+import {fromSerializedDay} from "@/model/calendarDay/serializer";
+import {whereDate, whereId} from "@/lib/listUtils";
+import {isDefined} from "@/lib/utils";
+import {Temporal} from "temporal-polyfill";
+import {useNotifyError} from "@/composables/useNotifyError";
 
 export interface CalendarStore {
   isInitialized: Readonly<Ref<boolean>>
@@ -15,17 +18,18 @@ export interface CalendarStore {
   activeDay: ReactiveActiveDay
   init: () => void
   addDay: (day: ReactiveCalendarDay) => void
-  setActiveDay: (date: Date) => void
+  setActiveDay: (date: Temporal.PlainDate) => void
   forEachEvent: (block: (event: ReactiveCalendarEvent) => void) => void
 }
 
 interface CalendarStorageSerialized {
+  version: number
   days: SerializedCalendarDay[]
 }
 
 export const useCalendarStore = defineStore('calendar', (): CalendarStore => {
   const projectsStore = useProjectsStore()
-  const storage = useLocalStorage<CalendarStorageSerialized>('time-companion-calendar-store', { days: [] })
+  const storage = useLocalStorage<CalendarStorageSerialized>('time-companion-calendar-store', { version: 0, days: [] })
 
   const isInitialized = ref(false)
 
@@ -45,39 +49,59 @@ export const useCalendarStore = defineStore('calendar', (): CalendarStore => {
       activities: projectsStore.activities,
     }
 
-    const serialized = storage.get()
+    try {
+      const serialized = storage.get()
 
-    days.push(...serialized.days.map((it: any) => createDay(fromSerializedDay(it, assets))))
+      days.push(...serialized.days.map((it: any) => createDay(fromSerializedDay(it, assets))))
 
-    isInitialized.value = true
+      isInitialized.value = true
+    } catch (error) {
+      useNotifyError({
+        title: 'Failed to load calendar',
+        message: 'Your calendar data could not be loaded. Data may be corrupted or missing.',
+        actions: [{
+          label: 'Delete calendar data',
+          handler: () => {
+            storage.clear()
+            init()
+          }
+        }],
+        error: error
+      })
+    }
   }
 
-  function store() {
+  function commit() {
+    if (!isInitialized.value) {
+      throw new Error('Tried to commit calendar store before it was initialized')
+    }
+
     storage.set({
+      version: 1,
       days: days.map((it) => it.toSerialized()),
     })
   }
 
-  watch(() => days, store, {deep: true})
+  watch(() => days, commit, {deep: true})
 
   function addDay(day: ReactiveCalendarDay) {
-    if (days.some((it) => it.id === day.id)) {
+    if (days.some(whereId(day.id))) {
       throw new Error(`Day with id ${day.id} already exists`)
     }
 
     days.push(day)
   }
 
-  function setActiveDay(date: Date) {
-    const existingDay = days.find((it) => isSameDay(it.date, date))
+  function setActiveDay(date: Temporal.PlainDate) {
+    const existingDay = days.find(whereDate(date))
 
-    if (existingDay) {
+    if (isDefined(existingDay)) {
       activeDay.setActiveDay(existingDay)
       return
     }
 
     const newDay = createDay({
-      date: dayjs(date).startOf('day').toDate(),
+      date,
     })
 
     addDay(newDay)

@@ -19,9 +19,9 @@ defineProps<{
 <template>
   <Dialog v-model:open="open">
     <DialogContent>
-      <DialogHeader v-if="isDefined(title)" class="mb-4">
-        <DialogTitle v-if="isDefined(title)">{{ title }}</DialogTitle>
-        <DialogDescription v-if="isDefined(description)">{{ description }}</DialogDescription>
+      <DialogHeader v-if="isDefined(title) || $slots.title" class="mb-4">
+        <DialogTitle v-if="isDefined(title) || $slots.title" class="flex items-center gap-2"><slot name="title">{{ title }}</slot></DialogTitle>
+        <DialogDescription v-if="isDefined(description) || $slots.description"><slot name="description">{{ description }}</slot></DialogDescription>
       </DialogHeader>
       <slot />
       <div class="mt-1.5">

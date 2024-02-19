@@ -1,12 +1,13 @@
 import type {ReactiveCalendarDay} from "@/model/calendarDay";
 import {useReferenceById} from "@/composables/useReferenceById";
 import {computed, reactive} from "vue";
-import type {ReactiveCalendarEventShadow} from "@/model/calendarEventShadow";
+import type {ReactiveCalendarEventShadow} from "@/model/eventShadow";
 import {isDefined, isNotNull, isNull, type Nullable} from "@/lib/utils";
-import {createEvent, type ReactiveCalendarEvent} from "@/model/calendarEvent";
-import {now} from "@/lib/timeUtils";
+import {now} from "@/lib/neoTime";
 import type {ID} from "@/lib/types";
 import {lastOf} from "@/lib/listUtils";
+import {createEvent} from "@/model/calendarEvent/model";
+import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 
 export interface ReactiveActiveDay {
   day: Nullable<ReactiveCalendarDay>
@@ -26,8 +27,14 @@ export function useActiveDay(days: ReactiveCalendarDay[]): ReactiveActiveDay {
 
   const activeDay = useReferenceById(days)
 
-  const currentEvent = useReferenceById(() => activeDay.value?.events, () => state.currentEventId)
-  const selectedEvent = useReferenceById(() => activeDay.value?.events, () => state.selectedEventId)
+  const currentEvent = useReferenceById(
+    () => activeDay.value?.events,
+    () => state.currentEventId
+  )
+  const selectedEvent = useReferenceById(
+    () => activeDay.value?.events,
+    () => state.selectedEventId
+  )
 
   function setActiveDay(day: ReactiveCalendarDay) {
     activeDay.referenceBy(day.id)
@@ -61,7 +68,7 @@ export function useActiveDay(days: ReactiveCalendarDay[]): ReactiveActiveDay {
       return
     }
 
-    currentEvent.value.endedAt = now()
+    currentEvent.value.endAt = now()
 
     state.selectedEventId = currentEvent.value.id
     state.currentEventId = null
@@ -78,7 +85,7 @@ export function useActiveDay(days: ReactiveCalendarDay[]): ReactiveActiveDay {
 
     const event = createEvent({
       ...shadow?.createEvent(),
-      startedAt: now(),
+      startAt: now(),
     })
 
     activeDay.value.addEvent(event)

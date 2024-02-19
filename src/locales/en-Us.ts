@@ -88,9 +88,9 @@ export default {
     properties: {
       displayText: '@:common.properties.displayName',
       color: '@:common.properties.color',
-      remindAt: 'Time',
-      remindMinutesBefore: 'Remind Before',
-      remindMinutesAfter: 'Remind After',
+      startAt: 'Time',
+      remindBefore: 'Remind Before',
+      remindAfter: 'Remind After',
       repeatOn: 'Repeat on',
       actionType: 'Action',
     },
@@ -158,7 +158,7 @@ export default {
       table: {
         columns: {
           name: '@:reminder.properties.displayText',
-          remindAt: '@:reminder.properties.remindAt',
+          startAt: '@:reminder.properties.startAt',
           repeatOn: '@:reminder.properties.repeatOn',
           action: '@:reminder.properties.actionType',
         }
@@ -267,17 +267,17 @@ export default {
         color: {
           label: '@:reminder.properties.color'
         },
-        remindAt: {
-          label: '@:reminder.properties.remindAt'
+        startAt: {
+          label: '@:reminder.properties.startAt'
         },
         repeatOn: {
           label: '@:reminder.properties.repeatOn'
         },
-        remindMinutesBefore: {
-          label: '@:reminder.properties.remindMinutesBefore'
+        remindBefore: {
+          label: '@:reminder.properties.remindBefore'
         },
-        remindMinutesAfter: {
-          label: '@:reminder.properties.remindMinutesAfter'
+        remindAfter: {
+          label: '@:reminder.properties.remindAfter'
         },
       }
     }

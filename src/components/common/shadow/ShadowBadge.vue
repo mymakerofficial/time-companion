@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {Slash} from "lucide-vue-next";
-import type {ReactiveCalendarEventShadow} from "@/model/calendarEventShadow";
+import type {ReactiveCalendarEventShadow} from "@/model/eventShadow";
 import {cn, type Nullable} from "@/lib/utils";
 import type {HTMLAttributes} from "vue";
 import {Badge, type BadgeVariants} from "@/components/ui/badge";

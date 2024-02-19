@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import dayjs from 'dayjs'
-import {useNow} from "@vueuse/core";
-import {formatHours, timeStringToDate} from "@/lib/timeUtils";
 import CalendarViewEvent from "@/components/common/calendar/CalendarViewEvent.vue";
 import CalendarViewPointer from "@/components/common/calendar/CalendarViewPointer.vue";
-import CalendarViewArea from "@/components/common/calendar/CalendarViewArea.vue";
-import type {ReactiveCalendarEvent} from "@/model/calendarEvent";
+import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
+import {rowsToTime} from "@/lib/calendarUtils";
+import {formatTime, withFormat} from "@/lib/neoTime";
 
-const props = defineProps<{
+defineProps<{
   events: ReactiveCalendarEvent[]
 }>()
 
@@ -15,35 +13,8 @@ const emit = defineEmits<{
   eventSelected: [id: string]
 }>()
 
-const now = useNow({ interval: 60000 }) // update every minute
-
 function getRowTimeLabel(row: number) {
-  const rowsPerHour = 2
-  return formatHours(row / rowsPerHour)
-}
-
-function calculateInset(event: ReactiveCalendarEvent) {
-  const start = dayjs(event.startedAt)
-
-  let inset = 0
-
-  props.events.forEach((it) => {
-    if (it.id === event.id) {
-      return
-    }
-
-    const itStart = dayjs(it.startedAt)
-    const itEnd = dayjs(it.endedAt || now.value)
-    const diff = itEnd.diff(itStart, 'minute')
-
-    const itEndPadded = diff < 12 ? itEnd.add(12 - diff, 'minute') : itEnd
-
-    if (start.isAfter(itStart) && start.isBefore(itEndPadded)) {
-      inset += 1
-    }
-  })
-
-  return inset
+  return formatTime(rowsToTime(row), withFormat('HH:mm'))
 }
 
 function handleClick(id: string) {
@@ -66,17 +37,14 @@ function handleClick(id: string) {
             </div>
           </template>
         </div>
-        <div class="relative col-start-1 col-end-2 row-end-2 mr-3 border-r border-border grid grid-rows-[2rem_repeat(288,_minmax(0,_1fr))_auto] grid-cols-12">
-          <CalendarViewArea :started-at="null" :ended-at="timeStringToDate('07:00:00')" />
-          <CalendarViewArea :started-at="timeStringToDate('18:00:00')" :ended-at="null" />
+        <div class="relative col-start-1 col-end-2 row-end-2 mr-3 border-r border-border grid grid-rows-[2rem_repeat(288,_minmax(0,_1fr))_auto] grid-cols-1">
           <CalendarViewEvent
             v-for="event in events"
             :key="event.id"
             :event="event"
-            :inset="calculateInset(event)"
             @click="handleClick(event.id)"
           />
-          <CalendarViewPointer :date="now" />
+          <CalendarViewPointer />
         </div>
       </div>
     </div>

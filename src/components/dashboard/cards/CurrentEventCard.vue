@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import {Button} from "@/components/ui/button";
 import {computed, reactive, watch} from "vue";
-import {useNow, watchDebounced} from "@vueuse/core";
+import { watchDebounced} from "@vueuse/core";
 import {MoreVertical} from "lucide-vue-next";
-import TimeDurationInput from "@/components/common/inputs/TimeDurationInput.vue";
-import {formatTimeDiff, minutesSinceStartOfDay, minutesSinceStartOfDayToDate} from "@/lib/timeUtils";
-import {isNotDefined, isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
+import {isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent";
-import type {ReactiveProject} from "@/model/project";
-import type {ReactiveActivity} from "@/model/activity";
-import dayjs from "dayjs";
+import type {ReactiveProject} from "@/model/project/";
+import type {ReactiveActivity} from "@/model/activity/";
 import ProjectActionInput from "@/components/common/inputs/projectActionInput/ProjectActionInput.vue";
+import {useNow} from "@/composables/useNow";
+import {dateTimeZero, durationBetween, formatDuration, formatDurationIso, withFormat} from "@/lib/neoTime";
+import DateTimeInput from "@/components/common/inputs/timeInput/DateTimeInput.vue";
 
 const props = defineProps<{
   event: Nullable<ReactiveCalendarEvent>
@@ -21,16 +21,16 @@ const emit = defineEmits<{
   stopEvent: []
 }>()
 
-const now = useNow({ interval: 1000 }) // update every minute
+const now = useNow()
 
 const state = reactive({
   project: props.event?.project ?? null as Nullable<ReactiveProject>,
   activity: props.event?.activity ?? null as Nullable<ReactiveActivity>,
   note: props.event?.note ?? '',
 
-  startedAtMinutes: computed({
-    get() { return minutesSinceStartOfDay(props.event?.startedAt) },
-    set(value: number) { runIf(props.event, isNotNull, () => props.event!.startedAt = minutesSinceStartOfDayToDate(value)) }
+  startAt: computed<ReactiveCalendarEvent['startAt']>({
+    get() { return props.event?.startAt ?? dateTimeZero() },
+    set(value) { runIf(props.event, isNotNull, () => props.event!.startAt = value) }
   }),
 
   isRunning: computed(() => isNotNull(props.event) && props.event.hasStarted && !props.event.hasEnded)
@@ -97,15 +97,13 @@ function handleStartStop() {
 }
 
 const durationLabel = computed(() => {
-  if (
-    isNotDefined(props.event?.startedAt) ||
-    dayjs(props.event!.startedAt).isAfter(now.value)
-  ) {
+  if (isNull(props.event)) {
     return '00:00:00'
   }
 
-  // time between now and startedAt in HH:mm:ss
-  return formatTimeDiff(props.event!.startedAt, now.value)
+  return formatDuration(durationBetween(props.event.startAt, now.value), {
+    includeSeconds: true,
+  })
 })
 </script>
 
@@ -123,7 +121,7 @@ const durationLabel = computed(() => {
         />
       </div>
       <div class="flex flex-row items-center gap-8">
-        <TimeDurationInput v-if="state.isRunning" v-model="state.startedAtMinutes" class="w-16 text-center font-medium text-sm border-none bg-primary text-primary-foreground" />
+        <DateTimeInput v-if="state.startAt" v-model="state.startAt" size="lg" class="w-20 border-none bg-primary text-primary-foreground" />
         <time class="text-2xl font-medium tracking-wide w-24">{{ durationLabel }}</time>
       </div>
       <div class="flex flex-row items-center gap-2">

@@ -1,25 +1,25 @@
 <script setup lang="ts">
 import {MoreVertical} from "lucide-vue-next";
 import {Button} from "@/components/ui/button";
-import {useNow} from "@vueuse/core";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import {computed} from "vue";
 import {vProvideColor} from "@/directives/vProvideColor";
-import {isDefined, isNotDefined, isNotNull} from "@/lib/utils";
+import {isNotNull} from "@/lib/utils";
 import type {ReactiveCalendarReminder} from "@/model/calendarReminder";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
-
-dayjs.extend(relativeTime)
+import {useTimeNow} from "@/composables/useNow";
+import {durationBetween, minutes} from "@/lib/neoTime";
 
 const props = defineProps<{
   reminder: ReactiveCalendarReminder
 }>()
 
-const now = useNow({ interval: 60000 }) // update every minute
+const now = useTimeNow({
+  interval: minutes(1)
+})
 
 const timeLabel = computed(() => {
-  return dayjs(now.value).to(props.reminder.remindAt)
+  // TODO humanize duration
+  return `in ${durationBetween(now.value, props.reminder.startAt).minutes}min`
 })
 
 const hasButton = computed(() => {

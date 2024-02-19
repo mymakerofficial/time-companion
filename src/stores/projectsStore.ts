@@ -1,12 +1,13 @@
 import {defineStore} from "pinia";
 import {reactive, readonly, type Ref, ref, watch} from "vue";
-import type {ReactiveProject, SerializedProject} from "@/model/project";
-import type {ReactiveActivity, SerializedActivity} from "@/model/activity";
-import {createProject, fromSerializedProject} from "@/model/project";
-import {createActivity, fromSerializedActivity} from "@/model/activity";
+import type {ReactiveProject, SerializedProject} from "@/model/project/";
+import type {ReactiveActivity, SerializedActivity} from "@/model/activity/";
+import {createProject, fromSerializedProject} from "@/model/project/";
+import {createActivity, fromSerializedActivity} from "@/model/activity/";
 import {useLocalStorage} from "@/composables/useLocalStorage";
 import {isNotDefined, isNotNull, isNull, type Maybe, type Nullable, takeIf} from "@/lib/utils";
 import {useCalendarStore} from "@/stores/calendarStore";
+import {useNotifyError} from "@/composables/useNotifyError";
 
 export interface ProjectsStore {
   isInitialized: Readonly<Ref<boolean>>
@@ -29,13 +30,14 @@ export interface ProjectsStore {
 }
 
 interface ProjectsStorageSerialized {
+  version: number
   projects: SerializedProject[]
   activities: SerializedActivity[]
 }
 
 export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
   const calendarStore = useCalendarStore()
-  const storage = useLocalStorage<ProjectsStorageSerialized>('time-companion-projects-store', { projects: [], activities: [] })
+  const storage = useLocalStorage<ProjectsStorageSerialized>('time-companion-projects-store', { version: 0, projects: [], activities: [] })
 
   const isInitialized = ref(false)
 
@@ -47,22 +49,43 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
       return
     }
 
-    const serialized = storage.get()
+    try {
+      const serialized = storage.get()
 
-    addProjects(serialized.projects.map((it: any) => createProject(fromSerializedProject(it))))
-    addActivities(serialized.activities.map((it: any) => createActivity(fromSerializedActivity(it, { projects }))))
+      addProjects(serialized.projects.map((it: any) => createProject(fromSerializedProject(it))))
+      addActivities(serialized.activities.map((it: any) => createActivity(fromSerializedActivity(it, { projects }))))
 
-    isInitialized.value = true
+      isInitialized.value = true
+    } catch(error) {
+      useNotifyError({
+        title: 'Failed to load projects',
+        message: 'Your projects and activity data could not be loaded. Data may be corrupted or missing.',
+        actions: [{
+          label: 'Delete projects data',
+          handler: () => {
+            storage.clear()
+            init()
+          }
+        }],
+        error
+      })
+    }
+
   }
 
-  function store() {
+  function commit() {
+    if (!isInitialized.value) {
+      throw new Error('Tried to commit projects store before it was initialized')
+    }
+
     storage.set({
+      version: 1,
       projects: projects.map((it) => it.toSerialized()),
       activities: activities.map((it) => it.toSerialized()),
     })
   }
 
-  watch([() => projects, () => activities], store, {deep: true})
+  watch([() => projects, () => activities], commit, {deep: true})
 
   function getProjectIndexById(id: Maybe<ReactiveProject['id']>) {
     const index = projects.findIndex((it) => it.id === id)

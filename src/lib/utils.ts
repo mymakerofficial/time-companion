@@ -54,3 +54,16 @@ export function isCallable(maybeFunction: unknown | ((...args: any[]) => any)): 
 export function getOrRun<T>(valueOrFunction: MaybeFunction<T>): T {
   return isCallable(valueOrFunction) ? valueOrFunction() : valueOrFunction
 }
+
+export function round(value: number, precision: number = 0): number {
+  if (precision <= 0) {
+    return Math.round(value)
+  }
+
+  const factor = Math.pow(10, precision)
+  return Math.round(value * factor) / factor
+}
+
+export function fillZero(value: number, length: number = 2): string {
+  return value.toString().padStart(length, '0')
+}

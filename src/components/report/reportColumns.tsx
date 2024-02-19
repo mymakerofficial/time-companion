@@ -1,18 +1,19 @@
 import {getSortableHeader} from "@/helpers/table/tableHelpers";
-import {formatDate, formatMinutes} from "@/lib/timeUtils";
 import {createColumnHelper, type Row} from "@tanstack/vue-table";
 import type {DayTimeReport} from "@/lib/timeReport/calculateTimeReport";
 import {useProjectsStore} from "@/stores/projectsStore";
 import {useI18n} from "vue-i18n";
-import type {ReactiveProject} from "@/model/project";
+import type {ReactiveProject} from "@/model/project/";
 import {Minus} from "lucide-vue-next";
-
-const projectsStore = useProjectsStore()
+import {durationZero, formatDate, formatDuration, formatDurationIso, isZeroDuration, withFormat} from "@/lib/neoTime";
+import {Duration} from "@js-joda/core";
 
 function getDateCell(value: DayTimeReport['date']) {
-  const text = formatDate(value, 'dd, DD')
+  // TODO i18n
+  const text = formatDate(value, withFormat('eeee, dd'))
 
-  if (['Saturday', 'Sunday'].includes(formatDate(value, 'dddd'))) {
+  // TODO find a better way to do this
+  if (['Saturday', 'Sunday'].includes(formatDate(value, withFormat('eeee')))) {
     return <span class="text-muted-foreground">{ text }</span>
   } else {
     return text
@@ -20,20 +21,24 @@ function getDateCell(value: DayTimeReport['date']) {
 }
 
 function getProjectCell(row: Row<DayTimeReport>, project: ReactiveProject) {
-  const value = row.original.entries.find((it) => it.project.id === project.id)?.timeMinutes ?? 0
+  const duration = row.original.entries
+    .find((it) => it.project.id === project.id)
+    ?.duration ?? durationZero()
 
-  if (value === 0) {
+  if (isZeroDuration(duration)) {
     return <span class="text-muted-foreground"><Minus class="size-3" /></span>
   } else {
-    return formatMinutes(value)
+    // TODO humanize
+    return formatDuration(duration)
   }
 }
 
-function getTotalBillableTimeMinutesCell(value: DayTimeReport['totalBillableTimeMinutes']) {
-  if (value === 0) {
+function getTotalCell(duration: DayTimeReport['totalBillableDuration']) {
+  if (isZeroDuration(duration)) {
     return <span class="text-muted-foreground"><Minus class="size-3" /></span>
   } else {
-    return formatMinutes(value)
+    // TODO humanize
+    return formatDuration(duration)
   }
 }
 
@@ -41,6 +46,7 @@ const columnHelper = createColumnHelper<DayTimeReport>()
 
 export function createReportColumns() {
   const { t } = useI18n()
+  const projectsStore = useProjectsStore()
 
   return [
     columnHelper.accessor('date', {
@@ -56,9 +62,9 @@ export function createReportColumns() {
       header: () => project.displayName,
       cell: ({ row }) => getProjectCell(row, project),
     })),
-    columnHelper.accessor('totalBillableTimeMinutes', {
+    columnHelper.accessor('totalBillableDuration', {
       header: () => t('report.table.columns.totalDuration'),
-      cell: (info) => getTotalBillableTimeMinutesCell(info.getValue()),
+      cell: (info) => getTotalCell(info.getValue()),
       enableHiding: false,
       meta: {
         className: 'border-l font-medium',

@@ -16,10 +16,13 @@ export function useLocalStorage<T>(key: string, defaultValue: T) {
     return JSON.parse(value) as T
   }
 
-  get()
+  function clear() {
+    localStorage.removeItem(key)
+  }
 
   return {
     get,
     set,
+    clear,
   }
 }

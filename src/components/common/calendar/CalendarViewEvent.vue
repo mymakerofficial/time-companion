@@ -1,29 +1,34 @@
 <script setup lang="ts">
-import {formatDate, minutesSinceStartOfDay} from "@/lib/timeUtils";
 import {computed} from "vue";
-import dayjs from 'dayjs'
-import {useNow} from "@vueuse/core";
-import {minutesToGridRows} from "@/lib/calendarUtils";
+import {durationToGridRows} from "@/lib/calendarUtils";
 import {vProvideColor} from "@/directives/vProvideColor";
-import type {ReactiveCalendarEvent} from "@/model/calendarEvent";
+import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
+import {
+  durationBetween,
+  durationSinceStartOfDay,
+  formatTime,
+  minutes,
+  withFormat
+} from "@/lib/neoTime";
+import {isNull} from "@/lib/utils";
+import {useNow} from "@/composables/useNow";
 
 const props = defineProps<{
   event: ReactiveCalendarEvent
-  inset: number
 }>()
 
 const emit = defineEmits<{
   click: []
 }>()
 
-const now = useNow({ interval: 60000 }) // update every minute
+const now = useNow({ interval: minutes(1) })
 
 const containerPosition = computed(() => {
-  const { startedAt, endedAt, durationMinutes } = props.event
+  const { startAt, endAt } = props.event
 
   const startOffset = 2 // due to spacing at the top
-  const startRow = minutesToGridRows(minutesSinceStartOfDay(startedAt)) + startOffset
-  const spanRows = minutesToGridRows(dayjs(endedAt || now.value).diff(dayjs(startedAt), 'minute'))
+  const startRow = durationToGridRows(durationSinceStartOfDay(startAt)) + startOffset
+  const spanRows = durationToGridRows(durationBetween(startAt, endAt ?? now.value))
 
   const minRowSpan = 1 // to prevent to small and negative spans
   if (spanRows < minRowSpan) {
@@ -35,24 +40,22 @@ const containerPosition = computed(() => {
 
 const containerStyle = computed(() => {
   const { startRow, spanRows } = containerPosition.value
-  const { inset } = props
 
   return {
     gridRow: `${startRow} / span ${spanRows}`,
-    gridColumn: `${inset + 1} / span ${12 - inset}`
   }
 })
 
 const startedAtLabel = computed(() => {
-  return formatDate(props.event.startedAt, 'HH:mm')
+  return formatTime(props.event.startAt, withFormat('HH:mm'))
 })
 
 const endedAtLabel = computed(() => {
-  if (!props.event.hasEnded) {
+  if (isNull(props.event.endAt)) {
     return 'now'
   }
 
-  return formatDate(props.event.endedAt, 'HH:mm')
+  return formatTime(props.event.endAt,  withFormat('HH:mm'))
 })
 
 function handleClick() {
@@ -61,7 +64,7 @@ function handleClick() {
 </script>
 
 <template>
-  <div class="flex relative mt-0.5" :style="containerStyle">
+  <div class="flex relative mt-0.5 col-span-full" :style="containerStyle">
     <div @click="handleClick" class="cursor-pointer absolute inset-0.5 flex rounded-md overflow-hidden bg-background min-h-3" v-provide-color="event.color">
       <div class="flex-1 px-2 py-1 flex flex-col gap-1 bg-primary text-primary-foreground hover:bg-primary/90">
         <div class="flex flex-row justify-between items-center">

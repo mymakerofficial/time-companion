@@ -1,15 +1,14 @@
 <script setup lang="ts">
 import {computed} from "vue";
-import {minutesToGridRows} from "@/lib/calendarUtils";
-import {minutesSinceStartOfDay} from "@/lib/timeUtils";
+import {durationToGridRows} from "@/lib/calendarUtils";
+import {durationSinceStartOfDay, minutes} from "@/lib/neoTime";
+import {useNow} from "@/composables/useNow";
 
-const props = defineProps<{
-  date: Date,
-}>()
+const now = useNow({ interval: minutes(1) })
 
 const containerStyle = computed(() => {
   const startOffset = 2 // due to spacing at the top
-  return { gridRow: minutesToGridRows(minutesSinceStartOfDay(props.date)) + startOffset }
+  return { gridRow: durationToGridRows(durationSinceStartOfDay(now.value)) + startOffset }
 })
 </script>
 
