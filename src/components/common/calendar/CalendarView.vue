@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import {formatHours} from "@/lib/timeUtils";
 import CalendarViewEvent from "@/components/common/calendar/CalendarViewEvent.vue";
 import CalendarViewPointer from "@/components/common/calendar/CalendarViewPointer.vue";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
