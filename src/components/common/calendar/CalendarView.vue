@@ -3,6 +3,8 @@ import {formatHours} from "@/lib/timeUtils";
 import CalendarViewEvent from "@/components/common/calendar/CalendarViewEvent.vue";
 import CalendarViewPointer from "@/components/common/calendar/CalendarViewPointer.vue";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
+import {rowsToTime} from "@/lib/calendarUtils";
+import {formatTime, withFormat} from "@/lib/neoTime";
 
 defineProps<{
   events: ReactiveCalendarEvent[]
@@ -13,12 +15,10 @@ const emit = defineEmits<{
 }>()
 
 function getRowTimeLabel(row: number) {
-  const rowsPerHour = 2
-  return formatHours(row / rowsPerHour)
+  return formatTime(rowsToTime(row), withFormat('HH:mm'))
 }
 
 function handleClick(id: string) {
-  console.log('event selected', id)
   emit('eventSelected', id)
 }
 </script>
