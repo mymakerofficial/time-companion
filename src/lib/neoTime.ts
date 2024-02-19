@@ -219,6 +219,19 @@ export function toPlainTime(dateTime: Temporal.PlainDateTime) {
   })
 }
 
+export function dateWithTime(date: Temporal.PlainDate, time: Temporal.PlainTime): Temporal.PlainDateTime
+export function dateWithTime(date: Temporal.PlainDateTime, time: Temporal.PlainTime): Temporal.PlainDateTime
+export function dateWithTime(date: any, time: any) {
+  return Temporal.PlainDateTime.from({
+    year: date.year,
+    month: date.month,
+    day: date.day,
+    hour: time.hour,
+    minute: time.minute,
+    second: time.second
+  })
+}
+
 export function durationBetween(start: Temporal.PlainTime, end: Temporal.PlainTime): Temporal.Duration
 export function durationBetween(start: Temporal.PlainDate, end: Temporal.PlainDate): Temporal.Duration
 export function durationBetween(start: Temporal.PlainDateTime, end: Temporal.PlainDateTime): Temporal.Duration

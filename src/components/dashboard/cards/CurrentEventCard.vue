@@ -11,6 +11,7 @@ import ProjectActionInput from "@/components/common/inputs/projectActionInput/Pr
 import TimeInput from "@/components/common/inputs/timeInput/TimeInput.vue";
 import {useNow} from "@/composables/useNow";
 import {dateTimeZero, durationBetween, formatDuration, withFormat} from "@/lib/neoTime";
+import DateTimeInput from "@/components/common/inputs/timeInput/DateTimeInput.vue";
 
 const props = defineProps<{
   event: Nullable<ReactiveCalendarEvent>
@@ -119,7 +120,7 @@ const durationLabel = computed(() => {
         />
       </div>
       <div class="flex flex-row items-center gap-8">
-        <TimeInput v-if="state.startAt" v-model="state.startAt" size="lg" class="w-20 border-none bg-primary text-primary-foreground" />
+        <DateTimeInput v-if="state.startAt" v-model="state.startAt" size="lg" class="w-20 border-none bg-primary text-primary-foreground" />
         <time class="text-2xl font-medium tracking-wide w-24">{{ durationLabel }}</time>
       </div>
       <div class="flex flex-row items-center gap-2">
