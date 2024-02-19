@@ -97,7 +97,7 @@ function handleStartStop() {
 }
 
 const durationLabel = computed(() => {
-  if (isNull(props.event) || isNull(props.event.startAt)) {
+  if (isNull(props.event)) {
     return '00:00:00'
   }
 

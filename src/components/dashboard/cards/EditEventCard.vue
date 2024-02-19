@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import {ArrowRight, MoreVertical} from "lucide-vue-next";
 import {Button} from "@/components/ui/button";
-import {reactive} from "vue";
-import {isNotNull} from "@/lib/utils";
+import {computed, reactive} from "vue";
+import {isNotNull, isNull} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import type {ReactiveCalendarEventShadow} from "@/model/eventShadow";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
@@ -10,6 +10,7 @@ import ProjectActionInput from "@/components/common/inputs/projectActionInput/Pr
 import TimeInput from "@/components/common/inputs/timeInput/TimeInput.vue";
 import {mapWritable} from "@/model/modelHelpers";
 import DateTimeInput from "@/components/common/inputs/timeInput/DateTimeInput.vue";
+import {durationBetween, formatDuration} from "@/lib/neoTime";
 
 const props = defineProps<{
   event: ReactiveCalendarEvent
@@ -27,6 +28,14 @@ function handleContinue() {
 function handleRemove() {
   emit('remove', props.event)
 }
+
+const durationLabel = computed(() => {
+  if (isNull(props.event) || isNull(props.event.endAt)) {
+    return '00:00:00'
+  }
+
+  return formatDuration(durationBetween(props.event.startAt, props.event.endAt))
+})
 </script>
 
 <template>
@@ -42,9 +51,10 @@ function handleRemove() {
         />
       </div>
       <div class="flex flex-row items-center gap-2">
-        <DateTimeInput v-if="event.startAt" v-model="event.startAt" placeholder="00:00" size="lg" class="w-20" />
-        <ArrowRight v-show="event.endAt" class="size-4" />
-        <DateTimeInput v-if="event.endAt"  v-model="event.endAt" placeholder="00:00" size="lg" class="w-20" />
+        <DateTimeInput v-if="event.startAt" v-model="event.startAt" placeholder="00:00" size="lg" class="border-none w-14 text-sm" />
+        <ArrowRight v-show="event.endAt" class="size-4 text-muted-foreground" />
+        <DateTimeInput v-if="event.endAt"  v-model="event.endAt" placeholder="00:00" size="lg" class="border-none w-14 text-sm" />
+        <time class="mx-4 text-xl font-medium tracking-wide">{{ durationLabel }}</time>
       </div>
       <div class="flex flex-row items-center gap-2">
         <Button v-if="isNotNull(event.project)" @click="handleContinue()">{{ $t('dashboard.controls.continueEvent') }}</Button>
