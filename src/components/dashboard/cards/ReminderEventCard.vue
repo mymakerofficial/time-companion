@@ -3,7 +3,7 @@ import {MoreVertical} from "lucide-vue-next";
 import {Button} from "@/components/ui/button";
 import {computed} from "vue";
 import {vProvideColor} from "@/directives/vProvideColor";
-import {isNotNull} from "@/lib/utils";
+import {isNotNull, round} from "@/lib/utils";
 import type {ReactiveCalendarReminder} from "@/model/calendarReminder";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {useTimeNow} from "@/composables/useNow";
@@ -19,7 +19,7 @@ const now = useTimeNow({
 
 const timeLabel = computed(() => {
   // TODO humanize duration
-  return `in ${durationBetween(now.value, props.reminder.startAt).minutes}min`
+  return `in ${round(durationBetween(now.value, props.reminder.startAt).total({ unit: 'minutes' }))}min`
 })
 
 const hasButton = computed(() => {
