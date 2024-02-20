@@ -2,3 +2,4 @@ export type { CalendarReminderContext, ReactiveCalendarReminder, CalendarReminde
 export { ReminderActionType } from './types'
 export { serializeReminder, fromSerializedReminder } from './serializer'
 export { createReminder } from './model'
+export { migrateSerializedReminder } from './migrations'

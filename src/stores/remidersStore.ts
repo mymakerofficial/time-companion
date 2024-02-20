@@ -5,6 +5,7 @@ import {useLocalStorage} from "@/composables/useLocalStorage";
 import {createReminder, fromSerializedReminder} from "@/model/calendarReminder";
 import {useProjectsStore} from "@/stores/projectsStore";
 import {useNotifyError} from "@/composables/useNotifyError";
+import {migrateSerializedReminder} from "@/model/calendarReminder/migrations";
 
 export interface RemindersStore {
   isInitialized: Readonly<Ref<boolean>>
@@ -43,7 +44,7 @@ export const useRemindersStore = defineStore('reminders', (): RemindersStore => 
     try {
       const serialized = storage.get()
 
-      reminders.push(...serialized.reminders.map((it: any) => createReminder(fromSerializedReminder(it, assets))))
+      reminders.push(...serialized.reminders.map((it: any) => createReminder(fromSerializedReminder(migrateSerializedReminder(it, serialized.version ?? 0), assets))))
 
       isInitialized.value = true
     } catch (error) {

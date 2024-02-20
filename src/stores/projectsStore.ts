@@ -8,6 +8,8 @@ import {useLocalStorage} from "@/composables/useLocalStorage";
 import {isNotDefined, isNotNull, isNull, type Maybe, type Nullable, takeIf} from "@/lib/utils";
 import {useCalendarStore} from "@/stores/calendarStore";
 import {useNotifyError} from "@/composables/useNotifyError";
+import {migrateSerializedProject} from "@/model/project/migrations";
+import {migrateSerializedActivity} from "@/model/activity/migrations";
 
 export interface ProjectsStore {
   isInitialized: Readonly<Ref<boolean>>
@@ -52,8 +54,8 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     try {
       const serialized = storage.get()
 
-      addProjects(serialized.projects.map((it: any) => createProject(fromSerializedProject(it))))
-      addActivities(serialized.activities.map((it: any) => createActivity(fromSerializedActivity(it, { projects }))))
+      addProjects(serialized.projects.map((it: any) => createProject(fromSerializedProject(migrateSerializedProject(it, serialized.version ?? 0)))))
+      addActivities(serialized.activities.map((it: any) => createActivity(fromSerializedActivity(migrateSerializedActivity(it, serialized.version ?? 0), { projects }))))
 
       isInitialized.value = true
     } catch(error) {

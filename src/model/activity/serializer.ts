@@ -8,7 +8,7 @@ export function fromSerializedActivity(serialized: SerializedActivity, assets: A
     displayName: serialized.displayName,
     color: serialized.color,
     parentProject: assets.projects.find(whereId(serialized.parentProjectId)) ?? null,
-    lastUsed: parseDateTime(serialized.LastUsed),
+    lastUsed: parseDateTime(serialized.lastUsed),
   }
 }
 
@@ -18,6 +18,6 @@ export function serializeActivity(activity: ActivityContext): SerializedActivity
     displayName: activity.displayName,
     color: activity.color,
     parentProjectId: activity.parentProject?.id ?? null,
-    LastUsed: formatDateTime(activity.lastUsed),
+    lastUsed: formatDateTime(activity.lastUsed),
   }
 }
