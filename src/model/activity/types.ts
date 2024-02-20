@@ -24,7 +24,7 @@ export interface SerializedActivity {
   displayName: string
   color: Nullable<string>
   parentProjectId: Nullable<string>
-  LastUsed: string // ISO Date Time (YYYY-MM-DDTHH:mm:ss)
+  lastUsed: string // ISO Date Time (YYYY-MM-DDTHH:mm:ss)
 }
 
 export type ActivityDeserializationAssets = Pick<ProjectsStore,

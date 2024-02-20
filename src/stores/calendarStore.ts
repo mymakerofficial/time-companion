@@ -11,6 +11,7 @@ import {whereDate, whereId} from "@/lib/listUtils";
 import {isDefined} from "@/lib/utils";
 import {Temporal} from "temporal-polyfill";
 import {useNotifyError} from "@/composables/useNotifyError";
+import {migrateCalendarDay} from "@/model/calendarDay/migrations";
 
 export interface CalendarStore {
   isInitialized: Readonly<Ref<boolean>>
@@ -52,7 +53,7 @@ export const useCalendarStore = defineStore('calendar', (): CalendarStore => {
     try {
       const serialized = storage.get()
 
-      days.push(...serialized.days.map((it: any) => createDay(fromSerializedDay(it, assets))))
+      days.push(...serialized.days.map((it: any) => createDay(fromSerializedDay(migrateCalendarDay(it, serialized.version ?? 0), assets))))
 
       isInitialized.value = true
     } catch (error) {
