@@ -9,9 +9,9 @@ type Wrapped<TValue> = { original: TValue }
 import {cn, isDefined, type MaybeArray, type Nullable} from "@/lib/utils";
 import {ComboboxRoot, PopoverAnchor} from "radix-vue";
 import {Popover, PopoverContent} from "@/components/ui/popover";
-import {CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from "@/components/ui/command";
+import {CommandInput, CommandItem, CommandList} from "@/components/ui/command";
 import {Button, buttonVariants} from "@/components/ui/button";
-import {Check, ChevronsUpDown} from 'lucide-vue-next'
+import {Check, ChevronsUpDown, Plus} from 'lucide-vue-next'
 import {useToggle} from "@vueuse/core";
 import {asArray, isArray, isEmpty, isNotEmpty} from "@/lib/listUtils";
 import {computed, type HTMLAttributes} from "vue";
@@ -37,6 +37,8 @@ const props = withDefaults(defineProps<{
   emptyLabel?: string
   noInput?: boolean
   preventClose?: boolean
+  allowCreate?: boolean
+  hideWhenEmpty?: boolean
 }>(), {
   limit: Infinity,
   variant: 'outline',
@@ -44,6 +46,7 @@ const props = withDefaults(defineProps<{
 
 const emit = defineEmits<{
   'selected': [value: typeof model.value]
+  'create': [value: string]
 }>()
 
 defineOptions({
@@ -51,19 +54,6 @@ defineOptions({
 })
 
 const toggleOpen = useToggle(openModel)
-
-const open = computed({
-  get() {
-    if (isEmpty(props.options)) {
-      return false
-    }
-
-    return openModel.value
-  },
-  set(value) {
-    openModel.value = value
-  }
-})
 
 function isSelected(option: TValue): boolean {
   return asArray(model.value).includes(option)
@@ -125,6 +115,12 @@ function handleSelect(option: TValue) {
   emit('selected', model.value)
 }
 
+function handleCreate() {
+  if (props.allowCreate) {
+    emit('create', searchTerm.value)
+  }
+}
+
 function handleUpdateClose(value: boolean) {
   if (value) {
     return
@@ -157,6 +153,31 @@ function wrapModel(value: Nullable<MaybeArray<TValue>>) {
 }
 
 const primitiveModel = computed(() => wrapModel(model.value))
+
+const showCreate = computed(() => {
+  return props.allowCreate && isNotEmpty(searchTerm.value)
+})
+
+const showEmpty = computed(() => {
+  return isEmpty(filteredOptions.value) && !showCreate.value
+})
+
+const open = computed({
+  get() {
+    if (isEmpty(props.options) && !props.allowCreate) {
+      return false
+    }
+
+    if (props.hideWhenEmpty && showEmpty.value) {
+      return false
+    }
+
+    return openModel.value
+  },
+  set(value) {
+    openModel.value = value
+  }
+})
 </script>
 
 <template>
@@ -201,11 +222,11 @@ const primitiveModel = computed(() => wrapModel(model.value))
             v-if="!noInput"
             :placeholder="searchLabel ?? $t('common.placeholders.search')"
           />
-          <CommandEmpty>
+          <div v-if="showEmpty" class="py-6 text-center text-sm">
             <slot name="empty">
               <span class="truncate">{{ emptyLabel ?? $t('common.placeholders.searchEmpty') }}</span>
             </slot>
-          </CommandEmpty>
+          </div>
           <CommandList>
             <div class="p-1">
               <CommandItem
@@ -224,6 +245,21 @@ const primitiveModel = computed(() => wrapModel(model.value))
                       :data-active="isSelected(option)"
                       class="ml-2 size-4 opacity-0 data-[active=true]:opacity-100"
                     />
+                  </span>
+                </slot>
+              </CommandItem>
+              <CommandItem
+                v-if="showCreate"
+                :value="{}"
+                @click.prevent="() => handleCreate()"
+              >
+                <slot name="create">
+                  <slot name="createLeading" :value="searchTerm" />
+                  <slot name="createLabel" :value="searchTerm">
+                    <span class="truncate">{{ searchTerm }}</span>
+                  </slot>
+                  <span class="ml-auto">
+                    <Plus class="ml-2 size-4" />
                   </span>
                 </slot>
               </CommandItem>
