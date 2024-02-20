@@ -78,6 +78,23 @@ export function firstOf<T>(value: Maybe<MaybeArray<T>>): Maybe<T> {
   return value[0]
 }
 
+// if given an array, returns second element, if given a single value, returns that value
+export function secondOf<T>(value: Maybe<MaybeArray<T>>): Maybe<T> {
+  if (isEmpty(value)) {
+    return null
+  }
+
+  if (isNotArray(value)) {
+    return value
+  }
+
+  if (value.length < 2) {
+    return null
+  }
+
+  return value[1]
+}
+
 // if given an array, returns the last element, if given a single value, returns that value
 export function lastOf<T>(value: Maybe<MaybeArray<T>>): Maybe<T> {
   if (isEmpty(value)) {

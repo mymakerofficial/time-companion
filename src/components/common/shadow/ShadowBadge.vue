@@ -2,16 +2,23 @@
 import {Slash} from "lucide-vue-next";
 import type {ReactiveCalendarEventShadow} from "@/model/eventShadow";
 import {cn, type Nullable} from "@/lib/utils";
-import type {HTMLAttributes} from "vue";
+import {computed, type HTMLAttributes} from "vue";
 import {Badge, type BadgeVariants} from "@/components/ui/badge";
 import {cva} from "class-variance-authority";
+import type {ReactiveProject} from "@/model/project";
+import type {ReactiveActivity} from "@/model/activity";
 
 const props = defineProps<{
+  project?: Nullable<ReactiveProject>
+  activity?: Nullable<ReactiveActivity>
   shadow?: Nullable<ReactiveCalendarEventShadow>
   variant?: NonNullable<BadgeVariants>['variant']
   size?: NonNullable<BadgeVariants>['size']
   class?: HTMLAttributes['class']
 }>()
+
+const project = computed(() => props.project ?? props.shadow?.project ?? null)
+const activity = computed(() => props.activity ?? props.shadow?.activity ?? null)
 
 const slashVariants = cva(
   '',
@@ -38,18 +45,18 @@ const slashVariants = cva(
     :color="shadow?.color"
     :class="cn(props.variant === 'skeleton' ? 'p-0' : '', props.class)"
   >
-    <slot name="leading" :value="shadow" />
-    <slot name="project" :value="shadow?.project ?? null">
-      <slot name="part" v-if="shadow?.project" :value="shadow?.project ?? null">
-        <span v-text="shadow?.project.displayName" class="text-nowrap" />
+    <slot name="leading" />
+    <slot name="project" :value="project">
+      <slot name="part" v-if="project" :value="project">
+        <span v-text="project.displayName" class="text-nowrap" />
       </slot>
     </slot>
-    <Slash v-if="shadow?.activity || $slots.activity" :class="cn(slashVariants({ size }))" />
-    <slot name="activity" :value="shadow?.activity ?? null">
-      <slot name="part" v-if="shadow?.activity" :value="shadow?.activity ?? null">
-        <span v-text="shadow.activity?.displayName" class="text-nowrap" />
+    <Slash v-if="activity || $slots.activity" :class="cn(slashVariants({ size }))" />
+    <slot name="activity" :value="activity">
+      <slot name="part" v-if="activity" :value="activity">
+        <span v-text="activity?.displayName" class="text-nowrap" />
       </slot>
     </slot>
-    <slot name="trailing" :value="shadow" />
+    <slot name="trailing" />
   </Badge>
 </template>

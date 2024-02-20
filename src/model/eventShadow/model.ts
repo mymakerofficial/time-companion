@@ -19,7 +19,7 @@ export function createEventShadow(init: CalendarEventShadowInit): ReactiveCalend
   })
 
   const combinedName = computed(() => {
-    return [ctx.project.id, ctx.activity?.id].join('/')
+    return [ctx.project.displayName, ctx.activity?.displayName].join('/')
   })
 
   function create(init?: CalendarEventInit) {

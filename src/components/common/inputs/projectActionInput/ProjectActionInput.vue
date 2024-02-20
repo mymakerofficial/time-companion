@@ -3,16 +3,17 @@ import {computed, type HTMLAttributes, onMounted, ref, watch} from "vue";
 import {Input} from "@/components/ui/input";
 import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
 import ComboboxInput from "@/components/common/inputs/combobox/ComboboxInput.vue";
-import {isNotDefined, isNotNull, isNull, type Nullable} from "@/lib/utils";
+import {isDefined, isNotDefined, isNotNull, isNull, type Maybe, type Nullable} from "@/lib/utils";
 import {useQuickAccess} from "@/composables/useQuickAccess";
 import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/eventShadow";
 import ShadowBadge from "@/components/common/shadow/ShadowBadge.vue";
-import {isNotEmpty} from "@/lib/listUtils";
+import {firstOf, isEmpty, isNotEmpty, secondOf} from "@/lib/listUtils";
 import {useFocus} from "@vueuse/core";
-import type {ReactiveProject} from "@/model/project/";
-import type {ReactiveActivity} from "@/model/activity/";
+import {createProject, type ReactiveProject} from "@/model/project/";
+import {createActivity, type ReactiveActivity} from "@/model/activity/";
 import {projectActionInputBadgeVariants} from "@/components/common/inputs/projectActionInput/variants";
 import type {BadgeVariants} from "@/components/ui/badge";
+import {useProjectsStore} from "@/stores/projectsStore";
 
 const projectModel = defineModel<Nullable<ReactiveProject>>('project', { required: false, default: null })
 const activityModel = defineModel<Nullable<ReactiveActivity>>('activity', { required: false, default: null })
@@ -32,6 +33,8 @@ const props = withDefaults(defineProps<{
 defineOptions({
   inheritAttrs: false
 })
+
+const projectsStore = useProjectsStore()
 
 const searchTerm = ref('')
 
@@ -100,12 +103,84 @@ function handleBackspace(event: KeyboardEvent) {
   }
 }
 
+const createParts = computed(() => {
+  if (isDefined(selected.value?.project)) {
+    return [selected.value?.project.displayName, searchTerm.value]
+  }
+
+  return searchTerm.value.split('/', 2).filter(isNotEmpty)
+})
+
+function createProjectFromTerm() {
+  if (isNotNull(selected.value)) {
+    return selected.value.project
+  }
+
+  const displayName = firstOf(createParts.value)
+
+  if (isNotDefined(displayName)) {
+    return null
+  }
+
+  const project = createProject({
+    displayName,
+  }, {
+    randomColor: true
+  })
+
+  projectsStore.addProject(project)
+
+  return project
+}
+
+function createActivityFromTerm(project: Nullable<ReactiveProject>) {
+  if (
+      isNotNull(selected.value) &&
+      isNotNull(selected.value.activity)
+  ) {
+    return selected.value.activity
+  }
+
+  const displayName = secondOf(createParts.value)
+
+  if (isNotDefined(displayName)) {
+    return null
+  }
+
+  const activity = createActivity({
+    displayName,
+    parentProject: project
+  })
+
+  projectsStore.addActivity(activity)
+
+  return activity
+}
+
+function handleCreate() {
+  const project = createProjectFromTerm()
+  const activity = createActivityFromTerm(project)
+
+  if (isNull(project)) {
+    return
+  }
+
+  selected.value = createEventShadow({
+    project,
+    activity
+  })
+}
+
 const open = computed(() => {
   if (inputFocused.value === false) {
     return false
   }
 
   if (selected.value?.activity) {
+    return false
+  }
+
+  if (isEmpty(searchTerm) && isEmpty(shadows)) {
     return false
   }
 
@@ -130,7 +205,10 @@ const placeholder = computed(() => {
     :open="open"
     v-model:search-term="searchTerm"
     :limit="6"
+    @create="handleCreate"
     no-input
+    hide-when-empty
+    allow-create
     prevent-close
     popover-class="w-auto"
     :class="props.wrapperClass"
@@ -153,6 +231,16 @@ const placeholder = computed(() => {
     </template>
     <template #optionLabel="{ value }">
       <ShadowBadge :shadow="value" variant="skeleton" size="md" />
+    </template>
+    <template #createLabel>
+      <ShadowBadge variant="skeleton" size="md">
+        <template #project>
+          <span class="text-nowrap">{{ firstOf(createParts) }}</span>
+        </template>
+        <template #activity v-if="isNotNull(secondOf(createParts))">
+          <span class="text-nowrap">{{ secondOf(createParts) }}</span>
+        </template>
+      </ShadowBadge>
     </template>
   </Combobox>
 </template>
