@@ -1,21 +1,21 @@
-import {isNotDefined, type Nullable} from "@/lib/utils";
+import {isNotDefined, isNotNull, isNull, type Nullable} from "@/lib/utils";
 import {isEmpty} from "@/lib/listUtils";
 import {Temporal} from "temporal-polyfill";
-import {timeZero} from "@/lib/neoTime";
+import {durationZero, negateDuration, sumOfDurations, timeZero} from "@/lib/neoTime";
 
 /**
- * Parses any single human-readable time input into LocalTime
+ * Parses any single human-readable duration input into Duration
  * @param value The input to parse
- * @returns LocalTime, or null if the duration could not be parsed
+ * @returns Duration, or null if the duration could not be parsed
  * @example
- * parseHumanTime('1.5h') // LocalTime.of(1, 30)
- * parseHumanTime('1:30') // LocalTime.of(1, 30)
- * parseHumanTime('130') // LocalTime.of(1, 30)
- * parseHumanTime('1 30') // LocalTime.of(1, 30)
- * parseHumanTime('90m') // LocalTime.of(1, 30)
- * parseHumanTime('1h') // LocalTime.of(1, 0)
+ * parseHumanTime('1.5h') // 1 hour and 30 minutes
+ * parseHumanTime('1:30') // 1 hour and 30 minutes
+ * parseHumanTime('130') // 1 hour and 30 minutes
+ * parseHumanTime('1 30') // 1 hour and 30 minutes
+ * parseHumanTime('90m') // 1 hour and 30 minutes
+ * parseHumanTime('1h') // 1 hour and 0 minutes
  */
-export function parseHumanTime(value: string): Nullable<Temporal.PlainTime> {
+export function parseHumanDuration(value: string): Nullable<Temporal.Duration> {
   // match any valid input and extract the relevant parts in groups
   // whole.decimal | hour:minute | value unit
   const inputRegex = /^\s*((?<whole>\d{1,2})\.(?<decimal>\d+)?h?\s*$)|((?<hour>\d{1,2})(:|h| )?(?<minute>\d{2})?\s*$)|((?<value>\d+)\s*(?<unit>minute|min|m|hour|h)?\s*$)/gi
@@ -40,9 +40,9 @@ export function parseHumanTime(value: string): Nullable<Temporal.PlainTime> {
     const hours = parseInt(whole)
     const minutes = parseInt(decimal) / 10 * 60
 
-    return Temporal.PlainTime.from({
-      hour: hours,
-      minute: minutes
+    return Temporal.Duration.from({
+      hours,
+      minutes
     })
   }
 
@@ -51,9 +51,9 @@ export function parseHumanTime(value: string): Nullable<Temporal.PlainTime> {
     const hours = parseInt(hour)
     const minutes = parseInt(minute) || 0
 
-    return Temporal.PlainTime.from({
-      hour: hours,
-      minute: minutes
+    return Temporal.Duration.from({
+      hours,
+      minutes
     })
   }
 
@@ -61,25 +61,22 @@ export function parseHumanTime(value: string): Nullable<Temporal.PlainTime> {
     // value is given in minutes or hours (e.g. 90m or 1h)
     const isMinutes = unit === 'm' || unit === 'min' || unit === 'minute'
 
-    // TODO switch to Temporal
-    // return LocalTime.of(0).plusMinutes(parseInt(valueString) * (isMinutes ? 1 : 60))
-
-    return timeZero()
+    return durationZero().add({minutes: parseInt(valueString) * (isMinutes ? 1 : 60)})
   }
 
   return null
 }
 
 /**
- * Parses any human-readable time input, including equations, into LocalTime
+ * Parses any human-readable time input, including equations, into Duration
  * @param value The input to parse
- * @returns LocalTime, or null if the duration could not be parsed
+ * @returns Duration, or null if the duration could not be parsed
  * @example
- * parseHumanTimeWithEquation('08:00 + 30min') // LocalTime.of(8, 30)
- * parseHumanTimeWithEquation('08:00 - 30min') // LocalTime.of(7, 30)
- * parseHumanTimeWithEquation('08:00 + 1h + 30min') // LocalTime.of(9, 30)
+ * parseHumanTimeWithEquation('08:00 + 30min') // 8 hours 30 minutes
+ * parseHumanTimeWithEquation('08:00 - 30min') // 7 hours 30 minutes
+ * parseHumanTimeWithEquation('08:00 + 1h + 30min') // 9 hours 30 minutes
  */
-export function parseHumanTimeWithEquation(value: string): Nullable<Temporal.PlainTime> {
+export function parseHumanDurationWithEquation(value: string): Nullable<Temporal.Duration> {
   // split the input into individual values and operators
   const inputRegex = /(?<operator>[+-])?\s*(?<value>\d+.?\d*\w*)/gi
 
@@ -93,14 +90,22 @@ export function parseHumanTimeWithEquation(value: string): Nullable<Temporal.Pla
     const {operator, value: rawValue} = match.groups!
 
     const isNegative = operator === '-'
-    const duration = parseHumanTime(rawValue)
+    const duration = parseHumanDuration(rawValue)
 
-    return {
-      value: duration,
-      isNegative
+    if (isNull(duration)) {
+      return null
     }
-  })
 
-  // TODO actually calculate the result
-  return values[0].value
+    if (isNegative) {
+      return negateDuration(duration)
+    } else {
+      return duration
+    }
+  }).filter(isNotNull)
+
+  if (isEmpty(values)) {
+    return null
+  }
+
+  return sumOfDurations(values)
 }
