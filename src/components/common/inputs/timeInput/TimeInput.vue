@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import {ref, watch} from "vue";
 import {Input} from "@/components/ui/input";
-import {formatTime, withFormat} from "@/lib/neoTime";
-import {parseHumanTimeWithEquation} from "@/lib/parsers";
+import {durationToTime, formatTime, withFormat} from "@/lib/neoTime";
+import {parseHumanDurationWithEquation} from "@/lib/parsers";
 import {isNull} from "@/lib/utils";
 import {Temporal} from "temporal-polyfill";
 
@@ -21,14 +21,14 @@ function setInputFromModel() {
 }
 
 function handleChange() {
-  const parsed = parseHumanTimeWithEquation(inputValue.value)
+  const parsedDuration = parseHumanDurationWithEquation(inputValue.value)
 
-  if (isNull(parsed)) {
+  if (isNull(parsedDuration)) {
     setInputFromModel()
     return
   }
 
-  model.value = parsed
+  model.value = durationToTime(parsedDuration)
 }
 </script>
 
