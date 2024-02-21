@@ -57,11 +57,11 @@ export function getOrRun<T>(valueOrFunction: MaybeFunction<T>): T {
 
 export function round(value: number, precision: number = 0): number {
   if (precision <= 0) {
-    return Math.round(value)
+    return Math.floor(value)
   }
 
   const factor = Math.pow(10, precision)
-  return Math.round(value * factor) / factor
+  return Math.floor(value * factor) / factor
 }
 
 export function fillZero(value: number, length: number = 2): string {
