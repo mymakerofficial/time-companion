@@ -265,6 +265,19 @@ export function durationSinceStartOfDay(time: any) {
   return durationBetween(timeZero(), time)
 }
 
+// given a duration, return the time of day
+export function durationToTime(duration: Temporal.Duration): Temporal.PlainTime {
+  return Temporal.PlainTime.from({
+    hour: duration.total({unit: 'hours'}),
+    minute: duration.total({unit: 'minutes'}) % 60,
+    second: duration.total({unit: 'seconds'}) % 60
+  })
+}
+
+export function negateDuration(duration: Temporal.Duration) {
+  return Temporal.Duration.from({ milliseconds: -duration.total({unit: 'milliseconds'}) })
+}
+
 export function sumOfDurations(durations: Temporal.Duration[]) {
   return durations.reduce((acc, duration) => acc.add(duration), durationZero())
 }
