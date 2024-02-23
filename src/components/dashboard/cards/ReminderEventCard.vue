@@ -4,7 +4,7 @@ import {Button} from "@/components/ui/button";
 import {computed} from "vue";
 import {vProvideColor} from "@/directives/vProvideColor";
 import {isNotNull, round} from "@/lib/utils";
-import type {ReactiveCalendarReminder} from "@/model/calendarReminder";
+import type {ReactiveCalendarReminder} from "@/model/calendarReminder/types";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {useTimeNow} from "@/composables/useNow";
 import {durationBetween, minutes} from "@/lib/neoTime";

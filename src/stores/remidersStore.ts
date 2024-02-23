@@ -1,8 +1,9 @@
 import {defineStore} from "pinia";
 import {reactive, readonly, type Ref, ref, watch} from "vue";
-import type {ReactiveCalendarReminder, SerializedCalendarReminder} from "@/model/calendarReminder";
+import type {ReactiveCalendarReminder, SerializedCalendarReminder} from "@/model/calendarReminder/types";
 import {useLocalStorage} from "@/composables/useLocalStorage";
-import {createReminder, fromSerializedReminder} from "@/model/calendarReminder";
+import {fromSerializedReminder} from "@/model/calendarReminder/serializer";
+import {createReminder} from "@/model/calendarReminder/model";
 import {useProjectsStore} from "@/stores/projectsStore";
 import {useNotifyError} from "@/composables/useNotifyError";
 import {migrateSerializedReminder} from "@/model/calendarReminder/migrations";

@@ -1,5 +1,5 @@
-import type {ReactiveProject} from "@/model/project/";
-import type {ReactiveCalendarDay} from "@/model/calendarDay";
+import type {ReactiveProject} from "@/model/project/types";
+import type {ReactiveCalendarDay} from "@/model/calendarDay/types";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import {dateTimeZero, dateZero, durationBetween, durationZero, now, sumOfDurations} from "@/lib/neoTime";
 import {Temporal} from "temporal-polyfill";

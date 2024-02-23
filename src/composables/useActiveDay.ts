@@ -1,7 +1,7 @@
-import type {ReactiveCalendarDay} from "@/model/calendarDay";
+import type {ReactiveCalendarDay} from "@/model/calendarDay/types";
 import {useReferenceById} from "@/composables/useReferenceById";
 import {computed, reactive} from "vue";
-import type {ReactiveCalendarEventShadow} from "@/model/eventShadow";
+import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
 import {isDefined, isNotNull, isNull, type Nullable} from "@/lib/utils";
 import {now} from "@/lib/neoTime";
 import type {ID} from "@/lib/types";

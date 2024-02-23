@@ -1,11 +1,11 @@
 <script setup lang="tsx">
 import {computed, ref} from "vue";
-import type {ReactiveProject} from "@/model/project/";
+import type {ReactiveProject} from "@/model/project/types";
 import type {ProjectRow} from "@/components/settings/projects/table/types";
 import {createProjectsColumns} from "@/components/settings/projects/table/projectsColumns";
 import Table from "@/components/common/table/Table.vue";
-import {getSortedRowModel, getExpandedRowModel} from "@tanstack/vue-table";
 import type {ExpandedState, SortingState, TableOptions} from '@tanstack/vue-table'
+import {getExpandedRowModel, getSortedRowModel} from "@tanstack/vue-table";
 import EditProjectDialog from "@/components/settings/projects/projectDialog/EditProjectDialog.vue";
 import EditActivityDialog from "@/components/settings/projects/activityDialog/EditActivityDialog.vue";
 import {useDialogStore} from "@/stores/dialogStore";

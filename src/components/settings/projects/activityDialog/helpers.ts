@@ -1,10 +1,9 @@
-import type {ReactiveActivity} from "@/model/activity/";
+import type {ReactiveActivity} from "@/model/activity/types";
 import type {Maybe, Nullable} from "@/lib/utils";
-import type {ID} from "@/lib/types";
-import {createActivity} from "@/model/activity/";
-import {useProjectsStore} from "@/stores/projectsStore";
 import {isNotNull} from "@/lib/utils";
-import type {ReactiveProject} from "@/model/project/";
+import {createActivity} from "@/model/activity/model";
+import {useProjectsStore} from "@/stores/projectsStore";
+import type {ReactiveProject} from "@/model/project/types";
 
 export interface ActivityForm {
   displayName: ReactiveActivity['displayName'],

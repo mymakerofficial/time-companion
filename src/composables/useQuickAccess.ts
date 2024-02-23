@@ -1,8 +1,9 @@
 import {useProjectsStore} from "@/stores/projectsStore";
-import type {ReactiveProject} from "@/model/project/";
-import type {ReactiveActivity} from "@/model/activity/";
-import {type  MaybeRefOrGetter, ref, toRefs, toValue, watchEffect} from "vue";
-import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/eventShadow";
+import type {ReactiveProject} from "@/model/project/types";
+import type {ReactiveActivity} from "@/model/activity/types";
+import {type  MaybeRefOrGetter, ref, toValue, watchEffect} from "vue";
+import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
+import {createEventShadow} from "@/model/eventShadow/model";
 import type {Nullable} from "@/lib/utils";
 import {isNull} from "@/lib/utils";
 import {isAfter} from "@/lib/neoTime";

@@ -1,8 +1,7 @@
 import type {HasId} from "@/lib/types";
-import type {ReactiveActivity} from "@/model/activity/";
+import type {ReactiveActivity} from "@/model/activity/types";
 import type {Nullable} from "@/lib/utils";
-import type {LocalDateTime} from "@js-joda/core";
-import { Temporal } from 'temporal-polyfill'
+import {Temporal} from 'temporal-polyfill'
 
 
 export interface ProjectContext extends HasId {

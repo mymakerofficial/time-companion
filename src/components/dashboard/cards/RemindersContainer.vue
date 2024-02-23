@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import ReminderEventCard from "@/components/dashboard/cards/ReminderEventCard.vue";
 import {computed} from "vue";
-import type {ReactiveCalendarReminder} from "@/model/calendarReminder";
+import type {ReactiveCalendarReminder} from "@/model/calendarReminder/types";
 import {useTimeNow} from "@/composables/useNow";
 import {isAfter, isBefore, minutes} from "@/lib/neoTime";
 

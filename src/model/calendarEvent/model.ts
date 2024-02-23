@@ -2,7 +2,7 @@ import {computed, reactive} from "vue";
 import {v4 as uuid} from "uuid";
 import {isNotNull, isNull, runIf} from "@/lib/utils";
 import {dateTimeZero, durationBetween, durationZero, isAfter, isBefore} from "@/lib/neoTime";
-import {createEventShadow} from "@/model/eventShadow";
+import {createEventShadow} from "@/model/eventShadow/model";
 import type {CalendarEventContext, CalendarEventInit, ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import {serializeEvent} from "@/model/calendarEvent/serializer";
 import {mapReadonly, mapWritable} from "@/model/modelHelpers";

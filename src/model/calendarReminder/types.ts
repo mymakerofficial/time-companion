@@ -1,7 +1,6 @@
 import type {HasId} from "@/lib/types";
 import type {Nullable} from "@/lib/utils";
-import type {ReactiveCalendarEventShadow} from "@/model/eventShadow";
-import type {Duration, LocalTime} from "@js-joda/core";
+import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
 import type {ProjectsStore} from "@/stores/projectsStore";
 import {Temporal} from "temporal-polyfill";
 

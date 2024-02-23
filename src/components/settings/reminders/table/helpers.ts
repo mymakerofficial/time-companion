@@ -1,4 +1,4 @@
-import type {ReactiveCalendarReminder} from "@/model/calendarReminder";
+import type {ReactiveCalendarReminder} from "@/model/calendarReminder/types";
 import type {ReminderRow} from "@/components/settings/reminders/table/types";
 
 export function toReminderRow(reminder: ReactiveCalendarReminder): ReminderRow {

@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import {Button} from "@/components/ui/button";
 import {computed, reactive, watch} from "vue";
-import { watchDebounced} from "@vueuse/core";
+import {watchDebounced} from "@vueuse/core";
 import {MoreVertical} from "lucide-vue-next";
 import {isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
-import type {ReactiveCalendarEvent} from "@/model/calendarEvent";
-import type {ReactiveProject} from "@/model/project/";
-import type {ReactiveActivity} from "@/model/activity/";
+import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
+import type {ReactiveProject} from "@/model/project/types";
+import type {ReactiveActivity} from "@/model/activity/types";
 import ProjectActionInput from "@/components/common/inputs/projectActionInput/ProjectActionInput.vue";
 import {useNow} from "@/composables/useNow";
-import {dateTimeZero, durationBetween, formatDuration, formatDurationIso, withFormat} from "@/lib/neoTime";
+import {dateTimeZero, durationBetween, formatDuration} from "@/lib/neoTime";
 import DateTimeInput from "@/components/common/inputs/timeInput/DateTimeInput.vue";
 
 const props = defineProps<{

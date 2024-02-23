@@ -1,7 +1,7 @@
-import type {ReactiveProject} from "@/model/project";
+import type {ReactiveProject} from "@/model/project/types";
 import type {Nullable} from "@/lib/utils";
-import type {ReactiveActivity} from "@/model/activity";
-import type {CalendarEventInit, ReactiveCalendarEvent} from "@/model/calendarEvent";
+import type {ReactiveActivity} from "@/model/activity/types";
+import type {CalendarEventInit, ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import type {ID} from "@/lib/types";
 
 export interface EventShadowContext {
