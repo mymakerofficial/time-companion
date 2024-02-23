@@ -7,6 +7,7 @@ import {createReminder} from "@/model/calendarReminder/model";
 import {useProjectsStore} from "@/stores/projectsStore";
 import {useNotifyError} from "@/composables/useNotifyError";
 import {migrateSerializedReminder} from "@/model/calendarReminder/migrations";
+import {useProjectsService} from "@/services/projectsService";
 
 export interface RemindersStore {
   isInitialized: Readonly<Ref<boolean>>
@@ -22,7 +23,7 @@ interface RemindersStorageSerialized {
 }
 
 export const useRemindersStore = defineStore('reminders', (): RemindersStore => {
-  const projectsStore = useProjectsStore()
+  const projectsService = useProjectsService()
   const storage = useLocalStorage<RemindersStorageSerialized>('time-companion-reminders-store', { version: 0, reminders: [] })
 
   const isInitialized = ref(false)
@@ -35,11 +36,11 @@ export const useRemindersStore = defineStore('reminders', (): RemindersStore => 
     }
 
     // projects need to be initialized first
-    projectsStore.init()
+    projectsService.init()
 
     const assets = {
-      projects: projectsStore.projects,
-      activities: projectsStore.activities,
+      projects: projectsService.projects,
+      activities: projectsService.activities,
     }
 
     try {

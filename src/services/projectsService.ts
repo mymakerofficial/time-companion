@@ -1,5 +1,5 @@
 import {useProjectsStore} from "@/stores/projectsStore";
-import {reactive} from "vue";
+import {reactive, ref} from "vue";
 import type {ReactiveProject} from "@/model/project/types";
 import type {ReactiveActivity} from "@/model/activity/types";
 import {check, isNotNull} from "@/lib/utils";
@@ -12,6 +12,7 @@ import {createProject} from "@/model/project/model";
 import {migrateSerializedActivity} from "@/model/activity/migrations";
 import {createActivity} from "@/model/activity/model";
 import {fromSerializedActivity} from "@/model/activity/serializer";
+import {createGlobalState, set} from "@vueuse/core";
 
 export interface ProjectsService {
   projects: ReadonlyArray<ReactiveProject>
@@ -29,11 +30,18 @@ export interface ProjectsService {
   link: (project: ReactiveProject, activity: ReactiveActivity) => void
 }
 
-export function useProjectsService({
+export const useProjectsService = createGlobalState(({
   projectsStore = useProjectsStore(),
   calendarService = useCalendarService(),
-} = {}): ProjectsService {
+} = {}): ProjectsService => {
+
+  const isInitialized = ref(false)
+
   function init() {
+    if (isInitialized) {
+      return
+    }
+
     const serialized = projectsStore.getSerializedStorage()
 
     const version = serialized.version ?? 0
@@ -48,6 +56,8 @@ export function useProjectsService({
 
     addProjects(projects)
     addActivities(activities)
+
+    set(isInitialized, true)
   }
 
   function addProject(project: ReactiveProject) {
@@ -187,4 +197,4 @@ export function useProjectsService({
     unlink,
     link
   })
-}
+})

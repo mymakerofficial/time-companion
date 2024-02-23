@@ -55,35 +55,6 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
   const projects = reactive<ReactiveProject[]>([])
   const activities = reactive<ReactiveActivity[]>([])
 
-  function init() {
-    if (isInitialized.value) {
-      return
-    }
-
-    try {
-      const serialized = getSerializedStorage();
-
-      addProjects(serialized.projects.map((it: any) => createProject(fromSerializedProject(migrateSerializedProject(it, serialized.version ?? 0)))))
-      addActivities(serialized.activities.map((it: any) => createActivity(fromSerializedActivity(migrateSerializedActivity(it, serialized.version ?? 0), { projects }))))
-
-      isInitialized.value = true
-    } catch(error) {
-      useNotifyError({
-        title: 'Failed to load projects',
-        message: 'Your projects and activity data could not be loaded. Data may be corrupted or missing.',
-        actions: [{
-          label: 'Delete projects data',
-          handler: () => {
-            storage.clear()
-            init()
-          }
-        }],
-        error
-      })
-    }
-
-  }
-
   function commit() {
     if (!isInitialized.value) {
       throw new Error('Tried to commit projects store before it was initialized')
@@ -358,7 +329,6 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     isInitialized: readonly(isInitialized),
     projects,
     activities,
-    init,
     getProjectById,
     getActivityById,
     addProject,
