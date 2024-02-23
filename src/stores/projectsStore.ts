@@ -33,6 +33,7 @@ export interface ProjectsStore {
   link: (project: Maybe<ReactiveProject>, activity: Maybe<ReactiveActivity>) => void
 
 
+  getSerializedStorage: () => ProjectsStorageSerialized
   unsafeAddProject: (project: ReactiveProject) => void
   unsafeAddActivity: (activity: ReactiveActivity) => void
   unsafeRemoveProject: (project: ReactiveProject) => void
@@ -49,7 +50,7 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
   const calendarStore = useCalendarStore()
   const storage = useLocalStorage<ProjectsStorageSerialized>('time-companion-projects-store', { version: 0, projects: [], activities: [] })
 
-  const isInitialized = ref(false)
+  const isInitialized = ref(true)
 
   const projects = reactive<ReactiveProject[]>([])
   const activities = reactive<ReactiveActivity[]>([])
@@ -60,7 +61,7 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     }
 
     try {
-      const serialized = storage.get()
+      const serialized = getSerializedStorage();
 
       addProjects(serialized.projects.map((it: any) => createProject(fromSerializedProject(migrateSerializedProject(it, serialized.version ?? 0)))))
       addActivities(serialized.activities.map((it: any) => createActivity(fromSerializedActivity(migrateSerializedActivity(it, serialized.version ?? 0), { projects }))))
@@ -325,6 +326,10 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     })
   }
 
+  function getSerializedStorage() {
+    return storage.get();
+  }
+
   function unsafeAddProject(project: ReactiveProject) {
     projects.push(project)
   }
@@ -361,6 +366,7 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     removeProject,
     removeActivity,
     link,
+    getSerializedStorage,
     unsafeAddProject,
     unsafeAddActivity,
     unsafeRemoveProject,

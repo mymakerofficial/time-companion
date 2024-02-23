@@ -12,6 +12,7 @@ import {check, isDefined} from "@/lib/utils";
 import {Temporal} from "temporal-polyfill";
 import {useNotifyError} from "@/composables/useNotifyError";
 import {migrateCalendarDay} from "@/model/calendarDay/migrations";
+import {useProjectsService} from "@/services/projectsService";
 
 export interface CalendarStore {
   isInitialized: Readonly<Ref<boolean>>
@@ -31,7 +32,7 @@ interface CalendarStorageSerialized {
 }
 
 export const useCalendarStore = defineStore('calendar', (): CalendarStore => {
-  const projectsStore = useProjectsStore()
+  const projectsService = useProjectsService()
   const storage = useLocalStorage<CalendarStorageSerialized>('time-companion-calendar-store', { version: 0, days: [] })
 
   const isInitialized = ref(false)
@@ -49,11 +50,11 @@ export const useCalendarStore = defineStore('calendar', (): CalendarStore => {
     }
 
     // projects need to be initialized first
-    projectsStore.init()
+    projectsService.init()
 
     const assets = {
-      projects: projectsStore.projects,
-      activities: projectsStore.activities,
+      projects: projectsService.projects,
+      activities: projectsService.activities,
     }
 
     try {

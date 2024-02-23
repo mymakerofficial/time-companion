@@ -6,10 +6,17 @@ import {check, isNotNull} from "@/lib/utils";
 import {whereDisplayName, whereId} from "@/lib/listUtils";
 import {mapReadonly} from "@/model/modelHelpers";
 import {useCalendarService} from "@/services/calendarService";
+import {migrateSerializedProject} from "@/model/project/migrations";
+import {fromSerializedProject} from "@/model/project/serializer";
+import {createProject} from "@/model/project/model";
+import {migrateSerializedActivity} from "@/model/activity/migrations";
+import {createActivity} from "@/model/activity/model";
+import {fromSerializedActivity} from "@/model/activity/serializer";
 
 export interface ProjectsService {
   projects: ReadonlyArray<ReactiveProject>
   activities: ReadonlyArray<ReactiveActivity>
+  init: () => void
   addProject: (project: ReactiveProject) => void
   addProjects: (projects: ReactiveProject[]) => void
   removeProject: (project: ReactiveProject) => void
@@ -26,6 +33,23 @@ export function useProjectsService({
   projectsStore = useProjectsStore(),
   calendarService = useCalendarService(),
 } = {}): ProjectsService {
+  function init() {
+    const serialized = projectsStore.getSerializedStorage()
+
+    const version = serialized.version ?? 0
+
+    const projects = serialized.projects
+      .map((it) => migrateSerializedProject(it, version))
+      .map((it) => createProject(fromSerializedProject(it)))
+
+    const activities = serialized.activities
+      .map((it) => migrateSerializedActivity(it, version))
+      .map((it) => createActivity(fromSerializedActivity(it, { projects })))
+
+    addProjects(projects)
+    addActivities(activities)
+  }
+
   function addProject(project: ReactiveProject) {
     check(!projectsStore.projects.some(whereId(project.id)),
       `Failed to add project: Project with id "${project.id}" already exists.`
@@ -151,6 +175,7 @@ export function useProjectsService({
       'projects',
       'activities'
     ]),
+    init,
     addProject,
     addProjects,
     removeProject,
