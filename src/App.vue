@@ -12,6 +12,7 @@ import {computed} from "vue";
 import {today} from "@/lib/neoTime";
 import {useColorMode} from "@vueuse/core";
 import {useLocaleStore} from "@/stores/settings/localeStore";
+import {useActiveDayService} from "@/services/activeDayService";
 
 // initialize appearance settings
 useLocaleStore()
@@ -27,6 +28,8 @@ remindersStore.init()
 calendarStore.init()
 
 calendarStore.setActiveDay(today())
+
+useActiveDayService().setByDate(today())
 
 const { t } = useI18n()
 

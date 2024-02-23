@@ -1,12 +1,10 @@
 import type {HasId} from "@/lib/types";
-import type {LocalDate, LocalDateTime} from "@js-joda/core";
 import type {
   EventDeserializationAssets,
   ReactiveCalendarEvent,
   SerializedCalendarEvent
 } from "@/model/calendarEvent/types";
 import type {Nullable} from "@/lib/utils";
-import type {serializeDay} from "@/model/calendarDay/serializer";
 import {Temporal} from "temporal-polyfill";
 
 export interface CalendarDayContext extends HasId {
@@ -14,10 +12,13 @@ export interface CalendarDayContext extends HasId {
   events: ReactiveCalendarEvent[]
 }
 
-export interface ReactiveCalendarDay extends CalendarDayContext {
-  readonly startAt: Nullable<ReactiveCalendarEvent['startAt']>
-  addEvent: (event: ReactiveCalendarEvent) => void
-  removeEvent: (event: ReactiveCalendarEvent) => void
+export interface ReactiveCalendarDay {
+  id: Readonly<CalendarDayContext['id']>
+  date: CalendarDayContext['date']
+  events: ReadonlyArray<ReactiveCalendarEvent>
+  startAt: Readonly<Nullable<ReactiveCalendarEvent['startAt']>>
+  unsafeAddEvent: (event: ReactiveCalendarEvent) => void
+  unsafeRemoveEvent: (event: ReactiveCalendarEvent) => void
   toSerialized: () => SerializedCalendarDay
 }
 

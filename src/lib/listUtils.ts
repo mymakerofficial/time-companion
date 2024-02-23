@@ -1,7 +1,6 @@
 import type {Maybe, MaybeArray} from "@/lib/utils";
 import {isDefined, isNotDefined, isNull} from "@/lib/utils";
 import type {HasId, ID} from "@/lib/types";
-import type {LocalDate} from "@js-joda/core";
 import {isSameDay} from "@/lib/neoTime";
 import {Temporal} from "temporal-polyfill";
 
@@ -123,4 +122,12 @@ export function whereDate<T extends { date: Temporal.PlainDate }>(date: Maybe<Te
   }
 
   return (it: T) => isSameDay(it.date, date)
+}
+
+export function whereDisplayName<T extends { displayName: string }>(displayName: Maybe<string>) {
+  if (isNotDefined(displayName)) {
+    return () => false
+  }
+
+  return (it: T) => it.displayName === displayName
 }

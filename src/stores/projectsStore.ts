@@ -7,7 +7,7 @@ import {createProject} from "@/model/project/model";
 import {fromSerializedActivity} from "@/model/activity/serializer";
 import {createActivity} from "@/model/activity/model";
 import {useLocalStorage} from "@/composables/useLocalStorage";
-import {isNotDefined, isNotNull, isNull, type Maybe, type Nullable, takeIf} from "@/lib/utils";
+import {check, isNotDefined, isNotNull, isNull, type Maybe, type Nullable, takeIf} from "@/lib/utils";
 import {useCalendarStore} from "@/stores/calendarStore";
 import {useNotifyError} from "@/composables/useNotifyError";
 import {migrateSerializedProject} from "@/model/project/migrations";
@@ -31,6 +31,12 @@ export interface ProjectsStore {
    */
   removeActivity: (activity: Maybe<ReactiveActivity>) => void
   link: (project: Maybe<ReactiveProject>, activity: Maybe<ReactiveActivity>) => void
+
+
+  unsafeAddProject: (project: ReactiveProject) => void
+  unsafeAddActivity: (activity: ReactiveActivity) => void
+  unsafeRemoveProject: (project: ReactiveProject) => void
+  unsafeRemoveActivity: (activity: ReactiveActivity) => void
 }
 
 interface ProjectsStorageSerialized {
@@ -91,6 +97,9 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
 
   watch([() => projects, () => activities], commit, {deep: true})
 
+  /**
+   * @deprecated
+   */
   function getProjectIndexById(id: Maybe<ReactiveProject['id']>) {
     const index = projects.findIndex((it) => it.id === id)
 
@@ -101,11 +110,17 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     return index
   }
 
+  /**
+   * @deprecated
+   */
   function getProjectById(id: Maybe<ReactiveProject['id']>) {
     const index = getProjectIndexById(id)
     return takeIf(index, isNotNull, projects[index!])
   }
 
+  /**
+   * @deprecated
+   */
   function getActivityIndexById(id: Maybe<ReactiveActivity['id']>) {
     const index = activities.findIndex((it) => it.id === id)
 
@@ -116,11 +131,17 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     return index
   }
 
+  /**
+   * @deprecated
+   */
   function getActivityById(id: Maybe<ReactiveActivity['id']>) {
     const index = getActivityIndexById(id)
     return takeIf(index, isNotNull, activities[index!])
   }
 
+  /**
+   * @deprecated
+   */
   function addProject(project: Maybe<ReactiveProject>) {
     if (isNotDefined(project)) {
       return
@@ -137,10 +158,16 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     projects.push(project)
   }
 
+  /**
+   * @deprecated
+   */
   function addProjects(projects: ReactiveProject[]) {
     projects.forEach((it) => addProject(it))
   }
 
+  /**
+   * @deprecated
+   */
   function addActivity(activity: Maybe<ReactiveActivity>) {
     if(isNotDefined(activity)) {
       return
@@ -161,10 +188,16 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     }
   }
 
+  /**
+   * @deprecated
+   */
   function addActivities(activities: ReactiveActivity[]) {
     activities.forEach((it) => addActivity(it))
   }
 
+  /**
+   * @deprecated
+   */
   function removeActivity(activity:  Maybe<ReactiveActivity>) {
     if (isNotDefined(activity)) {
       return
@@ -205,6 +238,9 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     activities.splice(index, 1)
   }
 
+  /**
+   * @deprecated
+   */
   function removeProject(project: Maybe<ReactiveProject>) {
     if (isNotDefined(project)) {
       return
@@ -243,6 +279,9 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     projects.splice(index, 1)
   }
 
+  /**
+   * @deprecated
+   */
   function unlink(project: Maybe<ReactiveProject>, activity: Maybe<ReactiveActivity>) {
     if (isNotDefined(project) || isNotDefined(activity)) {
       return
@@ -258,6 +297,9 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     activity.parentProject = null
   }
 
+  /**
+   * @deprecated
+   */
   function link(project: Maybe<ReactiveProject>, activity: Maybe<ReactiveActivity>) {
     if (isNotDefined(project) || isNotDefined(activity)) {
       return
@@ -283,6 +325,30 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     })
   }
 
+  function unsafeAddProject(project: ReactiveProject) {
+    projects.push(project)
+  }
+
+  function unsafeAddActivity(activity: ReactiveActivity) {
+    activities.push(activity)
+  }
+
+  function unsafeRemoveProject(project: ReactiveProject) {
+    const index = projects.indexOf(project)
+
+    check(index !== -1, `Failed to remove project "${project.id}": Project does not exist in store.`)
+
+    projects.splice(index, 1)
+  }
+
+  function unsafeRemoveActivity(activity: ReactiveActivity) {
+    const index = activities.indexOf(activity)
+
+    check(index !== -1, `Failed to remove activity "${activity.id}": Activity does not exist in store.`)
+
+    activities.splice(index, 1)
+  }
+
   return {
     isInitialized: readonly(isInitialized),
     projects,
@@ -295,5 +361,9 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     removeProject,
     removeActivity,
     link,
+    unsafeAddProject,
+    unsafeAddActivity,
+    unsafeRemoveProject,
+    unsafeRemoveActivity,
   }
 })

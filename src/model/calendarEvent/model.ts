@@ -1,20 +1,22 @@
 import {computed, reactive} from "vue";
 import {v4 as uuid} from "uuid";
-import {isNotNull, isNull, runIf} from "@/lib/utils";
+import {isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
 import {dateTimeZero, durationBetween, durationZero, isAfter, isBefore} from "@/lib/neoTime";
 import {createEventShadow} from "@/model/eventShadow/model";
 import type {CalendarEventContext, CalendarEventInit, ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import {serializeEvent} from "@/model/calendarEvent/serializer";
 import {mapReadonly, mapWritable} from "@/model/modelHelpers";
+import type {ReactiveCalendarDay} from "@/model/calendarDay/types";
 
 export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
   const ctx = reactive<CalendarEventContext>({
     id: init.id ?? uuid(),
+    day: init.day ?? null,
+    project: init.project ?? null,
+    activity: init.activity ?? null,
     note: init.note ?? '',
     startAt: init.startAt ?? dateTimeZero(),
     endAt: init.endAt ?? null,
-    project: init.project ?? null,
-    activity: init.activity ?? null,
   })
 
   const startAt = computed<CalendarEventContext['startAt']>({
@@ -60,6 +62,10 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
   const hasStarted = computed(() => isNotNull(ctx.startAt))
   const hasEnded = computed(() => isNotNull(ctx.endAt))
 
+  function unsafeSetDay(day: Nullable<ReactiveCalendarDay>) {
+    ctx.day = day
+  }
+
   function createShadow() {
     if (isNull(ctx.project)) {
       throw Error('Tried to create a shadow of an event without a project.')
@@ -76,7 +82,10 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
   }
 
   return reactive({
-    ...mapReadonly(ctx, ['id']),
+    ...mapReadonly(ctx, [
+      'id',
+      'day',
+    ]),
     ...mapWritable(ctx, [
       'note',
       'project',
@@ -108,6 +117,7 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
     duration,
     hasStarted,
     hasEnded,
+    unsafeSetDay,
     createShadow,
     toSerialized,
   })

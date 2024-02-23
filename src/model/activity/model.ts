@@ -1,9 +1,11 @@
 import {reactive} from "vue";
 import {v4 as uuid} from "uuid";
-import type {ActivityInit, ReactiveActivity, ActivityContext} from "@/model/activity/types";
+import type {ActivityContext, ActivityInit, ReactiveActivity} from "@/model/activity/types";
 import {serializeActivity} from "@/model/activity/serializer";
 import {now} from "@/lib/neoTime";
 import {mapReadonly, mapWritable} from "@/model/modelHelpers";
+import type {ReactiveProject} from "@/model/project/types";
+import type {Nullable} from "@/lib/utils";
 
 export function createActivity(init: ActivityInit): ReactiveActivity {
   const ctx = reactive<ActivityContext>({
@@ -13,6 +15,10 @@ export function createActivity(init: ActivityInit): ReactiveActivity {
     parentProject: init.parentProject ?? null,
     lastUsed: init.lastUsed ?? now(),
   })
+
+  function unsafeSetParentProject(parentProject: Nullable<ReactiveProject>) {
+    ctx.parentProject = parentProject
+  }
 
   function lastUsedNow() {
     ctx.lastUsed = now()
@@ -25,13 +31,14 @@ export function createActivity(init: ActivityInit): ReactiveActivity {
   return reactive({
     ...mapReadonly(ctx, [
       'id',
+      'parentProject',
       'lastUsed',
     ]),
     ...mapWritable(ctx, [
-      'parentProject',
       'displayName',
       'color',
     ]),
+    unsafeSetParentProject,
     lastUsedNow,
     toSerialized,
   })

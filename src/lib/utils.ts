@@ -1,6 +1,6 @@
 import type {ClassValue} from "clsx";
-import {twMerge} from "tailwind-merge";
 import {clsx} from "clsx";
+import {twMerge} from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -66,4 +66,17 @@ export function round(value: number, precision: number = 0): number {
 
 export function fillZero(value: number, length: number = 2): string {
   return value.toString().padStart(length, '0')
+}
+
+export class IllegalStateError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'IllegalStateError'
+  }
+}
+
+export function check(predicate: boolean, message: string) {
+  if (!predicate) {
+    throw new IllegalStateError(message)
+  }
 }

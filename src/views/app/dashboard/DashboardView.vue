@@ -13,35 +13,44 @@ import {useCalendarStore} from "@/stores/calendarStore";
 import type {ID} from "@/lib/types";
 import ControlsHeader from "@/components/dashboard/layout/ControlsHeader.vue";
 import DebugDialog from "@/components/common/DebugDialog.vue";
-import {isNotNull} from "@/lib/utils";
+import {isNotNull, isNull} from "@/lib/utils";
+import {useActiveEventService} from "@/services/activeEventService";
+import {useCalendarService} from "@/services/calendarService";
+import {useActiveDayService} from "@/services/activeDayService";
 
 const remindersStore = useRemindersStore()
 const calendarStore = useCalendarStore()
 
+const calendarService = useCalendarService()
+const activeDayService = useActiveDayService()
+const activeEventService = useActiveEventService()
+
 const activeEventHasNoProject = computed(() => {
-  return calendarStore.activeDay.currentEvent?.project === null
+  return isNull(activeEventService.event?.project)
 })
 
 function handleStartEvent(shadow?: ReactiveCalendarEventShadow) {
-  calendarStore.activeDay.startEvent(shadow)
+  activeEventService.startEvent(shadow)
 }
 function handleStopEvent() {
-  calendarStore.activeDay.stopEvent()
+  activeEventService.stopEvent()
 }
 function handleRemoveEvent(event: ReactiveCalendarEvent) {
-  calendarStore.activeDay.day?.removeEvent(event)
+  // calendarStore.activeDay.day?.removeEvent(event)
 }
 function handleEventSelected(id: ID) {
-  calendarStore.activeDay.selectEventById(id)
+  // calendarStore.activeDay.selectEventById(id)
 }
 function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
-  if (activeEventHasNoProject.value && isNotNull(calendarStore.activeDay.currentEvent)) {
-    calendarStore.activeDay.currentEvent.project = shadow.project
-    calendarStore.activeDay.currentEvent.activity = shadow.activity
-    return
+  if (
+      activeEventHasNoProject.value &&
+      isNotNull(activeEventService.event)
+  ) {
+    activeEventService.event.project = shadow.project
+    activeEventService.event.activity = shadow.activity
+  } else {
+    activeEventService.startEvent(shadow)
   }
-
-  calendarStore.activeDay.startEvent(shadow)
 }
 </script>
 
@@ -51,7 +60,7 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
       <ControlsHeader />
       <div class="flex-1 overflow-y-auto">
         <CurrentEventCard
-          :event="calendarStore.activeDay.currentEvent"
+          :event="activeEventService.event"
           @start-event="handleStartEvent"
           @stop-event="handleStopEvent"
         />

@@ -6,6 +6,7 @@ import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import type {CalendarDayContext, CalendarDayInit, ReactiveCalendarDay} from "@/model/calendarDay/types";
 import {mapReadonly} from "@/model/modelHelpers";
 import {dateZero} from "@/lib/neoTime";
+import {check} from "@/lib/utils";
 
 export function createDay(init: CalendarDayInit): ReactiveCalendarDay {
   const ctx = reactive<CalendarDayContext>({
@@ -16,15 +17,16 @@ export function createDay(init: CalendarDayInit): ReactiveCalendarDay {
 
   const startAt = computed(() => firstOf(ctx.events)?.startAt ?? null)
 
-  function addEvent(event: ReactiveCalendarEvent) {
+  function unsafeAddEvent(event: ReactiveCalendarEvent) {
     ctx.events.push(event)
   }
 
-  function removeEvent(event: ReactiveCalendarEvent) {
-    const index = ctx.events.findIndex((it) => it.id === event.id)
-    if (index >= 0) {
-      ctx.events.splice(index, 1)
-    }
+  function unsafeRemoveEvent(event: ReactiveCalendarEvent) {
+    const index = ctx.events.indexOf(event)
+
+    check(index !== -1, `Failed to remove event "${event.id}": Event does not exist in day "${ctx.id}".`)
+
+    ctx.events.splice(index, 1)
   }
 
   function toSerialized() {
@@ -38,8 +40,8 @@ export function createDay(init: CalendarDayInit): ReactiveCalendarDay {
       'events'
     ]),
     startAt,
-    addEvent,
-    removeEvent,
+    unsafeAddEvent,
+    unsafeRemoveEvent,
     toSerialized,
   })
 }

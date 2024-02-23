@@ -12,7 +12,14 @@ export interface ProjectContext extends HasId {
   lastUsed: Temporal.PlainDateTime
 }
 
-export interface ReactiveProject extends ProjectContext {
+export interface ReactiveProject {
+  id: Readonly<ProjectContext['id']>
+  childActivities: ReadonlyArray<ReactiveActivity>
+  lastUsed: Readonly<ProjectContext['lastUsed']>
+  displayName: ProjectContext['displayName']
+  color: ProjectContext['color']
+  unsafeAddChildActivity: (activity: ReactiveActivity) => void
+  unsafeRemoveChildActivity: (activity: ReactiveActivity) => void
   lastUsedNow: () => void
   toSerialized: () => SerializedProject
 }

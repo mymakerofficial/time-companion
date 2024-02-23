@@ -88,7 +88,7 @@ export function useActiveDay(days: ReactiveCalendarDay[]): ReactiveActiveDay {
       startAt: now(),
     })
 
-    activeDay.value.addEvent(event)
+    activeDay.value.unsafeAddEvent(event)
     state.currentEventId = event.id
   }
 
