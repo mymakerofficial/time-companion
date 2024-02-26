@@ -18,13 +18,13 @@ export interface DayTimeReport {
 }
 
 export type EventDurationCalculator = (event: ReactiveCalendarEvent) => Temporal.Duration
-export type ProjectDurationCalculator = (project: ReactiveProject, events: ReactiveCalendarEvent[], eventDurationCalculator: EventDurationCalculator) => Temporal.Duration
+export type ProjectDurationCalculator = (project: ReactiveProject, events: ReadonlyArray<ReactiveCalendarEvent>, eventDurationCalculator: EventDurationCalculator) => Temporal.Duration
 
 function calculateEventDurationExact(event: ReactiveCalendarEvent): Temporal.Duration {
   return durationBetween(event.startAt ?? dateTimeZero(), event.endAt ?? now())
 }
 
-function calculateProjectDurationExact(project: ReactiveProject, events: ReactiveCalendarEvent[], eventDurationCalculator: EventDurationCalculator): Temporal.Duration {
+function calculateProjectDurationExact(project: ReactiveProject, events: ReadonlyArray<ReactiveCalendarEvent>, eventDurationCalculator: EventDurationCalculator): Temporal.Duration {
   return sumOfDurations(
     events
       .filter((event) => event.project?.id === project.id)
@@ -45,7 +45,7 @@ export interface TimeReportOptions {
   projectDurationCalculator?: ProjectDurationCalculator
 }
 
-export function calculateTimeReport(day: ReactiveCalendarDay, projects: ReactiveProject[], options: TimeReportOptions = {}): DayTimeReport {
+export function calculateTimeReport(day: ReactiveCalendarDay, projects: ReadonlyArray<ReactiveProject>, options: TimeReportOptions = {}): DayTimeReport {
   const {
     eventDurationCalculator = calculateEventDurationExact,
     projectDurationCalculator = calculateProjectDurationExact,

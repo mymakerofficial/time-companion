@@ -1,5 +1,5 @@
 import {useProjectsStore} from "@/stores/projectsStore";
-import {reactive, ref} from "vue";
+import {reactive} from "vue";
 import type {ReactiveProject} from "@/model/project/types";
 import type {ReactiveActivity} from "@/model/activity/types";
 import {check, isNotNull} from "@/lib/utils";

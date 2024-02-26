@@ -1,4 +1,3 @@
-import {useProjectsStore} from "@/stores/projectsStore";
 import type {ReactiveProject} from "@/model/project/types";
 import type {ReactiveActivity} from "@/model/activity/types";
 import {type  MaybeRefOrGetter, ref, toValue, watchEffect} from "vue";
@@ -7,6 +6,7 @@ import {createEventShadow} from "@/model/eventShadow/model";
 import type {Nullable} from "@/lib/utils";
 import {isNull} from "@/lib/utils";
 import {isAfter} from "@/lib/neoTime";
+import {useProjectsService} from "@/services/projectsService";
 
 function byLastUsed(a: ReactiveProject | ReactiveActivity, b: ReactiveProject | ReactiveActivity) {
   return isAfter(a.lastUsed, b.lastUsed) ? -1 : 1
@@ -22,7 +22,7 @@ export interface UseQuickAccessOptions {
 }
 
 export function useQuickAccess(options?: MaybeRefOrGetter<UseQuickAccessOptions>) {
-  const { projects } = useProjectsStore()
+  const { projects } = useProjectsService()
 
   const shadows = ref<ReactiveCalendarEventShadow[]>([])
 
@@ -38,7 +38,7 @@ export function useQuickAccess(options?: MaybeRefOrGetter<UseQuickAccessOptions>
       .filter((project) => isNull(projectFilter) || project === projectFilter)
       .flatMap((project) => {
         return [
-          ...project.childActivities.sort(byLastUsed).map((activity) => createEventShadow({ project, activity })).slice(0, maxActivitiesPerProject),
+          ...[...project.childActivities].sort(byLastUsed).map((activity) => createEventShadow({ project, activity })).slice(0, maxActivitiesPerProject),
           createEventShadow({ project })
         ]
       })

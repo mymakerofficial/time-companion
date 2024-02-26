@@ -1,5 +1,4 @@
 <script setup lang="tsx">
-import {useProjectsStore} from "@/stores/projectsStore";
 import SettingsHeader from "@/components/settings/layout/SettingsHeader.vue";
 import ProjectsTable from "@/components/settings/projects/table/ProjectsTable.vue";
 import {Button} from "@/components/ui/button";
@@ -8,8 +7,9 @@ import NewProjectDialog from "@/components/settings/projects/projectDialog/NewPr
 import NewActivityDialog from "@/components/settings/projects/activityDialog/NewActivityDialog.vue";
 import {useDialogStore} from "@/stores/dialogStore";
 import {PlusCircle} from "lucide-vue-next"
+import {useProjectsService} from "@/services/projectsService";
 
-const projectsStore = useProjectsStore()
+const projectsService = useProjectsService()
 const dialogStore = useDialogStore()
 
 function openNewProjectDialog() {
@@ -37,6 +37,6 @@ function openNewActivityDialog() {
         <span>{{ $t('settings.projects.controls.createProject') }}</span>
       </Button>
     </TableActions>
-    <ProjectsTable :projects="projectsStore.projects" />
+    <ProjectsTable :projects="projectsService.projects" />
   </div>
 </template>

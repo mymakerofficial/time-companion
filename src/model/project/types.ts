@@ -17,6 +17,7 @@ export interface ReactiveProject {
   childActivities: ReadonlyArray<ReactiveActivity>
   lastUsed: Readonly<ProjectContext['lastUsed']>
   displayName: ProjectContext['displayName']
+  isBillable: ProjectContext['isBillable']
   color: ProjectContext['color']
   unsafeAddChildActivity: (activity: ReactiveActivity) => void
   unsafeRemoveChildActivity: (activity: ReactiveActivity) => void

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import BaseDialog from "@/components/common/dialog/BaseDialog.vue";
 import {isNull, type Nullable} from "@/lib/utils";
-import {useProjectsStore} from "@/stores/projectsStore";
 import {reactive, ref} from "vue";
 import {Button} from "@/components/ui/button";
 import {useReferenceById} from "@/composables/useReferenceById";
 import ActivityForm from "@/components/settings/projects/activityDialog/ActivityForm.vue";
 import {createActivityForm, patchActivityWithForm} from "@/components/settings/projects/activityDialog/helpers";
+import {useProjectsService} from "@/services/projectsService";
 
 const props = defineProps<{
   id: Nullable<string>
@@ -22,8 +22,9 @@ function close() {
   emit('close')
 }
 
-const projectsStore = useProjectsStore()
-const activity = useReferenceById(projectsStore.activities, () => props.id)
+const projectsService = useProjectsService()
+// TODO readonly is not assignable
+const activity = useReferenceById(projectsService.activities, () => props.id)
 
 const form = reactive(createActivityForm(activity.value))
 
@@ -32,7 +33,7 @@ function handleRemove() {
     return
   }
 
-  projectsStore.removeActivity(activity.value)
+  projectsService.removeActivity(activity.value)
 
   close()
 }

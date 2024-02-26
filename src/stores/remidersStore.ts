@@ -4,7 +4,6 @@ import type {ReactiveCalendarReminder, SerializedCalendarReminder} from "@/model
 import {useLocalStorage} from "@/composables/useLocalStorage";
 import {fromSerializedReminder} from "@/model/calendarReminder/serializer";
 import {createReminder} from "@/model/calendarReminder/model";
-import {useProjectsStore} from "@/stores/projectsStore";
 import {useNotifyError} from "@/composables/useNotifyError";
 import {migrateSerializedReminder} from "@/model/calendarReminder/migrations";
 import {useProjectsService} from "@/services/projectsService";

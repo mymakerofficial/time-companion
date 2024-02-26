@@ -12,7 +12,6 @@ import {useRemindersStore} from "@/stores/remidersStore";
 import {useCalendarStore} from "@/stores/calendarStore";
 import type {ID} from "@/lib/types";
 import ControlsHeader from "@/components/dashboard/layout/ControlsHeader.vue";
-import DebugDialog from "@/components/common/DebugDialog.vue";
 import {isNotNull, isNull} from "@/lib/utils";
 import {useActiveEventService} from "@/services/activeEventService";
 import {useCalendarService} from "@/services/calendarService";
@@ -77,7 +76,6 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
           :icon-pencil="activeEventHasNoProject"
           @start="handleQuickStart"
         />
-        <DebugDialog />
       </div>
     </section>
     <section class="col-span-5 flex flex-col h-screen">

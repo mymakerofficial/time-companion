@@ -1,7 +1,6 @@
 import {defineStore} from "pinia";
 import type {ReactiveCalendarDay, SerializedCalendarDay} from "@/model/calendarDay/types";
 import {reactive, readonly, type Ref, ref, watch} from "vue";
-import {useProjectsStore} from "@/stores/projectsStore";
 import {createDay} from "@/model/calendarDay/model";
 import {useLocalStorage} from "@/composables/useLocalStorage";
 import {type ReactiveActiveDay, useActiveDay} from "@/composables/useActiveDay";

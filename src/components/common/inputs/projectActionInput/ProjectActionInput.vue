@@ -16,7 +16,7 @@ import type {ReactiveActivity} from "@/model/activity/types";
 import {createActivity} from "@/model/activity/model";
 import {projectActionInputBadgeVariants} from "@/components/common/inputs/projectActionInput/variants";
 import type {BadgeVariants} from "@/components/ui/badge";
-import {useProjectsStore} from "@/stores/projectsStore";
+import {useProjectsService} from "@/services/projectsService";
 
 const projectModel = defineModel<Nullable<ReactiveProject>>('project', { required: false, default: null })
 const activityModel = defineModel<Nullable<ReactiveActivity>>('activity', { required: false, default: null })
@@ -37,7 +37,7 @@ defineOptions({
   inheritAttrs: false
 })
 
-const projectsStore = useProjectsStore()
+const projectsService = useProjectsService()
 
 const searchTerm = ref('')
 
@@ -131,7 +131,7 @@ function createProjectFromTerm() {
     randomColor: true
   })
 
-  projectsStore.addProject(project)
+  projectsService.addProject(project)
 
   return project
 }
@@ -155,7 +155,7 @@ function createActivityFromTerm(project: Nullable<ReactiveProject>) {
     parentProject: project
   })
 
-  projectsStore.addActivity(activity)
+  projectsService.addActivity(activity)
 
   return activity
 }

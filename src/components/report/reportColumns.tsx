@@ -1,11 +1,11 @@
 import {getSortableHeader} from "@/helpers/table/tableHelpers";
 import {createColumnHelper, type Row} from "@tanstack/vue-table";
 import type {DayTimeReport} from "@/lib/timeReport/calculateTimeReport";
-import {useProjectsStore} from "@/stores/projectsStore";
 import {useI18n} from "vue-i18n";
 import type {ReactiveProject} from "@/model/project/types";
 import {Minus} from "lucide-vue-next";
 import {durationZero, formatDate, formatDuration, isZeroDuration, withFormat} from "@/lib/neoTime";
+import {useProjectsService} from "@/services/projectsService";
 
 function getDateCell(value: DayTimeReport['date']) {
   // TODO i18n
@@ -45,7 +45,7 @@ const columnHelper = createColumnHelper<DayTimeReport>()
 
 export function createReportColumns() {
   const { t } = useI18n()
-  const projectsStore = useProjectsStore()
+  const projectsService = useProjectsService()
 
   return [
     columnHelper.accessor('date', {
@@ -56,7 +56,7 @@ export function createReportColumns() {
         className: 'border-r font-medium',
       },
     }),
-    ...projectsStore.projects.map((project) => columnHelper.display({
+    ...projectsService.projects.map((project) => columnHelper.display({
       id: project.id,
       header: () => project.displayName,
       cell: ({ row }) => getProjectCell(row, project),

@@ -1,5 +1,4 @@
 <script setup lang="tsx">
-import {useProjectsStore} from "@/stores/projectsStore";
 import {ref} from "vue";
 import ResponsiveContainer from "@/components/common/layout/ResponsiveContainer.vue";
 import TableActions from "@/components/common/table/TableActions.vue";
@@ -20,9 +19,10 @@ import NewProjectDialog from "@/components/settings/projects/projectDialog/NewPr
 import {isNull} from "@/lib/utils";
 import {createReportColumns} from "@/components/report/reportColumns";
 import {daysInMonth, formatDate, today, withFormat} from "@/lib/neoTime";
+import {useProjectsService} from "@/services/projectsService";
 
 const calendarStore = useCalendarStore()
-const projectsStore = useProjectsStore()
+const projectsService = useProjectsService()
 
 const monthLabel = formatDate(today(), withFormat('MMMM'))
 const yearLabel = formatDate(today(), withFormat('YYYY'))
@@ -38,7 +38,7 @@ const data = dates.map((date) => {
     })
   }
 
-  return calculateTimeReport(day, projectsStore.projects)
+  return calculateTimeReport(day, projectsService.projects)
 })
 
 const columns = createReportColumns()
@@ -59,7 +59,7 @@ const tableOptions: Partial<TableOptions<DayTimeReport>> = {
 
 <template>
   <ResponsiveContainer class="my-16">
-    <template v-if="isNotEmpty(projectsStore.projects)">
+    <template v-if="isNotEmpty(projectsService.projects)">
       <Table :data="data" :columns="columns" :options="tableOptions" class="[&_tbody_>_tr:nth-child(odd)]:bg-muted/20 [&_tbody_>_tr:nth-child(odd):hover]:bg-muted/60">
         <template #actions="{ table }">
           <TableActions>

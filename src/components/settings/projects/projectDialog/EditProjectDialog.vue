@@ -1,17 +1,12 @@
 <script setup lang="ts">
 import BaseDialog from "@/components/common/dialog/BaseDialog.vue";
 import {isNull, type Nullable} from "@/lib/utils";
-import {useProjectsStore} from "@/stores/projectsStore";
-import {reactive, ref, watch} from "vue";
-import {Input} from "@/components/ui/input";
+import {reactive, ref} from "vue";
 import {Button} from "@/components/ui/button";
 import {useReferenceById} from "@/composables/useReferenceById";
-import ColorSelect from "@/components/common/inputs/colorSelect/ColorSelect.vue";
-import {whenever} from "@vueuse/core";
-import Switch from "@/components/ui/switch/Switch.vue";
-import Label from "@/components/ui/label/Label.vue";
 import ProjectForm from "@/components/settings/projects/projectDialog/ProjectForm.vue";
 import {createProjectForm, patchProjectWithForm} from "@/components/settings/projects/projectDialog/helpers";
+import {useProjectsService} from "@/services/projectsService";
 
 const props = defineProps<{
   id: Nullable<string>
@@ -27,8 +22,9 @@ function close() {
   emit('close')
 }
 
-const projectsStore = useProjectsStore()
-const project = useReferenceById(projectsStore.projects, () => props.id)
+const projectsService = useProjectsService()
+// TODO readonly is not assignable
+const project = useReferenceById(projectsService.projects, () => props.id)
 
 const form = reactive(createProjectForm(project.value))
 
@@ -37,7 +33,7 @@ function handleRemove() {
     return
   }
 
-  projectsStore.removeProject(project.value)
+  projectsService.removeProject(project.value)
 
   close()
 }

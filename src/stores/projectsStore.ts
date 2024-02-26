@@ -14,25 +14,8 @@ import {migrateSerializedProject} from "@/model/project/migrations";
 import {migrateSerializedActivity} from "@/model/activity/migrations";
 
 export interface ProjectsStore {
-  isInitialized: Readonly<Ref<boolean>>
   projects: ReactiveProject[]
   activities: ReactiveActivity[]
-  init: () => void
-  getProjectById: (id: Maybe<ReactiveProject['id']>) => Nullable<ReactiveProject>
-  getActivityById: (id: Maybe<ReactiveActivity['id']>) => Nullable<ReactiveActivity>
-  addProject: (project: Maybe<ReactiveProject>) => void
-  addActivity: (activity: Maybe<ReactiveActivity>) => void
-  /**
-   * Removes a project and all its child activities from the store. Also removes the project and child activities from all events in calendarStore.
-   */
-  removeProject: (project: Maybe<ReactiveProject>) => void
-  /**
-   * Removes an activity from the store and removes the activity from all events in calendarStore.
-   */
-  removeActivity: (activity: Maybe<ReactiveActivity>) => void
-  link: (project: Maybe<ReactiveProject>, activity: Maybe<ReactiveActivity>) => void
-
-
   getSerializedStorage: () => ProjectsStorageSerialized
   unsafeAddProject: (project: ReactiveProject) => void
   unsafeAddActivity: (activity: ReactiveActivity) => void
@@ -47,19 +30,12 @@ interface ProjectsStorageSerialized {
 }
 
 export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
-  const calendarStore = useCalendarStore()
   const storage = useLocalStorage<ProjectsStorageSerialized>('time-companion-projects-store', { version: 0, projects: [], activities: [] })
-
-  const isInitialized = ref(true)
 
   const projects = reactive<ReactiveProject[]>([])
   const activities = reactive<ReactiveActivity[]>([])
 
   function commit() {
-    if (!isInitialized.value) {
-      throw new Error('Tried to commit projects store before it was initialized')
-    }
-
     storage.set({
       version: 1,
       projects: projects.map((it) => it.toSerialized()),
@@ -67,235 +43,7 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     })
   }
 
-  watch([() => projects, () => activities], commit, {deep: true})
-
-  /**
-   * @deprecated
-   */
-  function getProjectIndexById(id: Maybe<ReactiveProject['id']>) {
-    const index = projects.findIndex((it) => it.id === id)
-
-    if (index === -1) {
-      return null
-    }
-
-    return index
-  }
-
-  /**
-   * @deprecated
-   */
-  function getProjectById(id: Maybe<ReactiveProject['id']>) {
-    const index = getProjectIndexById(id)
-    return takeIf(index, isNotNull, projects[index!])
-  }
-
-  /**
-   * @deprecated
-   */
-  function getActivityIndexById(id: Maybe<ReactiveActivity['id']>) {
-    const index = activities.findIndex((it) => it.id === id)
-
-    if (index === -1) {
-      return null
-    }
-
-    return index
-  }
-
-  /**
-   * @deprecated
-   */
-  function getActivityById(id: Maybe<ReactiveActivity['id']>) {
-    const index = getActivityIndexById(id)
-    return takeIf(index, isNotNull, activities[index!])
-  }
-
-  /**
-   * @deprecated
-   */
-  function addProject(project: Maybe<ReactiveProject>) {
-    if (isNotDefined(project)) {
-      return
-    }
-
-    if (isNotNull(getProjectById(project.id))) {
-      throw new Error(`Activity with id ${project.id} already exists`)
-    }
-
-    if (projects.some((it) => it.displayName === project.displayName)) {
-      throw new Error(`Project with displayName ${project.displayName} already exists`)
-    }
-
-    projects.push(project)
-  }
-
-  /**
-   * @deprecated
-   */
-  function addProjects(projects: ReactiveProject[]) {
-    projects.forEach((it) => addProject(it))
-  }
-
-  /**
-   * @deprecated
-   */
-  function addActivity(activity: Maybe<ReactiveActivity>) {
-    if(isNotDefined(activity)) {
-      return
-    }
-
-    if (isNotNull(getActivityById(activity.id))) {
-      throw new Error(`Activity with id ${activity.id} already exists`)
-    }
-
-    if (activities.some((it) => it.displayName === activity.displayName && it.parentProject?.id === activity.parentProject?.id)) {
-      throw new Error(`Activity with displayName ${activity.displayName} and same parentProject already exists`)
-    }
-
-    activities.push(activity)
-
-    if (activity.parentProject) {
-      link(activity.parentProject, activity)
-    }
-  }
-
-  /**
-   * @deprecated
-   */
-  function addActivities(activities: ReactiveActivity[]) {
-    activities.forEach((it) => addActivity(it))
-  }
-
-  /**
-   * @deprecated
-   */
-  function removeActivity(activity:  Maybe<ReactiveActivity>) {
-    if (isNotDefined(activity)) {
-      return
-    }
-
-    if (!calendarStore.isInitialized) {
-      throw new Error('Tried to remove activity before calendarStore was initialized. This should not happen.')
-    }
-
-    if (!isInitialized.value) {
-      throw new Error('Tried to remove activity before projectsStore was initialized. This should not happen.')
-    }
-
-    if (isNull(getActivityById(activity.id))) {
-      throw new Error(`Activity with id ${activity.id} does not exist in projectsStore`)
-    }
-
-    if (isNotNull(activity.parentProject)) {
-      unlink(activity.parentProject, activity)
-    }
-
-    // remove activities from events
-
-    calendarStore.forEachEvent((event) => {
-      if (event.activity?.id === activity.id) {
-        event.activity = null
-      }
-    })
-
-    // remove activity from list
-
-    const index = getActivityIndexById(activity.id)
-
-    if (isNull(index)) {
-      throw new Error(`Something went wrong while removing activity ${activity.id} from projectsStore`)
-    }
-
-    activities.splice(index, 1)
-  }
-
-  /**
-   * @deprecated
-   */
-  function removeProject(project: Maybe<ReactiveProject>) {
-    if (isNotDefined(project)) {
-      return
-    }
-
-    if (!calendarStore.isInitialized) {
-      throw new Error('Tried to remove project before calendarStore was initialized. This should not happen.')
-    }
-
-    if (!isInitialized.value) {
-      throw new Error('Tried to remove project before projectsStore was initialized. This should not happen.')
-    }
-
-    if (!projects.some((it) => it.id === project.id)) {
-      throw new Error(`Project with id ${project.id} does not exist in projectsStore`)
-    }
-
-    project.childActivities.forEach((it) => removeActivity(it))
-
-    // remove project from events
-
-    calendarStore.forEachEvent((event) => {
-      if (event.project?.id === project.id) {
-        event.project = null
-      }
-    })
-
-    // remove project from list
-
-    const index = getProjectIndexById(project.id)
-
-    if (isNull(index)) {
-      throw new Error(`Something went wrong while removing project ${project.id} from projectsStore`)
-    }
-
-    projects.splice(index, 1)
-  }
-
-  /**
-   * @deprecated
-   */
-  function unlink(project: Maybe<ReactiveProject>, activity: Maybe<ReactiveActivity>) {
-    if (isNotDefined(project) || isNotDefined(activity)) {
-      return
-    }
-
-    const index = project.childActivities.findIndex((it) => it.id === activity.id)
-
-    if (index === -1) {
-      throw new Error(`Activity with id ${activity.id} does not exist in project ${project.id}`)
-    }
-
-    project.childActivities.splice(index, 1)
-    activity.parentProject = null
-  }
-
-  /**
-   * @deprecated
-   */
-  function link(project: Maybe<ReactiveProject>, activity: Maybe<ReactiveActivity>) {
-    if (isNotDefined(project) || isNotDefined(activity)) {
-      return
-    }
-
-    if (project.childActivities.some((it) => it.id === activity.id)) {
-      throw new Error(`Activity with id ${activity.id} already exists in project ${project.id}`)
-    }
-
-    if (isNotNull(activity.parentProject) && activity.parentProject.id !== project.id) {
-      unlink(activity.parentProject, activity)
-    }
-
-    project.childActivities.push(activity)
-    activity.parentProject = project
-
-    // change project of all events with this activity
-
-    calendarStore.forEachEvent((event) => {
-      if (event.activity?.id === activity.id) {
-        event.project = project
-      }
-    })
-  }
+  watch([projects, activities], commit, {deep: true})
 
   function getSerializedStorage() {
     return storage.get();
@@ -326,16 +74,8 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
   }
 
   return {
-    isInitialized: readonly(isInitialized),
     projects,
     activities,
-    getProjectById,
-    getActivityById,
-    addProject,
-    addActivity,
-    removeProject,
-    removeActivity,
-    link,
     getSerializedStorage,
     unsafeAddProject,
     unsafeAddActivity,
