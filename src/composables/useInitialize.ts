@@ -1,9 +1,9 @@
 import type {Ref} from "vue";
-import {ref} from "vue";
+import {readonly, ref} from "vue";
 
 export interface UseInitializeReturn {
   init: () => void,
-  isInitialized: Ref<boolean>
+  isInitialized: Readonly<Ref<boolean>>
 }
 
 export function useInitialize(initializer: () => void): UseInitializeReturn {
@@ -21,6 +21,6 @@ export function useInitialize(initializer: () => void): UseInitializeReturn {
 
   return {
     init,
-    isInitialized
+    isInitialized: readonly(isInitialized)
   }
 }
