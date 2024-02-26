@@ -1,7 +1,6 @@
-import {useCalendarStore} from "@/stores/calendarStore";
 import {computed, reactive} from "vue";
 import {v4 as uuid} from "uuid";
-import {isNotNull, isNull} from "@/lib/utils";
+import {isNotNull} from "@/lib/utils";
 import {mapReadonly, mapWritable} from "@/model/modelHelpers";
 import type {
   CalendarReminderContext,
@@ -13,9 +12,10 @@ import {
 } from "@/model/calendarReminder/types";
 import {serializeReminder} from "@/model/calendarReminder/serializer";
 import {minutes, timeNow} from "@/lib/neoTime";
+import {useActiveEventService} from "@/services/activeEventService";
 
 export function createReminder(init: CalendarReminderInit): ReactiveCalendarReminder {
-  const calendarStore = useCalendarStore()
+  const activeEventService = useActiveEventService()
 
   const ctx = reactive<CalendarReminderContext>({
     id: init.id ?? uuid(),
@@ -65,7 +65,7 @@ export function createReminder(init: CalendarReminderInit): ReactiveCalendarRemi
     }
 
     if (ctx.actionType === ReminderActionType.STOP_CURRENT_EVENT) {
-      calendarStore.activeDay.stopEvent()
+      activeEventService.stopEvent()
       return
     }
 
@@ -73,20 +73,14 @@ export function createReminder(init: CalendarReminderInit): ReactiveCalendarRemi
       ctx.actionType === ReminderActionType.START_EVENT &&
       isNotNull(ctx.actionTargetShadow)
     ) {
-      calendarStore.activeDay.startEvent(ctx.actionTargetShadow)
+      activeEventService.startEvent(ctx.actionTargetShadow)
       return
     }
 
     if (
       ctx.actionType === ReminderActionType.CONTINUE_PREVIOUS_EVENT
     ) {
-      const shadow = calendarStore.activeDay.selectedEvent?.createShadow()
-
-      if (isNull(shadow)) {
-        return
-      }
-
-      calendarStore.activeDay.startEvent(shadow)
+      // TODO implement CONTINUE_PREVIOUS_EVENT
       return
     }
   }

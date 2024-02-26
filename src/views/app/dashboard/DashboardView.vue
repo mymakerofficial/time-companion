@@ -3,24 +3,19 @@ import CalendarView from "@/components/common/calendar/CalendarView.vue";
 import CalendarHeader from "@/components/dashboard/layout/CalendarHeader.vue";
 import {computed} from "vue";
 import CurrentEventCard from "@/components/dashboard/cards/CurrentEventCard.vue";
-import EditEventCard from "@/components/dashboard/cards/EditEventCard.vue";
 import RemindersContainer from "@/components/dashboard/cards/RemindersContainer.vue";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
 import QuickStartCard from "@/components/dashboard/cards/QuickStartCard.vue";
 import {useRemindersStore} from "@/stores/remidersStore";
-import {useCalendarStore} from "@/stores/calendarStore";
 import type {ID} from "@/lib/types";
 import ControlsHeader from "@/components/dashboard/layout/ControlsHeader.vue";
 import {isNotNull, isNull} from "@/lib/utils";
 import {useActiveEventService} from "@/services/activeEventService";
-import {useCalendarService} from "@/services/calendarService";
 import {useActiveDayService} from "@/services/activeDayService";
 
 const remindersStore = useRemindersStore()
-const calendarStore = useCalendarStore()
 
-const calendarService = useCalendarService()
 const activeDayService = useActiveDayService()
 const activeEventService = useActiveEventService()
 
@@ -66,12 +61,12 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
         <RemindersContainer
           :reminders="remindersStore.reminders"
         />
-        <EditEventCard
+        <!--<EditEventCard
           v-if="calendarStore.activeDay.selectedEvent"
           :event="calendarStore.activeDay.selectedEvent"
           @continue="handleStartEvent"
           @remove="handleRemoveEvent"
-        />
+        />-->
         <QuickStartCard
           :icon-pencil="activeEventHasNoProject"
           @start="handleQuickStart"
@@ -81,8 +76,8 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
     <section class="col-span-5 flex flex-col h-screen">
       <CalendarHeader />
       <CalendarView
-        v-if="calendarStore.activeDay.day"
-        :events="calendarStore.activeDay.day.events"
+        v-if="activeDayService.day"
+        :events="activeDayService.day.events"
         @event-selected="handleEventSelected"
       />
     </section>

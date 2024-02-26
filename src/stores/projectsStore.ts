@@ -1,17 +1,9 @@
 import {defineStore} from "pinia";
-import {reactive, readonly, type Ref, ref, watch} from "vue";
+import {reactive, watch} from "vue";
 import type {ReactiveProject, SerializedProject} from "@/model/project/types";
 import type {ReactiveActivity, SerializedActivity} from "@/model/activity/types";
-import {fromSerializedProject} from "@/model/project/serializer";
-import {createProject} from "@/model/project/model";
-import {fromSerializedActivity} from "@/model/activity/serializer";
-import {createActivity} from "@/model/activity/model";
 import {useLocalStorage} from "@/composables/useLocalStorage";
-import {check, isNotDefined, isNotNull, isNull, type Maybe, type Nullable, takeIf} from "@/lib/utils";
-import {useCalendarStore} from "@/stores/calendarStore";
-import {useNotifyError} from "@/composables/useNotifyError";
-import {migrateSerializedProject} from "@/model/project/migrations";
-import {migrateSerializedActivity} from "@/model/activity/migrations";
+import {check} from "@/lib/utils";
 
 export interface ProjectsStore {
   projects: ReactiveProject[]

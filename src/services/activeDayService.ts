@@ -8,6 +8,7 @@ import {createDay} from "@/model/calendarDay/model";
 import {useCalendarService} from "@/services/calendarService";
 import {reactive} from "vue";
 import {mapReadonly} from "@/model/modelHelpers";
+import {createService} from "@/composables/createService";
 
 export interface ActiveDayService {
   readonly day: Nullable<ReactiveCalendarDay>
@@ -16,10 +17,10 @@ export interface ActiveDayService {
   setByDate: (date: Temporal.PlainDate) => ReactiveCalendarDay
 }
 
-export function useActiveDayService({
-  activeDayStore = useActiveDayStore(),
-  calendarService = useCalendarService()
-} = {}): ActiveDayService {
+export const useActiveDayService = createService<ActiveDayService>(() => {
+  const activeDayStore = useActiveDayStore()
+  const calendarService = useCalendarService()
+
   function setDay(day: ReactiveCalendarDay) {
     check(calendarService.days.includes(day),
       "Failed to set day as active day. Day is not in calendar."
@@ -57,4 +58,4 @@ export function useActiveDayService({
     unsetDay,
     setByDate
   })
-}
+})

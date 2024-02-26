@@ -18,7 +18,7 @@ export function createService<TService extends object>(serviceFactory: () => TSe
   return <() => TService>(() => {
     subscribers += 1
     if (!service) {
-      scope = effectScope()
+      scope = effectScope(true)
       service = scope.run(() => serviceFactory())
     }
     tryOnScopeDispose(dispose)

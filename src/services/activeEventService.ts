@@ -8,6 +8,7 @@ import {now} from "@/lib/neoTime";
 import {reactive} from "vue";
 import {mapReadonly} from "@/model/modelHelpers";
 import {useActiveDayService} from "@/services/activeDayService";
+import {createService} from "@/composables/createService";
 
 export interface ActiveEventService {
   readonly event: Nullable<ReactiveCalendarEvent>
@@ -17,10 +18,10 @@ export interface ActiveEventService {
   stopEvent: () => void
 }
 
-export function useActiveEventService({
-  activeEventStore = useActiveEventStore(),
-  activeDayService = useActiveDayService()
-} = {}): ActiveEventService {
+export const useActiveEventService = createService<ActiveEventService>(() =>  {
+  const activeEventStore = useActiveEventStore()
+  const activeDayService = useActiveDayService()
+
   function setEvent(event: ReactiveCalendarEvent) {
     check(isNotNull(activeDayService.day),
       "Failed to set event as active event: Active day is not set."
@@ -80,4 +81,4 @@ export function useActiveEventService({
     startEvent,
     stopEvent,
   })
-}
+})

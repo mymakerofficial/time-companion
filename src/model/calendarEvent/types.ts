@@ -6,6 +6,7 @@ import type {ProjectsStore} from "@/stores/projectsStore";
 import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
 import {Temporal} from "temporal-polyfill";
 import type {ReactiveCalendarDay} from "@/model/calendarDay/types";
+import type {ProjectsService} from "@/services/projectsService";
 
 export interface CalendarEventContext extends HasId {
   day: Nullable<ReactiveCalendarDay>
@@ -46,7 +47,7 @@ export interface SerializedCalendarEvent {
   endAt: Nullable<string> // ISO DateTime (YYYY-MM-DDTHH:mm:ss)
 }
 
-export type EventDeserializationAssets = Pick<ProjectsStore,
+export type EventDeserializationAssets = Pick<ProjectsService,
   'projects' |
   'activities'
 >
