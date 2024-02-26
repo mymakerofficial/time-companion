@@ -3,6 +3,7 @@ import type {Nullable} from "@/lib/utils";
 import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
 import type {ProjectsStore} from "@/stores/projectsStore";
 import {Temporal} from "temporal-polyfill";
+import type {ProjectsService} from "@/services/projectsService";
 
 export enum ReminderActionType {
   NO_ACTION = 'NO_ACTION',
@@ -45,7 +46,7 @@ export interface SerializedCalendarReminder {
   actionTargetActivityId: Nullable<string>
 }
 
-export type ReminderDeserializationAssets = Pick<ProjectsStore,
+export type ReminderDeserializationAssets = Pick<ProjectsService,
   'projects' |
   'activities'
 >

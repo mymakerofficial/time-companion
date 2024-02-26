@@ -7,14 +7,14 @@ import RemindersContainer from "@/components/dashboard/cards/RemindersContainer.
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
 import QuickStartCard from "@/components/dashboard/cards/QuickStartCard.vue";
-import {useRemindersStore} from "@/stores/remidersStore";
 import type {ID} from "@/lib/types";
 import ControlsHeader from "@/components/dashboard/layout/ControlsHeader.vue";
 import {isNotNull, isNull} from "@/lib/utils";
 import {useActiveEventService} from "@/services/activeEventService";
 import {useActiveDayService} from "@/services/activeDayService";
+import {useRemindersService} from "@/services/remindersService";
 
-const remindersStore = useRemindersStore()
+const remindersService = useRemindersService()
 
 const activeDayService = useActiveDayService()
 const activeEventService = useActiveEventService()
@@ -59,7 +59,7 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
           @stop-event="handleStopEvent"
         />
         <RemindersContainer
-          :reminders="remindersStore.reminders"
+          :reminders="remindersService.reminders"
         />
         <!--<EditEventCard
           v-if="calendarStore.activeDay.selectedEvent"

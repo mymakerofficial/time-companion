@@ -1,5 +1,4 @@
 <script setup lang="tsx">
-import {useRemindersStore} from "@/stores/remidersStore";
 import SettingsHeader from "@/components/settings/layout/SettingsHeader.vue";
 import {Button} from "@/components/ui/button";
 import {useDialogStore} from "@/stores/dialogStore";
@@ -7,8 +6,9 @@ import NewReminderDialog from "@/components/settings/reminders/dialog/NewReminde
 import RemindersTable from "@/components/settings/reminders/table/RemindersTable.vue";
 import TableActions from "@/components/common/table/TableActions.vue";
 import {PlusCircle} from "lucide-vue-next";
+import {useRemindersService} from "@/services/remindersService";
 
-const remindersStore = useRemindersStore()
+const remindersService = useRemindersService()
 const dialogStore = useDialogStore()
 
 function openNewReminderDialog() {
@@ -28,6 +28,6 @@ function openNewReminderDialog() {
         <span>{{ $t('settings.reminders.controls.createReminder') }}</span>
       </Button>
     </TableActions>
-    <RemindersTable :reminders="remindersStore.reminders" />
+    <RemindersTable :reminders="remindersService.reminders" />
   </div>
 </template>

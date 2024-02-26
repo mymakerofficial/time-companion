@@ -4,7 +4,6 @@ import AppSidebar from "@/components/common/layout/AppSidebar.vue";
 import {TooltipProvider} from "radix-vue"
 import type {NavLink} from "@/components/common/layout/nav/nav-link";
 import {Archive, Calendar, Settings} from "lucide-vue-next";
-import {useRemindersStore} from "@/stores/remidersStore";
 import DialogProvider from "@/components/common/dialog/DialogProvider.vue";
 import {useI18n} from "vue-i18n";
 import {computed} from "vue";
@@ -13,6 +12,7 @@ import {useColorMode} from "@vueuse/core";
 import {useLocaleStore} from "@/stores/settings/localeStore";
 import {useActiveDayService} from "@/services/activeDayService";
 import {useCalendarService} from "@/services/calendarService";
+import {useRemindersService} from "@/services/remindersService";
 
 // initialize appearance settings
 useLocaleStore()
@@ -22,10 +22,10 @@ useColorMode({
 })
 
 const calendarService = useCalendarService()
-const remindersStore = useRemindersStore()
+const remindersService = useRemindersService()
 const activeDayService = useActiveDayService()
 
-remindersStore.init()
+remindersService.init()
 calendarService.init()
 activeDayService.setByDate(today())
 

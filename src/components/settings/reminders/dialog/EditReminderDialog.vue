@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import BaseDialog from "@/components/common/dialog/BaseDialog.vue";
 import {reactive, ref} from "vue";
-import {useRemindersStore} from "@/stores/remidersStore";
 import {Button} from "@/components/ui/button";
 import {
   createReminderForm,
@@ -10,6 +9,7 @@ import {
 import ReminderForm from "@/components/settings/reminders/dialog/ReminderForm.vue";
 import {isNull, type Nullable} from "@/lib/utils";
 import {useReferenceById} from "@/composables/useReferenceById";
+import {useRemindersService} from "@/services/remindersService";
 
 const props = defineProps<{
   id: Nullable<string>
@@ -25,8 +25,8 @@ function close() {
   emit('close')
 }
 
-const remindersStore = useRemindersStore()
-const reminder = useReferenceById(remindersStore.reminders, () => props.id)
+const remindersService = useRemindersService()
+const reminder = useReferenceById(remindersService.reminders, () => props.id)
 
 const form = reactive(createReminderForm(reminder.value))
 
@@ -35,7 +35,7 @@ function handleRemove() {
     return
   }
 
-  remindersStore.removeReminder(reminder.value)
+  remindersService.removeReminder(reminder.value)
 
   close()
 }
