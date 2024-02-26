@@ -1,7 +1,7 @@
 import type {ReactiveCalendarDay} from "@/model/calendarDay/types";
 import {Temporal} from "temporal-polyfill";
 import type {Nullable} from "@/lib/utils";
-import {check, isDefined, isNull} from "@/lib/utils";
+import {check, isDefined, isNotNull, isNull} from "@/lib/utils";
 import {useActiveDayStore} from "@/stores/activeDayStore";
 import {lastOf, whereDate} from "@/lib/listUtils";
 import {createDay} from "@/model/calendarDay/model";
@@ -10,12 +10,18 @@ import {reactive} from "vue";
 import {mapReadonly} from "@/model/modelHelpers";
 import {createService} from "@/composables/createService";
 import {useActiveEventService} from "@/services/activeEventService";
+import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
+import {useSelectedEventService} from "@/services/selectedEventService";
 
 export interface ActiveDayService {
   readonly day: Nullable<ReactiveCalendarDay>
   setDay: (day: ReactiveCalendarDay) => void
   unsetDay: () => void
   setByDate: (date: Temporal.PlainDate) => ReactiveCalendarDay
+  addEvent: (event: ReactiveCalendarEvent) => void
+  removeEvent: (event: ReactiveCalendarEvent) => void
+  getLastRunningEvent: () => Nullable<ReactiveCalendarEvent>
+  getLastCompletedEvent: () => Nullable<ReactiveCalendarEvent>
 }
 
 export const useActiveDayService = createService<ActiveDayService>(() => {
@@ -29,10 +35,15 @@ export const useActiveDayService = createService<ActiveDayService>(() => {
 
     activeDayStore.unsafeSetDay(day)
 
-    const lastNonEndedEvent = lastOf(day.events.filter((it) => isNull(it.endAt)))
+    const lastRunningEvent = getLastRunningEvent()
+    const lastCompletedEvent = getLastCompletedEvent()
 
-    if (isDefined(lastNonEndedEvent)) {
-      useActiveEventService().setEvent(lastNonEndedEvent)
+    if (isNotNull(lastRunningEvent)) {
+      useActiveEventService().setEvent(lastRunningEvent)
+    }
+
+    if (isNotNull(lastCompletedEvent)) {
+      useSelectedEventService().setEvent(lastCompletedEvent)
     }
   }
 
@@ -58,12 +69,48 @@ export const useActiveDayService = createService<ActiveDayService>(() => {
     return newDay
   }
 
+  function addEvent(event: ReactiveCalendarEvent) {
+    check(isNotNull(activeDayStore.day),
+      "Failed to add event to active day: Active day is not set."
+    )
+
+    calendarService.addEventToDay(activeDayStore.day!, event)
+  }
+
+  function removeEvent(event: ReactiveCalendarEvent) {
+    check(isNotNull(activeDayStore.day),
+      "Failed to remove event from active day: Active day is not set."
+    )
+
+    calendarService.removeEventFromDay(activeDayStore.day!, event)
+  }
+
+  function getLastRunningEvent(): Nullable<ReactiveCalendarEvent> {
+    if (isNull(activeDayStore.day)) {
+      return null
+    }
+
+    return lastOf(activeDayStore.day.events.filter((it) => isNull(it.endAt))) ?? null
+  }
+
+  function getLastCompletedEvent(): Nullable<ReactiveCalendarEvent> {
+    if (isNull(activeDayStore.day)) {
+      return null
+    }
+
+    return lastOf(activeDayStore.day.events.filter((it) => isNotNull(it.endAt))) ?? null
+  }
+
   return reactive({
     ...mapReadonly(activeDayStore, [
       "day"
     ]),
     setDay,
     unsetDay,
-    setByDate
+    setByDate,
+    addEvent,
+    removeEvent,
+    getLastRunningEvent,
+    getLastCompletedEvent,
   })
 })

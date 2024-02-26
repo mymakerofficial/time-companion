@@ -2,7 +2,6 @@ import type {Nullable} from "@/lib/utils";
 import type {HasId} from "@/lib/types";
 import type {ReactiveProject} from "@/model/project/types";
 import type {ReactiveActivity} from "@/model/activity/types";
-import type {ProjectsStore} from "@/stores/projectsStore";
 import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
 import {Temporal} from "temporal-polyfill";
 import type {ReactiveCalendarDay} from "@/model/calendarDay/types";

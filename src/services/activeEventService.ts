@@ -1,6 +1,6 @@
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import type {Nullable} from "@/lib/utils";
-import {check, isNotNull, isNull} from "@/lib/utils";
+import {check, isNotNull} from "@/lib/utils";
 import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
 import {useActiveEventStore} from "@/stores/activeEventStore";
 import {createEvent} from "@/model/calendarEvent/model";
@@ -9,6 +9,7 @@ import {reactive} from "vue";
 import {mapReadonly} from "@/model/modelHelpers";
 import {useActiveDayService} from "@/services/activeDayService";
 import {createService} from "@/composables/createService";
+import {useSelectedEventService} from "@/services/selectedEventService";
 
 export interface ActiveEventService {
   readonly event: Nullable<ReactiveCalendarEvent>
@@ -21,6 +22,7 @@ export interface ActiveEventService {
 export const useActiveEventService = createService<ActiveEventService>(() =>  {
   const activeEventStore = useActiveEventStore()
   const activeDayService = useActiveDayService()
+  const selectedEventService = useSelectedEventService()
 
   function setEvent(event: ReactiveCalendarEvent) {
     check(isNotNull(activeDayService.day),
@@ -29,11 +31,11 @@ export const useActiveEventService = createService<ActiveEventService>(() =>  {
     check(activeDayService.day!.events.includes(event),
       "Failed to set event as active event: Event is not in active day."
     )
-    check(isNull(activeEventStore.event),
-      "Failed to set event as active event: Active event is already set."
-    )
 
-    activeDayService.day!.unsafeAddEvent(event)
+    if (isNotNull(activeEventStore.event)) {
+      stopEvent()
+    }
+
     activeEventStore.unsafeSetEvent(event)
   }
 
@@ -56,10 +58,8 @@ export const useActiveEventService = createService<ActiveEventService>(() =>  {
       startAt: now(),
     })
 
-    activeDayService.day?.unsafeAddEvent(event)
-
+    activeDayService.addEvent(event)
     setEvent(event)
-
     return event
   }
 
@@ -69,6 +69,8 @@ export const useActiveEventService = createService<ActiveEventService>(() =>  {
     )
 
     activeEventStore.event!.endAt = now()
+    // TODO move to selectedEventService via event bus
+    selectedEventService.setEvent(activeEventStore.event!)
     unsetEvent()
   }
 

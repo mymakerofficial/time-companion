@@ -7,17 +7,19 @@ import RemindersContainer from "@/components/dashboard/cards/RemindersContainer.
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
 import QuickStartCard from "@/components/dashboard/cards/QuickStartCard.vue";
-import type {ID} from "@/lib/types";
 import ControlsHeader from "@/components/dashboard/layout/ControlsHeader.vue";
 import {isNotNull, isNull} from "@/lib/utils";
 import {useActiveEventService} from "@/services/activeEventService";
 import {useActiveDayService} from "@/services/activeDayService";
 import {useRemindersService} from "@/services/remindersService";
+import EditEventCard from "@/components/dashboard/cards/EditEventCard.vue";
+import {useSelectedEventService} from "@/services/selectedEventService";
 
 const remindersService = useRemindersService()
 
 const activeDayService = useActiveDayService()
 const activeEventService = useActiveEventService()
+const selectedEventService = useSelectedEventService()
 
 const activeEventHasNoProject = computed(() => {
   return isNull(activeEventService.event?.project)
@@ -30,10 +32,10 @@ function handleStopEvent() {
   activeEventService.stopEvent()
 }
 function handleRemoveEvent(event: ReactiveCalendarEvent) {
-  // calendarStore.activeDay.day?.removeEvent(event)
+  activeDayService.removeEvent(event)
 }
-function handleEventSelected(id: ID) {
-  // calendarStore.activeDay.selectEventById(id)
+function handleEventSelected(event: ReactiveCalendarEvent) {
+  selectedEventService.setEvent(event)
 }
 function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
   if (
@@ -61,12 +63,12 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
         <RemindersContainer
           :reminders="remindersService.reminders"
         />
-        <!--<EditEventCard
-          v-if="calendarStore.activeDay.selectedEvent"
-          :event="calendarStore.activeDay.selectedEvent"
+        <EditEventCard
+          v-if="selectedEventService.event"
+          :event="selectedEventService.event"
           @continue="handleStartEvent"
           @remove="handleRemoveEvent"
-        />-->
+        />
         <QuickStartCard
           :icon-pencil="activeEventHasNoProject"
           @start="handleQuickStart"
