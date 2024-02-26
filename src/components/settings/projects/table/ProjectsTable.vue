@@ -11,9 +11,10 @@ import EditActivityDialog from "@/components/settings/projects/activityDialog/Ed
 import {useDialogStore} from "@/stores/dialogStore";
 import {toProjectRow} from "@/components/settings/projects/table/helpers";
 import {updater} from "@/lib/helpers/tableHelpers";
+import type {MaybeReadonly} from "@/lib/utils";
 
 const props = defineProps<{
-  projects: ReactiveProject[]
+  projects: MaybeReadonly<Array<ReactiveProject>>
 }>()
 
 const dialogStore = useDialogStore()

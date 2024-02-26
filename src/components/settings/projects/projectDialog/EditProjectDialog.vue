@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import BaseDialog from "@/components/common/dialog/BaseDialog.vue";
-import {isNull, type Nullable} from "@/lib/utils";
-import {reactive, ref} from "vue";
+import {isNotDefined, type Nullable} from "@/lib/utils";
+import {ref} from "vue";
 import {Button} from "@/components/ui/button";
-import {useReferenceById} from "@/composables/useReferenceById";
 import ProjectForm from "@/components/settings/projects/projectDialog/ProjectForm.vue";
 import {createProjectForm, patchProjectWithForm} from "@/components/settings/projects/projectDialog/helpers";
 import {useProjectsService} from "@/services/projectsService";
+import {useGetFrom} from "@/composables/useGetFrom";
+import {whereId} from "@/lib/listUtils";
+import {reactiveComputed} from "@vueuse/core";
 
 const props = defineProps<{
   id: Nullable<string>
@@ -23,13 +25,11 @@ function close() {
 }
 
 const projectsService = useProjectsService()
-// TODO readonly is not assignable
-const project = useReferenceById(projectsService.projects, () => props.id)
-
-const form = reactive(createProjectForm(project.value))
+const project = useGetFrom(projectsService.projects, whereId(props.id))
+const form = reactiveComputed(() => createProjectForm(project.value))
 
 function handleRemove() {
-  if (isNull(project.value)) {
+  if (isNotDefined(project.value)) {
     return
   }
 
@@ -39,7 +39,7 @@ function handleRemove() {
 }
 
 function handleSubmit() {
-  if (isNull(project.value)) {
+  if (isNotDefined(project.value)) {
     return
   }
 

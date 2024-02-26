@@ -6,7 +6,7 @@ type Wrapped<TValue> = { original: TValue }
 </script>
 
 <script setup lang="ts" generic="TValue extends AcceptableValue, TMultiple extends boolean">
-import {cn, isDefined, type MaybeArray, type Nullable} from "@/lib/utils";
+import {cn, isDefined, type MaybeArray, type MaybeReadonly, type Nullable} from "@/lib/utils";
 import {ComboboxRoot, PopoverAnchor} from "radix-vue";
 import {Popover, PopoverContent} from "@/components/ui/popover";
 import {CommandInput, CommandItem, CommandList} from "@/components/ui/command";
@@ -21,10 +21,10 @@ const searchTerm = defineModel<string>('searchTerm', { required: false, default:
 const openModel = defineModel<boolean>('open', { required: false, default: false })
 
 const props = withDefaults(defineProps<{
-  options: TValue[]
+  options: MaybeReadonly<Array<TValue>>
   multiple?: TMultiple
   displayValue?: (option: TValue) => string;
-  filterFunction?: (list: TValue[], query: string) => TValue[];
+  filterFunction?: (list: MaybeReadonly<Array<TValue>>, query: string) => TValue[];
   getKey?: (option: TValue) => string | number;
   limit?: number
   variant?: NonNullable<Parameters<typeof buttonVariants>[0]>['variant']
@@ -67,7 +67,7 @@ function getDisplayValue(option: TValue): string {
   return String(option)
 }
 
-function filterFunction(list: TValue[], query: string): TValue[] {
+function filterFunction(list: MaybeReadonly<Array<TValue>>, query: string): TValue[] {
   if (isDefined(props.filterFunction)) {
     return props.filterFunction(list, query)
   }

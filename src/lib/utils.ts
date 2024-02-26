@@ -10,8 +10,9 @@ export type Nullable<T> = T | null
 export type Optional<T> = T | undefined
 export type Maybe<T> = Nullable<Optional<T>>
 
-export type MaybeArray<T> = T | T[]
+export type MaybeArray<T> = T | Array<T>
 export type MaybeFunction<T> = T | ((...args: any[]) => T)
+export type MaybeReadonly<T> = T | Readonly<T>
 
 export function isNull<T>(value: Nullable<T>): value is null {
   return value === null

@@ -4,9 +4,10 @@ import {computed} from "vue";
 import type {ReactiveCalendarReminder} from "@/model/calendarReminder/types";
 import {useTimeNow} from "@/composables/useNow";
 import {isAfter, isBefore, minutes} from "@/lib/neoTime";
+import type {MaybeReadonly} from "@/lib/utils";
 
 const props = defineProps<{
-  reminders: ReactiveCalendarReminder[]
+  reminders: MaybeReadonly<Array<ReactiveCalendarReminder>>
 }>()
 
 const now = useTimeNow({

@@ -1,11 +1,11 @@
 import {getSortableHeader} from "@/lib/helpers/tableHelpers";
 import {createColumnHelper, type Row} from "@tanstack/vue-table";
-import type {DayTimeReport} from "@/lib/timeReport/calculateDayTimeReport";
 import {useI18n} from "vue-i18n";
 import type {ReactiveProject} from "@/model/project/types";
 import {Minus} from "lucide-vue-next";
 import {durationZero, formatDate, formatDuration, isZeroDuration, withFormat} from "@/lib/neoTime";
 import {useProjectsService} from "@/services/projectsService";
+import type {DayTimeReport} from "@/lib/timeReport/types";
 
 function getDateCell(value: DayTimeReport['date']) {
   // TODO i18n

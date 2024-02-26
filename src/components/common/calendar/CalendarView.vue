@@ -4,9 +4,10 @@ import CalendarViewPointer from "@/components/common/calendar/CalendarViewPointe
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import {rowsToTime} from "@/lib/calendarUtils";
 import {formatTime, withFormat} from "@/lib/neoTime";
+import type {MaybeReadonly} from "@/lib/utils";
 
 defineProps<{
-  events: ReactiveCalendarEvent[]
+  events: MaybeReadonly<Array<ReactiveCalendarEvent>>
 }>()
 
 const emit = defineEmits<{

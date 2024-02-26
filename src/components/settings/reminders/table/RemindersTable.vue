@@ -9,9 +9,10 @@ import {getSortedRowModel, type SortingState, type TableOptions} from "@tanstack
 import Table from "@/components/common/table/Table.vue";
 import {updater} from "@/lib/helpers/tableHelpers";
 import type {ReminderRow} from "@/components/settings/reminders/table/types";
+import type {MaybeReadonly} from "@/lib/utils";
 
 const props = defineProps<{
-  reminders: ReactiveCalendarReminder[]
+  reminders: MaybeReadonly<Array<ReactiveCalendarReminder>>
 }>()
 
 const dialogStore = useDialogStore()
