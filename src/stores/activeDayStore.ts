@@ -3,11 +3,6 @@ import type {Nullable} from "@/lib/utils";
 import {defineStore} from "pinia";
 import {ref} from "vue";
 
-export interface ActiveDayStore {
-  day: Nullable<ReactiveCalendarDay>
-  unsafeSetDay: (newDay: Nullable<ReactiveCalendarDay>) => void
-}
-
 export const useActiveDayStore = defineStore('active-day', () => {
   const day = ref<Nullable<ReactiveCalendarDay>>(null)
 

@@ -9,6 +9,7 @@ import {reactive} from "vue";
 import {mapReadonly} from "@/model/modelHelpers";
 import {useActiveDayService} from "@/services/activeDayService";
 import {createService} from "@/composables/createService";
+import {useSelectedEventService} from "@/services/selectedEventService";
 
 export interface ActiveEventService {
   readonly event: Nullable<ReactiveCalendarEvent>
@@ -21,6 +22,7 @@ export interface ActiveEventService {
 export const useActiveEventService = createService<ActiveEventService>(() =>  {
   const activeEventStore = useActiveEventStore()
   const activeDayService = useActiveDayService()
+  const selectedEventService = useSelectedEventService()
 
   function setEvent(event: ReactiveCalendarEvent) {
     check(isNotNull(activeDayService.day),
@@ -34,7 +36,6 @@ export const useActiveEventService = createService<ActiveEventService>(() =>  {
       stopEvent()
     }
 
-    activeDayService.day!.unsafeAddEvent(event)
     activeEventStore.unsafeSetEvent(event)
   }
 
@@ -57,10 +58,8 @@ export const useActiveEventService = createService<ActiveEventService>(() =>  {
       startAt: now(),
     })
 
-    activeDayService.day?.unsafeAddEvent(event)
-
+    activeDayService.addEvent(event)
     setEvent(event)
-
     return event
   }
 
@@ -70,6 +69,8 @@ export const useActiveEventService = createService<ActiveEventService>(() =>  {
     )
 
     activeEventStore.event!.endAt = now()
+    // TODO move to selectedEventService via event bus
+    selectedEventService.setEvent(activeEventStore.event!)
     unsetEvent()
   }
 

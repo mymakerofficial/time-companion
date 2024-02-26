@@ -11,15 +11,15 @@ defineProps<{
 }>()
 
 const emit = defineEmits<{
-  eventSelected: [id: string]
+  eventSelected: [event: ReactiveCalendarEvent]
 }>()
 
 function getRowTimeLabel(row: number) {
   return formatTime(rowsToTime(row), withFormat('HH:mm'))
 }
 
-function handleClick(id: string) {
-  emit('eventSelected', id)
+function handleClick(event: ReactiveCalendarEvent) {
+  emit('eventSelected', event)
 }
 </script>
 
@@ -43,7 +43,7 @@ function handleClick(id: string) {
             v-for="event in events"
             :key="event.id"
             :event="event"
-            @click="handleClick(event.id)"
+            @click="handleClick(event)"
           />
           <CalendarViewPointer />
         </div>

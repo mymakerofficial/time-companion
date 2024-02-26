@@ -3,7 +3,7 @@ import {defineStore} from "pinia";
 import {ref} from "vue";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 
-export const useActiveEventStore = defineStore('active-event', () => {
+export const useSelectedEventStore = defineStore('selected-event', () => {
   const event = ref<Nullable<ReactiveCalendarEvent>>(null)
 
   function unsafeSetEvent(newEvent: Nullable<ReactiveCalendarEvent>) {
