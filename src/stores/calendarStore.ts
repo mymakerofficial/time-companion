@@ -5,7 +5,7 @@ import {useLocalStorage} from "@/composables/useLocalStorage";
 import {check} from "@/lib/utils";
 
 export interface CalendarStore {
-  days: ReactiveCalendarDay[]
+  days: ReadonlyArray<ReactiveCalendarDay>
   getSerializedStorage: () => CalendarStorageSerialized
   unsafeAddDay: (day: ReactiveCalendarDay) => void
   unsafeRemoveDay: (day: ReactiveCalendarDay) => void

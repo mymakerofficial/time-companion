@@ -6,8 +6,8 @@ import {useLocalStorage} from "@/composables/useLocalStorage";
 import {check} from "@/lib/utils";
 
 export interface ProjectsStore {
-  projects: ReactiveProject[]
-  activities: ReactiveActivity[]
+  projects: ReadonlyArray<ReactiveProject>
+  activities: ReadonlyArray<ReactiveActivity>
   getSerializedStorage: () => ProjectsStorageSerialized
   unsafeAddProject: (project: ReactiveProject) => void
   unsafeAddActivity: (activity: ReactiveActivity) => void
