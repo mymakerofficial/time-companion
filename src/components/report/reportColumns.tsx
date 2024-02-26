@@ -1,6 +1,6 @@
 import {getSortableHeader} from "@/helpers/table/tableHelpers";
 import {createColumnHelper, type Row} from "@tanstack/vue-table";
-import type {DayTimeReport} from "@/lib/timeReport/calculateTimeReport";
+import type {DayTimeReport} from "@/lib/timeReport/calculateDayTimeReport";
 import {useI18n} from "vue-i18n";
 import type {ReactiveProject} from "@/model/project/types";
 import {Minus} from "lucide-vue-next";
