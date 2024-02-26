@@ -10,7 +10,7 @@ import EditProjectDialog from "@/components/settings/projects/projectDialog/Edit
 import EditActivityDialog from "@/components/settings/projects/activityDialog/EditActivityDialog.vue";
 import {useDialogStore} from "@/stores/dialogStore";
 import {toProjectRow} from "@/components/settings/projects/table/helpers";
-import {updater} from "@/helpers/table/tableHelpers";
+import {updater} from "@/lib/helpers/tableHelpers";
 
 const props = defineProps<{
   projects: ReactiveProject[]

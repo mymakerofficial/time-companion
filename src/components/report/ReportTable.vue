@@ -8,7 +8,7 @@ import {
   type TableOptions, type VisibilityState
 } from "@tanstack/vue-table";
 import Table from "@/components/common/table/Table.vue";
-import {updater} from "@/helpers/table/tableHelpers";
+import {updater} from "@/lib/helpers/tableHelpers";
 import TableVisibilitySelect from "@/components/common/table/TableVisibilitySelect.vue";
 import {isNotEmpty} from "@/lib/listUtils";
 import {Button} from "@/components/ui/button";

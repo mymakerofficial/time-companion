@@ -7,7 +7,7 @@ import {toReminderRow} from "@/components/settings/reminders/table/helpers";
 import {computed, ref} from "vue";
 import {getSortedRowModel, type SortingState, type TableOptions} from "@tanstack/vue-table";
 import Table from "@/components/common/table/Table.vue";
-import {updater} from "@/helpers/table/tableHelpers";
+import {updater} from "@/lib/helpers/tableHelpers";
 import type {ReminderRow} from "@/components/settings/reminders/table/types";
 
 const props = defineProps<{

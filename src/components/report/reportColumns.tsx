@@ -1,4 +1,4 @@
-import {getSortableHeader} from "@/helpers/table/tableHelpers";
+import {getSortableHeader} from "@/lib/helpers/tableHelpers";
 import {createColumnHelper, type Row} from "@tanstack/vue-table";
 import type {DayTimeReport} from "@/lib/timeReport/calculateDayTimeReport";
 import {useI18n} from "vue-i18n";

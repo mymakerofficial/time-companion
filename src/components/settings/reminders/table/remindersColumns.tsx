@@ -2,7 +2,7 @@ import {createColumnHelper, type Row} from "@tanstack/vue-table";
 import {ArrowRight, Pencil, Slash} from "lucide-vue-next";
 import {Button} from "@/components/ui/button";
 import type {ReminderRow} from "@/components/settings/reminders/table/types";
-import {getSortableHeader} from "@/helpers/table/tableHelpers";
+import {getSortableHeader} from "@/lib/helpers/tableHelpers";
 import {useI18n} from "vue-i18n";
 import {formatTime, withFormat} from "@/lib/neoTime";
 import {DateTimeFormatter} from "@js-joda/core";
