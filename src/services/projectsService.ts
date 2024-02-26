@@ -12,7 +12,7 @@ import {createProject} from "@/model/project/model";
 import {migrateSerializedActivity} from "@/model/activity/migrations";
 import {createActivity} from "@/model/activity/model";
 import {fromSerializedActivity} from "@/model/activity/serializer";
-import {createGlobalState, set} from "@vueuse/core";
+import {createService} from "@/composables/createService";
 
 export interface ProjectsService {
   projects: ReadonlyArray<ReactiveProject>
@@ -30,15 +30,14 @@ export interface ProjectsService {
   link: (project: ReactiveProject, activity: ReactiveActivity) => void
 }
 
-export const useProjectsService = createGlobalState(({
-  projectsStore = useProjectsStore(),
-  calendarService = useCalendarService(),
-} = {}): ProjectsService => {
+export const useProjectsService = createService<ProjectsService>(() => {
+  const projectsStore = useProjectsStore()
+  const calendarService = useCalendarService()
 
   const isInitialized = ref(false)
 
   function init() {
-    if (isInitialized) {
+    if (isInitialized.value) {
       return
     }
 
@@ -57,7 +56,7 @@ export const useProjectsService = createGlobalState(({
     addProjects(projects)
     addActivities(activities)
 
-    set(isInitialized, true)
+    isInitialized.value = true
   }
 
   function addProject(project: ReactiveProject) {
