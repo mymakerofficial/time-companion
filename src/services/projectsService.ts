@@ -13,6 +13,7 @@ import {migrateSerializedActivity} from "@/model/activity/migrations";
 import {createActivity} from "@/model/activity/model";
 import {fromSerializedActivity} from "@/model/activity/serializer";
 import {createService} from "@/composables/createService";
+import {useInitialize} from "@/composables/useInitialize";
 
 export interface ProjectsService {
   projects: ReadonlyArray<ReactiveProject>
@@ -34,13 +35,7 @@ export const useProjectsService = createService<ProjectsService>(() => {
   const projectsStore = useProjectsStore()
   const calendarService = useCalendarService()
 
-  const isInitialized = ref(false)
-
-  function init() {
-    if (isInitialized.value) {
-      return
-    }
-
+  const { init } = useInitialize(() => {
     const serialized = projectsStore.getSerializedStorage()
 
     const version = serialized.version ?? 0
@@ -55,9 +50,7 @@ export const useProjectsService = createService<ProjectsService>(() => {
 
     addProjects(projects)
     addActivities(activities)
-
-    isInitialized.value = true
-  }
+  })
 
   function addProject(project: ReactiveProject) {
     check(!projectsStore.projects.some(whereId(project.id)),
@@ -105,7 +98,7 @@ export const useProjectsService = createService<ProjectsService>(() => {
   }
 
   function addActivity(activity: ReactiveActivity) {
-    check(!projectsStore.activities.some((it) => it.id === activity.id),
+    check(!projectsStore.activities.some(whereId(activity.id)),
       `Failed to add activity: Activity with id "${activity.id}" already exists.`
     )
     check(!projectsStore.activities.some((it) => it.displayName === activity.displayName && it.parentProject === activity.parentProject),
