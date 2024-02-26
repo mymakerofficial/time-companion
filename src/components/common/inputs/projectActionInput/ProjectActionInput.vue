@@ -3,17 +3,20 @@ import {computed, type HTMLAttributes, onMounted, ref, watch} from "vue";
 import {Input} from "@/components/ui/input";
 import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
 import ComboboxInput from "@/components/common/inputs/combobox/ComboboxInput.vue";
-import {isDefined, isNotDefined, isNotNull, isNull, type Maybe, type Nullable} from "@/lib/utils";
+import {isDefined, isNotDefined, isNotNull, isNull, type Nullable} from "@/lib/utils";
 import {useQuickAccess} from "@/composables/useQuickAccess";
-import {createEventShadow, type ReactiveCalendarEventShadow} from "@/model/eventShadow";
+import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
+import {createEventShadow} from "@/model/eventShadow/model";
 import ShadowBadge from "@/components/common/shadow/ShadowBadge.vue";
 import {firstOf, isEmpty, isNotEmpty, secondOf} from "@/lib/listUtils";
 import {useFocus} from "@vueuse/core";
-import {createProject, type ReactiveProject} from "@/model/project/";
-import {createActivity, type ReactiveActivity} from "@/model/activity/";
+import type {ReactiveProject} from "@/model/project/types";
+import {createProject} from "@/model/project/model";
+import type {ReactiveActivity} from "@/model/activity/types";
+import {createActivity} from "@/model/activity/model";
 import {projectActionInputBadgeVariants} from "@/components/common/inputs/projectActionInput/variants";
 import type {BadgeVariants} from "@/components/ui/badge";
-import {useProjectsStore} from "@/stores/projectsStore";
+import {useProjectsService} from "@/services/projectsService";
 
 const projectModel = defineModel<Nullable<ReactiveProject>>('project', { required: false, default: null })
 const activityModel = defineModel<Nullable<ReactiveActivity>>('activity', { required: false, default: null })
@@ -34,7 +37,7 @@ defineOptions({
   inheritAttrs: false
 })
 
-const projectsStore = useProjectsStore()
+const projectsService = useProjectsService()
 
 const searchTerm = ref('')
 
@@ -128,7 +131,7 @@ function createProjectFromTerm() {
     randomColor: true
   })
 
-  projectsStore.addProject(project)
+  projectsService.addProject(project)
 
   return project
 }
@@ -152,7 +155,7 @@ function createActivityFromTerm(project: Nullable<ReactiveProject>) {
     parentProject: project
   })
 
-  projectsStore.addActivity(activity)
+  projectsService.addActivity(activity)
 
   return activity
 }

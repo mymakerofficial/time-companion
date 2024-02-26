@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import BaseDialog from "@/components/common/dialog/BaseDialog.vue";
 import {reactive, ref} from "vue";
-import {useRemindersStore} from "@/stores/remidersStore";
 import {Button} from "@/components/ui/button";
 import {createReminderForm, createReminderFromForm} from "@/components/settings/reminders/dialog/helpers";
 import ReminderForm from "@/components/settings/reminders/dialog/ReminderForm.vue";
+import {useRemindersService} from "@/services/remindersService";
 
 const emit = defineEmits<{
   close: []
@@ -16,12 +16,12 @@ function close() {
   emit('close')
 }
 
-const remindersStore = useRemindersStore()
+const remindersService = useRemindersService()
 
 const form = reactive(createReminderForm())
 
 function handleSubmit() {
-  remindersStore.addReminder(createReminderFromForm(form))
+  remindersService.addReminder(createReminderFromForm(form))
   close()
 }
 </script>

@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import {computed} from "vue";
-import {useCalendarStore} from "@/stores/calendarStore";
 import {formatDate, formatTime, withFormat} from "@/lib/neoTime";
 import {useTimeNow} from "@/composables/useNow";
 import {isNull} from "@/lib/utils";
+import {useActiveDayService} from "@/services/activeDayService";
 
-const calendarStore = useCalendarStore()
+const activeDayService = useActiveDayService()
 
 const now = useTimeNow()
 
 const displayDateLabel = computed(() => {
-  if (isNull(calendarStore.activeDay.day)) {
+  if (isNull(activeDayService.day)) {
     return ''
   }
 
-  return formatDate(calendarStore.activeDay.day.date, withFormat('eeee, MMMM dd'))
+  return formatDate(activeDayService.day.date, withFormat('eeee, MMMM dd'))
 })
 
 const displayTimeLabel = computed(() => {

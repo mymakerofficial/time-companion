@@ -4,13 +4,13 @@ import RadioGroupItem from "@/components/ui/radio-group/RadioGroupItem.vue";
 import Label from "@/components/ui/label/Label.vue";
 import {useColorMode} from "@vueuse/core";
 import {vProvideColor} from "@/directives/vProvideColor";
-import {useProjectsStore} from "@/stores/projectsStore";
-import {useCalendarStore} from "@/stores/calendarStore";
 import {computed} from "vue";
 import {isNotNull} from "@/lib/utils";
+import {useProjectsService} from "@/services/projectsService";
+import {useActiveDayService} from "@/services/activeDayService";
 
-const calendarStore = useCalendarStore()
-const projectsStore = useProjectsStore()
+const activeDayService = useActiveDayService()
+const projectsService = useProjectsService()
 
 const themes = ['dark', 'light']
 
@@ -20,15 +20,15 @@ const theme = useColorMode({
 })
 
 const eventColors = computed(() => {
-  if (isNotNull(calendarStore.activeDay.day) && calendarStore.activeDay.day.events.length >= 3) {
-    return calendarStore.activeDay.day.events
+  if (isNotNull(activeDayService.day) && activeDayService.day.events.length >= 3) {
+    return activeDayService.day.events
       .slice(-3)
       .map((event) => event.color)
       .reverse() ?? []
   }
 
-  if (projectsStore.projects.length >= 3) {
-    return projectsStore.projects
+  if (projectsService.projects.length >= 3) {
+    return [...projectsService.projects]
       .sort((a, b) => a.lastUsed > b.lastUsed ? -1 : 1)
       .slice(0, 3)
       .map((project) => project.color)

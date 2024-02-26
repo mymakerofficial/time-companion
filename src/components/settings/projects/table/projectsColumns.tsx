@@ -7,7 +7,7 @@ import {
 } from "lucide-vue-next";
 import {Button} from "@/components/ui/button";
 import type {ProjectRow} from "@/components/settings/projects/table/types";
-import {getSortableHeader} from "@/helpers/table/tableHelpers";
+import {getSortableHeader} from "@/lib/helpers/tableHelpers";
 import {useI18n} from "vue-i18n";
 import {Badge} from "@/components/ui/badge";
 import ShadowBadge from "@/components/common/shadow/ShadowBadge.vue";

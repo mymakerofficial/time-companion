@@ -1,11 +1,10 @@
 import type {HasId} from "@/lib/types";
 import type {Nullable} from "@/lib/utils";
-import type {ReactiveProject} from "@/model/project/";
-import type {LocalDateTime} from "@js-joda/core";
+import type {ReactiveProject} from "@/model/project/types";
 import type {ProjectsStore} from "@/stores/projectsStore";
 import {Temporal} from "temporal-polyfill";
 
-export interface ActivityContext extends HasId {
+export interface ActivityContext extends Readonly<HasId> {
   displayName: string
   color: Nullable<string>
   parentProject: Nullable<ReactiveProject>
@@ -13,6 +12,9 @@ export interface ActivityContext extends HasId {
 }
 
 export interface ReactiveActivity extends ActivityContext {
+  readonly parentProject: ActivityContext['parentProject']
+  readonly lastUsed: ActivityContext['lastUsed']
+  unsafeSetParentProject: (project: Nullable<ReactiveProject>) => void
   lastUsedNow: () => void
   toSerialized: () => SerializedActivity
 }

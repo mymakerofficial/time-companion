@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import BaseDialog from "@/components/common/dialog/BaseDialog.vue";
-import {useProjectsStore} from "@/stores/projectsStore";
-import {reactive, ref, watch} from "vue";
+import {reactive, ref} from "vue";
 import {Button} from "@/components/ui/button";
 import ProjectForm from "@/components/settings/projects/projectDialog/ProjectForm.vue";
 import {
   createProjectForm,
   createProjectFromForm,
 } from "@/components/settings/projects/projectDialog/helpers";
+import {useProjectsService} from "@/services/projectsService";
 
 const emit = defineEmits<{
   close: []
@@ -19,12 +19,12 @@ function close() {
   emit('close')
 }
 
-const projectsStore = useProjectsStore()
+const projectsService = useProjectsService()
 
 const form = reactive(createProjectForm())
 
 function handleSubmit() {
-  projectsStore.addProject(createProjectFromForm(form))
+  projectsService.addProject(createProjectFromForm(form))
   close()
 }
 </script>

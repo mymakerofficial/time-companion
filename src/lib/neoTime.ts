@@ -104,6 +104,10 @@ export function jodaToTemporal(joda: any): any {
 }
 
 
+export function currentMonth() {
+  return dateToMonth(today())
+}
+
 // obtain the current LocalDate
 export function today() {
   return Temporal.Now.plainDateISO()
@@ -274,6 +278,13 @@ export function durationToTime(duration: Temporal.Duration): Temporal.PlainTime 
   })
 }
 
+export function dateToMonth(date: Temporal.PlainDate): Temporal.PlainYearMonth {
+  return Temporal.PlainYearMonth.from({
+    year: date.year,
+    month: date.month
+  })
+}
+
 export function negateDuration(duration: Temporal.Duration) {
   return Temporal.Duration.from({ milliseconds: -duration.total({unit: 'milliseconds'}) })
 }
@@ -282,14 +293,14 @@ export function sumOfDurations(durations: Temporal.Duration[]) {
   return durations.reduce((acc, duration) => acc.add(duration), durationZero())
 }
 
-// returns a list of all days in the month and year of the given date
-export function daysInMonth(date: Temporal.PlainDate): Temporal.PlainDate[] {
-  const monthLength = date.daysInMonth
+// returns a list of all days in the month and year of the given month
+export function daysInMonth(month: Temporal.PlainYearMonth): Temporal.PlainDate[] {
+  const monthLength = month.daysInMonth
 
   return Array.from({length: monthLength}, (_, i) => {
     return Temporal.PlainDate.from({
-      year: date.year,
-      month: date.month,
+      year: month.year,
+      month: month.month,
       day: i + 1
     })
   })

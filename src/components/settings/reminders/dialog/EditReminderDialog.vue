@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import BaseDialog from "@/components/common/dialog/BaseDialog.vue";
-import {reactive, ref} from "vue";
-import {useRemindersStore} from "@/stores/remidersStore";
+import {ref} from "vue";
 import {Button} from "@/components/ui/button";
 import {
   createReminderForm,
   patchReminderWithForm,
 } from "@/components/settings/reminders/dialog/helpers";
 import ReminderForm from "@/components/settings/reminders/dialog/ReminderForm.vue";
-import {isNull, type Nullable} from "@/lib/utils";
-import {useReferenceById} from "@/composables/useReferenceById";
+import {isNotDefined, type Nullable} from "@/lib/utils";
+import {useRemindersService} from "@/services/remindersService";
+import {useGetFrom} from "@/composables/useGetFrom";
+import {whereId} from "@/lib/listUtils";
+import {reactiveComputed} from "@vueuse/core";
 
 const props = defineProps<{
   id: Nullable<string>
@@ -25,23 +27,22 @@ function close() {
   emit('close')
 }
 
-const remindersStore = useRemindersStore()
-const reminder = useReferenceById(remindersStore.reminders, () => props.id)
-
-const form = reactive(createReminderForm(reminder.value))
+const remindersService = useRemindersService()
+const reminder = useGetFrom(remindersService.reminders, whereId(props.id))
+const form = reactiveComputed(() => createReminderForm(reminder.value))
 
 function handleRemove() {
-  if (isNull(reminder.value)) {
+  if (isNotDefined(reminder.value)) {
     return
   }
 
-  remindersStore.removeReminder(reminder.value)
+  remindersService.removeReminder(reminder.value)
 
   close()
 }
 
 function handleSubmit() {
-  if (isNull(reminder.value)) {
+  if (isNotDefined(reminder.value)) {
     return
   }
 

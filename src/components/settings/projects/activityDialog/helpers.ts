@@ -1,10 +1,9 @@
-import type {ReactiveActivity} from "@/model/activity/";
+import type {ReactiveActivity} from "@/model/activity/types";
 import type {Maybe, Nullable} from "@/lib/utils";
-import type {ID} from "@/lib/types";
-import {createActivity} from "@/model/activity/";
-import {useProjectsStore} from "@/stores/projectsStore";
 import {isNotNull} from "@/lib/utils";
-import type {ReactiveProject} from "@/model/project/";
+import {createActivity} from "@/model/activity/model";
+import type {ReactiveProject} from "@/model/project/types";
+import {useProjectsService} from "@/services/projectsService";
 
 export interface ActivityForm {
   displayName: ReactiveActivity['displayName'],
@@ -29,12 +28,12 @@ export function createActivityFromForm(form: ActivityForm) {
 }
 
 export function patchActivityWithForm(activity: ReactiveActivity, form: ActivityForm) {
-  const projectsStore = useProjectsStore()
+  const projectsService = useProjectsService()
 
   activity.displayName = form.displayName
   activity.color = form.color
 
   if (isNotNull(form.project) && form.project !== activity.parentProject) {
-    projectsStore.link(form.project, activity)
+    projectsService.link(form.project, activity)
   }
 }

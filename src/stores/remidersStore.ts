@@ -1,18 +1,14 @@
 import {defineStore} from "pinia";
-import {reactive, readonly, type Ref, ref, watch} from "vue";
-import type {ReactiveCalendarReminder, SerializedCalendarReminder} from "@/model/calendarReminder";
+import {reactive, watch} from "vue";
+import type {ReactiveCalendarReminder, SerializedCalendarReminder} from "@/model/calendarReminder/types";
 import {useLocalStorage} from "@/composables/useLocalStorage";
-import {createReminder, fromSerializedReminder} from "@/model/calendarReminder";
-import {useProjectsStore} from "@/stores/projectsStore";
-import {useNotifyError} from "@/composables/useNotifyError";
-import {migrateSerializedReminder} from "@/model/calendarReminder/migrations";
+import {check} from "@/lib/utils";
 
 export interface RemindersStore {
-  isInitialized: Readonly<Ref<boolean>>
-  reminders: ReactiveCalendarReminder[]
-  init: () => void
-  addReminder: (reminder: ReactiveCalendarReminder) => void
-  removeReminder: (reminder: ReactiveCalendarReminder) => void
+  reminders: ReadonlyArray<ReactiveCalendarReminder>
+  getSerializedStorage: () => RemindersStorageSerialized
+  unsafeAddReminder: (reminder: ReactiveCalendarReminder) => void
+  unsafeRemoveReminder: (reminder: ReactiveCalendarReminder) => void
 }
 
 interface RemindersStorageSerialized {
@@ -21,88 +17,39 @@ interface RemindersStorageSerialized {
 }
 
 export const useRemindersStore = defineStore('reminders', (): RemindersStore => {
-  const projectsStore = useProjectsStore()
   const storage = useLocalStorage<RemindersStorageSerialized>('time-companion-reminders-store', { version: 0, reminders: [] })
-
-  const isInitialized = ref(false)
 
   const reminders = reactive<ReactiveCalendarReminder[]>([])
 
-  function init() {
-    if (isInitialized.value) {
-      return
-    }
-
-    // projects need to be initialized first
-    projectsStore.init()
-
-    const assets = {
-      projects: projectsStore.projects,
-      activities: projectsStore.activities,
-    }
-
-    try {
-      const serialized = storage.get()
-
-      reminders.push(...serialized.reminders.map((it: any) => createReminder(fromSerializedReminder(migrateSerializedReminder(it, serialized.version ?? 0), assets))))
-
-      isInitialized.value = true
-    } catch (error) {
-      useNotifyError({
-        title: 'Failed to load reminders',
-        message: 'Your reminders data could not be loaded. Data may be corrupted or missing.',
-        actions: [{
-          label: 'Delete reminders data',
-          handler: () => {
-            storage.clear()
-            init()
-          }
-        }],
-        error
-      })
-    }
-  }
-
-  function store() {
-    if (!isInitialized.value) {
-      throw new Error('Tried to commit reminders store before it was initialized')
-    }
-
+  function commit() {
     storage.set({
       version: 1,
       reminders: reminders.map((it) => it.toSerialized()),
     })
   }
 
-  watch(() => reminders, store, {deep: true})
+  watch(() => reminders, commit, {deep: true})
 
-  function addReminder(reminder: ReactiveCalendarReminder) {
-    if (reminders.some((it) => it.id === reminder.id)) {
-      throw new Error(`Reminder with id ${reminder.id} already exists`)
-    }
+  function getSerializedStorage() {
+    return storage.get()
+  }
 
-    if (reminders.some((it) => it.displayText === reminder.displayText)) {
-      throw new Error(`Reminder with displayText ${reminder.displayText} already exists`)
-    }
-
+  function unsafeAddReminder(reminder: ReactiveCalendarReminder) {
     reminders.push(reminder)
   }
 
-  function removeReminder(reminder: ReactiveCalendarReminder) {
-    const index = reminders.findIndex((it) => it.id === reminder.id)
+  function unsafeRemoveReminder(reminder: ReactiveCalendarReminder) {
+    const index = reminders.indexOf(reminder)
 
-    if (index === -1) {
-      throw new Error(`Reminder with id ${reminder.id} does not exist`)
-    }
+    check(index !== -1, `Failed to remove reminder "${reminder.id}": Reminder does not exist in store.`)
 
     reminders.splice(index, 1)
   }
 
   return {
-    isInitialized: readonly(isInitialized),
     reminders,
-    init,
-    addReminder,
-    removeReminder,
+    getSerializedStorage,
+    unsafeAddReminder,
+    unsafeRemoveReminder,
   }
 })

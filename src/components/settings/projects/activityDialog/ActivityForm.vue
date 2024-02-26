@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
 import {Slash} from "lucide-vue-next";
-import {useProjectsStore} from "@/stores/projectsStore";
 import type {ActivityForm} from "@/components/settings/projects/activityDialog/helpers";
 import ColorTextInput from "@/components/common/inputs/colorTextInput/ColorTextInput.vue";
+import {useProjectsService} from "@/services/projectsService";
 
 defineProps<{
   form: ActivityForm
 }>()
 
-const { projects } = useProjectsStore()
+const { projects } = useProjectsService()
 </script>
 
 <template>

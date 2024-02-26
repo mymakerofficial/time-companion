@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import {Slash} from "lucide-vue-next";
-import type {ReactiveCalendarEventShadow} from "@/model/eventShadow";
+import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
 import {cn, type Nullable} from "@/lib/utils";
 import {computed, type HTMLAttributes} from "vue";
 import {Badge, type BadgeVariants} from "@/components/ui/badge";
 import {cva} from "class-variance-authority";
-import type {ReactiveProject} from "@/model/project";
-import type {ReactiveActivity} from "@/model/activity";
+import type {ReactiveProject} from "@/model/project/types";
+import type {ReactiveActivity} from "@/model/activity/types";
 
 const props = defineProps<{
   project?: Nullable<ReactiveProject>

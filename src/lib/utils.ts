@@ -1,6 +1,6 @@
 import type {ClassValue} from "clsx";
-import {twMerge} from "tailwind-merge";
 import {clsx} from "clsx";
+import {twMerge} from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -10,8 +10,9 @@ export type Nullable<T> = T | null
 export type Optional<T> = T | undefined
 export type Maybe<T> = Nullable<Optional<T>>
 
-export type MaybeArray<T> = T | T[]
+export type MaybeArray<T> = T | Array<T>
 export type MaybeFunction<T> = T | ((...args: any[]) => T)
+export type MaybeReadonly<T> = T | Readonly<T>
 
 export function isNull<T>(value: Nullable<T>): value is null {
   return value === null
@@ -66,4 +67,17 @@ export function round(value: number, precision: number = 0): number {
 
 export function fillZero(value: number, length: number = 2): string {
   return value.toString().padStart(length, '0')
+}
+
+export class IllegalStateError extends Error {
+  constructor(message: string) {
+    super(message)
+    this.name = 'IllegalStateError'
+  }
+}
+
+export function check(predicate: boolean, message: string) {
+  if (!predicate) {
+    throw new IllegalStateError(message)
+  }
 }

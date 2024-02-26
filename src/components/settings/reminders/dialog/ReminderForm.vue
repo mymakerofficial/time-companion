@@ -4,7 +4,7 @@ import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
 import ColorSelect from "@/components/common/inputs/colorSelect/ColorSelect.vue";
 import {Label} from "@/components/ui/label";
 import {computed} from "vue";
-import {ReminderActionType} from "@/model/calendarReminder";
+import {ReminderActionType} from "@/model/calendarReminder/types";
 import type {ReminderFormState} from "@/components/settings/reminders/dialog/helpers";
 import ProjectActionInput from "@/components/common/inputs/projectActionInput/ProjectActionInput.vue";
 import TimeInput from "@/components/common/inputs/timeInput/TimeInput.vue";

@@ -1,10 +1,12 @@
 import type {Maybe, Nullable} from "@/lib/utils";
 import {isNotNull, isNull} from "@/lib/utils";
-import {createReminder, type ReactiveCalendarReminder, ReminderActionType} from "@/model/calendarReminder";
-import {createEventShadow} from "@/model/eventShadow";
+import type {ReactiveCalendarReminder} from "@/model/calendarReminder/types";
+import {ReminderActionType} from "@/model/calendarReminder/types";
+import {createReminder} from "@/model/calendarReminder/model";
+import {createEventShadow} from "@/model/eventShadow/model";
 import {minutes, timeNow} from "@/lib/neoTime";
-import type {ReactiveProject} from "@/model/project";
-import type {ReactiveActivity} from "@/model/activity";
+import type {ReactiveProject} from "@/model/project/types";
+import type {ReactiveActivity} from "@/model/activity/types";
 
 export type ReminderFormState = Pick<ReactiveCalendarReminder,
   'displayText' |

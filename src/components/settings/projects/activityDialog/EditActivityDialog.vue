@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import BaseDialog from "@/components/common/dialog/BaseDialog.vue";
-import {isNull, type Nullable} from "@/lib/utils";
-import {useProjectsStore} from "@/stores/projectsStore";
+import {isNotDefined, type Nullable} from "@/lib/utils";
 import {reactive, ref} from "vue";
 import {Button} from "@/components/ui/button";
-import {useReferenceById} from "@/composables/useReferenceById";
 import ActivityForm from "@/components/settings/projects/activityDialog/ActivityForm.vue";
 import {createActivityForm, patchActivityWithForm} from "@/components/settings/projects/activityDialog/helpers";
+import {useProjectsService} from "@/services/projectsService";
+import {useGetFrom} from "@/composables/useGetFrom";
+import {whereId} from "@/lib/listUtils";
+import {reactiveComputed} from "@vueuse/core";
 
 const props = defineProps<{
   id: Nullable<string>
@@ -22,23 +24,22 @@ function close() {
   emit('close')
 }
 
-const projectsStore = useProjectsStore()
-const activity = useReferenceById(projectsStore.activities, () => props.id)
-
-const form = reactive(createActivityForm(activity.value))
+const projectsService = useProjectsService()
+const activity = useGetFrom(projectsService.activities, whereId(props.id))
+const form = reactiveComputed(() => createActivityForm(activity.value))
 
 function handleRemove() {
-  if (isNull(activity.value)) {
+  if (isNotDefined(activity.value)) {
     return
   }
 
-  projectsStore.removeActivity(activity.value)
+  projectsService.removeActivity(activity.value)
 
   close()
 }
 
 function handleSubmit() {
-  if (isNull(activity.value)) {
+  if (isNotDefined(activity.value)) {
     return
   }
 

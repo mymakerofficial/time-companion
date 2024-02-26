@@ -1,18 +1,18 @@
 <script setup lang="tsx">
 import {useDialogStore} from "@/stores/dialogStore";
-import type {ReactiveCalendarReminder} from "@/model/calendarReminder";
+import type {ReactiveCalendarReminder} from "@/model/calendarReminder/types";
 import {createRemindersColumns} from "@/components/settings/reminders/table/remindersColumns";
 import EditReminderDialog from "@/components/settings/reminders/dialog/EditReminderDialog.vue";
 import {toReminderRow} from "@/components/settings/reminders/table/helpers";
 import {computed, ref} from "vue";
 import {getSortedRowModel, type SortingState, type TableOptions} from "@tanstack/vue-table";
-import type {ProjectRow} from "@/components/settings/projects/table/types";
 import Table from "@/components/common/table/Table.vue";
-import {updater} from "@/helpers/table/tableHelpers";
+import {updater} from "@/lib/helpers/tableHelpers";
 import type {ReminderRow} from "@/components/settings/reminders/table/types";
+import type {MaybeReadonly} from "@/lib/utils";
 
 const props = defineProps<{
-  reminders: ReactiveCalendarReminder[]
+  reminders: MaybeReadonly<Array<ReactiveCalendarReminder>>
 }>()
 
 const dialogStore = useDialogStore()

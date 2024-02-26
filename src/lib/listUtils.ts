@@ -1,20 +1,19 @@
-import type {Maybe, MaybeArray} from "@/lib/utils";
+import type {Maybe, MaybeArray, MaybeReadonly} from "@/lib/utils";
 import {isDefined, isNotDefined, isNull} from "@/lib/utils";
 import type {HasId, ID} from "@/lib/types";
-import type {LocalDate} from "@js-joda/core";
 import {isSameDay} from "@/lib/neoTime";
 import {Temporal} from "temporal-polyfill";
 
-export function isArray<T>(value: Maybe<MaybeArray<T>>): value is T[] {
+export function isArray<T>(value: Maybe<MaybeReadonly<MaybeArray<T>>>): value is T[] {
   return Array.isArray(value)
 }
 
-export function isNotArray<T>(value: Maybe<MaybeArray<T>>): value is Maybe<T> {
+export function isNotArray<T>(value: Maybe<MaybeReadonly<MaybeArray<T>>>): value is Maybe<T> {
   return !isArray(value)
 }
 
 // if given an array, returns true if the array is empty, if not given an array, returns true if the value is null or undefined
-export function isEmpty<T>(value: Maybe<MaybeArray<T>>): value is Maybe<[]> {
+export function isEmpty<T>(value: Maybe<MaybeReadonly<MaybeArray<T>>>): value is Maybe<[]> {
   if (typeof value === 'string') {
     return value.length === 0
   }
@@ -27,7 +26,7 @@ export function isEmpty<T>(value: Maybe<MaybeArray<T>>): value is Maybe<[]> {
 }
 
 // if given an array, returns true if the array is not empty, if not given an array, returns true if the value is not null or undefined
-export function isNotEmpty<T>(value: Maybe<MaybeArray<T>>): value is [T, ...T[]] {
+export function isNotEmpty<T>(value: Maybe<MaybeReadonly<MaybeArray<T>>>): value is [T, ...T[]] {
   if (typeof value === 'string') {
     return value.length > 0
   }
@@ -123,4 +122,12 @@ export function whereDate<T extends { date: Temporal.PlainDate }>(date: Maybe<Te
   }
 
   return (it: T) => isSameDay(it.date, date)
+}
+
+export function whereDisplayName<T extends { displayName: string }>(displayName: Maybe<string>) {
+  if (isNotDefined(displayName)) {
+    return () => false
+  }
+
+  return (it: T) => it.displayName === displayName
 }

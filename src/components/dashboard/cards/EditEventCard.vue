@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import {ArrowRight, MoreVertical} from "lucide-vue-next";
 import {Button} from "@/components/ui/button";
-import {computed, reactive} from "vue";
+import {computed} from "vue";
 import {isNotNull, isNull} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
-import type {ReactiveCalendarEventShadow} from "@/model/eventShadow";
+import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import ProjectActionInput from "@/components/common/inputs/projectActionInput/ProjectActionInput.vue";
-import TimeInput from "@/components/common/inputs/timeInput/TimeInput.vue";
-import {mapWritable} from "@/model/modelHelpers";
 import DateTimeInput from "@/components/common/inputs/timeInput/DateTimeInput.vue";
 import {durationBetween, formatDuration} from "@/lib/neoTime";
 

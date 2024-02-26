@@ -1,6 +1,6 @@
 import type {Nullable} from "@/lib/utils";
-import type {ReactiveCalendarEventShadow} from "@/model/eventShadow";
-import type {ReactiveProject} from "@/model/project";
+import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
+import type {ReactiveProject} from "@/model/project/types";
 
 export interface ProjectRow {
   id: string

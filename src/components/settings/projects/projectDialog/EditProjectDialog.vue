@@ -1,17 +1,14 @@
 <script setup lang="ts">
 import BaseDialog from "@/components/common/dialog/BaseDialog.vue";
-import {isNull, type Nullable} from "@/lib/utils";
-import {useProjectsStore} from "@/stores/projectsStore";
-import {reactive, ref, watch} from "vue";
-import {Input} from "@/components/ui/input";
+import {isNotDefined, type Nullable} from "@/lib/utils";
+import {ref} from "vue";
 import {Button} from "@/components/ui/button";
-import {useReferenceById} from "@/composables/useReferenceById";
-import ColorSelect from "@/components/common/inputs/colorSelect/ColorSelect.vue";
-import {whenever} from "@vueuse/core";
-import Switch from "@/components/ui/switch/Switch.vue";
-import Label from "@/components/ui/label/Label.vue";
 import ProjectForm from "@/components/settings/projects/projectDialog/ProjectForm.vue";
 import {createProjectForm, patchProjectWithForm} from "@/components/settings/projects/projectDialog/helpers";
+import {useProjectsService} from "@/services/projectsService";
+import {useGetFrom} from "@/composables/useGetFrom";
+import {whereId} from "@/lib/listUtils";
+import {reactiveComputed} from "@vueuse/core";
 
 const props = defineProps<{
   id: Nullable<string>
@@ -27,23 +24,22 @@ function close() {
   emit('close')
 }
 
-const projectsStore = useProjectsStore()
-const project = useReferenceById(projectsStore.projects, () => props.id)
-
-const form = reactive(createProjectForm(project.value))
+const projectsService = useProjectsService()
+const project = useGetFrom(projectsService.projects, whereId(props.id))
+const form = reactiveComputed(() => createProjectForm(project.value))
 
 function handleRemove() {
-  if (isNull(project.value)) {
+  if (isNotDefined(project.value)) {
     return
   }
 
-  projectsStore.removeProject(project.value)
+  projectsService.removeProject(project.value)
 
   close()
 }
 
 function handleSubmit() {
-  if (isNull(project.value)) {
+  if (isNotDefined(project.value)) {
     return
   }
 

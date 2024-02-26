@@ -1,8 +1,7 @@
-import type {ReactiveActivity} from "@/model/activity/";
+import type {ReactiveActivity} from "@/model/activity/types";
 import type {ProjectRow} from "@/components/settings/projects/table/types";
-import {isDefined} from "@/lib/utils";
-import type {ReactiveProject} from "@/model/project/";
-import {createEventShadow} from "@/model/eventShadow";
+import type {ReactiveProject} from "@/model/project/types";
+import {createEventShadow} from "@/model/eventShadow/model";
 
 function toActivityRow(activity: ReactiveActivity): ProjectRow {
   return {

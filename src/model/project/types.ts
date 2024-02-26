@@ -1,8 +1,7 @@
 import type {HasId} from "@/lib/types";
-import type {ReactiveActivity} from "@/model/activity/";
+import type {ReactiveActivity} from "@/model/activity/types";
 import type {Nullable} from "@/lib/utils";
-import type {LocalDateTime} from "@js-joda/core";
-import { Temporal } from 'temporal-polyfill'
+import {Temporal} from 'temporal-polyfill'
 
 
 export interface ProjectContext extends HasId {
@@ -13,7 +12,15 @@ export interface ProjectContext extends HasId {
   lastUsed: Temporal.PlainDateTime
 }
 
-export interface ReactiveProject extends ProjectContext {
+export interface ReactiveProject {
+  id: Readonly<ProjectContext['id']>
+  childActivities: ReadonlyArray<ReactiveActivity>
+  lastUsed: Readonly<ProjectContext['lastUsed']>
+  displayName: ProjectContext['displayName']
+  isBillable: ProjectContext['isBillable']
+  color: ProjectContext['color']
+  unsafeAddChildActivity: (activity: ReactiveActivity) => void
+  unsafeRemoveChildActivity: (activity: ReactiveActivity) => void
   lastUsedNow: () => void
   toSerialized: () => SerializedProject
 }

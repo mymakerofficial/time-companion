@@ -1,5 +1,4 @@
 <script setup lang="tsx">
-import {useProjectsStore} from "@/stores/projectsStore";
 import {ref} from "vue";
 import ResponsiveContainer from "@/components/common/layout/ResponsiveContainer.vue";
 import TableActions from "@/components/common/table/TableActions.vue";
@@ -9,37 +8,25 @@ import {
   type TableOptions, type VisibilityState
 } from "@tanstack/vue-table";
 import Table from "@/components/common/table/Table.vue";
-import {updater} from "@/helpers/table/tableHelpers";
+import {updater} from "@/lib/helpers/tableHelpers";
 import TableVisibilitySelect from "@/components/common/table/TableVisibilitySelect.vue";
-import {type DayTimeReport, calculateTimeReport, createTimeReport} from "@/lib/timeReport/calculateTimeReport";
-import {useCalendarStore} from "@/stores/calendarStore";
-import {isNotEmpty, whereDate} from "@/lib/listUtils";
+import {isNotEmpty} from "@/lib/listUtils";
 import {Button} from "@/components/ui/button";
 import {useOpenDialog} from "@/composables/useOpenDialog";
 import NewProjectDialog from "@/components/settings/projects/projectDialog/NewProjectDialog.vue";
-import {isNull} from "@/lib/utils";
 import {createReportColumns} from "@/components/report/reportColumns";
-import {daysInMonth, formatDate, today, withFormat} from "@/lib/neoTime";
+import {currentMonth, formatDate, today, withFormat} from "@/lib/neoTime";
+import {useTimeReportService} from "@/services/timeReportService";
+import {useProjectsService} from "@/services/projectsService";
+import type {DayTimeReport} from "@/lib/timeReport/types";
 
-const calendarStore = useCalendarStore()
-const projectsStore = useProjectsStore()
+const projectsService = useProjectsService()
+const timeReportService = useTimeReportService()
 
 const monthLabel = formatDate(today(), withFormat('MMMM'))
 const yearLabel = formatDate(today(), withFormat('YYYY'))
 
-const dates = daysInMonth(today())
-
-const data = dates.map((date) => {
-  const day = calendarStore.days.find(whereDate(date)) ?? null
-
-  if (isNull(day)) {
-    return createTimeReport({
-      date
-    })
-  }
-
-  return calculateTimeReport(day, projectsStore.projects)
-})
+const data = timeReportService.getMonthTimeReport(currentMonth())
 
 const columns = createReportColumns()
 
@@ -59,7 +46,7 @@ const tableOptions: Partial<TableOptions<DayTimeReport>> = {
 
 <template>
   <ResponsiveContainer class="my-16">
-    <template v-if="isNotEmpty(projectsStore.projects)">
+    <template v-if="isNotEmpty(projectsService.projects)">
       <Table :data="data" :columns="columns" :options="tableOptions" class="[&_tbody_>_tr:nth-child(odd)]:bg-muted/20 [&_tbody_>_tr:nth-child(odd):hover]:bg-muted/60">
         <template #actions="{ table }">
           <TableActions>
