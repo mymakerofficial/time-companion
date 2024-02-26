@@ -1,6 +1,6 @@
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import type {Nullable} from "@/lib/utils";
-import {check, isNotNull, isNull} from "@/lib/utils";
+import {check, isNotNull} from "@/lib/utils";
 import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
 import {useActiveEventStore} from "@/stores/activeEventStore";
 import {createEvent} from "@/model/calendarEvent/model";
@@ -29,9 +29,10 @@ export const useActiveEventService = createService<ActiveEventService>(() =>  {
     check(activeDayService.day!.events.includes(event),
       "Failed to set event as active event: Event is not in active day."
     )
-    check(isNull(activeEventStore.event),
-      "Failed to set event as active event: Active event is already set."
-    )
+
+    if (isNotNull(activeEventStore.event)) {
+      stopEvent()
+    }
 
     activeDayService.day!.unsafeAddEvent(event)
     activeEventStore.unsafeSetEvent(event)
