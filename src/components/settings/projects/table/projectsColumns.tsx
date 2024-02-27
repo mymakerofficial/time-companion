@@ -14,6 +14,7 @@ import ShadowBadge from "@/components/common/shadow/ShadowBadge.vue";
 import {formatDateTime, withFormat} from "@/lib/neoTime";
 import BillableSelectBadge from "@/components/common/inputs/billableSelectBadge/BillableSelectBadge.vue";
 import {h} from "vue";
+import ColorSelectBadge from "@/components/common/inputs/colorSelectBadge/ColorSelectBadge.vue";
 
 function getNameCell(value: ProjectRow['shadow']) {
   return <ShadowBadge shadow={value} variant="skeleton" size="md" class="font-medium" />
@@ -24,11 +25,7 @@ function getColorCell(value: ProjectRow['color']) {
     return null
   }
 
-  const { t } = useI18n()
-
-  const label = t(`common.colors.${value}`)
-
-  return <Badge color={value} variant="ghost"><span class="bg-primary size-1.5 mr-1 rounded-full" />{label}</Badge>
+  return h(ColorSelectBadge, { modelValue: value, 'onUpdate:modelValue': () => {} })
 }
 
 function getBillableCell(value: ProjectRow['isBillable']) {
