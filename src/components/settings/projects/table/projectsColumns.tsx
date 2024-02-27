@@ -12,6 +12,8 @@ import {useI18n} from "vue-i18n";
 import {Badge} from "@/components/ui/badge";
 import ShadowBadge from "@/components/common/shadow/ShadowBadge.vue";
 import {formatDateTime, withFormat} from "@/lib/neoTime";
+import BillableSelectBadge from "@/components/common/inputs/billableSelectBadge/BillableSelectBadge.vue";
+import {h} from "vue";
 
 function getNameCell(value: ProjectRow['shadow']) {
   return <ShadowBadge shadow={value} variant="skeleton" size="md" class="font-medium" />
@@ -26,7 +28,7 @@ function getColorCell(value: ProjectRow['color']) {
 
   const label = t(`common.colors.${value}`)
 
-  return <Badge color={value} variant="ghost"><Paintbrush class="size-3" />{label}</Badge>
+  return <Badge color={value} variant="ghost"><span class="bg-primary size-1.5 mr-1 rounded-full" />{label}</Badge>
 }
 
 function getBillableCell(value: ProjectRow['isBillable']) {
@@ -34,14 +36,7 @@ function getBillableCell(value: ProjectRow['isBillable']) {
     return null
   }
 
-  const { t } = useI18n()
-
-  const color = value ? 'green' : 'rose'
-  const label = value ? t(`common.labels.yes`) : t(`common.labels.no`)
-
-  const Icon = value ? Coins : Coffee
-
-  return <Badge color={color} variant="ghost"><Icon class="size-3" />{label}</Badge>
+  return h(BillableSelectBadge, { modelValue: value, 'onUpdate:modelValue': () => {} })
 }
 
 function getLastUsedCell(value: ProjectRow['lastUsed']) {
@@ -50,7 +45,9 @@ function getLastUsedCell(value: ProjectRow['lastUsed']) {
   }
 
   // TODO i18n
-  return formatDateTime(value, withFormat('dd/MM/yyyy HH:mm'))
+  const label = formatDateTime(value, withFormat('dd/MM/yyyy'))
+
+  return <span class="text-muted-foreground text-xs font-medium">{label}</span>
 }
 
 function getActionsCell(row: Row<ProjectRow>, options: ProjectColumnsOptions) {
