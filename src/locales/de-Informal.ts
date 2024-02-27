@@ -14,6 +14,8 @@ export default {
       save: 'Speichern',
       cancel: 'Abbrechen',
       delete: 'Löschen',
+      expandAll: 'Alle ausklappen',
+      collapseAll: 'Alle einklappen',
     },
     properties: {
       displayName: 'Name',

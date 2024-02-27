@@ -14,6 +14,8 @@ export default {
       save: 'Save',
       cancel: 'Cancel',
       delete: 'Delete',
+      expandAll: 'Expand all',
+      collapseAll: 'Collapse all',
     },
     properties: {
       displayName: 'Name',

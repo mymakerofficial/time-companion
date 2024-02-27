@@ -7,7 +7,7 @@ import {
 } from "lucide-vue-next";
 import {Button} from "@/components/ui/button";
 import type {ProjectRow} from "@/components/settings/projects/table/types";
-import {getSortableHeader} from "@/lib/helpers/tableHelpers";
+import {getSortableHeader, getToggleExpandHeader} from "@/lib/helpers/tableHelpers";
 import {useI18n} from "vue-i18n";
 import {Badge} from "@/components/ui/badge";
 import ShadowBadge from "@/components/common/shadow/ShadowBadge.vue";
@@ -89,22 +89,23 @@ export function  createProjectsColumns(
   return [
     columnHelper.accessor('shadow', {
       header: ({ column }) => getSortableHeader(column, t('settings.projects.table.columns.name')),
-      cell: (info) => getNameCell(info.getValue()),
+      cell: ({ getValue }) => getNameCell(getValue()),
     }),
     columnHelper.accessor('color', {
       header: ({ column }) => getSortableHeader(column, t('settings.projects.table.columns.color')),
-      cell: (info) => getColorCell(info.getValue()),
+      cell: ({ getValue }) => getColorCell(getValue()),
     }),
     columnHelper.accessor('isBillable', {
       header: ({ column }) => getSortableHeader(column, t('settings.projects.table.columns.isBillable')),
-      cell: (info) => getBillableCell(info.getValue()),
+      cell: ({ getValue }) => getBillableCell(getValue()),
     }),
     columnHelper.accessor('lastUsed', {
       header: ({ column }) => getSortableHeader(column, t('settings.projects.table.columns.lastUsed')),
-      cell: (info) => getLastUsedCell(info.getValue()),
+      cell: ({ getValue }) => getLastUsedCell(getValue()),
     }),
     columnHelper.display({
       id: 'actions',
+      header: ({ table }) => getToggleExpandHeader(table),
       cell: ({ row }) => getActionsCell(row, options),
       meta: {
         className: 'w-0',
