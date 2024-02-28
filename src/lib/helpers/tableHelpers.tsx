@@ -1,16 +1,46 @@
 import type {Ref} from "vue";
-import type {SortDirection, Table, Updater} from "@tanstack/vue-table";
+import type {CellContext, RowData, SortDirection, Table, Updater} from "@tanstack/vue-table";
 import type {Column} from "@tanstack/table-core";
 import type {Icon as LucideIcon} from "lucide-vue-next";
 import {ArrowDown, ArrowDownUp, ArrowUp, ChevronsDownUp, ChevronsUpDown} from "lucide-vue-next";
 import {Button} from "@/components/ui/button";
 import {useI18n} from "vue-i18n";
 
+/**
+ * A function that updates a row's data.
+ * @param original The original row data. This should not be modified directly but instead used to find the original object in the data source and update it.
+ * @param columnAccessor The column accessor of the cell being updated.
+ * @param value The new value for the cell.
+ */
+export type DataUpdater<TRow extends RowData> = (original: TRow, columnAccessor: keyof TRow, value: unknown) => void
+
 export function updater<T>(updaterOrValue: Updater<T>, value: Ref<T>) {
   value.value =
     typeof updaterOrValue === 'function'
       ? (updaterOrValue as (old: T) => T)(value.value)
       : updaterOrValue
+}
+
+export function defineTableCell<TData extends RowData, TKey extends keyof TData>
+  (cellFactory: (value: TData[TKey]) => unknown):
+  (context: CellContext<TData, TData[TKey]>) => unknown {
+  return (context) => {
+    const value = context.getValue() as TData[TKey]
+    return cellFactory(value)
+  }
+}
+
+export function defineEditableTableCell<TData extends RowData, TKey extends keyof TData>
+  (cellFactory: (value: TData[TKey], updateValue: (newValue: TData[TKey]) => void) => unknown):
+  (context: CellContext<TData, TData[TKey]>, updateData: DataUpdater<TData>) => unknown {
+  return (context, updateData) => {
+    const value = context.getValue() as TData[TKey]
+    const updateValue = (newValue: TData[TKey]) => {
+      updateData(context.row.original, context.column.id as TKey, newValue)
+    }
+
+    return cellFactory(value, updateValue)
+  }
 }
 
 export function getSortableHeader<T>(column: Column<T>, label: string) {

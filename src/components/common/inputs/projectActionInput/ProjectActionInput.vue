@@ -17,6 +17,7 @@ import {createActivity} from "@/model/activity/model";
 import {projectActionInputBadgeVariants} from "@/components/common/inputs/projectActionInput/variants";
 import type {BadgeVariants} from "@/components/ui/badge";
 import {useProjectsService} from "@/services/projectsService";
+import EditableShadowBadge from "@/components/common/shadow/EditableShadowBadge.vue";
 
 const projectModel = defineModel<Nullable<ReactiveProject>>('project', { required: false, default: null })
 const activityModel = defineModel<Nullable<ReactiveActivity>>('activity', { required: false, default: null })
@@ -225,7 +226,7 @@ const placeholder = computed(() => {
         v-bind="$attrs"
       >
         <template #leading>
-          <ShadowBadge :shadow="selected" :variant="variant" :size="size" :class="projectActionInputBadgeVariants({ size })" />
+          <EditableShadowBadge :shadow="selected" :variant="variant" :size="size" :class="projectActionInputBadgeVariants({ size })" />
         </template>
         <template #input="props">
           <ComboboxInput ref="input" v-bind="props" />

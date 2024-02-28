@@ -8,13 +8,23 @@ import {cva} from "class-variance-authority";
 import type {ReactiveProject} from "@/model/project/types";
 import type {ReactiveActivity} from "@/model/activity/types";
 
-const props = defineProps<{
+export interface ShadowBadgeProps {
   project?: Nullable<ReactiveProject>
   activity?: Nullable<ReactiveActivity>
   shadow?: Nullable<ReactiveCalendarEventShadow>
   variant?: NonNullable<BadgeVariants>['variant']
   size?: NonNullable<BadgeVariants>['size']
   class?: HTMLAttributes['class']
+}
+
+const props = defineProps<ShadowBadgeProps>()
+
+defineSlots<{
+  leading(): any
+  project(props: { value: Nullable<ReactiveProject> }): any
+  activity(props: { value: Nullable<ReactiveActivity> }): any
+  part(props: { value: ReactiveProject | ReactiveActivity }): any
+  trailing(): any
 }>()
 
 const project = computed(() => props.project ?? props.shadow?.project ?? null)

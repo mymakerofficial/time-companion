@@ -13,6 +13,8 @@ function toActivityRow(activity: ReactiveActivity): ProjectRow {
     isBillable: null,
     color: activity.color,
     lastUsed: activity.lastUsed,
+    activities: [],
+    parentProjectId: activity.parentProject?.id ?? null,
     isProject: false,
   }
 }
@@ -27,6 +29,7 @@ export function toProjectRow(project: ReactiveProject): ProjectRow {
     color: project.color,
     lastUsed: project.lastUsed,
     activities: project.childActivities.map(toActivityRow),
+    parentProjectId: null,
     isProject: true,
   }
 }
