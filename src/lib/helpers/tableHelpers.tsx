@@ -6,7 +6,13 @@ import {ArrowDown, ArrowDownUp, ArrowUp, ChevronsDownUp, ChevronsUpDown} from "l
 import {Button} from "@/components/ui/button";
 import {useI18n} from "vue-i18n";
 
-export type DataUpdater<TRow extends RowData> = (rowIndex: number, columnAccessor: keyof TRow, value: unknown) => void
+/**
+ * A function that updates a row's data.
+ * @param original The original row data. This should not be modified directly but instead used to find the original object in the data source and update it.
+ * @param columnAccessor The column accessor of the cell being updated.
+ * @param value The new value for the cell.
+ */
+export type DataUpdater<TRow extends RowData> = (original: TRow, columnAccessor: keyof TRow, value: unknown) => void
 
 export function updater<T>(updaterOrValue: Updater<T>, value: Ref<T>) {
   value.value =
@@ -30,7 +36,7 @@ export function defineEditableTableCell<TData extends RowData, TKey extends keyo
   return (context, updateData) => {
     const value = context.getValue() as TData[TKey]
     const updateValue = (newValue: TData[TKey]) => {
-      updateData(context.row.index, context.column.id as TKey, newValue)
+      updateData(context.row.original, context.column.id as TKey, newValue)
     }
 
     return cellFactory(value, updateValue)

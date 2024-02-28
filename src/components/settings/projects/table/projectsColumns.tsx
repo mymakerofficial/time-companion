@@ -22,10 +22,6 @@ const getNameCell = defineTableCell<ProjectRow, 'shadow'>((value) => {
 })
 
 const getColorCell = defineEditableTableCell<ProjectRow, 'color'>((value, updateValue) => {
-  if (isNull(value)) {
-    return null
-  }
-
   return h(ColorSelectBadge, { modelValue: value, 'onUpdate:modelValue': updateValue })
 })
 

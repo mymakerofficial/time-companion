@@ -12,6 +12,7 @@ import {useDialogStore} from "@/stores/dialogStore";
 import {toProjectRow} from "@/components/settings/projects/table/helpers";
 import {updater} from "@/lib/helpers/tableHelpers";
 import type {MaybeReadonly} from "@/lib/utils";
+import {whereId} from "@/lib/listUtils";
 
 const props = defineProps<{
   projects: MaybeReadonly<Array<ReactiveProject>>
@@ -20,9 +21,18 @@ const props = defineProps<{
 const dialogStore = useDialogStore()
 
 const projectsColumns = createProjectsColumns({
-  updateData: (rowIndex, columnAccessor, value) => {
-    // @ts-ignore
-    props.projects[rowIndex][columnAccessor] = value
+  updateData: (original, columnAccessor, value) => {
+    const projectId = original.parentProjectId ?? original.id
+    const projectIndex = props.projects.findIndex(whereId(projectId))
+
+    if (original.isProject) {
+      // @ts-ignore types are not the same but compatible in this case
+      props.projects[projectIndex][columnAccessor] = value
+    } else {
+      const activityIndex = props.projects[projectIndex].childActivities.findIndex(whereId(original.id))
+      // @ts-ignore types are not the same but compatible in this case
+      props.projects[projectIndex].childActivities[activityIndex][columnAccessor] = value
+    }
   },
   onOpenEditProjectDialog: (id) => {
     dialogStore.openDialog(<EditProjectDialog id={id} />)

@@ -8,6 +8,7 @@ export interface ProjectRow {
   isBillable: Nullable<boolean>
   color: ReactiveProject['color']
   lastUsed: ReactiveProject['lastUsed']
-  activities?: ProjectRow[]
+  activities: ProjectRow[]
+  parentProjectId: Nullable<string>
   isProject: boolean
 }
