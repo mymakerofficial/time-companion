@@ -5,12 +5,15 @@ import {useEmitAsProps} from "radix-vue";
 import InputPrimitive from "@/components/ui/input/InputPrimitive.vue";
 import {inputContainerVariants, inputInputVariants, type InputVariants} from "@/components/ui/input/index";
 
-const props = withDefaults(defineProps<{
-  modelValue?: string | number
+export interface InputProps {
   size?: InputVariants['size']
   type?: HTMLAttributes['inputmode']
   class?: HTMLAttributes['class']
   inputClass?: HTMLAttributes['class']
+}
+
+const props = withDefaults(defineProps<InputProps & {
+  modelValue?: string | number
 }>(), {
   modelValue: '',
   type: 'text',

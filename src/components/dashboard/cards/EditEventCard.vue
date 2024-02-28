@@ -9,6 +9,7 @@ import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 import ProjectActionInput from "@/components/common/inputs/projectActionInput/ProjectActionInput.vue";
 import DateTimeInput from "@/components/common/inputs/timeInput/DateTimeInput.vue";
 import {durationBetween, formatDuration} from "@/lib/neoTime";
+import DurationInput from "@/components/common/inputs/timeInput/DurationInput.vue";
 
 const props = defineProps<{
   event: ReactiveCalendarEvent
@@ -26,14 +27,6 @@ function handleContinue() {
 function handleRemove() {
   emit('remove', props.event)
 }
-
-const durationLabel = computed(() => {
-  if (isNull(props.event) || isNull(props.event.endAt)) {
-    return '00:00:00'
-  }
-
-  return formatDuration(durationBetween(props.event.startAt, props.event.endAt))
-})
 </script>
 
 <template>
@@ -49,10 +42,10 @@ const durationLabel = computed(() => {
         />
       </div>
       <div class="flex flex-row items-center gap-2">
-        <DateTimeInput v-if="event.startAt" v-model="event.startAt" placeholder="00:00" size="lg" class="border-none w-14 text-sm" />
+        <DateTimeInput v-if="event.startAt" v-model="event.startAt" placeholder="00:00" size="lg" class="border-none w-14 text-sm" input-class="text-center" />
         <ArrowRight v-show="event.endAt" class="size-4 text-muted-foreground" />
-        <DateTimeInput v-if="event.endAt"  v-model="event.endAt" placeholder="00:00" size="lg" class="border-none w-14 text-sm" />
-        <time class="mx-4 text-xl font-medium tracking-wide">{{ durationLabel }}</time>
+        <DateTimeInput v-if="event.endAt"  v-model="event.endAt" placeholder="00:00" size="lg" class="border-none w-14 text-sm" input-class="text-center" />
+        <DurationInput v-if="event.endAt" v-model="event.duration" size="lg" class="border-none w-20 text-xl" input-class="text-center" />
       </div>
       <div class="flex flex-row items-center gap-2">
         <Button v-if="isNotNull(event.project)" @click="handleContinue()">{{ $t('dashboard.controls.continueEvent') }}</Button>

@@ -50,7 +50,11 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
       return durationBetween(startAt.value, endAt.value)
     },
     set(value) {
-      // TODO
+      check(value.sign >= 0,
+        'Tried to set duration to a negative value.'
+      )
+
+      endAt.value = startAt.value.add(value)
     }
   })
 
