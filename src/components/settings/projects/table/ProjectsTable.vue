@@ -20,6 +20,10 @@ const props = defineProps<{
 const dialogStore = useDialogStore()
 
 const projectsColumns = createProjectsColumns({
+  updateData: (rowIndex, columnAccessor, value) => {
+    // @ts-ignore
+    props.projects[rowIndex][columnAccessor] = value
+  },
   onOpenEditProjectDialog: (id) => {
     dialogStore.openDialog(<EditProjectDialog id={id} />)
   },
