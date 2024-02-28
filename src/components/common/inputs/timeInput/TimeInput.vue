@@ -1,37 +1,24 @@
 <script setup lang="ts">
-import {ref, watch} from "vue";
-import {Input} from "@/components/ui/input";
-import {durationToTime, formatTime, withFormat} from "@/lib/neoTime";
-import {parseHumanDurationWithEquation} from "@/lib/parsers";
-import {isNull} from "@/lib/utils";
+import {computed, reactive} from "vue";
+import {absDuration, durationSinceStartOfDay, durationToTime} from "@/lib/neoTime";
 import {Temporal} from "temporal-polyfill";
+import DurationInput from "@/components/common/inputs/timeInput/DurationInput.vue";
+import type {InputProps} from "@/components/ui/input/Input.vue";
 
 const model = defineModel<Temporal.PlainTime>({ required: true })
 
-const inputValue = ref('')
+const props = defineProps<Omit<InputProps, 'type'>>()
 
-watch(
-  () => model.value,
-  () => setInputFromModel(),
-  { immediate: true }
-)
-
-function setInputFromModel() {
-  inputValue.value = formatTime(model.value, withFormat('HH:mm'))
-}
-
-function handleChange() {
-  const parsedDuration = parseHumanDurationWithEquation(inputValue.value)
-
-  if (isNull(parsedDuration)) {
-    setInputFromModel()
-    return
+const forwardModel = computed<Temporal.Duration>({
+  get() {
+    return durationSinceStartOfDay(model.value)
+  },
+  set(value) {
+    model.value = durationToTime(absDuration(value))
   }
-
-  model.value = durationToTime(parsedDuration)
-}
+})
 </script>
 
 <template>
-  <Input v-model="inputValue" @change="handleChange" />
+  <DurationInput v-bind="props" v-model="forwardModel" />
 </template>

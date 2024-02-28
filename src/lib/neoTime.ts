@@ -305,6 +305,14 @@ export function negateDuration(duration: Temporal.Duration) {
   return Temporal.Duration.from({ milliseconds: -duration.total({unit: 'milliseconds'}) })
 }
 
+export function absDuration(duration: Temporal.Duration) {
+  if (duration.sign === -1) {
+    return negateDuration(duration)
+  }
+
+  return duration
+}
+
 export function sumOfDurations(durations: Temporal.Duration[]) {
   return durations.reduce((acc, duration) => acc.add(duration), durationZero())
 }
