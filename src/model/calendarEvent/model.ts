@@ -1,7 +1,7 @@
 import {computed, reactive} from "vue";
 import {v4 as uuid} from "uuid";
-import {isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
-import {dateTimeZero, durationBetween, durationZero, isAfter, isBefore} from "@/lib/neoTime";
+import {check, isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
+import {dateTimeIsAfter, dateTimeIsBefore, dateTimeZero, durationBetween, durationZero} from "@/lib/neoTime";
 import {createEventShadow} from "@/model/eventShadow/model";
 import type {CalendarEventContext, CalendarEventInit, ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import {serializeEvent} from "@/model/calendarEvent/serializer";
@@ -22,9 +22,9 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
   const startAt = computed<CalendarEventContext['startAt']>({
     get() { return ctx.startAt },
     set(value) {
-      if (isNotNull(endAt.value) && isAfter(value, endAt.value)) {
-        throw Error('Tried to set startAt to a value after endAt.')
-      }
+      check(isNull(endAt.value) || dateTimeIsBefore(value, endAt.value),
+        'Tried to set startAt to a value after endAt.'
+      )
 
       ctx.startAt = value
     }
@@ -33,14 +33,9 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
   const endAt = computed<CalendarEventContext['endAt']>({
     get() { return ctx.endAt },
     set(value) {
-      if (isNull(value)) {
-        ctx.endAt = null
-        return
-      }
-
-      if (isBefore(value, startAt.value)) {
-        throw Error('Tried to set endAt to a value before startAt.')
-      }
+      check(isNull(value) || dateTimeIsAfter(value, startAt.value),
+        'Tried to set endAt to a value before startAt.'
+      )
 
       ctx.endAt = value
     }
@@ -48,7 +43,7 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
 
   const duration = computed<ReactiveCalendarEvent['duration']>({
     get() {
-      if (isNull(startAt.value) || isNull(endAt.value)) {
+      if (isNull(endAt.value)) {
         return durationZero()
       }
 

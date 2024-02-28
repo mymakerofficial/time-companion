@@ -1,4 +1,4 @@
-import {DateTimeFormatter, Duration, LocalDate, LocalDateTime, LocalTime, nativeJs} from "@js-joda/core";
+import {DateTimeFormatter, Duration, LocalDate, LocalDateTime, LocalTime} from "@js-joda/core";
 import {Locale} from "@js-joda/locale_en";
 import {Temporal} from "temporal-polyfill";
 import {fillZero, isNotNull, round} from "@/lib/utils";
@@ -216,12 +216,28 @@ export function formatDuration(duration: Temporal.Duration, options: { includeSe
   return [hours, minutes, includeSeconds ? seconds : null].filter(isNotNull).join(':')
 }
 
-export function isBefore<T extends Temporal.PlainDateTimeLike>(start: T, end: T) {
-  return Temporal.PlainTime.compare(start, end) < 0
+export function timeCompare(a: Temporal.PlainTime, b: Temporal.PlainTime) {
+  return Temporal.PlainTime.compare(a, b)
 }
 
-export function isAfter<T extends Temporal.PlainDateTimeLike>(start: T, end: T) {
-  return Temporal.PlainTime.compare(start, end) > 0
+export function timeIsBefore(start: Temporal.PlainTime, end: Temporal.PlainTime) {
+  return timeCompare(start, end) < 0
+}
+
+export function timeIsAfter(start: Temporal.PlainTime, end: Temporal.PlainTime) {
+  return timeCompare(start, end) > 0
+}
+
+export function dateTimeCompare(a: Temporal.PlainDateTime, b: Temporal.PlainDateTime) {
+  return Temporal.PlainDateTime.compare(a, b)
+}
+
+export function dateTimeIsBefore(start: Temporal.PlainDateTime, end: Temporal.PlainDateTime) {
+  return dateTimeCompare(start, end) < 0
+}
+
+export function dateTimeIsAfter(start: Temporal.PlainDateTime, end: Temporal.PlainDateTime) {
+  return dateTimeCompare(start, end) > 0
 }
 
 export function isSameDay(date1: Temporal.PlainDate, date2: Temporal.PlainDate) {

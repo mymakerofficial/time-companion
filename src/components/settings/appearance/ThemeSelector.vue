@@ -8,7 +8,6 @@ import {computed} from "vue";
 import {isNotNull} from "@/lib/utils";
 import {useProjectsService} from "@/services/projectsService";
 import {useActiveDayService} from "@/services/activeDayService";
-import {isAfter} from "@/lib/neoTime";
 
 const activeDayService = useActiveDayService()
 const projectsService = useProjectsService()
@@ -30,7 +29,7 @@ const eventColors = computed(() => {
 
   if (projectsService.projects.length >= 3) {
     return [...projectsService.projects]
-      .sort((a, b) => isAfter(a.lastUsed, b.lastUsed) ? -1 : 1)
+      .sort((a, b) => timeIsAfter(a.lastUsed, b.lastUsed) ? -1 : 1)
       .slice(0, 3)
       .map((project) => project.color)
   }

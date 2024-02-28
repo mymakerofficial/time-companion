@@ -5,11 +5,11 @@ import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
 import {createEventShadow} from "@/model/eventShadow/model";
 import type {Nullable} from "@/lib/utils";
 import {isNull} from "@/lib/utils";
-import {isAfter} from "@/lib/neoTime";
 import {useProjectsService} from "@/services/projectsService";
+import {dateTimeCompare} from "@/lib/neoTime";
 
 function byLastUsed(a: ReactiveProject | ReactiveActivity, b: ReactiveProject | ReactiveActivity) {
-  return isAfter(a.lastUsed, b.lastUsed) ? -1 : 1
+  return -dateTimeCompare(a.lastUsed, b.lastUsed)
 }
 
 export interface UseQuickAccessOptions {
@@ -38,7 +38,10 @@ export function useQuickAccess(options?: MaybeRefOrGetter<UseQuickAccessOptions>
       .filter((project) => isNull(projectFilter) || project === projectFilter)
       .flatMap((project) => {
         return [
-          ...[...project.childActivities].sort(byLastUsed).map((activity) => createEventShadow({ project, activity })).slice(0, maxActivitiesPerProject),
+          ...[...project.childActivities]
+            .sort(byLastUsed)
+            .map((activity) => createEventShadow({ project, activity }))
+            .slice(0, maxActivitiesPerProject),
           createEventShadow({ project })
         ]
       })
