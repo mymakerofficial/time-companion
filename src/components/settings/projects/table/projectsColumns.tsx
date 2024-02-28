@@ -11,14 +11,14 @@ import {
   getToggleExpandHeader
 } from "@/lib/helpers/tableHelpers";
 import {useI18n} from "vue-i18n";
-import ShadowBadge from "@/components/common/shadow/ShadowBadge.vue";
 import {formatDateTime, withFormat} from "@/lib/neoTime";
 import BillableSelectBadge from "@/components/common/inputs/billableSelectBadge/BillableSelectBadge.vue";
 import {h} from "vue";
 import ColorSelectBadge from "@/components/common/inputs/colorSelectBadge/ColorSelectBadge.vue";
+import EditableShadowBadge from "@/components/common/shadow/EditableShadowBadge.vue";
 
 const getNameCell = defineTableCell<ProjectRow, 'shadow'>((value) => {
-  return <ShadowBadge shadow={value} variant="skeleton" size="md" class="font-medium" />
+  return <EditableShadowBadge shadow={value} variant="skeleton" size="md" class="font-medium" />
 })
 
 const getColorCell = defineEditableTableCell<ProjectRow, 'color'>((value, updateValue) => {
