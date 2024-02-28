@@ -13,9 +13,9 @@ export interface ProjectContext extends HasId {
 }
 
 export interface ReactiveProject {
-  id: Readonly<ProjectContext['id']>
+  readonly id: ProjectContext['id']
   childActivities: ReadonlyArray<ReactiveActivity>
-  lastUsed: Readonly<ProjectContext['lastUsed']>
+  readonly lastUsed: ProjectContext['lastUsed']
   displayName: ProjectContext['displayName']
   isBillable: ProjectContext['isBillable']
   color: ProjectContext['color']
