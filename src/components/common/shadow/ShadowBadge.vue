@@ -23,7 +23,7 @@ defineSlots<{
   leading(): any
   project(props: { value: Nullable<ReactiveProject> }): any
   activity(props: { value: Nullable<ReactiveActivity> }): any
-  part(props: { value: Nullable<ReactiveProject | ReactiveActivity> }): any
+  part(props: { value: ReactiveProject | ReactiveActivity }): any
   trailing(): any
 }>()
 
