@@ -4,6 +4,8 @@ import {vProvideColor} from "@/directives/vProvideColor";
 import {PencilLine, Play} from "lucide-vue-next";
 import {useQuickAccess} from "@/composables/useQuickAccess";
 import ShadowBadge from "@/components/common/shadow/ShadowBadge.vue";
+import {useActiveEventService} from "@/services/activeEventService";
+import {computed} from "vue";
 
 const emit = defineEmits<{
   start: [shadow: ReactiveCalendarEventShadow]
@@ -13,7 +15,12 @@ defineProps<{
   iconPencil?: boolean
 }>()
 
-const shadows = useQuickAccess()
+const activeEventService = useActiveEventService()
+const activeEventShadow = computed(() => activeEventService.event?.createShadow() ?? null)
+
+const shadows = useQuickAccess(() => ({
+  exclude: activeEventShadow.value,
+}))
 
 function handleClick(shadow: ReactiveCalendarEventShadow) {
   emit('start', shadow)
