@@ -166,6 +166,16 @@ export default {
         }
       }
     },
+    general: {
+      title: 'General',
+      description: 'General calendar settings',
+      sections: {
+        workingHours: {
+          title: 'Working Hours',
+          description: 'How many hours do you work per day?',
+        },
+      },
+    },
     appearance: {
       title: 'Appearance',
       description: 'Customize the look and feel of the app',

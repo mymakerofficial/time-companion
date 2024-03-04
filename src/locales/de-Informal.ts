@@ -166,6 +166,16 @@ export default {
         }
       }
     },
+    general: {
+      title: 'Allgemein',
+      description: 'Allgemeine Einstellungen',
+      sections: {
+        workingHours: {
+          title: 'Arbeitsstunden',
+          description: 'Arbeitsstunden pro Tag',
+        },
+      },
+    },
     appearance: {
       title: 'Aussehen',
       description: 'Mach dir die Welt, wie sie dir gefällt.',

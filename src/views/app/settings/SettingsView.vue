@@ -10,6 +10,7 @@ const { t } = useI18n()
 const links = computed<NavLink[]>(() => [
   { label: t('settings.projects.title'), to: { name: 'app-settings-projects' } },
   { label: t('settings.reminders.title'), to: { name: 'app-settings-reminders' } },
+  { label: t('settings.general.title'), to: { name: 'app-settings-general' } },
   { label: t('settings.appearance.title'), to: { name: 'app-settings-appearance' } },
 ])
 </script>

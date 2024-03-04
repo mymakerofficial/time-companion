@@ -32,6 +32,11 @@ const router = createRouter({
           component: () => import('../views/app/settings/SettingsRemindersView.vue'),
         },
         {
+          path: 'preferences',
+          name: 'app-settings-general',
+          component: () => import('../views/app/settings/SettingsGeneralView.vue'),
+        },
+        {
           path: 'appearance',
           name: 'app-settings-appearance',
           component: () => import('../views/app/settings/SettingsAppearanceView.vue'),
