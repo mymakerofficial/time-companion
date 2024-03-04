@@ -1,7 +1,11 @@
-import {isNull} from "@/lib/utils";
+import {isNotDefined, isNull} from "@/lib/utils";
 
 export function useLocalStorage<T>(key: string, defaultValue: T) {
-  function set(value: T): T {
+  function set(value?: T): T {
+    if (isNotDefined(value)) {
+      return set(defaultValue)
+    }
+
     localStorage.setItem(key, JSON.stringify(value))
     return value
   }

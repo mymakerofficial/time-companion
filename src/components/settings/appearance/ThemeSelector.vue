@@ -2,23 +2,19 @@
 import RadioGroup from "@/components/ui/radio-group/RadioGroup.vue";
 import RadioGroupItem from "@/components/ui/radio-group/RadioGroupItem.vue";
 import Label from "@/components/ui/label/Label.vue";
-import {useColorMode} from "@vueuse/core";
 import {vProvideColor} from "@/directives/vProvideColor";
 import {computed} from "vue";
 import {isNotNull} from "@/lib/utils";
 import {useProjectsService} from "@/services/projectsService";
 import {useActiveDayService} from "@/services/activeDayService";
 import {dateTimeCompare} from "@/lib/neoTime";
+import {useThemeService} from "@/services/themeService";
+import {Switch} from "@/components/ui/switch";
 
 const activeDayService = useActiveDayService()
 const projectsService = useProjectsService()
 
-const themes = ['dark', 'light']
-
-const theme = useColorMode({
-  attribute: 'data-theme',
-  storageKey: 'time-companion-theme',
-})
+const themeService = useThemeService()
 
 const eventColors = computed(() => {
   if (isNotNull(activeDayService.day) && activeDayService.day.events.length >= 3) {
@@ -41,9 +37,13 @@ const eventColors = computed(() => {
 </script>
 
 <template>
-  <RadioGroup v-model="theme">
+  <div class="flex items-center gap-4 rounded-md border p-4 mb-8">
+    <Switch v-model:checked="themeService.isAuto" />
+    <Label>{{ $t('common.themes.auto') }}</Label>
+  </div>
+  <RadioGroup v-model="themeService.theme">
     <div class="flex flex-wrap gap-8">
-      <template v-for="theme in themes" :key="theme.value">
+      <template v-for="theme in themeService.availableThemes.filter((it) => it !== 'auto')" :key="theme.value">
         <div class="aspect-video w-2/5 flex flex-col rounded-md border overflow-hidden">
           <div :data-theme="theme" class="flex-grow overflow-hidden border-b bg-background text-foreground">
             <div class="grid grid-cols-12 h-full">

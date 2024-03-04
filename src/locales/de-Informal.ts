@@ -50,6 +50,7 @@ export default {
       rose: 'Rose',
     },
     themes: {
+      auto: 'Auto',
       dark: 'Dunkel',
       light: 'Hell',
     },

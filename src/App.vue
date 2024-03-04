@@ -8,18 +8,15 @@ import DialogProvider from "@/components/common/dialog/DialogProvider.vue";
 import {useI18n} from "vue-i18n";
 import {computed} from "vue";
 import {today} from "@/lib/neoTime";
-import {useColorMode} from "@vueuse/core";
-import {useLocaleStore} from "@/stores/settings/localeStore";
 import {useActiveDayService} from "@/services/activeDayService";
 import {useCalendarService} from "@/services/calendarService";
 import {useRemindersService} from "@/services/remindersService";
+import {useLocaleService} from "@/services/localeService";
+import {useThemeService} from "@/services/themeService";
 
 // initialize appearance settings
-useLocaleStore()
-useColorMode({
-  attribute: 'data-theme',
-  storageKey: 'time-companion-theme',
-})
+useLocaleService()
+useThemeService()
 
 const calendarService = useCalendarService()
 const remindersService = useRemindersService()
