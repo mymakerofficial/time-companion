@@ -16,7 +16,7 @@ export const useSettingsStore = defineStore('settings', () => {
     values: {
       locale: 'en-US',
       theme: 'auto',
-      workingHours: 'PT8H',
+      workingDuration: 'PT8H',
     },
     version: 0,
   })
@@ -41,14 +41,14 @@ export const useSettingsStore = defineStore('settings', () => {
     set: (value: string) => values.theme = value,
   })
 
-  const workingHours = computed({
-    get: () => parseDuration(values.workingHours),
-    set: (value: Temporal.Duration) => values.workingHours = formatDurationIso(value),
+  const workingDuration = computed({
+    get: () => parseDuration(values.workingDuration),
+    set: (value: Temporal.Duration) => values.workingDuration = formatDurationIso(value),
   })
 
   return {
     locale,
     theme,
-    workingHours,
+    workingDuration,
   }
 })

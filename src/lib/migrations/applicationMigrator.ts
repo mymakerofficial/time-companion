@@ -20,7 +20,7 @@ const migrations = [
       values: {
         locale,
         theme,
-        workingHours: 'PT8H',
+        workingDuration: 'PT8H',
       },
     }).set()
 

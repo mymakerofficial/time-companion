@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import TimeInput from "@/components/common/inputs/timeInput/TimeInput.vue";
-import {ref} from "vue";
-import {durationToTime, hours} from "@/lib/neoTime";
+import DurationInput from "@/components/common/inputs/timeInput/DurationInput.vue";
+import {useWorkingDurationService} from "@/services/workingDurationService";
 
-const workingHours = ref(durationToTime(hours(8)))
+const workingDurationService = useWorkingDurationService()
 </script>
 
 <template>
-  <div class="flex items-center gap-2">
-    <TimeInput v-model="workingHours" class="w-16" input-class="text-center"/>
-    <span class="text-muted-foreground">h/day</span>
-  </div>
+  <DurationInput
+    v-model="workingDurationService.workingDuration"
+    class="w-16"
+    input-class="text-center"
+  />
 </template>
