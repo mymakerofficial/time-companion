@@ -3,6 +3,7 @@ import Combobox, {type ComboboxProps} from "@/components/common/inputs/combobox/
 import {useProjectsService} from "@/services/projectsService";
 import type {ReactiveProject} from "@/model/project/types";
 import type {Nullable} from "@/lib/utils";
+import {createProject} from "@/model/project/model";
 
 const model = defineModel<Nullable<ReactiveProject>>({ required: true })
 
@@ -13,14 +14,26 @@ const props = defineProps<Pick<ComboboxProps<ReactiveProject, false>,
   'emptyLabel'
 >>()
 
-const { projects } = useProjectsService()
+const projectsService = useProjectsService()
+
+function handleCreate(displayName: string) {
+  const project = createProject({
+    displayName
+  }, { randomColor: true})
+
+  projectsService.addProject(project)
+
+  model.value = project
+}
 </script>
 
 <template>
   <Combobox
     v-bind="props"
     v-model="model"
-    :options="projects"
+    :options="projectsService.projects"
     :display-value="(project) => project?.displayName"
+    allow-create
+    @create="handleCreate"
   />
 </template>
