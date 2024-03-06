@@ -54,7 +54,12 @@ export const useWorkingDurationService = createService<WorkingDurationService>((
 
     return normalWorkingDuration.value
       .subtract(totalBillableDuration)
-      .add(getBreakDurationLeftOnDay(day, endAtFallback))
+      .add(
+        maxDuration(
+          getBreakDurationLeftOnDay(day, endAtFallback),
+          durationZero()
+        )
+      )
   }
 
   function getPredictedEndOfDay(day: ReactiveCalendarDay) {
@@ -66,22 +71,13 @@ export const useWorkingDurationService = createService<WorkingDurationService>((
       return null
     }
 
-    if (day.events.length === 1) {
-      return lastBillableEvent.startAt
-        .add(normalTotalDuration.value)
+    if (isNotNull(lastBillableEvent.endAt)) {
+      return null
     }
 
-    const { totalBillableDuration } = timeReportService.getDayTimeReport(day)
+    const durationLeft = getDurationLeftOnDay(day)
 
-    return lastBillableEvent.startAt
-      .add(normalWorkingDuration.value)
-      .subtract(totalBillableDuration)
-      .add(
-        maxDuration(
-          getBreakDurationLeftOnDay(day),
-          durationZero()
-        )
-      )
+    return lastBillableEvent.startAt.add(durationLeft)
   }
 
   return reactive({
