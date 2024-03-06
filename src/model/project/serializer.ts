@@ -1,4 +1,4 @@
-import type {ProjectInit, SerializedProject, ProjectContext} from "@/model/project/types";
+import type {ProjectContext, ProjectInit, SerializedProject} from "@/model/project/types";
 import {formatDateTime, parseDateTime} from "@/lib/neoTime";
 
 export function fromSerializedProject(serialized: SerializedProject): ProjectInit {
@@ -8,6 +8,7 @@ export function fromSerializedProject(serialized: SerializedProject): ProjectIni
     displayName: serialized.displayName,
     color: serialized.color,
     isBillable: serialized.isBillable,
+    isBreak: serialized.isBreak,
     lastUsed: parseDateTime(serialized.lastUsed),
   }
 }
@@ -19,6 +20,7 @@ export function serializeProject(project: ProjectContext): SerializedProject {
     displayName: project.displayName,
     color: project.color,
     isBillable: project.isBillable,
+    isBreak: project.isBreak,
     lastUsed: formatDateTime(project.lastUsed),
   }
 }

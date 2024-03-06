@@ -14,9 +14,14 @@ export function createProject(init: ProjectInit, options?: ProjectOptions): Reac
     displayName: init.displayName ?? '',
     color: init.color ?? (options?.randomColor ? randomTailwindColor() : null),
     isBillable: init.isBillable ?? true,
+    isBreak: init.isBreak ?? false,
     childActivities: init.childActivities ?? [],
     lastUsed: init.lastUsed ?? now(),
   })
+
+  function unsafeSetIsBreak(value: boolean) {
+    ctx.isBreak = value
+  }
 
   function unsafeAddChildActivity(activity: ReactiveActivity) {
     ctx.childActivities.push(activity)
@@ -43,12 +48,14 @@ export function createProject(init: ProjectInit, options?: ProjectOptions): Reac
       'id',
       'lastUsed',
       'childActivities',
+      'isBreak',
     ]),
     ...mapWritable(ctx, [
       'displayName',
       'color',
       'isBillable',
     ]),
+    unsafeSetIsBreak,
     unsafeAddChildActivity,
     unsafeRemoveChildActivity,
     lastUsedNow,

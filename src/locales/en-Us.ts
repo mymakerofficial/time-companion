@@ -50,6 +50,7 @@ export default {
       rose: 'Rose',
     },
     themes: {
+      auto: 'Auto',
       dark: 'Dark',
       light: 'Light',
     },
@@ -72,6 +73,7 @@ export default {
       displayName: '@:common.properties.displayName',
       color: '@:common.properties.color',
       isBillable: '@:common.properties.isBillable',
+      isBreak: 'Break Project',
       lastUsed: '@:common.properties.lastUsed',
     },
   },
@@ -166,6 +168,24 @@ export default {
         }
       }
     },
+    general: {
+      title: 'General',
+      description: 'General calendar settings',
+      sections: {
+        normalWorkingDuration: {
+          title: 'Working Hours',
+          description: 'How many hours do you work per day?',
+        },
+        breakProject: {
+          title: '@:project.properties.isBreak',
+          description: 'Select a project to track your break time',
+        },
+        normalBreakDuration: {
+          title: 'Break Time',
+          description: 'How long is your break?',
+        },
+      },
+    },
     appearance: {
       title: 'Appearance',
       description: 'Customize the look and feel of the app',
@@ -209,6 +229,10 @@ export default {
         isBillable: {
           label: '@:project.properties.isBillable',
           description: 'Does this project count towards your tracked time?',
+        },
+        isBreak: {
+          label: '@:project.properties.isBreak',
+          description: 'This project is set as your break and will be counted differently for time calculations. You can change this in the "General" settings.',
         },
       }
     },

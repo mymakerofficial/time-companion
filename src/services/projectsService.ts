@@ -1,8 +1,8 @@
 import {useProjectsStore} from "@/stores/projectsStore";
-import {reactive} from "vue";
+import {computed, reactive, toValue} from "vue";
 import type {ReactiveProject} from "@/model/project/types";
 import type {ReactiveActivity} from "@/model/activity/types";
-import {check, isNotNull} from "@/lib/utils";
+import {check, isNotNull, type Nullable} from "@/lib/utils";
 import {whereDisplayName, whereId} from "@/lib/listUtils";
 import {mapReadonly} from "@/model/modelHelpers";
 import {useCalendarService} from "@/services/calendarService";
@@ -18,6 +18,7 @@ import {useInitialize} from "@/composables/useInitialize";
 export interface ProjectsService {
   projects: ReadonlyArray<ReactiveProject>
   activities: ReadonlyArray<ReactiveActivity>
+  breakProject: Nullable<ReactiveProject>
   init: () => void
   addProject: (project: ReactiveProject) => void
   addProjects: (projects: ReactiveProject[]) => void
@@ -50,6 +51,30 @@ export const useProjectsService = createService<ProjectsService>(() => {
 
     addProjects(projects)
     addActivities(activities)
+  })
+
+  function setBreakProject(newProject: Nullable<ReactiveProject>) {
+    const oldProject = breakProject.value
+
+    // TODO for some reason the project properties are refs here???
+    check(!toValue(newProject?.isBillable),
+      `Failed to set break project: Project with id "${toValue(newProject?.id)}" is billable.`
+    )
+
+    if (isNotNull(oldProject)) {
+      oldProject.unsafeSetIsBreak(false)
+    }
+
+    if (isNotNull(newProject)) {
+      newProject.unsafeSetIsBreak(true)
+    }
+  }
+
+  const breakProject = computed({
+    get() {
+      return projectsStore.projects.find((it) => it.isBreak) ?? null
+    },
+    set: setBreakProject
   })
 
   function addProject(project: ReactiveProject) {
@@ -177,6 +202,7 @@ export const useProjectsService = createService<ProjectsService>(() => {
       'projects',
       'activities'
     ]),
+    breakProject,
     init,
     addProject,
     addProjects,

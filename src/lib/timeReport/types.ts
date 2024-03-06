@@ -10,6 +10,7 @@ export interface TimeReportProjectEntry {
 
 export interface DayTimeReport {
   date: Readonly<Temporal.PlainDate>
+  totalDuration: Readonly<Temporal.Duration>
   totalBillableDuration: Readonly<Temporal.Duration>
   entries: ReadonlyArray<TimeReportProjectEntry>
 }

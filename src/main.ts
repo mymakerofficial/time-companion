@@ -6,6 +6,9 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import {i18n} from "@/locales/locales";
+import {migrateApplication} from "@/lib/migrations/applicationMigrator";
+
+migrateApplication()
 
 const app = createApp(App)
 

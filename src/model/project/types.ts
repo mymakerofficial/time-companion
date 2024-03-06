@@ -8,6 +8,7 @@ export interface ProjectContext extends HasId {
   displayName: string
   color: Nullable<string>
   isBillable: boolean
+  isBreak: boolean
   childActivities: ReactiveActivity[]
   lastUsed: Temporal.PlainDateTime
 }
@@ -18,7 +19,9 @@ export interface ReactiveProject {
   readonly lastUsed: ProjectContext['lastUsed']
   displayName: ProjectContext['displayName']
   isBillable: ProjectContext['isBillable']
+  readonly isBreak: ProjectContext['isBreak']
   color: ProjectContext['color']
+  unsafeSetIsBreak: (isBreak: boolean) => void
   unsafeAddChildActivity: (activity: ReactiveActivity) => void
   unsafeRemoveChildActivity: (activity: ReactiveActivity) => void
   lastUsedNow: () => void
@@ -32,6 +35,7 @@ export interface SerializedProject {
   displayName: string
   color: Nullable<string>
   isBillable: boolean
+  isBreak: boolean
   childActivityIds: string[]
   lastUsed: string // ISO Date Time (YYYY-MM-DDTHH:mm:ss)
 }

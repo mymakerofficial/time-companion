@@ -29,7 +29,7 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
 
   function commit() {
     storage.set({
-      version: 1,
+      version: 2,
       projects: projects.map((it) => it.toSerialized()),
       activities: activities.map((it) => it.toSerialized()),
     })

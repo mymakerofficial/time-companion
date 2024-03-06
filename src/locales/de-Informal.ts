@@ -50,6 +50,7 @@ export default {
       rose: 'Rose',
     },
     themes: {
+      auto: 'Auto',
       dark: 'Dunkel',
       light: 'Hell',
     },
@@ -72,6 +73,7 @@ export default {
       displayName: '@:common.properties.displayName',
       color: '@:common.properties.color',
       isBillable: '@:common.properties.isBillable',
+      isBreak: 'Pausenprojekt',
       lastUsed: '@:common.properties.lastUsed',
     },
   },
@@ -166,6 +168,24 @@ export default {
         }
       }
     },
+    general: {
+      title: 'Allgemein',
+      description: 'Allgemeine Einstellungen',
+      sections: {
+        normalWorkingDuration: {
+          title: 'Arbeitsstunden',
+          description: 'Arbeitsstunden pro Tag',
+        },
+        breakProject: {
+          title: '@:project.properties.isBreak',
+          description: 'Welches Projekt wird während der Pause verfolgt?',
+        },
+        normalBreakDuration: {
+          title: 'Pausendauer',
+          description: 'Dauer der Pause',
+        },
+      },
+    },
     appearance: {
       title: 'Aussehen',
       description: 'Mach dir die Welt, wie sie dir gefällt.',
@@ -209,6 +229,10 @@ export default {
         isBillable: {
           label: '@:project.properties.isBillable',
           description: 'Sollte dieses Projekt in Rechnung gestellt werden?',
+        },
+        isBreak: {
+          label: '@:project.properties.isBreak',
+          description: 'Dieses Projekt ist als Pausenprojekt markiert und beeinflusst die Zeitmessung für deine Pausen anders als normale Projekte. Du kannst das Pausenprojekt in den Einstellungen unter "Allgemein" ändern.',
         },
       }
     },

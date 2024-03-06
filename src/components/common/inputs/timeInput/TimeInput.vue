@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, reactive} from "vue";
+import {computed} from "vue";
 import {absDuration, durationSinceStartOfDay, durationToTime} from "@/lib/neoTime";
 import {Temporal} from "temporal-polyfill";
 import DurationInput from "@/components/common/inputs/timeInput/DurationInput.vue";
@@ -20,5 +20,5 @@ const forwardModel = computed<Temporal.Duration>({
 </script>
 
 <template>
-  <DurationInput v-bind="props" v-model="forwardModel" />
+  <DurationInput v-bind="props" v-model="forwardModel" mode="time" />
 </template>

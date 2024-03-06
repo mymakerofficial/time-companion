@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import {ArrowRight, MoreVertical} from "lucide-vue-next";
 import {Button} from "@/components/ui/button";
-import {computed} from "vue";
-import {isNotNull, isNull} from "@/lib/utils";
+import {isNotNull} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import ProjectActionInput from "@/components/common/inputs/projectActionInput/ProjectActionInput.vue";
 import DateTimeInput from "@/components/common/inputs/timeInput/DateTimeInput.vue";
-import {durationBetween, formatDuration} from "@/lib/neoTime";
 import DurationInput from "@/components/common/inputs/timeInput/DurationInput.vue";
 
 const props = defineProps<{
@@ -42,9 +40,9 @@ function handleRemove() {
         />
       </div>
       <div class="flex flex-row items-center gap-2">
-        <DateTimeInput v-if="event.startAt" v-model="event.startAt" placeholder="00:00" size="lg" class="border-none w-14 text-sm" input-class="text-center" />
+        <DateTimeInput v-if="event.startAt" v-model="event.startAt" placeholder="00:00" size="lg" class="border-none w-16 text-sm" input-class="text-center" />
         <ArrowRight v-show="event.endAt" class="size-4 text-muted-foreground" />
-        <DateTimeInput v-if="event.endAt"  v-model="event.endAt" placeholder="00:00" size="lg" class="border-none w-14 text-sm" input-class="text-center" />
+        <DateTimeInput v-if="event.endAt"  v-model="event.endAt" placeholder="00:00" size="lg" class="border-none w-16 text-sm" input-class="text-center" />
         <DurationInput v-if="event.endAt" v-model="event.duration" size="lg" class="border-none w-20 text-xl" input-class="text-center" />
       </div>
       <div class="flex flex-row items-center gap-2">
