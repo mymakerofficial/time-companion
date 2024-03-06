@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {ArrowRight, MoreVertical} from "lucide-vue-next";
+import {ArrowRight, Clock, MoreVertical, Trash, EyeOff, Play} from "lucide-vue-next";
 import {Button} from "@/components/ui/button";
 import {isNotNull} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
@@ -17,6 +17,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   continue: [shadow: ReactiveCalendarEventShadow]
   remove: [event: ReactiveCalendarEvent]
+  dismiss: []
 }>()
 
 function handleContinue() {
@@ -25,6 +26,10 @@ function handleContinue() {
 
 function handleRemove() {
   emit('remove', props.event)
+}
+
+function handleDismiss() {
+  emit('dismiss')
 }
 </script>
 
@@ -44,14 +49,16 @@ function handleRemove() {
         <DateTimeInput v-if="event.startAt" v-model="event.startAt" placeholder="00:00" size="sm" class="border-none w-14 h-11 text-sm" input-class="text-center" />
         <ArrowRight v-show="event.endAt" class="size-4 text-muted-foreground" />
         <DateTimeInput v-if="event.endAt"  v-model="event.endAt" placeholder="00:00" size="sm" class="border-none w-14 h-11 text-sm" input-class="text-center" />
-        <DurationInput v-if="event.endAt" v-model="event.duration" size="sm" class="border-none w-20 h-11 text-lg font-medium" input-class="text-center" />
+        <Clock v-show="event.endAt" class="size-4 text-muted-foreground" />
+        <DurationInput v-if="event.endAt" v-model="event.duration" size="sm" class="border-none w-20 h-11 text-lg font-medium" />
       </div>
-      <div class="flex items-center gap-2">
-        <Button v-if="isNotNull(event.project)" @click="handleContinue()" variant="secondary">{{ $t('dashboard.controls.continueEvent') }}</Button>
+      <div>
         <DropdownMenu>
           <DropdownMenuTrigger><Button variant="ghost" size="icon"><MoreVertical class="size-4" /></Button></DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem @click="handleRemove()">{{ $t('dashboard.controls.deleteEvent') }}</DropdownMenuItem>
+            <DropdownMenuItem v-if="isNotNull(event.project)" @click="handleContinue()" class="space-x-2"><Play class="size-4" /><span>{{ $t('dashboard.controls.continueEvent') }}</span></DropdownMenuItem>
+            <DropdownMenuItem @click="handleDismiss()" class="space-x-2"><EyeOff class="size-4" /><span>{{ $t('common.controls.dismiss') }}</span></DropdownMenuItem>
+            <DropdownMenuItem @click="handleRemove()" class="text-destructive space-x-2"><Trash class="size-4" /><span>{{ $t('dashboard.controls.deleteEvent') }}</span></DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

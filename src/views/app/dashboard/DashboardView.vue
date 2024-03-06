@@ -35,6 +35,9 @@ function handleStopEvent() {
 function handleRemoveEvent(event: ReactiveCalendarEvent) {
   activeDayService.removeEvent(event)
 }
+function handleDeselectEvent() {
+  selectedEventService.unsetEvent()
+}
 function handleEventSelected(event: ReactiveCalendarEvent) {
   selectedEventService.setEvent(event)
 }
@@ -66,6 +69,7 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
           :event="selectedEventService.event"
           @continue="handleStartEvent"
           @remove="handleRemoveEvent"
+          @dismiss="handleDeselectEvent"
         />
         <QuickStartCard
           :icon-pencil="activeEventHasNoProject"

@@ -22,7 +22,6 @@ export interface ActiveEventService {
 export const useActiveEventService = createService<ActiveEventService>(() =>  {
   const activeEventStore = useActiveEventStore()
   const activeDayService = useActiveDayService()
-  const selectedEventService = useSelectedEventService()
 
   function setEvent(event: ReactiveCalendarEvent) {
     check(isNotNull(activeDayService.day),
@@ -69,8 +68,6 @@ export const useActiveEventService = createService<ActiveEventService>(() =>  {
     )
 
     activeEventStore.event!.endAt = now()
-    // TODO move to selectedEventService via event bus
-    selectedEventService.setEvent(activeEventStore.event!)
     unsetEvent()
   }
 
