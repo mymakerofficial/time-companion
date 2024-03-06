@@ -9,7 +9,7 @@ import type {ReactiveProject} from "@/model/project/types";
 import type {ReactiveActivity} from "@/model/activity/types";
 import ProjectActionInput from "@/components/common/inputs/projectActionInput/ProjectActionInput.vue";
 import {useNow} from "@/composables/useNow";
-import {dateTimeZero, durationBetween, formatDuration} from "@/lib/neoTime";
+import {dateTimeZero, durationBetween, durationZero, humanizeDuration} from "@/lib/neoTime";
 import DateTimeInput from "@/components/common/inputs/timeInput/DateTimeInput.vue";
 
 const props = defineProps<{
@@ -96,12 +96,16 @@ function handleStartStop() {
   }
 }
 
-const durationLabel = computed(() => {
+const duration = computed(() => {
   if (isNull(props.event)) {
-    return '00:00:00'
+    return durationZero()
   }
 
-  return formatDuration(durationBetween(props.event.startAt, now.value), {
+  return durationBetween(props.event.startAt, now.value)
+})
+
+const durationLabel = computed(() => {
+  return humanizeDuration(duration.value, {
     includeSeconds: true,
   })
 })

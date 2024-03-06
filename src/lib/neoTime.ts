@@ -216,6 +216,25 @@ export function formatDuration(duration: Temporal.Duration, options: { includeSe
   return [hours, minutes, includeSeconds ? seconds : null].filter(isNotNull).join(':')
 }
 
+export function humanizeDuration(duration: Temporal.Duration, options: { includeSeconds?: boolean } = {}) {
+  const {
+    includeSeconds = false
+  } = options
+
+  const hours = round(duration.total({unit: 'hours'}))
+  const minutes = round(duration.total({unit: 'minutes'}) % 60)
+  const seconds = round(duration.total({unit: 'seconds'}) % 60)
+
+  // TODO i18n
+  const parts = [
+    hours > 0 ? `${hours}h` : null,
+    minutes > 0 ? `${minutes}m` : null,
+    includeSeconds && seconds > 0 ? `${seconds}s` : null
+  ].filter(isNotNull)
+
+  return parts.join(' ')
+}
+
 export function timeCompare(a: Temporal.PlainTime, b: Temporal.PlainTime) {
   return Temporal.PlainTime.compare(a, b)
 }

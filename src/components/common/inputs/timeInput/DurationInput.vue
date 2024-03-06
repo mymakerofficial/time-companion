@@ -1,24 +1,31 @@
 <script setup lang="ts">
-import {ref, watch} from "vue";
+import {ref} from "vue";
 import {Input} from "@/components/ui/input";
-import {durationToTime, formatDuration, formatTime, withFormat} from "@/lib/neoTime";
+import {formatDuration, humanizeDuration} from "@/lib/neoTime";
 import {parseHumanDurationWithEquation} from "@/lib/parsers";
-import {cn, isNull} from "@/lib/utils";
+import {isNull} from "@/lib/utils";
 import {Temporal} from "temporal-polyfill";
 import {watchImmediate} from "@vueuse/core";
 import type {InputProps} from "@/components/ui/input/Input.vue";
-import {useForwardProps} from "radix-vue";
 
 const model = defineModel<Temporal.Duration>({ required: true })
 
-const props = defineProps<Omit<InputProps, 'type'>>()
+const props = withDefaults(defineProps<Omit<InputProps, 'type'> & {
+  mode?: 'duration' | 'time'
+}>(), {
+  mode: 'duration'
+})
 
 const inputValue = ref('')
 
 watchImmediate(model, setInputFromModel)
 
 function setInputFromModel() {
-  inputValue.value = formatDuration(model.value)
+  if (props.mode === 'duration') {
+    inputValue.value = humanizeDuration(model.value)
+  } else {
+    inputValue.value = formatDuration(model.value)
+  }
 }
 
 function handleChange() {

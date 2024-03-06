@@ -3,7 +3,7 @@ import {createColumnHelper, type Row} from "@tanstack/vue-table";
 import {useI18n} from "vue-i18n";
 import type {ReactiveProject} from "@/model/project/types";
 import {Minus} from "lucide-vue-next";
-import {durationZero, formatDate, formatDuration, isZeroDuration, withFormat} from "@/lib/neoTime";
+import {durationZero, formatDate, humanizeDuration, isZeroDuration, withFormat} from "@/lib/neoTime";
 import {useProjectsService} from "@/services/projectsService";
 import type {DayTimeReport} from "@/lib/timeReport/types";
 
@@ -27,8 +27,7 @@ function getProjectCell(row: Row<DayTimeReport>, project: ReactiveProject) {
   if (isZeroDuration(duration)) {
     return <span class="text-muted-foreground"><Minus class="size-3" /></span>
   } else {
-    // TODO humanize
-    return formatDuration(duration)
+    return humanizeDuration(duration)
   }
 }
 
@@ -36,8 +35,7 @@ function getTotalCell(duration: DayTimeReport['totalBillableDuration']) {
   if (isZeroDuration(duration)) {
     return <span class="text-muted-foreground"><Minus class="size-3" /></span>
   } else {
-    // TODO humanize
-    return formatDuration(duration)
+    return humanizeDuration(duration)
   }
 }
 

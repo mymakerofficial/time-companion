@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import {ArrowRight, MoreVertical} from "lucide-vue-next";
 import {Button} from "@/components/ui/button";
-import {computed} from "vue";
-import {isNotNull, isNull} from "@/lib/utils";
+import {isNotNull} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import ProjectActionInput from "@/components/common/inputs/projectActionInput/ProjectActionInput.vue";
 import DateTimeInput from "@/components/common/inputs/timeInput/DateTimeInput.vue";
-import {durationBetween, formatDuration} from "@/lib/neoTime";
 import DurationInput from "@/components/common/inputs/timeInput/DurationInput.vue";
 
 const props = defineProps<{
