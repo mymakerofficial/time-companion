@@ -8,6 +8,7 @@ import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 import ProjectActionInput from "@/components/common/inputs/projectActionInput/ProjectActionInput.vue";
 import DateTimeInput from "@/components/common/inputs/timeInput/DateTimeInput.vue";
 import DurationInput from "@/components/common/inputs/timeInput/DurationInput.vue";
+import DashboardSection from "@/components/dashboard/cards/DashboardSection.vue";
 
 const props = defineProps<{
   event: ReactiveCalendarEvent
@@ -28,8 +29,8 @@ function handleRemove() {
 </script>
 
 <template>
-  <div class="p-8 border-b border-border">
-    <div class="flex flex-row justify-between items-center gap-4">
+  <DashboardSection label="Edit tracked time">
+    <div class="flex items-center gap-3">
       <div class="flex-grow">
         <ProjectActionInput
           v-model:project="event.project"
@@ -39,21 +40,21 @@ function handleRemove() {
           class="w-full"
         />
       </div>
-      <div class="flex flex-row items-center gap-2">
-        <DateTimeInput v-if="event.startAt" v-model="event.startAt" placeholder="00:00" size="lg" class="border-none w-16 text-sm" input-class="text-center" />
+      <div class="flex items-center gap-2">
+        <DateTimeInput v-if="event.startAt" v-model="event.startAt" placeholder="00:00" size="sm" class="border-none w-14 h-11 text-sm" input-class="text-center" />
         <ArrowRight v-show="event.endAt" class="size-4 text-muted-foreground" />
-        <DateTimeInput v-if="event.endAt"  v-model="event.endAt" placeholder="00:00" size="lg" class="border-none w-16 text-sm" input-class="text-center" />
-        <DurationInput v-if="event.endAt" v-model="event.duration" size="lg" class="border-none w-20 text-xl" input-class="text-center" />
+        <DateTimeInput v-if="event.endAt"  v-model="event.endAt" placeholder="00:00" size="sm" class="border-none w-14 h-11 text-sm" input-class="text-center" />
+        <DurationInput v-if="event.endAt" v-model="event.duration" size="sm" class="border-none w-20 h-11 text-lg font-medium" input-class="text-center" />
       </div>
-      <div class="flex flex-row items-center gap-2">
-        <Button v-if="isNotNull(event.project)" @click="handleContinue()">{{ $t('dashboard.controls.continueEvent') }}</Button>
+      <div class="flex items-center gap-2">
+        <Button v-if="isNotNull(event.project)" @click="handleContinue()" variant="secondary">{{ $t('dashboard.controls.continueEvent') }}</Button>
         <DropdownMenu>
-          <DropdownMenuTrigger><Button variant="ghost" size="icon"><MoreVertical /></Button></DropdownMenuTrigger>
+          <DropdownMenuTrigger><Button variant="ghost" size="icon"><MoreVertical class="size-4" /></Button></DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem @click="handleRemove()">{{ $t('dashboard.controls.deleteEvent') }}</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
     </div>
-  </div>
+  </DashboardSection>
 </template>

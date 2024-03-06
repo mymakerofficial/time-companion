@@ -11,6 +11,7 @@ import ProjectActionInput from "@/components/common/inputs/projectActionInput/Pr
 import {useNow} from "@/composables/useNow";
 import {dateTimeZero, durationBetween, durationZero, humanizeDuration} from "@/lib/neoTime";
 import DateTimeInput from "@/components/common/inputs/timeInput/DateTimeInput.vue";
+import DashboardSection from "@/components/dashboard/cards/DashboardSection.vue";
 
 const props = defineProps<{
   event: Nullable<ReactiveCalendarEvent>
@@ -112,8 +113,8 @@ const durationLabel = computed(() => {
 </script>
 
 <template>
-  <div class="p-8 bg-primary text-primary-foreground flex flex-col gap-2 border-b border-border">
-    <div class="flex flex-row justify-between items-center gap-8">
+  <DashboardSection>
+    <div class="flex flex-row justify-between items-center gap-4">
       <div class="flex-grow">
         <ProjectActionInput
           v-model:project="state.project"
@@ -121,17 +122,18 @@ const durationLabel = computed(() => {
           v-model:note="state.note"
           placeholder="what are you working on?..."
           size="lg"
-          class="w-full bg-primary text-primary-foreground border-none"
+          class="w-full"
         />
       </div>
-      <div class="flex flex-row items-center gap-8">
-        <DateTimeInput v-if="state.startAt" v-model="state.startAt" size="lg" class="w-20 border-none bg-primary text-primary-foreground" input-class="text-center" />
-        <time class="text-2xl font-medium tracking-wide text-center min-w-24">{{ durationLabel }}</time>
-      </div>
-      <div class="flex flex-row items-center gap-2">
-        <Button @click="handleStartStop" variant="inverted">{{ state.isRunning ? $t('dashboard.controls.stopEvent') : $t('dashboard.controls.startEvent') }}</Button>
-        <Button variant="ghost" size="icon"><MoreVertical /></Button>
+      <div class="flex items-center gap-8">
+        <div v-if="state.isRunning" class="flex items-center gap-4">
+          <DateTimeInput v-if="state.startAt" v-model="state.startAt" size="sm" class="border-none w-14 h-11 text-sm" input-class="text-center" />
+          <time class="text-lg font-medium text-center min-w-24">{{ durationLabel }}</time>
+        </div>
+        <div class="mr-2">
+          <Button @click="handleStartStop">{{ state.isRunning ? $t('dashboard.controls.stopEvent') : $t('dashboard.controls.startEvent') }}</Button>
+        </div>
       </div>
     </div>
-  </div>
+  </DashboardSection>
 </template>

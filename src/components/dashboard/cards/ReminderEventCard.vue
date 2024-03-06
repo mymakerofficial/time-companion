@@ -3,11 +3,11 @@ import {MoreVertical} from "lucide-vue-next";
 import {Button} from "@/components/ui/button";
 import {computed} from "vue";
 import {vProvideColor} from "@/directives/vProvideColor";
-import {isNotNull, round} from "@/lib/utils";
+import {isNotNull,} from "@/lib/utils";
 import type {ReactiveCalendarReminder} from "@/model/calendarReminder/types";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {useTimeNow} from "@/composables/useNow";
-import {durationBetween, minutes} from "@/lib/neoTime";
+import {durationBetween, humanizeDuration, minutes} from "@/lib/neoTime";
 
 const props = defineProps<{
   reminder: ReactiveCalendarReminder
@@ -18,8 +18,7 @@ const now = useTimeNow({
 })
 
 const timeLabel = computed(() => {
-  // TODO humanize duration
-  return `in ${round(durationBetween(now.value, props.reminder.startAt).total({ unit: 'minutes' }))}min`
+  return `in ${humanizeDuration(durationBetween(now.value, props.reminder.startAt))}`
 })
 
 const hasButton = computed(() => {
@@ -36,19 +35,20 @@ function handleDismiss() {
 </script>
 
 <template>
-  <div v-provide-color="reminder.color" class="p-8 border-b border-border bg-primary text-primary-foreground">
-    <div class="flex flex-row justify-between items-center gap-4">
-      <div class="flex-grow">
-        <h1 class="font-medium text-xl ml-3">{{ reminder.displayText }}</h1>
+  <div>
+    <div class="flex flex-row justify-between items-center gap-8">
+      <div class="flex-grow flex items-center gap-4">
+        <span v-provide-color="reminder.color" class="size-3 rounded-sm bg-primary" />
+        <h3 class="font-medium text-sm">{{ reminder.displayText }}</h3>
       </div>
       <div>
-        <time class="text-2xl font-medium tracking-wide">{{ timeLabel }}</time>
+        <time class="text-sm font-medium">{{ timeLabel }}</time>
       </div>
       <div class="flex flex-row items-center gap-2">
-        <Button v-if="hasButton" variant="inverted" @click="handleTrigger()">{{ reminder.actionLabel }}</Button>
+        <Button v-if="hasButton" @click="handleTrigger()" variant="secondary" size="sm">{{ $t('dashboard.controls.startEvent') }}</Button>
         <DropdownMenu>
           <DropdownMenuTrigger>
-            <Button variant="ghost" size="icon"><MoreVertical /></Button>
+            <Button variant="ghost" size="icon"><MoreVertical class="size-4" /></Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem @click="handleDismiss()">{{ $t('dashboard.controls.dismissReminder') }}</DropdownMenuItem>

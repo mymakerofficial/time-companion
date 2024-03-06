@@ -61,9 +61,6 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
           @start-event="handleStartEvent"
           @stop-event="handleStopEvent"
         />
-        <RemindersContainer
-          :reminders="remindersService.reminders"
-        />
         <EditEventCard
           v-if="selectedEventService.event"
           :event="selectedEventService.event"
@@ -73,6 +70,9 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
         <QuickStartCard
           :icon-pencil="activeEventHasNoProject"
           @start="handleQuickStart"
+        />
+        <RemindersContainer
+          :reminders="remindersService.reminders"
         />
         <WorkingDurationCard />
       </div>

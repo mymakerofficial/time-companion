@@ -5,6 +5,8 @@ import type {ReactiveCalendarReminder} from "@/model/calendarReminder/types";
 import {useTimeNow} from "@/composables/useNow";
 import {minutes, timeIsAfter, timeIsBefore} from "@/lib/neoTime";
 import type {MaybeReadonly} from "@/lib/utils";
+import DashboardSection from "@/components/dashboard/cards/DashboardSection.vue";
+import {isNotEmpty} from "@/lib/listUtils";
 
 const props = defineProps<{
   reminders: MaybeReadonly<Array<ReactiveCalendarReminder>>
@@ -30,9 +32,13 @@ const filteredReminders = computed(() => {
 </script>
 
 <template>
-  <ReminderEventCard
-    v-for="reminder in filteredReminders"
-    :key="reminder.id"
-    :reminder="reminder"
-  />
+  <DashboardSection v-if="isNotEmpty(filteredReminders)" label="Upcoming reminders">
+    <div class="flex flex-col gap-2">
+      <ReminderEventCard
+        v-for="reminder in filteredReminders"
+        :key="reminder.id"
+        :reminder="reminder"
+      />
+    </div>
+  </DashboardSection>
 </template>
