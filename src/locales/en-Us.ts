@@ -171,9 +171,17 @@ export default {
       title: 'General',
       description: 'General calendar settings',
       sections: {
-        workingHours: {
+        normalWorkingDuration: {
           title: 'Working Hours',
           description: 'How many hours do you work per day?',
+        },
+        breakProject: {
+          title: 'Break Project',
+          description: 'Select a project to track your break time',
+        },
+        normalBreakDuration: {
+          title: 'Break Time',
+          description: 'How long is your break?',
         },
       },
     },

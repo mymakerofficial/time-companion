@@ -228,7 +228,7 @@ export function humanizeDuration(duration: Temporal.Duration, options: { include
   // TODO i18n
   const parts = [
     hours > 0 ? `${hours}h` : null,
-    minutes > 0 ? `${minutes}m` : null,
+    minutes > 0 || (!includeSeconds && hours <= 0) ? `${minutes}m` : null,
     includeSeconds && seconds > 0 ? `${seconds}s` : null
   ].filter(isNotNull)
 

@@ -20,7 +20,9 @@ const migrations = [
       values: {
         locale,
         theme,
-        workingDuration: 'PT8H',
+        normalWorkingDuration: 'PT8H',
+        normalBreakDuration: 'PT0M',
+        breakProjectId: null,
       },
     }).set()
 

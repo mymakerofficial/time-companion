@@ -1,12 +1,15 @@
 import {defineStore} from "pinia";
 import {useLocalStorage} from "@/composables/useLocalStorage";
-import {computed, reactive, watch} from "vue";
-import {formatDurationIso, parseDuration} from "@/lib/neoTime";
-import {Temporal} from "temporal-polyfill";
+import type {Nullable} from "@/lib/utils";
+import {customRef, type Ref, unref} from "vue";
 
 interface SettingsStorageSerialized {
   values: {
-    [key: string]: any
+    locale: string,
+    theme: string,
+    normalWorkingDuration: string,
+    normalBreakDuration: string,
+    breakProjectId: Nullable<string>,
   }
   version: number
 }
@@ -16,39 +19,55 @@ export const useSettingsStore = defineStore('settings', () => {
     values: {
       locale: 'en-US',
       theme: 'auto',
-      workingDuration: 'PT8H',
+      normalWorkingDuration: 'PT8H',
+      normalBreakDuration: 'PT30M',
+      breakProjectId: null,
     },
     version: 0,
   })
 
-  const values = reactive(storage.get().values)
-  watch(
-    values,
-    (values) => storage.set({
+  function commit(values: SettingsStorageSerialized['values']) {
+    storage.set({
       version: 1,
       values,
-    }),
-    { deep: true}
-  )
+    })
+  }
 
-  const locale = computed({
-    get: () => values.locale,
-    set: (value: string) => values.locale = value,
-  })
-
-  const theme = computed({
-    get: () => values.theme,
-    set: (value: string) => values.theme = value,
-  })
-
-  const workingDuration = computed({
-    get: () => parseDuration(values.workingDuration),
-    set: (value: Temporal.Duration) => values.workingDuration = formatDurationIso(value),
-  })
+  function getValue
+    <
+      TKey extends keyof SettingsStorageSerialized['values'],
+      TValue extends unknown = SettingsStorageSerialized['values'][TKey]
+    >
+    (
+      key: TKey,
+      options: {
+        get: (value: SettingsStorageSerialized['values'][TKey]) => TValue,
+        set: (value: TValue) => SettingsStorageSerialized['values'][TKey],
+      } = {
+        get: (value) => value as unknown as TValue,
+        set: (value) => value as unknown as SettingsStorageSerialized['values'][TKey],
+      }
+    ): Ref<TValue>
+  {
+    const {get: getTransformer, set: setTransformer} = options
+    return customRef<TValue>((track, trigger) => {
+      return {
+        get() {
+          track()
+          return getTransformer(storage.get().values[key])
+        },
+        set(value: TValue) {
+          commit({
+            ...storage.get().values,
+            [key]: unref(setTransformer(value)),
+          })
+          trigger()
+        },
+      }
+    })
+  }
 
   return {
-    locale,
-    theme,
-    workingDuration,
+    getValue,
   }
 })

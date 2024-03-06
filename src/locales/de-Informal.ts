@@ -171,9 +171,17 @@ export default {
       title: 'Allgemein',
       description: 'Allgemeine Einstellungen',
       sections: {
-        workingHours: {
+        normalWorkingDuration: {
           title: 'Arbeitsstunden',
           description: 'Arbeitsstunden pro Tag',
+        },
+        breakProject: {
+          title: 'Pausenprojekt',
+          description: 'Welches Projekt wird während der Pause verfolgt?',
+        },
+        normalBreakDuration: {
+          title: 'Pausendauer',
+          description: 'Dauer der Pause',
         },
       },
     },

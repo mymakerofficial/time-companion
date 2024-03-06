@@ -1,8 +1,8 @@
 import {createService} from "@/composables/createService";
 import {useSettingsStore} from "@/stores/settingsStore";
 import {computed, reactive} from "vue";
-import {check} from "@/lib/utils";
 import {syncRefs, useColorMode} from "@vueuse/core";
+import {check} from "@/lib/utils";
 
 export interface ThemeService {
   theme: string
@@ -19,16 +19,16 @@ export const useThemeService = createService<ThemeService>(() => {
 
   const availableThemes = computed<ThemeService['availableThemes']>(() => ['auto', 'dark', 'light'])
 
-  const theme = computed<ThemeService['theme']>({
-    get() {
-      return store.theme
+  const theme = store.getValue('theme', {
+    get(value) {
+      return value
     },
     set(value) {
       check(availableThemes.value.includes(value),
         `Theme ${value} is not available`
       )
 
-      store.theme = value
+      return value
     }
   })
 
