@@ -55,7 +55,7 @@ function handleSubmit() {
     :title="$t('dialog.project.edit.title')"
     :description="$t('dialog.project.edit.description')"
   >
-    <ProjectForm :form="form" />
+    <ProjectForm :form="form" :is-break="project.isBreak" />
     <template #footer>
       <div class="flex flex-row gap-4 justify-between">
         <div class="flex flex-row gap-4">

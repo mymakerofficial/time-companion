@@ -73,6 +73,7 @@ export default {
       displayName: '@:common.properties.displayName',
       color: '@:common.properties.color',
       isBillable: '@:common.properties.isBillable',
+      isBreak: 'Break Project',
       lastUsed: '@:common.properties.lastUsed',
     },
   },
@@ -176,7 +177,7 @@ export default {
           description: 'How many hours do you work per day?',
         },
         breakProject: {
-          title: 'Break Project',
+          title: '@:project.properties.isBreak',
           description: 'Select a project to track your break time',
         },
         normalBreakDuration: {
@@ -228,6 +229,10 @@ export default {
         isBillable: {
           label: '@:project.properties.isBillable',
           description: 'Does this project count towards your tracked time?',
+        },
+        isBreak: {
+          label: '@:project.properties.isBreak',
+          description: 'This project is set as your break and will be counted differently for time calculations. You can change this in the "General" settings.',
         },
       }
     },

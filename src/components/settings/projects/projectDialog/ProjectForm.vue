@@ -3,9 +3,11 @@ import Switch from "@/components/ui/switch/Switch.vue";
 import Label from "@/components/ui/label/Label.vue";
 import type {ProjectForm} from "@/components/settings/projects/projectDialog/helpers";
 import ColorTextInput from "@/components/common/inputs/colorTextInput/ColorTextInput.vue";
+import {Info} from "lucide-vue-next";
 
 defineProps<{
   form: ProjectForm
+  isBreak?: boolean
 }>()
 </script>
 
@@ -19,6 +21,15 @@ defineProps<{
       </div>
       <div>
         <Switch v-model:checked="form.isBillable" />
+      </div>
+    </div>
+    <div v-if="isBreak" class="flex flex-row items-center justify-between -mx-6 p-4 px-8 bg-muted/50">
+      <div class="space-y-0.5">
+        <h2 class="font-medium">{{ $t('dialog.project.form.isBreak.label')}}</h2>
+        <p class="text-sm text-muted-foreground">{{ $t('dialog.project.form.isBreak.description') }}</p>
+      </div>
+      <div class="mx-4">
+        <Info class="size-6" />
       </div>
     </div>
   </div>
