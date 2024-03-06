@@ -1,24 +1,19 @@
 <script setup lang="ts">
-import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
 import {Slash} from "lucide-vue-next";
 import type {ActivityForm} from "@/components/settings/projects/activityDialog/helpers";
 import ColorTextInput from "@/components/common/inputs/colorTextInput/ColorTextInput.vue";
-import {useProjectsService} from "@/services/projectsService";
+import ProjectSelect from "@/components/common/inputs/projectInput/ProjectSelect.vue";
 
 defineProps<{
   form: ActivityForm
 }>()
-
-const { projects } = useProjectsService()
 </script>
 
 <template>
   <div class="flex flex-col gap-4">
     <div class="flex flex-row items-center gap-2">
-      <Combobox
+      <ProjectSelect
         v-model="form.project"
-        :options="projects"
-        :display-value="(project) => project?.displayName"
         :placeholder="$t('dialog.activity.form.parentProject.placeholder')"
       />
       <Slash class="size-4" />
