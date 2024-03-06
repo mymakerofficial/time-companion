@@ -12,6 +12,14 @@ function upgradeVersion0(original: any): any {
   }
 }
 
+function upgradeVersion1(original: any): any {
+  return {
+    ...original,
+    isBreak: original.displayName === 'Break',
+  }
+}
+
 export const migrateSerializedProject = defineMigrator<SerializedProject>([
   upgradeVersion0,
+  upgradeVersion1,
 ])

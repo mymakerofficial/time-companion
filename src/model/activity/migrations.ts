@@ -13,4 +13,5 @@ function upgradeVersion0(original: any): any {
 
 export const migrateSerializedActivity = defineMigrator<SerializedActivity>([
   upgradeVersion0,
+  (value) => value
 ])

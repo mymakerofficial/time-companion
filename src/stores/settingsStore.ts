@@ -1,6 +1,5 @@
 import {defineStore} from "pinia";
 import {useLocalStorage} from "@/composables/useLocalStorage";
-import type {Nullable} from "@/lib/utils";
 import {customRef, type Ref, unref} from "vue";
 
 interface SettingsStorageSerialized {
@@ -9,7 +8,6 @@ interface SettingsStorageSerialized {
     theme: string,
     normalWorkingDuration: string,
     normalBreakDuration: string,
-    breakProjectId: Nullable<string>,
   }
   version: number
 }
@@ -21,7 +19,6 @@ export const useSettingsStore = defineStore('settings', () => {
       theme: 'auto',
       normalWorkingDuration: 'PT8H',
       normalBreakDuration: 'PT30M',
-      breakProjectId: null,
     },
     version: 0,
   })

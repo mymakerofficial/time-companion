@@ -4,11 +4,12 @@ import {useSettingsStore} from "@/stores/settingsStore";
 import {computed, reactive} from "vue";
 import {useTimeReportService} from "@/services/timeReportService";
 import type {ReactiveCalendarDay} from "@/model/calendarDay/types";
-import {check, isNotNull, isNull, type Nullable} from "@/lib/utils";
+import {isNotNull, isNull, type Nullable} from "@/lib/utils";
 import type {ReactiveProject} from "@/model/project/types";
 import {useProjectsService} from "@/services/projectsService";
-import {asArray, lastOf, whereId} from "@/lib/listUtils";
+import {asArray, lastOf} from "@/lib/listUtils";
 import {durationZero, formatDurationIso, maxDuration, parseDuration} from "@/lib/neoTime";
+import {mapWritable} from "@/model/modelHelpers";
 
 export interface WorkingDurationService {
   normalWorkingDuration: Temporal.Duration
@@ -37,30 +38,11 @@ export const useWorkingDurationService = createService<WorkingDurationService>((
 
   const normalTotalDuration = computed(() => normalWorkingDuration.value.add(normalBreakDuration.value))
 
-  const breakProject = store.getValue('breakProjectId', {
-    get(id) {
-      if (isNull(id)) {
-        return null
-      }
-
-      return projectsService.projects.find(whereId(id)) ?? null
-    },
-    set(project){
-      check(isNull(project) || projectsService.projects.includes(project),
-        `Failed to set break project: Project is not in projects list.`
-      )
-
-      return project?.id ?? null
-    }
-  })
-
   function getBreakDurationLeftOnDay(day: ReactiveCalendarDay, endAtFallback?: Temporal.PlainDateTime) {
     const breakReport = timeReportService.getDayTimeReport(day, {
       endAtFallback,
-      projects: asArray(breakProject.value).filter(isNotNull)
+      projects: asArray(projectsService.breakProject).filter(isNotNull)
     })
-
-    console.log(normalBreakDuration.value.subtract(breakReport.totalDuration))
 
     return normalBreakDuration.value.subtract(breakReport.totalDuration)
   }
@@ -103,10 +85,12 @@ export const useWorkingDurationService = createService<WorkingDurationService>((
   }
 
   return reactive({
+    ...mapWritable(projectsService, [
+      'breakProject'
+    ]),
     normalWorkingDuration,
     normalBreakDuration,
     normalTotalDuration,
-    breakProject,
     getBreakDurationLeftOnDay,
     getDurationLeftOnDay,
     getPredictedEndOfDay,

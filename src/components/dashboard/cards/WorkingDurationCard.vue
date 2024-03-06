@@ -29,7 +29,6 @@ const durationWorked = computed(() => {
 })
 
 const durationNormal = computed(() => {
-  console.log(workingDurationService.normalTotalDuration)
   return workingDurationService.normalTotalDuration
 })
 

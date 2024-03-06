@@ -22,7 +22,6 @@ const migrations = [
         theme,
         normalWorkingDuration: 'PT8H',
         normalBreakDuration: 'PT0M',
-        breakProjectId: null,
       },
     }).set()
 
