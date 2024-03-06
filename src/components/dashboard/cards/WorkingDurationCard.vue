@@ -28,10 +28,6 @@ const durationWorked = computed(() => {
   return totalBillableDuration
 })
 
-const durationNormal = computed(() => {
-  return workingDurationService.normalTotalDuration
-})
-
 const durationLeft = computed(() => {
   if (isNull(activeDayService.day)) {
     return durationZero()
@@ -53,7 +49,7 @@ const durationWorkedFormatted = computed(() => {
 })
 
 const durationNormalFormatted = computed(() => {
-  return humanizeDuration(durationNormal.value)
+  return humanizeDuration(workingDurationService.normalWorkingDuration)
 })
 
 const durationLeftFormatted = computed(() => {
