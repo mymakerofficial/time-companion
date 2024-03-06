@@ -229,7 +229,7 @@ export function humanizeDuration(duration: Temporal.Duration, options: { include
   const parts = [
     hours > 0 ? `${hours}h` : null,
     minutes > 0 || (!includeSeconds && hours <= 0) ? `${minutes}m` : null,
-    includeSeconds && seconds > 0 ? `${seconds}s` : null
+    includeSeconds && (seconds > 0 || minutes == 0) ? `${seconds}s` : null
   ].filter(isNotNull)
 
   return parts.join(' ')

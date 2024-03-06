@@ -40,9 +40,9 @@ function handleRemove() {
         />
       </div>
       <div class="flex flex-row items-center gap-2">
-        <DateTimeInput v-if="event.startAt" v-model="event.startAt" placeholder="00:00" size="lg" class="border-none w-14 text-sm" input-class="text-center" />
+        <DateTimeInput v-if="event.startAt" v-model="event.startAt" placeholder="00:00" size="lg" class="border-none w-16 text-sm" input-class="text-center" />
         <ArrowRight v-show="event.endAt" class="size-4 text-muted-foreground" />
-        <DateTimeInput v-if="event.endAt"  v-model="event.endAt" placeholder="00:00" size="lg" class="border-none w-14 text-sm" input-class="text-center" />
+        <DateTimeInput v-if="event.endAt"  v-model="event.endAt" placeholder="00:00" size="lg" class="border-none w-16 text-sm" input-class="text-center" />
         <DurationInput v-if="event.endAt" v-model="event.duration" size="lg" class="border-none w-20 text-xl" input-class="text-center" />
       </div>
       <div class="flex flex-row items-center gap-2">

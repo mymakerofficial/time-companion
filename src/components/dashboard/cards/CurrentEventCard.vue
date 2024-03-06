@@ -126,7 +126,7 @@ const durationLabel = computed(() => {
       </div>
       <div class="flex flex-row items-center gap-8">
         <DateTimeInput v-if="state.startAt" v-model="state.startAt" size="lg" class="w-20 border-none bg-primary text-primary-foreground" input-class="text-center" />
-        <time class="text-2xl font-medium tracking-wide w-24">{{ durationLabel }}</time>
+        <time class="text-2xl font-medium tracking-wide text-center min-w-24">{{ durationLabel }}</time>
       </div>
       <div class="flex flex-row items-center gap-2">
         <Button @click="handleStartStop" variant="inverted">{{ state.isRunning ? $t('dashboard.controls.stopEvent') : $t('dashboard.controls.startEvent') }}</Button>
