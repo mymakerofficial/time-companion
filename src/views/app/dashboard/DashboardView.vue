@@ -14,6 +14,7 @@ import {useActiveDayService} from "@/services/activeDayService";
 import {useRemindersService} from "@/services/remindersService";
 import EditEventCard from "@/components/dashboard/cards/EditEventCard.vue";
 import {useSelectedEventService} from "@/services/selectedEventService";
+import WorkingDurationCard from "@/components/dashboard/cards/WorkingDurationCard.vue";
 
 const remindersService = useRemindersService()
 
@@ -73,6 +74,7 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
           :icon-pencil="activeEventHasNoProject"
           @start="handleQuickStart"
         />
+        <WorkingDurationCard />
       </div>
     </section>
     <section class="col-span-5 flex flex-col h-screen">
