@@ -1,28 +1,17 @@
 <script lang="ts">
+import type {MaybeReadonly} from "@/lib/utils";
+import {buttonVariants} from "@/components/ui/button";
+import type {HTMLAttributes} from "vue";
+
 type PrimitiveAcceptableValue = string | number | true | false | object
 export type AcceptableValue = string | number | boolean | object | null
 
 type Wrapped<TValue> = { original: TValue }
-</script>
 
-<script setup lang="ts" generic="TValue extends AcceptableValue, TMultiple extends boolean">
-import {cn, isDefined, type MaybeArray, type MaybeReadonly, type Nullable} from "@/lib/utils";
-import {ComboboxRoot, PopoverAnchor} from "radix-vue";
-import {Popover, PopoverContent} from "@/components/ui/popover";
-import {CommandInput, CommandItem, CommandList} from "@/components/ui/command";
-import {Button, buttonVariants} from "@/components/ui/button";
-import {Check, ChevronsUpDown, Plus} from 'lucide-vue-next'
-import {useToggle} from "@vueuse/core";
-import {asArray, isArray, isEmpty, isNotEmpty} from "@/lib/listUtils";
-import {computed, type HTMLAttributes} from "vue";
-
-const model = defineModel<TMultiple extends true ? TValue[] : Nullable<TValue>>({ required: true, default: null })
-const searchTerm = defineModel<string>('searchTerm', { required: false, default: '' })
-const openModel = defineModel<boolean>('open', { required: false, default: false })
-
-const props = withDefaults(defineProps<{
+export interface ComboboxProps<TValue extends AcceptableValue, TMultiple extends boolean> {
   options: MaybeReadonly<Array<TValue>>
   multiple?: TMultiple
+  allowDeselect?: boolean
   displayValue?: (option: TValue) => string;
   filterFunction?: (list: MaybeReadonly<Array<TValue>>, query: string) => TValue[];
   getKey?: (option: TValue) => string | number;
@@ -39,7 +28,25 @@ const props = withDefaults(defineProps<{
   preventClose?: boolean
   allowCreate?: boolean
   hideWhenEmpty?: boolean
-}>(), {
+}
+</script>
+
+<script setup lang="ts" generic="TValue extends AcceptableValue, TMultiple extends boolean">
+import {cn, isDefined, isNotNull, type MaybeArray, type Nullable} from "@/lib/utils";
+import {ComboboxRoot, PopoverAnchor} from "radix-vue";
+import {Popover, PopoverContent} from "@/components/ui/popover";
+import {CommandInput, CommandItem, CommandList} from "@/components/ui/command";
+import {Button} from "@/components/ui/button";
+import {Check, ChevronsUpDown, Plus} from 'lucide-vue-next'
+import {useToggle} from "@vueuse/core";
+import {asArray, isArray, isEmpty, isNotEmpty} from "@/lib/listUtils";
+import {computed} from "vue";
+
+const model = defineModel<TMultiple extends true ? TValue[] : Nullable<TValue>>({ required: true, default: null })
+const searchTerm = defineModel<string>('searchTerm', { required: false, default: '' })
+const openModel = defineModel<boolean>('open', { required: false, default: false })
+
+const props = withDefaults(defineProps<ComboboxProps<TValue, TMultiple>>(), {
   limit: Infinity,
   variant: 'outline',
 })
@@ -109,7 +116,15 @@ function handleSelect(option: TValue) {
       model.value.push(option)
     }
   } else {
-    (model.value as TValue) = option
+    if (
+      isNotNull(option) &&
+      option === model.value &&
+      props.allowDeselect
+    ) {
+      (model.value as null) = null
+    } else {
+      (model.value as TValue) = option
+    }
   }
 
   emit('selected', model.value)
