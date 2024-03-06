@@ -1,12 +1,8 @@
 <script setup lang="tsx">
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import ResponsiveContainer from "@/components/common/layout/ResponsiveContainer.vue";
 import TableActions from "@/components/common/table/TableActions.vue";
-import {
-  getSortedRowModel,
-  type SortingState,
-  type TableOptions, type VisibilityState
-} from "@tanstack/vue-table";
+import {getSortedRowModel, type SortingState, type TableOptions, type VisibilityState} from "@tanstack/vue-table";
 import Table from "@/components/common/table/Table.vue";
 import {updater} from "@/lib/helpers/tableHelpers";
 import TableVisibilitySelect from "@/components/common/table/TableVisibilitySelect.vue";
@@ -15,10 +11,11 @@ import {Button} from "@/components/ui/button";
 import {useOpenDialog} from "@/composables/useOpenDialog";
 import NewProjectDialog from "@/components/settings/projects/projectDialog/NewProjectDialog.vue";
 import {createReportColumns} from "@/components/report/reportColumns";
-import {currentMonth, formatDate, today, withFormat} from "@/lib/neoTime";
+import {currentMonth, formatDate, minutes, today, withFormat} from "@/lib/neoTime";
 import {useTimeReportService} from "@/services/timeReportService";
 import {useProjectsService} from "@/services/projectsService";
 import type {DayTimeReport} from "@/lib/timeReport/types";
+import {useNow} from "@/composables/useNow";
 
 const projectsService = useProjectsService()
 const timeReportService = useTimeReportService()
@@ -26,7 +23,13 @@ const timeReportService = useTimeReportService()
 const monthLabel = formatDate(today(), withFormat('MMMM'))
 const yearLabel = formatDate(today(), withFormat('YYYY'))
 
-const data = timeReportService.getMonthTimeReport(currentMonth())
+const now = useNow({
+  interval: minutes()
+})
+
+const data = computed(() => timeReportService.getMonthTimeReport(currentMonth(), {
+  endAtFallback: now.value
+}))
 
 const columns = createReportColumns()
 

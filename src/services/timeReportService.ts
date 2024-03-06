@@ -8,21 +8,32 @@ import {daysInMonth} from "@/lib/neoTime";
 import {whereDate} from "@/lib/listUtils";
 import {isNull} from "@/lib/utils";
 import {useCalendarService} from "@/services/calendarService";
+import type {ReactiveProject} from "@/model/project/types";
+
+export interface GetTimeReportOptions {
+  endAtFallback?: Temporal.PlainDateTime
+  projects?: ReadonlyArray<ReactiveProject>
+}
 
 export interface TimeReportService {
-  getDayTimeReport: (day: ReactiveCalendarDay) => DayTimeReport
-  getMonthTimeReport: (month: Temporal.PlainYearMonth) => DayTimeReport[]
+  getDayTimeReport: (day: ReactiveCalendarDay, options?: GetTimeReportOptions) => DayTimeReport
+  getMonthTimeReport: (month: Temporal.PlainYearMonth, options?: GetTimeReportOptions) => DayTimeReport[]
 }
 
 export const useTimeReportService = createService<TimeReportService>(() => {
   const calendarService = useCalendarService()
   const projectsService = useProjectsService()
 
-  function getDayTimeReport(day: ReactiveCalendarDay) {
-    return calculateDayTimeReport(day, projectsService.projects)
+  function getDayTimeReport(day: ReactiveCalendarDay, options: GetTimeReportOptions = {}) {
+    const {
+      endAtFallback,
+      projects = projectsService.projects
+    } = options
+
+    return calculateDayTimeReport(day, projects, endAtFallback)
   }
 
-  function getMonthTimeReport(month: Temporal.PlainYearMonth) {
+  function getMonthTimeReport(month: Temporal.PlainYearMonth, options: GetTimeReportOptions = {}) {
     return daysInMonth(month).map((date) => {
       const day = calendarService.days.find(whereDate(date)) ?? null
 
@@ -32,7 +43,7 @@ export const useTimeReportService = createService<TimeReportService>(() => {
         })
       }
 
-      return calculateDayTimeReport(day, projectsService.projects)
+      return getDayTimeReport(day, options)
     })
   }
 

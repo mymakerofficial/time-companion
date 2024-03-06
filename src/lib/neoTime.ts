@@ -124,17 +124,17 @@ export function timeNow() {
 }
 
 // obtain a Duration from given hours
-export function hours(hours: number) {
+export function hours(hours: number = 1) {
   return Temporal.Duration.from({ hours })
 }
 
 // obtain a Duration from given minutes
-export function minutes(minutes: number) {
+export function minutes(minutes: number = 1) {
   return Temporal.Duration.from({ minutes })
 }
 
 // obtain a Duration from given seconds
-export function seconds(seconds: number) {
+export function seconds(seconds: number = 1) {
   return Temporal.Duration.from({ seconds })
 }
 
@@ -330,6 +330,14 @@ export function absDuration(duration: Temporal.Duration) {
   }
 
   return duration
+}
+
+export function minDuration(a: Temporal.Duration, b: Temporal.Duration) {
+  return Temporal.Duration.compare(a, b) < 0 ? a : b
+}
+
+export function maxDuration(a: Temporal.Duration, b: Temporal.Duration) {
+  return Temporal.Duration.compare(a, b) > 0 ? a : b
 }
 
 export function sumOfDurations(durations: Temporal.Duration[]) {

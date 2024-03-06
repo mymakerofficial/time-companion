@@ -48,7 +48,7 @@ export function sumOf(values: Maybe<number[]>): number {
 }
 
 // if given an array, returns the array, if given a single value, returns an array with that value
-export function asArray<T>(value: Maybe<MaybeArray<T>>): T[] {
+export function asArray<T>(value: Maybe<MaybeReadonly<MaybeArray<T>>>): T[] {
   if (isNull(value)) {
     return [null] as T[]
   }
@@ -61,11 +61,11 @@ export function asArray<T>(value: Maybe<MaybeArray<T>>): T[] {
     return value
   }
 
-  return [value]
+  return [value as T]
 }
 
 // if given an array, returns the first element, if given a single value, returns that value
-export function firstOf<T>(value: Maybe<MaybeArray<T>>): Maybe<T> {
+export function firstOf<T>(value: Maybe<MaybeReadonly<MaybeArray<T>>>): Maybe<T> {
   if (isEmpty(value)) {
     return null
   }
@@ -78,7 +78,7 @@ export function firstOf<T>(value: Maybe<MaybeArray<T>>): Maybe<T> {
 }
 
 // if given an array, returns second element, if given a single value, returns that value
-export function secondOf<T>(value: Maybe<MaybeArray<T>>): Maybe<T> {
+export function secondOf<T>(value: Maybe<MaybeReadonly<MaybeArray<T>>>): Maybe<T> {
   if (isEmpty(value)) {
     return null
   }
@@ -95,7 +95,7 @@ export function secondOf<T>(value: Maybe<MaybeArray<T>>): Maybe<T> {
 }
 
 // if given an array, returns the last element, if given a single value, returns that value
-export function lastOf<T>(value: Maybe<MaybeArray<T>>): Maybe<T> {
+export function lastOf<T>(value: Maybe<MaybeReadonly<MaybeArray<T>>>): Maybe<T> {
   if (isEmpty(value)) {
     return null
   }

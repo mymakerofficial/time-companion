@@ -1,20 +1,22 @@
 import {Temporal} from 'temporal-polyfill'
 import {createService} from "@/composables/createService";
 import {useSettingsStore} from "@/stores/settingsStore";
-import {reactive} from "vue";
+import {computed, reactive} from "vue";
 import {useTimeReportService} from "@/services/timeReportService";
 import type {ReactiveCalendarDay} from "@/model/calendarDay/types";
-import {check, isNull, type Nullable} from "@/lib/utils";
+import {check, isNotNull, isNull, type Nullable} from "@/lib/utils";
 import type {ReactiveProject} from "@/model/project/types";
 import {useProjectsService} from "@/services/projectsService";
-import {whereId} from "@/lib/listUtils";
-import {formatDurationIso, parseDuration} from "@/lib/neoTime";
+import {asArray, lastOf, whereId} from "@/lib/listUtils";
+import {durationZero, formatDurationIso, maxDuration, parseDuration} from "@/lib/neoTime";
 
 export interface WorkingDurationService {
   normalWorkingDuration: Temporal.Duration
   normalBreakDuration: Temporal.Duration
+  readonly normalTotalDuration: Temporal.Duration
   breakProject: Nullable<ReactiveProject>
-  getDurationLeftOnDay: (day: ReactiveCalendarDay) => Temporal.Duration
+  getBreakDurationLeftOnDay: (day: ReactiveCalendarDay, endAtFallback?: Temporal.PlainDateTime) => Temporal.Duration
+  getDurationLeftOnDay: (day: ReactiveCalendarDay, endAtFallback?: Temporal.PlainDateTime) => Temporal.Duration
   getPredictedEndOfDay: (day: ReactiveCalendarDay) => Nullable<Temporal.PlainDateTime>
 }
 
@@ -33,6 +35,8 @@ export const useWorkingDurationService = createService<WorkingDurationService>((
     set: formatDurationIso
   })
 
+  const normalTotalDuration = computed(() => normalWorkingDuration.value.add(normalBreakDuration.value))
+
   const breakProject = store.getValue('breakProjectId', {
     get(id) {
       if (isNull(id)) {
@@ -50,24 +54,60 @@ export const useWorkingDurationService = createService<WorkingDurationService>((
     }
   })
 
-  function getDurationLeftOnDay(day: ReactiveCalendarDay) {
-    // TODO include breaks
-    const { totalBillableDuration } = timeReportService.getDayTimeReport(day)
-    return normalWorkingDuration.value.subtract(totalBillableDuration)
+  function getBreakDurationLeftOnDay(day: ReactiveCalendarDay, endAtFallback?: Temporal.PlainDateTime) {
+    const breakReport = timeReportService.getDayTimeReport(day, {
+      endAtFallback,
+      projects: asArray(breakProject.value).filter(isNotNull)
+    })
+
+    console.log(normalBreakDuration.value.subtract(breakReport.totalDuration))
+
+    return normalBreakDuration.value.subtract(breakReport.totalDuration)
+  }
+
+  function getDurationLeftOnDay(day: ReactiveCalendarDay, endAtFallback?: Temporal.PlainDateTime) {
+    const { totalBillableDuration } = timeReportService.getDayTimeReport(day, {
+      endAtFallback,
+    })
+
+    return normalWorkingDuration.value
+      .subtract(totalBillableDuration)
+      .add(getBreakDurationLeftOnDay(day, endAtFallback))
   }
 
   function getPredictedEndOfDay(day: ReactiveCalendarDay) {
-    if (isNull(day.startAt)) {
+    const lastBillableEvent = lastOf(day.events.filter(
+      (it) => it.project?.isBillable)
+    ) ?? null
+
+    if (isNull(lastBillableEvent)) {
       return null
     }
 
-    return Temporal.PlainDateTime.from(day.startAt).add(getDurationLeftOnDay(day))
+    if (day.events.length === 1) {
+      return lastBillableEvent.startAt
+        .add(normalTotalDuration.value)
+    }
+
+    const { totalBillableDuration } = timeReportService.getDayTimeReport(day)
+
+    return lastBillableEvent.startAt
+      .add(normalWorkingDuration.value)
+      .subtract(totalBillableDuration)
+      .add(
+        maxDuration(
+          getBreakDurationLeftOnDay(day),
+          durationZero()
+        )
+      )
   }
 
   return reactive({
     normalWorkingDuration,
     normalBreakDuration,
+    normalTotalDuration,
     breakProject,
+    getBreakDurationLeftOnDay,
     getDurationLeftOnDay,
     getPredictedEndOfDay,
   })
