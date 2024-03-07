@@ -67,7 +67,7 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
 
   function createShadow() {
     if (isNull(ctx.project)) {
-      throw Error('Tried to create a shadow of an event without a project.')
+      return null
     }
 
     return createEventShadow({

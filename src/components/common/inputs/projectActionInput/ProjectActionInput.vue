@@ -173,6 +173,12 @@ function handleCreate() {
     project,
     activity
   })
+
+  searchTerm.value = ''
+}
+
+function handleSelect() {
+  searchTerm.value = ''
 }
 
 const open = computed(() => {
@@ -210,10 +216,13 @@ const placeholder = computed(() => {
     v-model:search-term="searchTerm"
     :limit="6"
     @create="handleCreate"
+    @selected="handleSelect"
     no-input
     hide-when-empty
     allow-create
+    :max-create-length="24"
     prevent-close
+    prevent-input-clear
     popover-class="w-auto"
     :class="props.wrapperClass"
   >

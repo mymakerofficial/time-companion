@@ -19,7 +19,11 @@ const emit = defineEmits<{
 }>()
 
 function handleContinue() {
-  emit('continue', props.event.createShadow())
+  const shadow = props.event.createShadow()
+
+  if (isNotNull(shadow)) {
+    emit('continue', shadow)
+  }
 }
 
 function handleRemove() {

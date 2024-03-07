@@ -31,7 +31,7 @@ export interface ReactiveCalendarEvent {
   readonly hasStarted: boolean
   readonly hasEnded: boolean
   unsafeSetDay: (day: Nullable<ReactiveCalendarDay>) => void
-  createShadow: () => ReactiveCalendarEventShadow
+  createShadow: () => Nullable<ReactiveCalendarEventShadow>
   toSerialized: () => SerializedCalendarEvent
 }
 
