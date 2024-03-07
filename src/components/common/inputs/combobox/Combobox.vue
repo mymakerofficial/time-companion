@@ -26,6 +26,7 @@ export interface ComboboxProps<TValue extends AcceptableValue, TMultiple extends
   emptyLabel?: string
   noInput?: boolean
   preventClose?: boolean
+  preventInputClear?: boolean
   allowCreate?: boolean
   hideWhenEmpty?: boolean
 }
@@ -98,8 +99,8 @@ const label = computed(() => {
   }
 
   return asArray(model.value)
-    .map(getDisplayValue)
-    .join(', ')
+      .map(getDisplayValue)
+      .join(', ')
 })
 
 const showLabel = computed(() => {
@@ -117,9 +118,9 @@ function handleSelect(option: TValue) {
     }
   } else {
     if (
-      isNotNull(option) &&
-      option === model.value &&
-      props.allowDeselect
+        isNotNull(option) &&
+        option === model.value &&
+        props.allowDeselect
     ) {
       (model.value as null) = null
     } else {
@@ -148,9 +149,17 @@ function handleUpdateClose(value: boolean) {
   open.value = false
 }
 
+function handleUpdateSearchTerm(value: string) {
+  if (isEmpty(value) && props.preventInputClear) {
+    return
+  }
+
+  searchTerm.value = value
+}
+
 const filteredOptions = computed(() =>
-  filterFunction(props.options, searchTerm.value)
-  .slice(0, props.limit) // limit the number of options (default: Infinity)
+    filterFunction(props.options, searchTerm.value)
+        .slice(0, props.limit) // limit the number of options (default: Infinity)
 )
 
 // radix's Combobox doesn't support null as a value, so to support any value, we need to wrap it
@@ -197,21 +206,22 @@ const open = computed({
 
 <template>
   <ComboboxRoot
-    :model-value="primitiveModel"
-    v-model:search-term="searchTerm"
-    open
-    :class="props.class"
+      :model-value="primitiveModel"
+      :search-term="searchTerm"
+      @update:search-term="handleUpdateSearchTerm"
+      open
+      :class="props.class"
   >
     <Popover :open="open" @update:open="handleUpdateClose">
       <PopoverAnchor as-child>
         <slot name="anchor" :value="model" :toggle-open="toggleOpen">
           <Button
-            @click="toggleOpen"
-            role="combobox"
-            aria-haspopup="listbox"
-            :aria-expanded="open"
-            :variant="variant"
-            :class="cn('w-52 justify-start', triggerClass)"
+              @click="toggleOpen"
+              role="combobox"
+              aria-haspopup="listbox"
+              :aria-expanded="open"
+              :variant="variant"
+              :class="cn('w-52 justify-start', triggerClass)"
           >
             <slot name="trigger" :value="model">
               <template v-if="showLabel">
@@ -229,13 +239,13 @@ const open = computed({
         </slot>
       </PopoverAnchor>
       <PopoverContent
-        :class="cn('min-w-[200px] w-[200px] p-0', popoverClass)"
-        align="start"
+          :class="cn('min-w-[200px] w-[200px] p-0', popoverClass)"
+          align="start"
       >
         <div class="flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground">
           <CommandInput
-            v-if="!noInput"
-            :placeholder="searchLabel ?? $t('common.placeholders.search')"
+              v-if="!noInput"
+              :placeholder="searchLabel ?? $t('common.placeholders.search')"
           />
           <div v-if="showEmpty" class="py-6 text-center text-sm">
             <slot name="empty">
@@ -245,10 +255,10 @@ const open = computed({
           <CommandList>
             <div class="p-1">
               <CommandItem
-                v-for="option in filteredOptions"
-                :key="getKey(option) /* keep the index stable */"
-                :value="wrap(option) /* radix doesn't support null */"
-                @click.prevent="() => handleSelect(option) /* override default behavior */"
+                  v-for="option in filteredOptions"
+                  :key="getKey(option) /* keep the index stable */"
+                  :value="wrap(option) /* radix doesn't support null */"
+                  @click.prevent="() => handleSelect(option) /* override default behavior */"
               >
                 <slot name="option" :value="option">
                   <slot name="optionLeading" :value="option" />
@@ -257,16 +267,16 @@ const open = computed({
                   </slot>
                   <span class="ml-auto">
                     <Check
-                      :data-active="isSelected(option)"
-                      class="ml-2 size-4 opacity-0 data-[active=true]:opacity-100"
+                        :data-active="isSelected(option)"
+                        class="ml-2 size-4 opacity-0 data-[active=true]:opacity-100"
                     />
                   </span>
                 </slot>
               </CommandItem>
               <CommandItem
-                v-if="showCreate"
-                :value="{}"
-                @click.prevent="() => handleCreate()"
+                  v-if="showCreate"
+                  :value="{}"
+                  @click.prevent="() => handleCreate()"
               >
                 <slot name="create">
                   <slot name="createLeading" :value="searchTerm" />

@@ -214,6 +214,7 @@ const placeholder = computed(() => {
     hide-when-empty
     allow-create
     prevent-close
+    prevent-input-clear
     popover-class="w-auto"
     :class="props.wrapperClass"
   >
