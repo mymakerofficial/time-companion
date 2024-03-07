@@ -30,7 +30,7 @@ function handleClick(shadow: ReactiveCalendarEventShadow) {
 
 <template>
   <DashboardSection v-if="shadows.length" label="Quick start">
-    <div class="flex flex-wrap gap-2">
+    <div class="flex flex-wrap gap-2 max-w-4xl">
       <button
         v-for="(shadow, index) in shadows"
         :key="index"
