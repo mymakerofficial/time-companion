@@ -28,6 +28,7 @@ export interface ComboboxProps<TValue extends AcceptableValue, TMultiple extends
   preventClose?: boolean
   preventInputClear?: boolean
   allowCreate?: boolean
+  maxCreateLength?: number
   hideWhenEmpty?: boolean
 }
 </script>
@@ -41,7 +42,7 @@ import {Button} from "@/components/ui/button";
 import {Check, ChevronsUpDown, Plus} from 'lucide-vue-next'
 import {useToggle} from "@vueuse/core";
 import {asArray, isArray, isEmpty, isNotEmpty} from "@/lib/listUtils";
-import {computed} from "vue";
+import {computed, triggerRef} from "vue";
 
 const model = defineModel<TMultiple extends true ? TValue[] : Nullable<TValue>>({ required: true, default: null })
 const searchTerm = defineModel<string>('searchTerm', { required: false, default: '' })
@@ -50,6 +51,7 @@ const openModel = defineModel<boolean>('open', { required: false, default: false
 const props = withDefaults(defineProps<ComboboxProps<TValue, TMultiple>>(), {
   limit: Infinity,
   variant: 'outline',
+  maxCreateLength: Infinity,
 })
 
 const emit = defineEmits<{
@@ -196,6 +198,10 @@ const open = computed({
       return false
     }
 
+    if (props.allowCreate && props.maxCreateLength < searchTerm.value.length) {
+      return false
+    }
+
     return openModel.value
   },
   set(value) {
@@ -206,11 +212,11 @@ const open = computed({
 
 <template>
   <ComboboxRoot
-      :model-value="primitiveModel"
-      :search-term="searchTerm"
-      @update:search-term="handleUpdateSearchTerm"
-      open
-      :class="props.class"
+    :model-value="primitiveModel"
+    :search-term="searchTerm"
+    @update:search-term="handleUpdateSearchTerm"
+    open
+    :class="props.class"
   >
     <Popover :open="open" @update:open="handleUpdateClose">
       <PopoverAnchor as-child>

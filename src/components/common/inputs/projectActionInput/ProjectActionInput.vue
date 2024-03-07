@@ -213,6 +213,7 @@ const placeholder = computed(() => {
     no-input
     hide-when-empty
     allow-create
+    :max-create-length="24"
     prevent-close
     prevent-input-clear
     popover-class="w-auto"
