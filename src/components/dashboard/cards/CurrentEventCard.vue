@@ -2,7 +2,6 @@
 import {Button} from "@/components/ui/button";
 import {computed, reactive, watch} from "vue";
 import {watchDebounced} from "@vueuse/core";
-import {MoreVertical} from "lucide-vue-next";
 import {isNotNull, isNull, type Nullable, runIf} from "@/lib/utils";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import type {ReactiveProject} from "@/model/project/types";
@@ -123,15 +122,16 @@ const durationLabel = computed(() => {
           placeholder="what are you working on?..."
           size="lg"
           class="w-full"
-        />
+          v-slot:trailing
+        >
+          <Button @click="handleStartStop" size="sm" class="mr-1 px-3 py-1">{{ state.isRunning ? $t('dashboard.controls.stopEvent') : $t('dashboard.controls.startEvent') }}</Button>
+        </ProjectActionInput>
       </div>
-      <div class="flex items-center gap-8">
+      <div class="flex items-center gap-4">
+
         <div v-if="state.isRunning" class="flex items-center gap-4">
           <DateTimeInput v-if="state.startAt" v-model="state.startAt" size="sm" class="border-none w-14 h-11 text-sm" input-class="text-center" />
           <time class="text-lg font-medium text-center min-w-24">{{ durationLabel }}</time>
-        </div>
-        <div class="mr-2">
-          <Button @click="handleStartStop">{{ state.isRunning ? $t('dashboard.controls.stopEvent') : $t('dashboard.controls.startEvent') }}</Button>
         </div>
       </div>
     </div>
