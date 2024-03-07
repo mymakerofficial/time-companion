@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
 import {useLocaleService} from "@/services/localeService";
+import RadioGroup from "@/components/common/inputs/radioGroup/RadioGroup.vue";
 
 const localeService = useLocaleService()
 </script>
 
 <template>
-  <Combobox
+  <RadioGroup
     v-model="localeService.locale"
     :options="localeService.availableLocales"
-    :display-value="(value) => $t(`common.locales.${value}`)"
+    :display-value="(option) => $t(`common.locales.${option}`)"
   />
 </template>
