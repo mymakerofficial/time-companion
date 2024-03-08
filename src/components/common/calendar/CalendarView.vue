@@ -25,7 +25,7 @@ function handleClick(event: ReactiveCalendarEvent) {
 
 <template>
   <div class="flex-1 flex overflow-y-scroll">
-    <div class="flex w-full min-h-[124rem]">
+    <div class="flex w-full min-h-[148rem]">
       <div class="w-20 border-r border-border" />
       <div class="flex-1 grid grid-cols-1 grid-rows-1">
         <div class="col-start-1 col-end-2 row-end-2 -ml-3 grid grid-rows-[2em_repeat(48,_minmax(0,_1fr))]">
