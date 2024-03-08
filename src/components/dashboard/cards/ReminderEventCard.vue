@@ -38,7 +38,7 @@ function handleDismiss() {
   <div>
     <div class="flex flex-row justify-between items-center gap-8">
       <div class="flex-grow flex items-center gap-4">
-        <span v-provide-color="reminder.color" class="size-3 rounded-sm bg-primary" />
+        <span v-provide-color="reminder.color" class="size-3 rounded-sm bg-color" />
         <h3 class="font-medium text-sm">{{ reminder.displayText }}</h3>
       </div>
       <div>

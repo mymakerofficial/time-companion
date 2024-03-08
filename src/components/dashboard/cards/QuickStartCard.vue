@@ -36,7 +36,7 @@ function handleClick(shadow: ReactiveCalendarEventShadow) {
         :key="index"
         @click="handleClick(shadow)"
         v-provide-color="shadow.color"
-        class="px-5 py-3 min-w-44 rounded-md flex flex-row justify-between items-center gap-4 bg-primary hover:bg-primary/90 text-primary-foreground text-md font-medium tracking-wide text-start"
+        class="px-5 py-3 min-w-44 rounded-md flex flex-row justify-between items-center gap-4 bg-color hover:bg-color/90 text-color-foreground text-md font-medium tracking-wide text-start"
       >
         <ShadowBadge :shadow="shadow" variant="skeleton" size="md" />
         <PencilLine v-if="iconPencil" class="size-4" />

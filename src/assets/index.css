@@ -32,6 +32,9 @@
     --input:0 0% 89.8%;
     --ring:0 0% 3.9%;
     --radius: 0.5rem;
+
+    --color: var(--primary);
+    --color-foreground: var(--primary-foreground);
   }
 
   [data-theme="dark"] {
@@ -65,6 +68,9 @@
     --input: 0 0% 14.9%;
     --ring: 0 0% 83.1%;
     --radius: 0.5rem;
+
+    --color: var(--primary);
+    --color-foreground: var(--primary-foreground);
   }
 }
  

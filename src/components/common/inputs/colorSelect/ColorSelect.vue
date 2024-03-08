@@ -24,10 +24,10 @@ defineProps<{
       <slot name="anchor" :value="firstOf(value)" :toggle-open="toggleOpen" />
     </template>
     <template v-else #triggerLeading="{ value }">
-      <div v-provide-color="firstOf(value)" class="mr-2 size-2 rounded-full bg-primary"/>
+      <div v-provide-color="firstOf(value)" class="mr-2 size-2 rounded-full bg-color"/>
     </template>
     <template #optionLeading="{ value }">
-      <div v-provide-color="value" class="mr-2 size-2 rounded-full bg-primary"/>
+      <div v-provide-color="value" class="mr-2 size-2 rounded-full bg-color"/>
     </template>
   </Combobox>
 </template>

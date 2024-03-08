@@ -3,13 +3,7 @@ import {computed} from "vue";
 import {durationToGridRows} from "@/lib/calendarUtils";
 import {vProvideColor} from "@/directives/vProvideColor";
 import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
-import {
-  durationBetween,
-  durationSinceStartOfDay,
-  formatTime,
-  minutes,
-  withFormat
-} from "@/lib/neoTime";
+import {durationBetween, durationSinceStartOfDay, formatTime, minutes, withFormat} from "@/lib/neoTime";
 import {isNull} from "@/lib/utils";
 import {useNow} from "@/composables/useNow";
 
@@ -65,8 +59,8 @@ function handleClick() {
 
 <template>
   <div class="flex relative mt-0.5 col-span-full" :style="containerStyle">
-    <div @click="handleClick" class="cursor-pointer absolute inset-0.5 flex rounded-md overflow-hidden bg-background min-h-3" v-provide-color="event.color">
-      <div class="flex-1 px-2 py-1 flex flex-col gap-1 bg-primary text-primary-foreground hover:bg-primary/90">
+    <div @click="handleClick" v-provide-color="event.color" class="cursor-pointer absolute inset-0.5 flex rounded-md overflow-hidden bg-background min-h-3">
+      <div class="flex-1 px-2 py-1 flex flex-col gap-1 bg-color text-color-foreground hover:bg-color/90">
         <div class="flex flex-row justify-between items-center">
           <h2 :data-small="containerPosition.spanRows < 2" class="space-x-2 text-sm data-[small=true]:text-xs data-[small=true]:-my-2">
             <span class="font-medium">{{ event.projectDisplayName || event.note || 'Unnamed' }}</span>
