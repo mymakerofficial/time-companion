@@ -4,7 +4,7 @@ export { default as Input } from './Input.vue'
 export { default as InputPrimitive } from './InputPrimitive.vue'
 
 export const inputContainerVariants = cva(
-  'flex items-center w-full overflow-hidden bg-input ring-offset-background placeholder:text-muted-foreground has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2',
+  'flex items-center w-full overflow-hidden bg-secondary ring-offset-background placeholder:text-muted-foreground has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2',
   {
     variants: {
       size: {
