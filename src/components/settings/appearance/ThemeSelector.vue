@@ -9,6 +9,6 @@ const themeService = useThemeService()
   <RadioGroup
     v-model="themeService.theme"
     :options="themeService.availableThemes"
-    :displayValue="(option) => $t(`common.themes.${option}`)"
+    :display-value="(theme) => $t(`common.themes.${theme}`)"
   />
 </template>

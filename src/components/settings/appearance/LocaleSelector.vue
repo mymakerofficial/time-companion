@@ -9,6 +9,6 @@ const localeService = useLocaleService()
   <RadioGroup
     v-model="localeService.locale"
     :options="localeService.availableLocales"
-    :display-value="(option) => $t(`common.locales.${option}`)"
+    :display-value="(locale) => $t(`common.locales.${locale}`)"
   />
 </template>
