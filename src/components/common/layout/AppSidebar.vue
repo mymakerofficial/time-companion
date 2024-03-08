@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <div class="min-w-16 h-screen sticky top-0 bg-neutral-50 dark:bg-neutral-950 border-r border-border pt-16">
-    <IconNav :links="links" class="py-4" />
+  <div class="min-w-16 h-screen sticky top-0 bg-neutral-50 dark:bg-neutral-950 border-r border-border pt-20">
+    <IconNav :links="links" class="py-2.5" />
   </div>
 </template>
