@@ -8,7 +8,5 @@ const workingDurationService = useWorkingDurationService()
 <template>
   <DurationInput
     v-model="workingDurationService.normalBreakDuration"
-    class="w-16"
-    input-class="text-center"
   />
 </template>

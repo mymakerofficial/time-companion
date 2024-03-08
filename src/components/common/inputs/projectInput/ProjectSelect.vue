@@ -2,8 +2,9 @@
 import Combobox, {type ComboboxProps} from "@/components/common/inputs/combobox/Combobox.vue";
 import {useProjectsService} from "@/services/projectsService";
 import type {ReactiveProject} from "@/model/project/types";
-import type {Nullable} from "@/lib/utils";
+import {isDefined, type Nullable} from "@/lib/utils";
 import {createProject} from "@/model/project/model";
+import {computed} from "vue";
 
 const model = defineModel<Nullable<ReactiveProject>>({ required: true })
 
@@ -11,10 +12,23 @@ const props = defineProps<Pick<ComboboxProps<ReactiveProject, false>,
   'allowDeselect' |
   'placeholder' |
   'searchLabel' |
-  'emptyLabel'
->>()
+  'emptyLabel' |
+  'class' |
+  'triggerClass' |
+  'popoverClass'
+> & {
+  filter?: (project: ReactiveProject) => boolean
+}>()
 
 const projectsService = useProjectsService()
+
+const filteredProjects = computed(() => {
+  if (isDefined(props.filter)) {
+    return projectsService.projects.filter(props.filter)
+  }
+
+  return projectsService.projects
+})
 
 function handleCreate(displayName: string) {
   const project = createProject({
@@ -31,7 +45,7 @@ function handleCreate(displayName: string) {
   <Combobox
     v-bind="props"
     v-model="model"
-    :options="projectsService.projects"
+    :options="filteredProjects"
     :display-value="(project) => project?.displayName"
     allow-create
     @create="handleCreate"

@@ -13,7 +13,7 @@ defineProps<{
       <h2 class="text-sm font-medium text-primary tracking-tight">{{ title }}</h2>
       <p v-if="description" class="text-sm text-muted-foreground">{{ description }}</p>
     </div>
-    <div>
+    <div class="flex flex-col gap-8">
       <slot />
     </div>
     <Separator />
