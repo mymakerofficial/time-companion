@@ -28,7 +28,7 @@ function openNewActivityDialog() {
       :description="$t('settings.projects.description')"
     />
     <TableActions>
-      <Button @click="openNewActivityDialog" variant="outline" size="sm" class="gap-2">
+      <Button @click="openNewActivityDialog" variant="secondary" size="sm" class="gap-2">
         <PlusCircle class="size-4" />
         <span>{{ $t('settings.projects.controls.createActivity') }}</span>
       </Button>

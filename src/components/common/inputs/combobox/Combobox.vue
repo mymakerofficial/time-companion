@@ -50,7 +50,7 @@ const openModel = defineModel<boolean>('open', { required: false, default: false
 
 const props = withDefaults(defineProps<ComboboxProps<TValue, TMultiple>>(), {
   limit: Infinity,
-  variant: 'outline',
+  variant: 'secondary',
   maxCreateLength: Infinity,
 })
 
