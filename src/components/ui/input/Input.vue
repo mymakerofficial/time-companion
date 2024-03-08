@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {cn} from '@/lib/utils'
 import {computed, type HTMLAttributes, useAttrs} from "vue";
-import {useEmitAsProps} from "radix-vue";
 import InputPrimitive from "@/components/ui/input/InputPrimitive.vue";
 import {inputContainerVariants, inputInputVariants, type InputVariants} from "@/components/ui/input/index";
 
@@ -10,6 +9,20 @@ export interface InputProps {
   type?: HTMLAttributes['inputmode']
   class?: HTMLAttributes['class']
   inputClass?: HTMLAttributes['class']
+}
+
+export interface InputForwardProps {
+  modelValue: string | number
+  'onUpdate:modelValue': (value: string | number) => void
+  class: HTMLAttributes['class']
+  type: HTMLAttributes['inputmode']
+  [key: string]: unknown
+}
+
+export interface InputSlots {
+  leading(): any
+  input(props: InputForwardProps): any
+  trailing(): any
 }
 
 const props = withDefaults(defineProps<InputProps & {
@@ -29,24 +42,22 @@ defineOptions({
   inheritAttrs: false
 })
 
+defineSlots<InputSlots>()
+
 const attrs = useAttrs()
 
 const containerProps = computed(() => {
-  const { size, class: className } = props
-
   return {
-    class: cn(inputContainerVariants({ size }), className)
+    class: cn(inputContainerVariants({ size: props.size }), props.class)
   }
 })
 
-const inputProps = computed(() => {
-  const { type, size, inputClass } = props
-
+const inputProps = computed<InputForwardProps>(() => {
   return {
     modelValue: props.modelValue,
-    ...useEmitAsProps(emit),
-    type,
-    class: cn(inputInputVariants({ size }), inputClass),
+    'onUpdate:modelValue': (value: string | number) => emit('update:modelValue', value),
+    class: cn(inputInputVariants({ size: props.size }), props.inputClass),
+    type: props.type,
     ...attrs,
   }
 })

@@ -50,11 +50,13 @@ function handleDismiss() {
         />
       </div>
       <div class="flex items-center gap-2">
-        <DateTimeInput v-if="event.startAt" v-model="event.startAt" placeholder="00:00" size="sm" class="border-none w-14 h-11 text-sm" input-class="text-center" />
-        <ArrowRight v-show="event.endAt" class="size-4 text-muted-foreground" />
-        <DateTimeInput v-if="event.endAt"  v-model="event.endAt" placeholder="00:00" size="sm" class="border-none w-14 h-11 text-sm" input-class="text-center" />
-        <Clock v-show="event.endAt" class="size-4 text-muted-foreground" />
-        <DurationInput v-if="event.endAt" v-model="event.duration" size="sm" class="border-none w-20 h-11 text-lg font-medium" />
+        <DateTimeInput v-if="event.startAt" v-model="event.startAt" placeholder="00:00" size="sm" class="border-none h-11 w-fit text-sm" input-class="w-12" v-slot:leading>
+          <Clock class="mx-3 size-4 text-muted-foreground" />
+        </DateTimeInput>
+        <DateTimeInput v-if="event.endAt" v-model="event.endAt" placeholder="00:00" size="sm" class="border-none h-11 w-fit text-sm" input-class="w-12" v-slot:leading>
+          <ArrowRight class="mx-3 size-4 text-muted-foreground" />
+        </DateTimeInput>
+        <DurationInput v-if="event.endAt" v-model="event.duration" size="sm" class="border-none h-11 w-fit text-lg font-medium" input-class="w-24 text-center" />
       </div>
       <div>
         <DropdownMenu>

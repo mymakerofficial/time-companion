@@ -6,7 +6,7 @@ import {parseHumanDurationWithEquation} from "@/lib/parsers";
 import {isNull} from "@/lib/utils";
 import {Temporal} from "temporal-polyfill";
 import {watchImmediate} from "@vueuse/core";
-import type {InputProps} from "@/components/ui/input/Input.vue";
+import type {InputProps, InputSlots} from "@/components/ui/input/Input.vue";
 
 const model = defineModel<Temporal.Duration>({ required: true })
 
@@ -15,6 +15,8 @@ const props = withDefaults(defineProps<Omit<InputProps, 'type'> & {
 }>(), {
   mode: 'duration'
 })
+
+defineSlots<InputSlots>()
 
 const inputValue = ref('')
 
@@ -41,5 +43,15 @@ function handleChange() {
 </script>
 
 <template>
-  <Input v-bind="props" v-model="inputValue" @change="handleChange" />
+  <Input v-bind="props" v-model="inputValue" @change="handleChange">
+    <template #leading>
+      <slot name="leading" />
+    </template>
+    <template #input="inputProps">
+      <slot name="input" v-bind="inputProps" />
+    </template>
+    <template #trailing>
+      <slot name="trailing" />
+    </template>
+  </Input>
 </template>

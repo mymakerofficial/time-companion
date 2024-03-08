@@ -4,13 +4,13 @@ export { default as Input } from './Input.vue'
 export { default as InputPrimitive } from './InputPrimitive.vue'
 
 export const inputContainerVariants = cva(
-  'flex items-center w-full overflow-hidden bg-secondary ring-offset-background placeholder:text-muted-foreground has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2',
+  'flex items-center w-full overflow-hidden rounded-lg bg-secondary ring-offset-background placeholder:text-muted-foreground has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2',
   {
     variants: {
       size: {
-        sm: 'h-7 rounded-md text-xs',
-        md: 'h-10 rounded-md text-sm',
-        lg: 'h-11 rounded-lg text-xl font-medium',
+        sm: 'h-7 text-xs',
+        md: 'h-10 text-sm',
+        lg: 'h-11 text-xl font-medium',
       },
     },
     defaultVariants: {

@@ -11,6 +11,7 @@ import {useNow} from "@/composables/useNow";
 import {dateTimeZero, durationBetween, durationZero, humanizeDuration} from "@/lib/neoTime";
 import DateTimeInput from "@/components/common/inputs/timeInput/DateTimeInput.vue";
 import DashboardSection from "@/components/dashboard/cards/DashboardSection.vue";
+import {Clock} from "lucide-vue-next";
 
 const props = defineProps<{
   event: Nullable<ReactiveCalendarEvent>
@@ -127,12 +128,11 @@ const durationLabel = computed(() => {
           <Button @click="handleStartStop" size="sm" class="mr-1 px-3 py-1">{{ state.isRunning ? $t('dashboard.controls.stopEvent') : $t('dashboard.controls.startEvent') }}</Button>
         </ProjectActionInput>
       </div>
-      <div class="flex items-center gap-4">
-
-        <div v-if="state.isRunning" class="flex items-center gap-4">
-          <DateTimeInput v-if="state.startAt" v-model="state.startAt" size="sm" class="border-none w-14 h-11 text-sm" input-class="text-center" />
-          <time class="text-lg font-medium text-center min-w-24">{{ durationLabel }}</time>
-        </div>
+      <div v-if="state.isRunning" class="flex items-center gap-4">
+        <DateTimeInput v-if="state.startAt" v-model="state.startAt" placeholder="00:00" size="sm" class="border-none h-11 w-fit text-sm" input-class="w-12" v-slot:leading>
+          <Clock class="mx-3 size-4 text-muted-foreground" />
+        </DateTimeInput>
+        <time class="text-lg font-medium text-center min-w-24">{{ durationLabel }}</time>
       </div>
     </div>
   </DashboardSection>
