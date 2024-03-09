@@ -58,6 +58,8 @@ export default {
     locales: {
       'en-US': 'Engels (Amerikaans)',
       'de-Informal': 'Duits (Informeel)',
+      'nl-NL': 'Nederlands',
+      'cat': 'Kattentaal',
     },
   },
   app: {
