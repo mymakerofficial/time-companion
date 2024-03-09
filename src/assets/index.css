@@ -72,10 +72,10 @@
   }
 
   [data-theme="barf"] {
-    color-scheme: dark;
+    color-scheme: light;
 
     --background: 329, 100%, 50%;
-    --foreground: 182, 100%, 50%;
+    --foreground: 81, 100%, 50%;
 
     --card: 110, 100%, 50%;
     --card-foreground: 67, 100%, 50%;
@@ -86,7 +86,7 @@
     --primary: 240, 100%, 50%;
     --primary-foreground: 171, 100%, 50%;
 
-    --secondary: 0, 100%, 50%;
+    --secondary: 240, 100%, 50%;
     --secondary-foreground: 36, 100%, 50%;
 
     --muted: 163, 100%, 50%;
@@ -95,12 +95,12 @@
     --accent: 268, 100%, 50%;
     --accent-foreground: 304, 100%, 50%;
 
-    --destructive: 81, 100%, 50%;
+    --destructive: 0, 100%, 50%;
     --destructive-foreground: 134, 100%, 50%;
 
     --border: 0 0% 14.9%;
     --ring: 0 0% 83.1%;
-    --radius: 100%;
+    --radius: 1.5rem;
 
     --color: var(--primary);
     --color-foreground: var(--primary-foreground);
