@@ -1,87 +1,86 @@
 export default {
   common: {
     labels: {
-      columns: 'Columns',
-      yes: 'Yes',
-      no: 'No',
+      columns: 'Kolommen',
+      yes: 'Ja',
+      no: 'Nee',
     },
     controls: {
       start: 'Start',
       stop: 'Stop',
-      continue: 'Continue',
-      dismiss: 'Dismiss',
-      create: 'Create',
-      save: 'Save',
-      cancel: 'Cancel',
-      delete: 'Delete',
-      expandAll: 'Expand all',
-      collapseAll: 'Collapse all',
+      continue: 'Doorgaan',
+      dismiss: 'Afwijzen',
+      create: 'Aanmaken',
+      save: 'Opslaan',
+      cancel: 'Annuleren',
+      delete: 'Verwijderen',
+      expandAll: 'Open alles',
+      collapseAll: 'Sluit alles',
     },
     properties: {
-      displayName: 'Name',
-      color: 'Color',
-      isBillable: 'Billable',
-      lastUsed: 'Last used',
+      displayName: 'Naam',
+      color: 'Kleur',
+      isBillable: 'Factureerbaar',
+      lastUsed: 'Laatst gebruikt',
     },
     placeholders: {
-      select: 'Select...',
-      search: 'Search...',
-      searchEmpty: 'No results',
-      noEntries: '*crickets*',
+      select: 'Kies...',
+      search: 'Zoek...',
+      searchEmpty: 'Geen resultaten',
+      noEntries: '*stilte*',
     },
     colors: {
-      noColor: 'None',
-      red: 'Red',
-      orange: 'Orange',
+      noColor: 'Geen',
+      red: 'Rood',
+      orange: 'Oranje',
       amber: 'Amber',
-      yellow: 'Yellow',
-      lime: 'Lime',
-      green: 'Green',
-      emerald: 'Emerald',
+      yellow: 'Geel',
+      lime: 'Limoen',
+      green: 'Groen',
+      emerald: 'Smaragd',
       teal: 'Teal',
-      cyan: 'Cyan',
-      sky: 'Sky',
-      blue: 'Blue',
+      cyan: 'Cyaan',
+      sky: 'Lucht',
+      blue: 'Blauw',
       indigo: 'Indigo',
       violet: 'Violet',
-      purple: 'Purple',
+      purple: 'Paars',
       fuchsia: 'Fuchsia',
-      pink: 'Pink',
-      rose: 'Rose',
+      pink: 'Roze',
+      rose: 'Roos',
     },
     themes: {
-      auto: 'Auto',
-      dark: 'Dark',
-      light: 'Light',
-      barf: 'Rainbow Barf',
+      auto: 'Automatisch',
+      dark: 'Donker',
+      light: 'Licht',
+      barf: 'Braaksel',
     },
     locales: {
-      'en-US': 'English (US)',
-      'de-Informal': 'German (Informal)',
-      'nl-NL': 'Dutch',
+      'en-US': 'Engels (Amerikaans)',
+      'de-Informal': 'Duits (Informeel)',
     },
   },
   app: {
     nav: {
-      dashboard: 'Dashboard',
-      report: 'Report',
-      settings: 'Settings',
+      dashboard: 'Start pagina',
+      report: 'Raport',
+      settings: 'Instellingen',
     },
   },
   project: {
-    title: 'Project | Projects',
-    description: 'Use projects to track your time',
+    title: 'Project | Projecten',
+    description: 'Gebruikt projecten om tijd bij te houden',
     properties: {
       displayName: '@:common.properties.displayName',
       color: '@:common.properties.color',
       isBillable: '@:common.properties.isBillable',
-      isBreak: 'Break Project',
+      isBreak: 'Pauze Project',
       lastUsed: '@:common.properties.lastUsed',
     },
   },
   activity: {
-    title: 'Activity | Activities',
-    description: 'Activities are just for you',
+    title: 'Activiteit | Activiteiten',
+    description: 'Activiteiten speciaal voor jou',
     properties: {
       displayName: '@:common.properties.displayName',
       color: '@:common.properties.color',
@@ -89,31 +88,31 @@ export default {
     },
   },
   reminder: {
-    title: 'Reminder | Reminders',
-    description: 'Use reminders to remind you of upcoming events',
+    title: 'Herinnering | Herinneringen',
+    description: 'Gebruik herinneringen voor opkomende evenementen',
     properties: {
       displayText: '@:common.properties.displayName',
       color: '@:common.properties.color',
-      startAt: 'Time',
-      remindBefore: 'Remind Before',
-      remindAfter: 'Remind After',
-      repeatOn: 'Repeat on',
-      actionType: 'Action',
+      startAt: 'Tijd',
+      remindBefore: 'Herinner voor',
+      remindAfter: 'Herinner na',
+      repeatOn: 'Herhaal op',
+      actionType: 'Actie',
     },
     actionType: {
-      'NO_ACTION': 'No Action',
-      'START_EVENT': 'Start Event',
-      'CONTINUE_PREVIOUS_EVENT': 'Continue Previous Event',
-      'STOP_CURRENT_EVENT': 'Stop Current Event',
+      'NO_ACTION': 'Geen actie',
+      'START_EVENT': 'Start Evenement',
+      'CONTINUE_PREVIOUS_EVENT': 'Ga verder met het vorige evenement',
+      'STOP_CURRENT_EVENT': 'Stop het huidige evenement',
     }
   },
   dashboard: {
     header: {
       greeting: {
-        morning: 'Good morning',
-        noon: 'Good morning',
-        afternoon: 'Good afternoon',
-        evening: 'Good evening',
+        morning: 'Goede morgen',
+        noon: 'Good morgen',
+        afternoon: 'Goede middag',
+        evening: 'Goede avond',
       },
     },
     controls: {
@@ -127,24 +126,24 @@ export default {
   report: {
     table: {
       columns: {
-        date: 'Date',
-        totalDuration: 'Total',
+        date: 'Datum',
+        totalDuration: 'Totaal',
       }
     },
     empty: {
       noProjects: {
-        title: 'No time tracked yet.',
-        description: { term: 'You dont have any projects yet. {0} to start tracking time.', createProject: 'Create one'},
+        title: 'Geen tijd bijgehouden tot nu toe.',
+        description: { term: 'Je hebt nog geen projecten. {0} om te starten met het bijhouden van je tijd.', createProject: 'Maak een project aan'},
       }
     }
   },
   settings: {
     projects: {
-      title: 'Projects',
-      description: 'Manage your projects and activities',
+      title: 'Projecten',
+      description: 'Hou je projecten en activiteiten bij.',
       controls: {
-        createProject: 'Add Project',
-        createActivity: 'Add Activity',
+        createProject: 'Voeg een project toe',
+        createActivity: 'Voeg een activiteit toe',
       },
       table: {
         columns: {
@@ -156,10 +155,10 @@ export default {
       }
     },
     reminders: {
-      title: 'Reminders',
-      description: 'Manage your reminders',
+      title: 'Herinneringen',
+      description: 'Hou je herinneringen bij',
       controls: {
-        createReminder: 'Add Reminder',
+        createReminder: 'Voeg een herinnering toe',
       },
       table: {
         columns: {
@@ -171,34 +170,34 @@ export default {
       }
     },
     general: {
-      title: 'General',
-      description: 'General calendar settings',
+      title: 'Algemeen',
+      description: 'Algemene kalender instellingen.',
       sections: {
         normalWorkingDuration: {
-          title: 'Working Hours',
-          description: 'How many hours do you work per day?',
+          title: 'Werk Uren',
+          description: 'Hoeveel uur per dag moet je werken?',
         },
         break: {
-          title: 'Work Breaks',
-          description: 'Your break time and project are used to calculate how much time you spend on breaks. Break projects may not be billable.',
+          title: 'Werk Pauze',
+          description: 'Je pauze tijd en project tijd word gebruikt om te berekenen hoeveel tijd je gebruikt voor pauzes. Pauzes hoeven niet factureerbaar te zijn.',
           sections: {
-            breakTime: 'Break Time',
-            breakProject: 'Break Project',
+            breakTime: 'Pauze Tijd',
+            breakProject: 'Pauze Project',
           }
         },
       },
     },
     appearance: {
-      title: 'Appearance',
-      description: 'Customize the look and feel of the app',
+      title: 'Thema',
+      description: 'Verander hoe de app er uit ziet en voelt.',
       sections: {
         theme: {
-          title: 'Theme',
-          description: 'Are you joining the dark side?',
+          title: 'Thema',
+          description: 'Hou jij van de Nachtwacht?',
         },
         language: {
-          title: 'Language',
-          description: 'What language do you speak?',
+          title: 'Taal',
+          description: 'Welke taal spreek je?',
         }
       },
     },
@@ -206,11 +205,11 @@ export default {
   dialog: {
     project: {
       new: {
-        title: 'New Project',
+        title: 'Nieuw Project',
         description: '@:project.description',
       },
       edit: {
-        title: 'Edit Project',
+        title: 'Weizig Project',
         description: '@:project.description',
       },
       controls: {
@@ -226,25 +225,25 @@ export default {
         },
         color: {
           label: '@:project.properties.color',
-          description: 'Give your life some color',
+          description: 'Geef je leven een beetje kleur',
         },
         isBillable: {
           label: '@:project.properties.isBillable',
-          description: 'Does this project count towards your tracked time?',
+          description: 'Telt dit project mee met je bijgehouden tijd?',
         },
         isBreak: {
           label: '@:project.properties.isBreak',
-          description: 'This project is set as your break and will be counted differently for time calculations. You can change this in the "General" settings.',
+          description: 'Dit project is bijgehouden als jouw pauze en zal anders berekend worden in je tijd berekeningen. Je kan dit weizigen in de algemene instellingen.',
         },
       }
     },
     activity: {
       new: {
-        title: 'New Activity',
+        title: 'Nieuwe Activiteit',
         description: '@:activity.description',
       },
       edit: {
-        title: 'Edit Activity',
+        title: 'Weizig Activiteit',
         description: '@:activity.description',
       },
       controls: {
@@ -256,24 +255,24 @@ export default {
       form: {
         parentProject: {
           label: '@:project.title',
-          placeholder: 'Select project',
+          placeholder: 'Selecteer een project',
         },
         displayName: {
           placeholder: '@:activity.properties.displayName',
         },
         color: {
           label: '@:activity.properties.color',
-          description: 'Give your life some color',
+          description: 'Voeg wat kleur toe aan je leven',
         },
       }
     },
     reminder: {
       new: {
-        title: 'New Reminder',
+        title: 'Nieuwe Herinnering',
         description: '@:reminder.description',
       },
       edit: {
-        title: 'Edit Reminder',
+        title: 'Weizig Reminder',
         description: '@:reminder.description',
       },
       controls: {
