@@ -8,11 +8,11 @@ export const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          'bg-primary text-primary-foreground hover:bg-primary/90',
+          'bg-color text-color-foreground hover:bg-color/90',
         secondary:
           'bg-secondary text-secondary-foreground hover:bg-primary/90',
         ghost:
-          'bg-primary/20 text-primary-foreground dark:text-primary hover:bg-primary/15',
+          'bg-color/20 text-color-foreground dark:text-color hover:bg-color/15',
         skeleton: '',
       },
       size: {

@@ -8,7 +8,7 @@ const props = defineProps<ShadowBadgeProps>()
 <template>
   <ShadowBadge v-bind="props">
     <template #part="{ value }">
-      <InplaceInput v-model="value.displayName" />
+      <InplaceInput v-model="value.displayName" class="text-nowrap" />
     </template>
   </ShadowBadge>
 </template>

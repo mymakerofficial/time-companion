@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import DurationInput from "@/components/common/inputs/timeInput/DurationInput.vue";
 import {useWorkingDurationService} from "@/services/workingDurationService";
+import {Clock} from "lucide-vue-next";
 
 const workingDurationService = useWorkingDurationService()
 </script>
@@ -8,7 +9,8 @@ const workingDurationService = useWorkingDurationService()
 <template>
   <DurationInput
     v-model="workingDurationService.normalBreakDuration"
-    class="w-16"
-    input-class="text-center"
-  />
+    v-slot:leading
+  >
+    <Clock class="mx-3 size-4 text-muted-foreground" />
+  </DurationInput>
 </template>

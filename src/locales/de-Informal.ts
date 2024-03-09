@@ -53,6 +53,7 @@ export default {
       auto: 'Auto',
       dark: 'Dunkel',
       light: 'Hell',
+      barf: 'Gräueltat des Auges'
     },
     locales: {
       'en-US': 'Englisch',
@@ -176,13 +177,13 @@ export default {
           title: 'Arbeitsstunden',
           description: 'Arbeitsstunden pro Tag',
         },
-        breakProject: {
-          title: '@:project.properties.isBreak',
-          description: 'Welches Projekt wird während der Pause verfolgt?',
-        },
-        normalBreakDuration: {
-          title: 'Pausendauer',
-          description: 'Dauer der Pause',
+        break: {
+          title: 'Arbeitspausen',
+          description: 'Deine Pausenzeit und Pauseprojekt werden verwendet, um deine restliche Arbeitszeit an einem Tag zu berechnen. Pausenprojekte dürfen nicht abrechenbar sein.',
+          sections: {
+            breakTime: 'Pausenzeit',
+            breakProject: 'Pausenprojekt',
+          }
         },
       },
     },

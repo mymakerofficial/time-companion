@@ -4,6 +4,8 @@ import SettingsSection from "@/components/settings/layout/SettingsSection.vue";
 import NormalWorkingDurationSelector from "@/components/settings/general/NormalWorkingDurationSelector.vue";
 import NormalBreakDurationSelector from "@/components/settings/general/NormalBreakDurationSelector.vue";
 import BreakProjectSelector from "@/components/settings/general/BreakProjectSelector.vue";
+import BreakSection from "@/components/settings/general/BreakSection.vue";
+import WorktimeSection from "@/components/settings/general/WorktimeSection.vue";
 </script>
 
 <template>
@@ -12,23 +14,7 @@ import BreakProjectSelector from "@/components/settings/general/BreakProjectSele
       :title="$t('settings.general.title')"
       :description="$t('settings.general.description')"
     />
-    <SettingsSection
-      :title="$t('settings.general.sections.normalWorkingDuration.title')"
-      :description="$t('settings.general.sections.normalWorkingDuration.description')"
-    >
-      <NormalWorkingDurationSelector />
-    </SettingsSection>
-    <SettingsSection
-        :title="$t('settings.general.sections.breakProject.title')"
-        :description="$t('settings.general.sections.breakProject.description')"
-    >
-      <BreakProjectSelector />
-    </SettingsSection>
-    <SettingsSection
-      :title="$t('settings.general.sections.normalBreakDuration.title')"
-      :description="$t('settings.general.sections.normalBreakDuration.description')"
-    >
-      <NormalBreakDurationSelector />
-    </SettingsSection>
+    <WorktimeSection />
+    <BreakSection />
   </div>
 </template>

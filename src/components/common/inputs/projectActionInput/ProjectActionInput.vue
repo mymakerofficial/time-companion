@@ -240,6 +240,9 @@ const placeholder = computed(() => {
         <template #input="props">
           <ComboboxInput ref="input" v-bind="props" />
         </template>
+        <template #trailing>
+          <slot name="trailing" />
+        </template>
       </Input>
     </template>
     <template #optionLabel="{ value }">

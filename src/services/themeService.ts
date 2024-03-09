@@ -15,9 +15,12 @@ export const useThemeService = createService<ThemeService>(() => {
   const colorMode = useColorMode({
     attribute: 'data-theme',
     storageKey: null,
+    modes: {
+      'barf': 'barf',
+    }
   })
 
-  const availableThemes = computed<ThemeService['availableThemes']>(() => ['auto', 'dark', 'light'])
+  const availableThemes = computed<ThemeService['availableThemes']>(() => ['auto', 'dark', 'light', 'barf'])
 
   const theme = store.getValue('theme', {
     get(value) {

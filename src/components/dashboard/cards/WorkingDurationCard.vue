@@ -7,6 +7,7 @@ import {isNotNull, isNull} from "@/lib/utils";
 import {ArrowRight, Slash} from "lucide-vue-next";
 import {useNow} from "@/composables/useNow";
 import {useTimeReportService} from "@/services/timeReportService";
+import DashboardSection from "@/components/dashboard/cards/DashboardSection.vue";
 
 const workingDurationService = useWorkingDurationService()
 const activeDayService = useActiveDayService()
@@ -48,10 +49,6 @@ const durationWorkedFormatted = computed(() => {
   return humanizeDuration(durationWorked.value)
 })
 
-const durationNormalFormatted = computed(() => {
-  return humanizeDuration(workingDurationService.normalWorkingDuration)
-})
-
 const durationLeftFormatted = computed(() => {
   return humanizeDuration(durationLeft.value)
 })
@@ -66,20 +63,22 @@ const predictedEndFormatted = computed(() => {
 </script>
 
 <template>
-  <div class="p-8 border-b border-border">
-    <div class="flex justify-between items-center gap-4">
-      <div class="flex items-center gap-2">
-        <span class="text-muted-foreground">Worked time</span>
-        <time class="font-medium">{{ durationWorkedFormatted }}</time>
-        <Slash class="size-4 text-muted-foreground" />
-        <time class="font-medium">{{ durationNormalFormatted }}</time>
+  <DashboardSection>
+    <div class="flex flex-col gap-6 my-2 mx-4">
+      <div class="flex justify-between items-center gap-4">
+        <h3 class="text-sm font-medium">Time left</h3>
+        <div class="flex items-center gap-4">
+          <time class="text-sm font-medium">{{ durationLeftFormatted }}</time>
+          <ArrowRight v-if="isNotNull(predictedEnd)" class="size-4 text-muted-foreground" />
+          <time v-if="isNotNull(predictedEnd)" class="text-sm font-medium">{{ predictedEndFormatted }}</time>
+        </div>
       </div>
-      <div class="flex items-center gap-2">
-        <span class="text-muted-foreground">Time left</span>
-        <time class="font-medium">{{ durationLeftFormatted }}</time>
-        <ArrowRight v-if="isNotNull(predictedEnd)" class="size-4 text-muted-foreground" />
-        <time v-if="isNotNull(predictedEnd)" class="font-medium">{{ predictedEndFormatted }}</time>
+      <div class="flex justify-between items-center gap-4">
+        <h3 class="text-sm font-medium">Worked time</h3>
+        <div class="flex items-center gap-4">
+          <time class="text-sm font-medium">{{ durationWorkedFormatted }}</time>
+        </div>
       </div>
     </div>
-  </div>
+  </DashboardSection>
 </template>

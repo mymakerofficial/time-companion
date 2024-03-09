@@ -36,14 +36,9 @@ export const useActiveDayService = createService<ActiveDayService>(() => {
     activeDayStore.unsafeSetDay(day)
 
     const lastRunningEvent = getLastRunningEvent()
-    const lastCompletedEvent = getLastCompletedEvent()
 
     if (isNotNull(lastRunningEvent)) {
       useActiveEventService().setEvent(lastRunningEvent)
-    }
-
-    if (isNotNull(lastCompletedEvent)) {
-      useSelectedEventService().setEvent(lastCompletedEvent)
     }
   }
 

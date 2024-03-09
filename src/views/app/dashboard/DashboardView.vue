@@ -35,6 +35,9 @@ function handleStopEvent() {
 function handleRemoveEvent(event: ReactiveCalendarEvent) {
   activeDayService.removeEvent(event)
 }
+function handleDeselectEvent() {
+  selectedEventService.unsetEvent()
+}
 function handleEventSelected(event: ReactiveCalendarEvent) {
   selectedEventService.setEvent(event)
 }
@@ -61,18 +64,19 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
           @start-event="handleStartEvent"
           @stop-event="handleStopEvent"
         />
-        <RemindersContainer
-          :reminders="remindersService.reminders"
-        />
         <EditEventCard
           v-if="selectedEventService.event"
           :event="selectedEventService.event"
           @continue="handleStartEvent"
           @remove="handleRemoveEvent"
+          @dismiss="handleDeselectEvent"
         />
         <QuickStartCard
           :icon-pencil="activeEventHasNoProject"
           @start="handleQuickStart"
+        />
+        <RemindersContainer
+          :reminders="remindersService.reminders"
         />
         <WorkingDurationCard />
       </div>

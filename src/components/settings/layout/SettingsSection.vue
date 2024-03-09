@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import {Separator} from "@/components/ui/separator"
+
 defineProps<{
   title: string
   description?: string
@@ -6,11 +8,14 @@ defineProps<{
 </script>
 
 <template>
-  <section class="mb-16">
-    <div class="mb-8 space-y-1">
-      <h2 class="text-lg font-semibold text-primary tracking-tight">{{ title }}</h2>
-      <p v-if="description" class="text-xs text-muted-foreground">{{ description }}</p>
+  <section class="mb-8 flex flex-col gap-8">
+    <div class="space-y-1">
+      <h2 class="text-sm font-medium text-primary tracking-tight">{{ title }}</h2>
+      <p v-if="description" class="text-sm text-muted-foreground">{{ description }}</p>
     </div>
-    <slot />
+    <div class="flex flex-col gap-8">
+      <slot />
+    </div>
+    <Separator />
   </section>
 </template>

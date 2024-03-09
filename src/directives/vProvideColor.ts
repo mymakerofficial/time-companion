@@ -1,56 +1,111 @@
 import Color from "color";
 import colors from "tailwindcss/colors";
-import type {Maybe} from "@/lib/utils";
-import {isNotDefined} from "@/lib/utils";
+import type {Maybe, Nullable} from "@/lib/utils";
+import {isNotDefined, round} from "@/lib/utils";
+import type {DefaultColors} from "tailwindcss/types/generated/colors";
 
-function getHsl(color: string, shade: number) {
-  // be warned, ugly code ahead
+type ColorName = Omit<keyof DefaultColors, 'inherit' | 'current' | 'transparent' | 'black' | 'white'>
+type ColorShade = keyof typeof colors['neutral']
+
+type Hsl = {
+  h: number
+  s: number
+  l: number
+}
+
+type HslString = `${number} ${number}% ${number}%`
+
+type ColorStyleVariable<VariablePrefix extends string> = {
+  property: `--${VariablePrefix}` | `--${VariablePrefix}-foreground` | `--${VariablePrefix}-${ColorShade}`,
+  value: Nullable<HslString>
+}
+
+const shades = Object.keys(colors['neutral']) as ColorShade[]
+
+function getHsl(color: ColorName, shade: ColorShade): Hsl {
   const [h, s, l] = (
     Color(colors
       [color as keyof typeof colors]
-      [shade.toString() as keyof typeof colors['neutral']]
+      [shade]
     ).hsl() as unknown as { color: [number, number, number] }
   ).color
   return { h, s, l }
 }
 
-function toString(color: { h: number, s: number, l: number }) {
-  return `${color.h} ${color.s}% ${color.l}%`
+function hslToString(color: Hsl): HslString {
+  return `${round(color.h, 2)} ${round(color.s, 2)}% ${round(color.l, 2)}%`
 }
 
-export function getColorStyleVariables(color: Maybe<string>) {
-  if (isNotDefined(color)) {
-    return {}
-  }
-
-  if (isNotDefined(colors[color as keyof typeof colors])) {
-    return {}
-  }
-
-  const surfaceShade = 400
-  const foregroundShade = 950
-
-  const surfaceColor = getHsl(color, surfaceShade)
-  const foregroundColor = getHsl(color, foregroundShade)
-
-  return {
-    '--primary': toString(surfaceColor),
-    '--primary-foreground': toString(foregroundColor),
-  }
+function getEmptyColorStyleVariables<VariablePrefix extends string>(variablePrefix: VariablePrefix): ColorStyleVariable<VariablePrefix>[] {
+  return [
+    { property: `--${variablePrefix}`, value: null },
+    { property: `--${variablePrefix}-foreground`, value: null },
+    ...shades.map(shade => ({
+      property: `--${variablePrefix}-${shade}`,
+      value: null } as ColorStyleVariable<VariablePrefix>
+    ))
+  ]
 }
 
-function update(el: HTMLElement, color: Maybe<string>) {
-  const style = getColorStyleVariables(color)
+export function getColorStyleVariables<VariablePrefix extends string>({
+  color,
+  variablePrefix,
+}: {
+  color: Maybe<ColorName>,
+  variablePrefix: VariablePrefix
+}): ColorStyleVariable<VariablePrefix>[] {
+  if (
+    isNotDefined(color) ||
+    isNotDefined(colors[color as keyof typeof colors])
+  ) {
+    return getEmptyColorStyleVariables(variablePrefix)
+  }
 
-  el.style.setProperty('--primary', style['--primary'] ?? null)
-  el.style.setProperty('--primary-foreground', style['--primary-foreground'] ?? null)
+  const surfaceShade: ColorShade = '400'
+  const foregroundShade: ColorShade = '950'
+
+  const surfaceColor = hslToString(getHsl(color, surfaceShade))
+  const foregroundColor = hslToString(getHsl(color, foregroundShade))
+
+  const colorShades: ColorStyleVariable<VariablePrefix>[] = shades.map((shade) => ({
+    property: `--${variablePrefix}-${shade}`,
+    value: hslToString(getHsl(color, shade))
+  }))
+
+  return [
+    { property: `--${variablePrefix}`, value: surfaceColor },
+    { property: `--${variablePrefix}-foreground`, value: foregroundColor },
+    ...colorShades,
+  ]
+}
+
+function update({
+  el,
+  color,
+  variablePrefix = 'color',
+}: {
+  el: HTMLElement,
+  color: Maybe<ColorName>
+  variablePrefix?: string
+}) {
+  const style = getColorStyleVariables({ color, variablePrefix })
+
+  style.forEach(({ property, value }) => {
+    el.style.setProperty(property, value ?? null)
+  })
 }
 
 export const vProvideColor = {
   mounted(el: HTMLElement, { value: color }: { value: Maybe<string> }) {
-    update(el, color)
+    update({
+      el,
+      color
+    })
   },
   updated(el: HTMLElement, { value: color }: { value: Maybe<string> }) {
-    update(el, color)
+    update({
+      el,
+      color
+    })
   }
 }

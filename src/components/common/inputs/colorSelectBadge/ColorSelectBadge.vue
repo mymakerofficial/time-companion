@@ -23,7 +23,7 @@ const label = computed(() => t(`common.colors.${model.value ?? 'noColor'}`))
       :color="model"
       variant="ghost"
     >
-      <span class="bg-primary size-1.5 mr-1 rounded-full" />
+      <span class="bg-color size-1.5 mr-1 rounded-full" />
       <span>{{ label }}</span>
     </Badge>
   </ColorSelect>

@@ -53,6 +53,7 @@ export default {
       auto: 'Auto',
       dark: 'Dark',
       light: 'Light',
+      barf: 'Rainbow Barf',
     },
     locales: {
       'en-US': 'English',
@@ -176,13 +177,13 @@ export default {
           title: 'Working Hours',
           description: 'How many hours do you work per day?',
         },
-        breakProject: {
-          title: '@:project.properties.isBreak',
-          description: 'Select a project to track your break time',
-        },
-        normalBreakDuration: {
-          title: 'Break Time',
-          description: 'How long is your break?',
+        break: {
+          title: 'Work Breaks',
+          description: 'Your break time and project are used to calculate how much time you spend on breaks. Break projects may not be billable.',
+          sections: {
+            breakTime: 'Break Time',
+            breakProject: 'Break Project',
+          }
         },
       },
     },

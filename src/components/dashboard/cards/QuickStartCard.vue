@@ -6,6 +6,7 @@ import {useQuickAccess} from "@/composables/useQuickAccess";
 import ShadowBadge from "@/components/common/shadow/ShadowBadge.vue";
 import {useActiveEventService} from "@/services/activeEventService";
 import {computed} from "vue";
+import DashboardSection from "@/components/dashboard/cards/DashboardSection.vue";
 
 const emit = defineEmits<{
   start: [shadow: ReactiveCalendarEventShadow]
@@ -28,19 +29,19 @@ function handleClick(shadow: ReactiveCalendarEventShadow) {
 </script>
 
 <template>
-  <div v-if="shadows.length" class="border-b border-border">
-    <div class="flex flex-wrap gap-2 p-8">
+  <DashboardSection v-if="shadows.length" label="Quick start">
+    <div class="flex flex-wrap gap-2 max-w-4xl">
       <button
         v-for="(shadow, index) in shadows"
         :key="index"
         @click="handleClick(shadow)"
         v-provide-color="shadow.color"
-        class="px-8 py-4 min-w-52 rounded-md flex flex-row justify-between items-center gap-4 bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-medium tracking-wide text-start"
+        class="px-5 py-3 min-w-44 rounded-md flex flex-row justify-between items-center gap-4 bg-color hover:bg-color/90 text-color-foreground text-md font-medium tracking-wide text-start"
       >
-        <ShadowBadge :shadow="shadow" variant="skeleton" size="lg" />
+        <ShadowBadge :shadow="shadow" variant="skeleton" size="md" />
         <PencilLine v-if="iconPencil" class="size-4" />
         <Play v-else class="size-4" />
       </button>
     </div>
-  </div>
+  </DashboardSection>
 </template>

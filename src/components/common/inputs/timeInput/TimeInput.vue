@@ -3,11 +3,13 @@ import {computed} from "vue";
 import {absDuration, durationSinceStartOfDay, durationToTime} from "@/lib/neoTime";
 import {Temporal} from "temporal-polyfill";
 import DurationInput from "@/components/common/inputs/timeInput/DurationInput.vue";
-import type {InputProps} from "@/components/ui/input/Input.vue";
+import type {InputProps, InputSlots} from "@/components/ui/input/Input.vue";
 
 const model = defineModel<Temporal.PlainTime>({ required: true })
 
 const props = defineProps<Omit<InputProps, 'type'>>()
+
+defineSlots<InputSlots>()
 
 const forwardModel = computed<Temporal.Duration>({
   get() {
@@ -20,5 +22,15 @@ const forwardModel = computed<Temporal.Duration>({
 </script>
 
 <template>
-  <DurationInput v-bind="props" v-model="forwardModel" mode="time" />
+  <DurationInput v-bind="props" v-model="forwardModel" mode="time">
+    <template #leading>
+      <slot name="leading" />
+    </template>
+    <template #input="inputProps">
+      <slot name="input" v-bind="inputProps" />
+    </template>
+    <template #trailing>
+      <slot name="trailing" />
+    </template>
+  </DurationInput>
 </template>
