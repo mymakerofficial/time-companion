@@ -56,8 +56,9 @@ export default {
       barf: 'Gräueltat des Auges'
     },
     locales: {
-      'en-US': 'Englisch',
+      'en-US': 'Englisch (US)',
       'de-Informal': 'Deutsch (Du)',
+      'nl-NL': 'Niederländisch',
     },
   },
   app: {
