@@ -32,8 +32,8 @@ function handleClick(event: ReactiveCalendarEvent) {
           <div />
           <template v-for="i in 48">
             <div class="border-t border-border">
-              <div v-if="i % 2 === 1" class="leading-5 text-right text-xs font-medium text-muted-foreground -ml-24 -mt-2.5 pr-5 w-24">
-                {{ getRowTimeLabel(i - 1) }}
+              <div v-if="i % 2 === 1" class="leading-5 text-right -ml-24 -mt-2.5 pr-5 w-24">
+                <time class="text-xs font-medium text-muted-foreground select-none">{{ getRowTimeLabel(i - 1) }}</time>
               </div>
             </div>
           </template>
