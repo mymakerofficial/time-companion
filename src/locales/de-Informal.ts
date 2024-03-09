@@ -59,6 +59,7 @@ export default {
       'en-US': 'Englisch (US)',
       'de-Informal': 'Deutsch (Du)',
       'nl-NL': 'Niederländisch',
+      'cat': 'Katzensprache',
     },
   },
   app: {

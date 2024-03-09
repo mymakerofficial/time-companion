@@ -1,88 +1,88 @@
 export default {
   common: {
     labels: {
-      columns: 'Columns',
-      yes: 'Yes',
-      no: 'No',
+      columns: 'Meow',
+      yes: '*purr*',
+      no: '*hiss*',
     },
     controls: {
-      start: 'Start',
-      stop: 'Stop',
-      continue: 'Continue',
-      dismiss: 'Dismiss',
-      create: 'Create',
-      save: 'Save',
-      cancel: 'Cancel',
-      delete: 'Delete',
-      expandAll: 'Expand all',
-      collapseAll: 'Collapse all',
+      start: 'Meow',
+      stop: 'Mrrp',
+      continue: 'Meooow',
+      dismiss: 'Prrr',
+      create: 'Meeeooow',
+      save: 'Meow',
+      cancel: 'Meeeoooww',
+      delete: '*hisss*',
+      expandAll: 'Meow Meoooww',
+      collapseAll: 'Meow Meow',
     },
     properties: {
-      displayName: 'Name',
-      color: 'Color',
-      isBillable: 'Billable',
-      lastUsed: 'Last used',
+      displayName: 'Meow',
+      color: 'Meow',
+      isBillable: 'Meeoow Meow',
+      lastUsed: 'Meow prrr',
     },
     placeholders: {
-      select: 'Select...',
-      search: 'Search...',
-      searchEmpty: 'No results',
-      noEntries: '*crickets*',
+      select: 'Meow...',
+      search: 'Meow...',
+      searchEmpty: 'prrr',
+      noEntries: '*meow*',
     },
     colors: {
-      noColor: 'None',
-      red: 'Red',
-      orange: 'Orange',
-      amber: 'Amber',
-      yellow: 'Yellow',
-      lime: 'Lime',
-      green: 'Green',
-      emerald: 'Emerald',
-      teal: 'Teal',
-      cyan: 'Cyan',
-      sky: 'Sky',
-      blue: 'Blue',
-      indigo: 'Indigo',
-      violet: 'Violet',
-      purple: 'Purple',
-      fuchsia: 'Fuchsia',
-      pink: 'Pink',
-      rose: 'Rose',
+      noColor: 'Meow',
+      red: 'Meow',
+      orange: 'Meow',
+      amber: 'Meow',
+      yellow: 'Meow',
+      lime: 'Meow',
+      green: 'Meow',
+      emerald: 'Meow',
+      teal: 'Meow',
+      cyan: 'Meow',
+      sky: 'Meow',
+      blue: 'Meow',
+      indigo: 'Meow',
+      violet: 'Meow',
+      purple: 'Meow',
+      fuchsia: 'Meow',
+      pink: 'Meow',
+      rose: 'Meow',
     },
     themes: {
-      auto: 'Auto',
-      dark: 'Dark',
-      light: 'Light',
-      barf: 'Rainbow Barf',
+      auto: 'Meooow Meow',
+      dark: 'Meow',
+      light: 'Meow',
+      barf: 'Meow',
     },
     locales: {
-      'en-US': 'English (US)',
-      'de-Informal': 'German (Informal)',
-      'nl-NL': 'Dutch',
-      'cat': 'Cat',
+      'en-US': 'Meow (Ameowrican)',
+      'de-Informal': 'Meow (Meow)',
+      'nl-NL': 'Meow',
+      'cat': 'pspsps',
     },
   },
   app: {
     nav: {
-      dashboard: 'Dashboard',
-      report: 'Report',
-      settings: 'Settings',
+      dashboard: 'Meow meow',
+      report: 'Meow',
+      settings: 'Mrrrrrp',
     },
   },
   project: {
-    title: 'Project | Projects',
-    description: 'Use projects to track your time',
+    title: 'Meow | Meeooow',
+    description: 'Meeooooww mrrrp prrr meow meow',
     properties: {
       displayName: '@:common.properties.displayName',
       color: '@:common.properties.color',
       isBillable: '@:common.properties.isBillable',
-      isBreak: 'Break Project',
+      isBreak: 'Meow meow',
       lastUsed: '@:common.properties.lastUsed',
     },
   },
   activity: {
-    title: 'Activity | Activities',
-    description: 'Activities are just for you',
+    title: 'Meeow | Meeooow',
+    description: 'Meow meow meeooww',
     properties: {
       displayName: '@:common.properties.displayName',
       color: '@:common.properties.color',
@@ -90,31 +90,31 @@ export default {
     },
   },
   reminder: {
-    title: 'Reminder | Reminders',
-    description: 'Use reminders to remind you of upcoming events',
+    title: 'Meow | Meeoow',
+    description: 'Meow mrrrp meow',
     properties: {
       displayText: '@:common.properties.displayName',
       color: '@:common.properties.color',
-      startAt: 'Time',
-      remindBefore: 'Remind Before',
-      remindAfter: 'Remind After',
-      repeatOn: 'Repeat on',
-      actionType: 'Action',
+      startAt: 'prrr',
+      remindBefore: 'Meow',
+      remindAfter: 'Meow',
+      repeatOn: 'Meooow',
+      actionType: 'Meow',
     },
     actionType: {
-      'NO_ACTION': 'No Action',
-      'START_EVENT': 'Start Event',
-      'CONTINUE_PREVIOUS_EVENT': 'Continue Previous Event',
-      'STOP_CURRENT_EVENT': 'Stop Current Event',
+      'NO_ACTION': '*hiss*',
+      'START_EVENT': 'Meow',
+      'CONTINUE_PREVIOUS_EVENT': 'Meoow',
+      'STOP_CURRENT_EVENT': 'Meooow',
     }
   },
   dashboard: {
     header: {
       greeting: {
-        morning: 'Good morning',
-        noon: 'Good morning',
-        afternoon: 'Good afternoon',
-        evening: 'Good evening',
+        morning: 'Meow Meeeow Meeeoooooow Meooooow Meeeoooow',
+        noon: 'Meow Meoow',
+        afternoon: 'Meow Meooow',
+        evening: 'Meoow Meeoooow Meeeooooow Meooooow',
       },
     },
     controls: {
@@ -128,24 +128,24 @@ export default {
   report: {
     table: {
       columns: {
-        date: 'Date',
-        totalDuration: 'Total',
+        date: 'Meow',
+        totalDuration: 'Meeoow',
       }
     },
     empty: {
       noProjects: {
-        title: 'No time tracked yet.',
-        description: { term: 'You dont have any projects yet. {0} to start tracking time.', createProject: 'Create one'},
+        title: 'Meeooow prrr',
+        description: { term: 'Meow meow meoow meow. {0} meow meow meoow.', createProject: 'Meow'},
       }
     }
   },
   settings: {
     projects: {
-      title: 'Projects',
-      description: 'Manage your projects and activities',
+      title: 'Meow',
+      description: 'Meow prrr',
       controls: {
-        createProject: 'Add Project',
-        createActivity: 'Add Activity',
+        createProject: 'Meow mrrrp',
+        createActivity: 'Meow meow',
       },
       table: {
         columns: {
@@ -157,10 +157,10 @@ export default {
       }
     },
     reminders: {
-      title: 'Reminders',
-      description: 'Manage your reminders',
+      title: 'Meow',
+      description: 'Mouw mrrrp prrr',
       controls: {
-        createReminder: 'Add Reminder',
+        createReminder: 'Meooow Meow Meoow',
       },
       table: {
         columns: {
@@ -172,34 +172,34 @@ export default {
       }
     },
     general: {
-      title: 'General',
-      description: 'General calendar settings',
+      title: 'Meooow',
+      description: 'Meooow Meow Meoooow',
       sections: {
         normalWorkingDuration: {
-          title: 'Working Hours',
-          description: 'How many hours do you work per day?',
+          title: 'Meow mrrrp',
+          description: 'Meoooow meow meow?',
         },
         break: {
-          title: 'Work Breaks',
-          description: 'Your break time and project are used to calculate how much time you spend on breaks. Break projects may not be billable.',
+          title: 'Meow',
+          description: 'Meow.',
           sections: {
-            breakTime: 'Break Time',
-            breakProject: 'Break Project',
+            breakTime: 'Meoow meow',
+            breakProject: 'Meooow mrrrp',
           }
         },
       },
     },
     appearance: {
-      title: 'Appearance',
-      description: 'Customize the look and feel of the app',
+      title: 'Meow',
+      description: 'Meooow meow',
       sections: {
         theme: {
-          title: 'Theme',
-          description: 'Are you joining the dark side?',
+          title: 'Meow',
+          description: 'mrrrp?',
         },
         language: {
-          title: 'Language',
-          description: 'What language do you speak?',
+          title: 'Meow',
+          description: 'Meow?',
         }
       },
     },
@@ -207,11 +207,11 @@ export default {
   dialog: {
     project: {
       new: {
-        title: 'New Project',
+        title: 'Meow meow',
         description: '@:project.description',
       },
       edit: {
-        title: 'Edit Project',
+        title: 'Meow meow',
         description: '@:project.description',
       },
       controls: {
@@ -227,25 +227,25 @@ export default {
         },
         color: {
           label: '@:project.properties.color',
-          description: 'Give your life some color',
+          description: 'Meow mrrrp',
         },
         isBillable: {
           label: '@:project.properties.isBillable',
-          description: 'Does this project count towards your tracked time?',
+          description: 'Meow meow meeooow?',
         },
         isBreak: {
           label: '@:project.properties.isBreak',
-          description: 'This project is set as your break and will be counted differently for time calculations. You can change this in the "General" settings.',
+          description: 'Meow',
         },
       }
     },
     activity: {
       new: {
-        title: 'New Activity',
+        title: 'Meow meow',
         description: '@:activity.description',
       },
       edit: {
-        title: 'Edit Activity',
+        title: 'Weizig Activiteit',
         description: '@:activity.description',
       },
       controls: {
@@ -257,24 +257,24 @@ export default {
       form: {
         parentProject: {
           label: '@:project.title',
-          placeholder: 'Select project',
+          placeholder: 'Meow meow meow',
         },
         displayName: {
           placeholder: '@:activity.properties.displayName',
         },
         color: {
           label: '@:activity.properties.color',
-          description: 'Give your life some color',
+          description: 'Meow',
         },
       }
     },
     reminder: {
       new: {
-        title: 'New Reminder',
+        title: 'Meow',
         description: '@:reminder.description',
       },
       edit: {
-        title: 'Edit Reminder',
+        title: 'Meow',
         description: '@:reminder.description',
       },
       controls: {
@@ -291,7 +291,7 @@ export default {
           label: '@:reminder.properties.actionType'
         },
         actionTarget: {
-          label: 'Start project'
+          label: 'Meow meow'
         },
         color: {
           label: '@:reminder.properties.color'
