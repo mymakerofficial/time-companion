@@ -53,6 +53,7 @@ export default {
       auto: 'Auto',
       dark: 'Dunkel',
       light: 'Hell',
+      barf: 'Gräueltat des Auges'
     },
     locales: {
       'en-US': 'Englisch',

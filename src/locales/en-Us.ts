@@ -53,6 +53,7 @@ export default {
       auto: 'Auto',
       dark: 'Dark',
       light: 'Light',
+      barf: 'Rainbow Barf',
     },
     locales: {
       'en-US': 'English',
