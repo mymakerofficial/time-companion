@@ -35,6 +35,7 @@ const slashVariants = cva(
   {
     variants: {
       size: {
+        xs: 'size-2',
         sm: 'size-3',
         md: 'size-3',
         lg: 'size-4',
