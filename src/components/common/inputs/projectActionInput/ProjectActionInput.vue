@@ -35,6 +35,10 @@ const props = withDefaults(defineProps<{
   variant: 'default',
 })
 
+const emit = defineEmits<{
+  'startTyping': []
+}>()
+
 defineOptions({
   inheritAttrs: false
 })
@@ -42,6 +46,12 @@ defineOptions({
 const projectsService = useProjectsService()
 
 const searchTerm = ref('')
+
+watch(searchTerm, (newValue, oldValue) => {
+  if (isEmpty(oldValue) && isNotEmpty(newValue)) {
+    emit('startTyping')
+  }
+})
 
 onMounted(() => {
   // wait for the combobox, so it doesn't reset the value

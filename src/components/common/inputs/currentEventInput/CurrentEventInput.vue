@@ -22,6 +22,30 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
+function handleStart() {
+  if (!props.isRunning) {
+    emit('start')
+  }
+}
+
+function handleStop() {
+  if (props.isRunning) {
+    emit('stop')
+  }
+}
+
+function handleStartTyping() {
+  handleStart()
+}
+
+function handleStartStop() {
+  if (!props.isRunning) {
+    handleStart()
+  } else {
+    handleStop()
+  }
+}
+
 const buttonLabel = computed(() => {
   if (props.isRunning) {
     return t('dashboard.controls.stopEvent')
@@ -29,14 +53,6 @@ const buttonLabel = computed(() => {
     return t('dashboard.controls.startEvent')
   }
 })
-
-function handleStartStop() {
-  if (props.isRunning) {
-    emit('stop')
-  } else {
-    emit('start')
-  }
-}
 </script>
 
 <template>
@@ -44,6 +60,7 @@ function handleStartStop() {
     v-model:project="project"
     v-model:activity="activity"
     v-model:note="note"
+    @start-typing="handleStartTyping"
     focus-when-typing
     placeholder="what are you working on?..."
     size="lg"
