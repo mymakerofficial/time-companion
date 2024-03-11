@@ -8,6 +8,7 @@ interface SettingsValues {
   normalWorkingDuration: string
   normalBreakDuration: string
   autoStartActiveEventWhenTyping: boolean
+  minimumEventDuration: string
 }
 
 interface SettingsStorageSerialized {
@@ -22,6 +23,7 @@ export const useSettingsStore = defineStore('settings', () => {
     normalWorkingDuration: 'PT8H',
     normalBreakDuration: 'PT30M',
     autoStartActiveEventWhenTyping: true,
+    minimumEventDuration: 'PT30S',
   }
 
   const storage = useLocalStorage<SettingsStorageSerialized>('time-companion-settings-store', {

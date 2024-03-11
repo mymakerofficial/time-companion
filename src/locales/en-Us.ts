@@ -194,6 +194,10 @@ export default {
         autoStartActiveEventWhenTyping: {
           title: 'Auto start when typing',
           description: 'Automatically start a new event when typing.',
+        },
+        minimumEventDuration: {
+          title: 'Minimum Event Duration',
+          description: 'When stopping an event, the duration must be at least this long to be saved.',
         }
       },
     },

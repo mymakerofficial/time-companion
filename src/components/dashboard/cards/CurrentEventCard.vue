@@ -36,10 +36,6 @@ function handleStop() {
   activeEventService.stopEvent()
 }
 
-function handleRemove() {
-  activeEventService.stopAndRemoveEvent()
-}
-
 const isRunning = computed(() => isDefined(event.value?.startAt) && isNotDefined(event.value?.endAt))
 
 const duration = computed(() => {
@@ -64,7 +60,6 @@ const durationLabel = computed(() => {
         v-model="event"
         @start="handleStart"
         @stop="handleStop"
-        @remove="handleRemove"
       />
       <div v-if="isRunning" class="flex items-center gap-4">
         <DateTimeInput v-if="event!.startAt" v-model="event!.startAt" placeholder="00:00" size="sm" class="border-none h-11 w-fit text-sm" input-class="w-12" v-slot:leading>

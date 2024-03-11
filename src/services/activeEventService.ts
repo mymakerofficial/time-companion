@@ -1,14 +1,14 @@
 import type {CalendarEventInit, ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import type {Nullable} from "@/lib/utils";
 import {check, isNotNull} from "@/lib/utils";
-import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
 import {useActiveEventStore} from "@/stores/activeEventStore";
 import {createEvent} from "@/model/calendarEvent/model";
-import {now} from "@/lib/neoTime";
+import {compareDuration, formatDurationIso, now, parseDuration} from "@/lib/neoTime";
 import {reactive} from "vue";
 import {mapReadonly} from "@/model/modelHelpers";
 import {useActiveDayService} from "@/services/activeDayService";
 import {createService} from "@/composables/createService";
+import {useSettingsStore} from "@/stores/settingsStore";
 
 export type StartEventProps = Pick<CalendarEventInit, 'project' | 'activity' | 'note'>
 
@@ -18,12 +18,17 @@ export interface ActiveEventService {
   unsetEvent: () => void
   startEvent: (partialEvent?: StartEventProps) => ReactiveCalendarEvent
   stopEvent: () => void
-  stopAndRemoveEvent: () => void
 }
 
 export const useActiveEventService = createService<ActiveEventService>(() =>  {
   const activeEventStore = useActiveEventStore()
   const activeDayService = useActiveDayService()
+  const settings = useSettingsStore()
+
+  const minimumDuration = settings.getValue('minimumEventDuration', {
+    get: parseDuration,
+    set: formatDurationIso,
+  })
 
   function setEvent(event: ReactiveCalendarEvent) {
     check(isNotNull(activeDayService.day),
@@ -68,17 +73,14 @@ export const useActiveEventService = createService<ActiveEventService>(() =>  {
       "Failed to stop active event: No active event."
     )
 
-    activeEventStore.event!.endAt = now()
-    unsetEvent()
-  }
+    const event = activeEventStore.event!
 
-  function stopAndRemoveEvent() {
-    check(isNotNull(activeEventStore.event),
-      "Failed to stop and remove active event: No active event."
-    )
-
+    event.endAt = now()
     unsetEvent()
-    activeDayService.removeEvent(activeEventStore.event!)
+
+    if (compareDuration(event.duration, minimumDuration.value) < 0) {
+      activeDayService.removeEvent(event)
+    }
   }
 
   return reactive({
@@ -89,6 +91,5 @@ export const useActiveEventService = createService<ActiveEventService>(() =>  {
     unsetEvent,
     startEvent,
     stopEvent,
-    stopAndRemoveEvent,
   })
 })
