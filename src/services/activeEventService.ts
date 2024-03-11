@@ -1,4 +1,4 @@
-import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
+import type {CalendarEventInit, ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import type {Nullable} from "@/lib/utils";
 import {check, isNotNull} from "@/lib/utils";
 import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
@@ -9,14 +9,16 @@ import {reactive} from "vue";
 import {mapReadonly} from "@/model/modelHelpers";
 import {useActiveDayService} from "@/services/activeDayService";
 import {createService} from "@/composables/createService";
-import {useSelectedEventService} from "@/services/selectedEventService";
+
+export type StartEventProps = Pick<CalendarEventInit, 'project' | 'activity' | 'note'>
 
 export interface ActiveEventService {
   readonly event: Nullable<ReactiveCalendarEvent>
   setEvent: (event: ReactiveCalendarEvent) => void
   unsetEvent: () => void
-  startEvent: (shadow?: ReactiveCalendarEventShadow) => ReactiveCalendarEvent
+  startEvent: (partialEvent?: StartEventProps) => ReactiveCalendarEvent
   stopEvent: () => void
+  stopAndRemoveEvent: () => void
 }
 
 export const useActiveEventService = createService<ActiveEventService>(() =>  {
@@ -46,14 +48,13 @@ export const useActiveEventService = createService<ActiveEventService>(() =>  {
     activeEventStore.unsafeSetEvent(null)
   }
 
-  function startEvent(shadow?: ReactiveCalendarEventShadow) {
+  function startEvent(partialEvent?: StartEventProps) {
     check(isNotNull(activeDayService.day),
       "Failed to start event as active event: Active day is not set."
     )
 
     const event = createEvent({
-      project: shadow?.project,
-      activity: shadow?.activity,
+      ...partialEvent,
       startAt: now(),
     })
 
@@ -71,6 +72,15 @@ export const useActiveEventService = createService<ActiveEventService>(() =>  {
     unsetEvent()
   }
 
+  function stopAndRemoveEvent() {
+    check(isNotNull(activeEventStore.event),
+      "Failed to stop and remove active event: No active event."
+    )
+
+    unsetEvent()
+    activeDayService.removeEvent(activeEventStore.event!)
+  }
+
   return reactive({
     ...mapReadonly(activeEventStore, [
       "event"
@@ -79,5 +89,6 @@ export const useActiveEventService = createService<ActiveEventService>(() =>  {
     unsetEvent,
     startEvent,
     stopEvent,
+    stopAndRemoveEvent,
   })
 })
