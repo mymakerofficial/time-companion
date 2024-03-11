@@ -12,6 +12,7 @@ const model = defineModel<Temporal.Duration>({ required: true })
 
 const props = withDefaults(defineProps<Omit<InputProps, 'type'> & {
   mode?: 'duration' | 'time'
+  allowSeconds?: boolean
 }>(), {
   mode: 'duration'
 })
@@ -24,7 +25,9 @@ watchImmediate(model, setInputFromModel)
 
 function setInputFromModel() {
   if (props.mode === 'duration') {
-    inputValue.value = humanizeDuration(model.value)
+    inputValue.value = humanizeDuration(model.value, {
+      includeSeconds: props.allowSeconds,
+    })
   } else {
     inputValue.value = formatDuration(model.value)
   }
@@ -32,6 +35,8 @@ function setInputFromModel() {
 
 function handleChange() {
   const parsedDuration = parseHumanDurationWithEquation(inputValue.value)
+
+  // TODO forbid seconds if not allowed
 
   if (isNull(parsedDuration)) {
     setInputFromModel()

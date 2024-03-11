@@ -18,7 +18,7 @@ import {durationZero, negateDuration, sumOfDurations, timeZero} from "@/lib/neoT
 export function parseHumanDuration(value: string): Nullable<Temporal.Duration> {
   // match any valid input and extract the relevant parts in groups
   // whole.decimal | hour:minute | value unit
-  const inputRegex = /^\s*((?<whole>\d{1,2})\.(?<decimal>\d+)?h?\s*$)|((?<hour>\d{1,2})(:|h| )?(?<minute>\d{2})?\s*$)|((?<value>\d+)\s*(?<unit>minute|min|m|hour|h)?\s*$)/gi
+  const inputRegex = /^\s*((?<whole>\d{1,2})\.(?<decimal>\d+)?h?\s*$)|((?<hour>\d{1,2})(:|h| )?(?<minute>\d{2})?\s*$)|((?<value>\d+)\s*(?<unit>minute|min|m|hour|h|seconds|second|sec|s)?\s*$)/gi
 
   const match = inputRegex.exec(value)
 
@@ -58,10 +58,16 @@ export function parseHumanDuration(value: string): Nullable<Temporal.Duration> {
   }
 
   if (valueString !== undefined) {
-    // value is given in minutes or hours (e.g. 90m or 1h)
-    const isMinutes = unit === 'm' || unit === 'min' || unit === 'minute'
+    // value is given in seconds,  minutes or hours (e.g. 30s, 90m or 1h)
 
-    return durationZero().add({minutes: parseInt(valueString) * (isMinutes ? 1 : 60)})
+    const isMinutes = unit === 'm' || unit === 'min' || unit === 'minute' || unit === 'minutes'
+    const isSeconds = unit === 's' || unit === 'sec' || unit === 'second' || unit === 'seconds'
+
+    const multiplier = isSeconds ? 1 : isMinutes ? 60 : 3600
+
+    return durationZero().add({
+      seconds: parseInt(valueString) * multiplier,
+    })
   }
 
   return null
