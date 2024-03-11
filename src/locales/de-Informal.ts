@@ -4,6 +4,7 @@ export default {
       columns: 'Spalten',
       yes: 'Ja',
       no: 'Nein',
+      new: 'Neu',
     },
     controls: {
       start: 'Start',
@@ -123,6 +124,9 @@ export default {
       continueEvent: '@:common.controls.continue',
       deleteEvent: '@:common.controls.delete',
       dismissReminder: '@:common.controls.dismiss',
+    },
+    labels: {
+      whatAreYouWorkingOn: 'Woran arbeitest du?...',
     }
   },
   report: {
@@ -187,6 +191,18 @@ export default {
             breakProject: 'Pausenprojekt',
           }
         },
+        autoStartActiveEventWhenTyping: {
+          title: null,
+          description: null,
+        },
+        stopActiveEventWithBackspace: {
+          title: null,
+          description: null,
+        },
+        minimumEventDuration: {
+          title: null,
+          description: null,
+        }
       },
     },
     appearance: {

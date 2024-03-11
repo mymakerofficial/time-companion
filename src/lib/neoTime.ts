@@ -332,12 +332,16 @@ export function absDuration(duration: Temporal.Duration) {
   return duration
 }
 
+export function compareDuration(a: Temporal.Duration, b: Temporal.Duration) {
+  return Temporal.Duration.compare(a, b)
+}
+
 export function minDuration(a: Temporal.Duration, b: Temporal.Duration) {
-  return Temporal.Duration.compare(a, b) < 0 ? a : b
+  return compareDuration(a, b) < 0 ? a : b
 }
 
 export function maxDuration(a: Temporal.Duration, b: Temporal.Duration) {
-  return Temporal.Duration.compare(a, b) > 0 ? a : b
+  return compareDuration(a, b) > 0 ? a : b
 }
 
 export function sumOfDurations(durations: Temporal.Duration[]) {

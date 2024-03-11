@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {computed, type HTMLAttributes, onMounted, ref, watch} from "vue";
+import {computed, type HTMLAttributes, onMounted, ref, watch, watchEffect} from "vue";
 import {Input} from "@/components/ui/input";
 import Combobox from "@/components/common/inputs/combobox/Combobox.vue";
 import ComboboxInput from "@/components/common/inputs/combobox/ComboboxInput.vue";
@@ -9,7 +9,7 @@ import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
 import {createEventShadow} from "@/model/eventShadow/model";
 import ShadowBadge from "@/components/common/shadow/ShadowBadge.vue";
 import {firstOf, isEmpty, isNotEmpty, secondOf} from "@/lib/listUtils";
-import {useFocus} from "@vueuse/core";
+import {onStartTyping, unrefElement, useFocus} from "@vueuse/core";
 import type {ReactiveProject} from "@/model/project/types";
 import {createProject} from "@/model/project/model";
 import type {ReactiveActivity} from "@/model/activity/types";
@@ -29,10 +29,17 @@ const props = withDefaults(defineProps<{
   class?: HTMLAttributes['class']
   wrapperClass?: HTMLAttributes['class']
   placeholder?: HTMLAttributes['placeholder']
+  focusWhenTyping?: boolean
 }>(), {
   size: 'md',
   variant: 'default',
 })
+
+const emit = defineEmits<{
+  'selected': []
+  'startTyping': []
+  'backspace': []
+}>()
 
 defineOptions({
   inheritAttrs: false
@@ -41,6 +48,12 @@ defineOptions({
 const projectsService = useProjectsService()
 
 const searchTerm = ref('')
+
+watch(searchTerm, (newValue, oldValue) => {
+  if (isEmpty(oldValue) && isNotEmpty(newValue)) {
+    emit('startTyping')
+  }
+})
 
 onMounted(() => {
   // wait for the combobox, so it doesn't reset the value
@@ -56,6 +69,13 @@ onMounted(() => {
 
 const input = ref()
 const { focused: inputFocused } = useFocus(input)
+const inputElement = computed(() => unrefElement(input))
+
+onStartTyping(() => {
+  if (props.focusWhenTyping) {
+    inputElement.value.focus()
+  }
+})
 
 const selected = computed<Nullable<ReactiveCalendarEventShadow>>({
   get() {
@@ -104,7 +124,10 @@ function handleBackspace(event: KeyboardEvent) {
 
   if (selected.value?.project) {
     selected.value = null
+    return
   }
+
+  emit('backspace')
 }
 
 const createParts = computed(() => {
@@ -179,6 +202,7 @@ function handleCreate() {
 
 function handleSelect() {
   searchTerm.value = ''
+  emit('selected')
 }
 
 const open = computed(() => {

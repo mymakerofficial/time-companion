@@ -16,6 +16,7 @@ export const badgeVariants = cva(
         skeleton: '',
       },
       size: {
+        xs: 'gap-0.5 text-xs px-1 rounded-sm',
         sm: 'gap-1 text-xs px-2.5 py-1',
         md: 'gap-1.5 text-md px-3 py-1',
         lg: 'gap-2 text-lg px-3 py-1',

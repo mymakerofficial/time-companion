@@ -1,27 +1,34 @@
-import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
+import type {CalendarEventInit, ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import type {Nullable} from "@/lib/utils";
 import {check, isNotNull} from "@/lib/utils";
-import type {ReactiveCalendarEventShadow} from "@/model/eventShadow/types";
 import {useActiveEventStore} from "@/stores/activeEventStore";
 import {createEvent} from "@/model/calendarEvent/model";
-import {now} from "@/lib/neoTime";
+import {compareDuration, formatDurationIso, now, parseDuration} from "@/lib/neoTime";
 import {reactive} from "vue";
 import {mapReadonly} from "@/model/modelHelpers";
 import {useActiveDayService} from "@/services/activeDayService";
 import {createService} from "@/composables/createService";
-import {useSelectedEventService} from "@/services/selectedEventService";
+import {useSettingsStore} from "@/stores/settingsStore";
+
+export type StartEventProps = Pick<CalendarEventInit, 'project' | 'activity' | 'note'>
 
 export interface ActiveEventService {
   readonly event: Nullable<ReactiveCalendarEvent>
   setEvent: (event: ReactiveCalendarEvent) => void
   unsetEvent: () => void
-  startEvent: (shadow?: ReactiveCalendarEventShadow) => ReactiveCalendarEvent
+  startEvent: (partialEvent?: StartEventProps) => ReactiveCalendarEvent
   stopEvent: () => void
 }
 
 export const useActiveEventService = createService<ActiveEventService>(() =>  {
   const activeEventStore = useActiveEventStore()
   const activeDayService = useActiveDayService()
+  const settings = useSettingsStore()
+
+  const minimumDuration = settings.getValue('minimumEventDuration', {
+    get: parseDuration,
+    set: formatDurationIso,
+  })
 
   function setEvent(event: ReactiveCalendarEvent) {
     check(isNotNull(activeDayService.day),
@@ -46,14 +53,13 @@ export const useActiveEventService = createService<ActiveEventService>(() =>  {
     activeEventStore.unsafeSetEvent(null)
   }
 
-  function startEvent(shadow?: ReactiveCalendarEventShadow) {
+  function startEvent(partialEvent?: StartEventProps) {
     check(isNotNull(activeDayService.day),
       "Failed to start event as active event: Active day is not set."
     )
 
     const event = createEvent({
-      project: shadow?.project,
-      activity: shadow?.activity,
+      ...partialEvent,
       startAt: now(),
     })
 
@@ -67,8 +73,14 @@ export const useActiveEventService = createService<ActiveEventService>(() =>  {
       "Failed to stop active event: No active event."
     )
 
-    activeEventStore.event!.endAt = now()
+    const event = activeEventStore.event!
+
+    event.endAt = now()
     unsetEvent()
+
+    if (compareDuration(event.duration, minimumDuration.value) < 0) {
+      activeDayService.removeEvent(event)
+    }
   }
 
   return reactive({

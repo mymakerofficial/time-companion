@@ -4,6 +4,7 @@ export default {
       columns: 'Meow',
       yes: '*purr*',
       no: '*hiss*',
+      new: 'Meow',
     },
     controls: {
       start: 'Meow',
@@ -123,6 +124,9 @@ export default {
       continueEvent: '@:common.controls.continue',
       deleteEvent: '@:common.controls.delete',
       dismissReminder: '@:common.controls.dismiss',
+    },
+    labels: {
+      whatAreYouWorkingOn: 'Meow meow?...',
     }
   },
   report: {
@@ -187,6 +191,18 @@ export default {
             breakProject: 'Meooow mrrrp',
           }
         },
+        autoStartActiveEventWhenTyping: {
+          title: 'Meow Meow',
+          description: 'Meow Meow Meow Meow Meow',
+        },
+        stopActiveEventWithBackspace: {
+          title: null,
+          description: null,
+        },
+        minimumEventDuration: {
+          title: null,
+          description: null,
+        }
       },
     },
     appearance: {

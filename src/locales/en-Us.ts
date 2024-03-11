@@ -4,6 +4,7 @@ export default {
       columns: 'Columns',
       yes: 'Yes',
       no: 'No',
+      new: 'New',
     },
     controls: {
       start: 'Start',
@@ -123,6 +124,9 @@ export default {
       continueEvent: '@:common.controls.continue',
       deleteEvent: '@:common.controls.delete',
       dismissReminder: '@:common.controls.dismiss',
+    },
+    labels: {
+      whatAreYouWorkingOn: 'What are you working on?...',
     }
   },
   report: {
@@ -187,6 +191,18 @@ export default {
             breakProject: 'Break Project',
           }
         },
+        autoStartActiveEventWhenTyping: {
+          title: 'Auto start when typing',
+          description: 'Automatically start a new event when typing.',
+        },
+        stopActiveEventWithBackspace: {
+          title: 'Stop with backspace',
+          description: 'Stop the active event when pressing backspace on the input field.',
+        },
+        minimumEventDuration: {
+          title: 'Minimum Event Duration',
+          description: 'When stopping an event, the duration must be at least this long to be saved.',
+        }
       },
     },
     appearance: {
