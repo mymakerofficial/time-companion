@@ -125,7 +125,7 @@ const buttonLabel = computed(() => {
       v-model:note="note"
       @start-typing="handleStartTyping"
       focus-when-typing
-      placeholder="what are you working on?..."
+      :placeholder="$t('dashboard.labels.whatAreYouWorkingOn')"
       size="lg"
       v-slot:trailing
     >

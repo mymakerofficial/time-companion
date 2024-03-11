@@ -124,6 +124,9 @@ export default {
       continueEvent: '@:common.controls.continue',
       deleteEvent: '@:common.controls.delete',
       dismissReminder: '@:common.controls.dismiss',
+    },
+    labels: {
+      whatAreYouWorkingOn: 'What are you working on?...',
     }
   },
   report: {
