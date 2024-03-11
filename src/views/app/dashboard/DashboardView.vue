@@ -29,9 +29,6 @@ const activeEventHasNoProject = computed(() => {
 function handleStartEvent(shadow?: ReactiveCalendarEventShadow) {
   activeEventService.startEvent(shadow)
 }
-function handleStopEvent() {
-  activeEventService.stopEvent()
-}
 function handleRemoveEvent(event: ReactiveCalendarEvent) {
   activeDayService.removeEvent(event)
 }
@@ -59,11 +56,7 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
     <section class="col-span-7 border-r border-border h-screen flex flex-col">
       <ControlsHeader />
       <div class="flex-1 overflow-y-auto">
-        <CurrentEventCard
-          :event="activeEventService.event"
-          @start-event="handleStartEvent"
-          @stop-event="handleStopEvent"
-        />
+        <CurrentEventCard />
         <EditEventCard
           v-if="selectedEventService.event"
           :event="selectedEventService.event"
