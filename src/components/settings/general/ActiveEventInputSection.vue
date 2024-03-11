@@ -8,6 +8,7 @@ import {Clock} from "lucide-vue-next";
 
 const settings = useSettingsStore()
 const autoStartActiveEventWhenTyping = settings.getValue('autoStartActiveEventWhenTyping')
+const stopActiveEventWithBackspace = settings.getValue('stopActiveEventWithBackspace')
 const minimumDuration = settings.getValue('minimumEventDuration', {
   get: parseDuration,
   set: formatDurationIso,
@@ -22,6 +23,14 @@ const minimumDuration = settings.getValue('minimumEventDuration', {
     v-slot:action
   >
     <Switch v-model:checked="autoStartActiveEventWhenTyping" />
+  </SettingsSection>
+  <SettingsSection
+      :title="$t('settings.general.sections.stopActiveEventWithBackspace.title')"
+      :description="$t('settings.general.sections.stopActiveEventWithBackspace.description')"
+      is-new
+      v-slot:action
+  >
+    <Switch v-model:checked="stopActiveEventWithBackspace" />
   </SettingsSection>
   <SettingsSection
     :title="$t('settings.general.sections.minimumEventDuration.title')"

@@ -8,6 +8,7 @@ interface SettingsValues {
   normalWorkingDuration: string
   normalBreakDuration: string
   autoStartActiveEventWhenTyping: boolean
+  stopActiveEventWithBackspace: boolean
   minimumEventDuration: string
 }
 
@@ -23,6 +24,7 @@ export const useSettingsStore = defineStore('settings', () => {
     normalWorkingDuration: 'PT8H',
     normalBreakDuration: 'PT30M',
     autoStartActiveEventWhenTyping: true,
+    stopActiveEventWithBackspace: true,
     minimumEventDuration: 'PT30S',
   }
 

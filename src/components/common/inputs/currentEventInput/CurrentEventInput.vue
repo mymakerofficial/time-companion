@@ -9,6 +9,7 @@ import type {ReactiveProject} from "@/model/project/types";
 import type {ReactiveActivity} from "@/model/activity/types";
 import type {StartEventProps} from "@/services/activeEventService";
 import {useSettingsStore} from "@/stores/settingsStore";
+import {refDebounced, whenever} from "@vueuse/core";
 
 const event = defineModel<Nullable<ReactiveCalendarEvent>>( { required: false, default: null })
 
@@ -23,6 +24,10 @@ const settings = useSettingsStore()
 const autoStartEventWhenTyping = settings.getValue('autoStartActiveEventWhenTyping')
 
 const isRunning = computed(() => isDefined(event.value?.startAt) && isNotDefined(event.value?.endAt))
+
+const debounceTime = 1000
+
+// TODO make this a composable
 
 const projectPlaceholder = ref<Nullable<ReactiveProject>>(null)
 const project = computed<Nullable<ReactiveProject>>({
@@ -41,6 +46,7 @@ const project = computed<Nullable<ReactiveProject>>({
     }
   }
 })
+const projectDebounced = refDebounced(project, debounceTime)
 
 const activityPlaceholder = ref<Nullable<ReactiveActivity>>(null)
 const activity = computed<Nullable<ReactiveActivity>>({
@@ -59,6 +65,7 @@ const activity = computed<Nullable<ReactiveActivity>>({
     }
   }
 })
+const activityDebounced = refDebounced(activity, debounceTime)
 
 const notePlaceholder = ref('')
 const note = computed({
@@ -77,6 +84,13 @@ const note = computed({
     }
   }
 })
+const noteDebounced = refDebounced(note, debounceTime)
+
+whenever(() => isDefined(event.value), () => {
+  projectPlaceholder.value = null
+  activityPlaceholder.value = null
+  notePlaceholder.value = ''
+})
 
 function handleStart() {
   if (!isRunning.value) {
@@ -92,6 +106,22 @@ function handleStop() {
   if (isRunning.value) {
     emit('stop')
   }
+}
+
+function handleBackspace() {
+  if (!isRunning.value) {
+    return
+  }
+  if (isNotNull(projectDebounced.value)) {
+    project.value = projectDebounced.value
+  }
+  if (isNotNull(activityDebounced.value)) {
+    activity.value = activityDebounced.value
+  }
+  if (isNotNull(noteDebounced.value)) {
+    note.value = noteDebounced.value
+  }
+  handleStop()
 }
 
 function handleStartTyping() {
@@ -123,7 +153,9 @@ const buttonLabel = computed(() => {
       v-model:project="project"
       v-model:activity="activity"
       v-model:note="note"
+      @selected="handleStartTyping"
       @start-typing="handleStartTyping"
+      @backspace="handleBackspace"
       focus-when-typing
       :placeholder="$t('dashboard.labels.whatAreYouWorkingOn')"
       size="lg"

@@ -36,7 +36,9 @@ const props = withDefaults(defineProps<{
 })
 
 const emit = defineEmits<{
+  'selected': []
   'startTyping': []
+  'backspace': []
 }>()
 
 defineOptions({
@@ -122,7 +124,10 @@ function handleBackspace(event: KeyboardEvent) {
 
   if (selected.value?.project) {
     selected.value = null
+    return
   }
+
+  emit('backspace')
 }
 
 const createParts = computed(() => {
@@ -197,6 +202,7 @@ function handleCreate() {
 
 function handleSelect() {
   searchTerm.value = ''
+  emit('selected')
 }
 
 const open = computed(() => {

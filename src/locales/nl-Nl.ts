@@ -194,6 +194,14 @@ export default {
         autoStartActiveEventWhenTyping: {
           title: null,
           description: null,
+        },
+        stopActiveEventWithBackspace: {
+          title: null,
+          description: null,
+        },
+        minimumEventDuration: {
+          title: null,
+          description: null,
         }
       },
     },

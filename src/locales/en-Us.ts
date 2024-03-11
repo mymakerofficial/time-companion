@@ -195,6 +195,10 @@ export default {
           title: 'Auto start when typing',
           description: 'Automatically start a new event when typing.',
         },
+        stopActiveEventWithBackspace: {
+          title: 'Stop with backspace',
+          description: 'Stop the active event when pressing backspace on the input field.',
+        },
         minimumEventDuration: {
           title: 'Minimum Event Duration',
           description: 'When stopping an event, the duration must be at least this long to be saved.',
