@@ -2,24 +2,30 @@ import {defineStore} from "pinia";
 import {useLocalStorage} from "@/composables/useLocalStorage";
 import {customRef, type Ref, unref} from "vue";
 
+interface SettingsValues {
+  locale: string
+  theme: string
+  normalWorkingDuration: string
+  normalBreakDuration: string
+  autoStartActiveEventWhenTyping: boolean
+}
+
 interface SettingsStorageSerialized {
-  values: {
-    locale: string,
-    theme: string,
-    normalWorkingDuration: string,
-    normalBreakDuration: string,
-  }
+  values: SettingsValues
   version: number
 }
 
 export const useSettingsStore = defineStore('settings', () => {
+  const defaultValues = {
+    locale: 'en-US',
+    theme: 'auto',
+    normalWorkingDuration: 'PT8H',
+    normalBreakDuration: 'PT30M',
+    autoStartActiveEventWhenTyping: true,
+  }
+
   const storage = useLocalStorage<SettingsStorageSerialized>('time-companion-settings-store', {
-    values: {
-      locale: 'en-US',
-      theme: 'auto',
-      normalWorkingDuration: 'PT8H',
-      normalBreakDuration: 'PT30M',
-    },
+    values: defaultValues,
     version: 0,
   })
 
@@ -51,7 +57,10 @@ export const useSettingsStore = defineStore('settings', () => {
       return {
         get() {
           track()
-          return getTransformer(storage.get().values[key])
+
+          const value = storage.get().values[key] ?? defaultValues[key]
+
+          return getTransformer(value)
         },
         set(value: TValue) {
           commit({

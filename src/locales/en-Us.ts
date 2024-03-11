@@ -4,6 +4,7 @@ export default {
       columns: 'Columns',
       yes: 'Yes',
       no: 'No',
+      new: 'New',
     },
     controls: {
       start: 'Start',
@@ -187,6 +188,10 @@ export default {
             breakProject: 'Break Project',
           }
         },
+        autoStartActiveEventWhenTyping: {
+          title: 'Auto start when typing',
+          description: 'Automatically start a new event when typing.',
+        }
       },
     },
     appearance: {

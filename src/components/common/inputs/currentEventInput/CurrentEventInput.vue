@@ -8,6 +8,7 @@ import type {ReactiveCalendarEvent} from "@/model/calendarEvent/types";
 import type {ReactiveProject} from "@/model/project/types";
 import type {ReactiveActivity} from "@/model/activity/types";
 import type {StartEventProps} from "@/services/activeEventService";
+import {useSettingsStore} from "@/stores/settingsStore";
 
 const event = defineModel<Nullable<ReactiveCalendarEvent>>( { required: false, default: null })
 
@@ -17,6 +18,9 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const settings = useSettingsStore()
+
+const autoStartEventWhenTyping = settings.getValue('autoStartActiveEventWhenTyping')
 
 const isRunning = computed(() => isDefined(event.value?.startAt) && isNotDefined(event.value?.endAt))
 
@@ -91,7 +95,9 @@ function handleStop() {
 }
 
 function handleStartTyping() {
-  handleStart()
+  if (autoStartEventWhenTyping.value) {
+    handleStart()
+  }
 }
 
 function handleStartStop() {

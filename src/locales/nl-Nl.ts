@@ -4,6 +4,7 @@ export default {
       columns: 'Kolommen',
       yes: 'Ja',
       no: 'Nee',
+      new: 'Nieuw',
     },
     controls: {
       start: 'Start',
@@ -187,6 +188,10 @@ export default {
             breakProject: 'Pauze Project',
           }
         },
+        autoStartActiveEventWhenTyping: {
+          title: null,
+          description: null,
+        }
       },
     },
     appearance: {

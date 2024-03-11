@@ -4,6 +4,7 @@ export default {
       columns: 'Spalten',
       yes: 'Ja',
       no: 'Nein',
+      new: 'Neu',
     },
     controls: {
       start: 'Start',
@@ -187,6 +188,10 @@ export default {
             breakProject: 'Pausenprojekt',
           }
         },
+        autoStartActiveEventWhenTyping: {
+          title: null,
+          description: null,
+        }
       },
     },
     appearance: {

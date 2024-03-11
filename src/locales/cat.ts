@@ -4,6 +4,7 @@ export default {
       columns: 'Meow',
       yes: '*purr*',
       no: '*hiss*',
+      new: 'Meow',
     },
     controls: {
       start: 'Meow',
@@ -187,6 +188,10 @@ export default {
             breakProject: 'Meooow mrrrp',
           }
         },
+        autoStartActiveEventWhenTyping: {
+          title: 'Meow Meow',
+          description: 'Meow Meow Meow Meow Meow',
+        }
       },
     },
     appearance: {
