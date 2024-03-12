@@ -13,11 +13,16 @@ export default defineConfig({
     vueJsxPlugin(),
     vueDevTools(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       injectRegister: 'inline',
+      strategies: 'generateSW',
+      includeAssets: [
+        "**/*",
+      ],
       workbox: {
         cleanupOutdatedCaches: true,
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,vue,txt,woff2}']
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,vue,txt,woff2}'],
+        maximumFileSizeToCacheInBytes: 5000000
       },
       devOptions: {
         enabled: true,
