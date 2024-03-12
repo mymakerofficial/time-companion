@@ -13,7 +13,7 @@ export interface ThemeService {
 export const useThemeService = createService<ThemeService>(() => {
   const store = useSettingsStore()
   const colorMode = useColorMode({
-    attribute: 'data-theme',
+    attribute: 'data-app-theme',
     storageKey: null,
     modes: {
       'barf': 'barf',
