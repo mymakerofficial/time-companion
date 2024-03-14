@@ -13,6 +13,7 @@ import {useCalendarService} from "@/services/calendarService";
 import {useRemindersService} from "@/services/remindersService";
 import {useLocaleService} from "@/services/localeService";
 import {useThemeService} from "@/services/themeService";
+import {Toaster} from "@/components/ui/sonner"
 
 // initialize appearance settings
 useLocaleService()
@@ -37,6 +38,7 @@ const links = computed<NavLink[]>(() => [
 
 <template>
   <DialogProvider />
+  <Toaster />
   <TooltipProvider>
     <div class="flex flex-row w-full">
       <AppSidebar :links="links" />

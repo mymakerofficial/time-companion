@@ -3,7 +3,7 @@
 @tailwind utilities;
  
 @layer base {
-  [data-theme="light"] {
+  [data-app-theme="light"] {
     --background: 0 0% 100%;
     --foreground: 0, 0%, 9%;
 
@@ -36,7 +36,7 @@
     --color-foreground: var(--primary-foreground);
   }
 
-  [data-theme="dark"] {
+  [data-app-theme="dark"] {
     color-scheme: dark;
 
     --background: 0, 0%, 9%;
@@ -71,7 +71,7 @@
     --color-foreground: var(--primary-foreground);
   }
 
-  [data-theme="barf"] {
+  [data-app-theme="barf"] {
     color-scheme: light;
 
     --background: 329, 100%, 50%;
@@ -114,4 +114,8 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+[data-sonner-toast] [data-button]:not(:first-of-type) {
+  margin-left: 0!important;
 }
