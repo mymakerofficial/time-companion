@@ -4,7 +4,8 @@ import {defineConfig} from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsxPlugin from "@vitejs/plugin-vue-jsx";
 import vueDevTools from 'vite-plugin-vue-devtools'
-import {VitePWA} from "vite-plugin-pwa";
+import {VitePWA as vitePwa} from "vite-plugin-pwa";
+import electron from "vite-plugin-electron";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -12,7 +13,18 @@ export default defineConfig({
     vue(),
     vueJsxPlugin(),
     vueDevTools(),
-    VitePWA({
+    electron([
+      {
+        entry: 'electron/main/index.ts',
+      },
+      {
+        entry: 'electron/preload/index.ts',
+        onstart(options) {
+          options.reload()
+        },
+      },
+    ]),
+    vitePwa({
       registerType: 'prompt',
       injectRegister: 'inline',
       strategies: 'generateSW',
