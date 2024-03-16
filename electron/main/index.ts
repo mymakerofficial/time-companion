@@ -32,6 +32,11 @@ function createWindow() {
 function handleSetTitleBarColors(event: Electron.IpcMainEvent, colors: any) {
   const window = BrowserWindow.fromWebContents(event.sender)
 
+  // might be undefined in some cases
+  if (!window.setTitleBarOverlay) {
+    return
+  }
+
   window.setTitleBarOverlay({
     color: colors.backgroundColor,
     symbolColor: colors.symbolColor,
