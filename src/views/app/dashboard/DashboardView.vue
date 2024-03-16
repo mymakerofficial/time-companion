@@ -52,8 +52,8 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
 </script>
 
 <template>
-  <main class="flex-grow grid grid-cols-12 h-screen">
-    <section class="col-span-7 border-r border-border h-screen flex flex-col">
+  <main class="flex-grow grid grid-cols-12">
+    <section class="col-span-7 border-r border-border flex flex-col">
       <ControlsHeader />
       <div class="flex-1 overflow-y-auto">
         <CurrentEventCard />
@@ -74,7 +74,7 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
         <WorkingDurationCard />
       </div>
     </section>
-    <section class="col-span-5 flex flex-col h-screen">
+    <section class="col-span-5 flex flex-col h-viewport">
       <CalendarHeader />
       <CalendarView
         v-if="activeDayService.day"

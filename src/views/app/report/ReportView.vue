@@ -3,7 +3,7 @@ import ReportTable from "@/components/report/ReportTable.vue";
 </script>
 
 <template>
-  <main class="w-screen">
+  <main>
     <ReportTable />
   </main>
 </template>

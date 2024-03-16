@@ -3,7 +3,17 @@
 @tailwind utilities;
  
 @layer base {
+  [data-custom-title-bar="false"] {
+    --titleBarHeight: 0px;
+  }
+
+  [data-custom-title-bar="true"] {
+    --titleBarHeight: 32px;
+  }
+
   [data-app-theme="light"] {
+    --backdrop: 0, 0%, 98%;
+
     --background: 0 0% 100%;
     --foreground: 0, 0%, 9%;
 
@@ -38,6 +48,8 @@
 
   [data-app-theme="dark"] {
     color-scheme: dark;
+
+    --backdrop: 0, 0%, 4%;
 
     --background: 0, 0%, 9%;
     --foreground: 0 0% 98%;
@@ -112,10 +124,14 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-backdrop text-foreground;
   }
 }
 
 [data-sonner-toast] [data-button]:not(:first-of-type) {
   margin-left: 0!important;
+}
+
+.electron-title-bar {
+  -webkit-app-region: drag;
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {RouterView} from 'vue-router'
-import AppSidebar from "@/components/common/layout/AppSidebar.vue";
+import AppNavigation from "@/components/common/layout/AppNavigation.vue";
 import {TooltipProvider} from "radix-vue"
 import type {NavLink} from "@/components/common/layout/nav/nav-link";
 import {Archive, Calendar, Settings} from "lucide-vue-next";
@@ -40,9 +40,8 @@ const links = computed<NavLink[]>(() => [
   <DialogProvider />
   <Toaster />
   <TooltipProvider>
-    <div class="flex flex-row w-full">
-      <AppSidebar :links="links" />
+    <AppNavigation :links="links">
       <RouterView />
-    </div>
+    </AppNavigation>
   </TooltipProvider>
 </template>
