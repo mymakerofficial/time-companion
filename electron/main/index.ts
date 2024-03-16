@@ -12,14 +12,12 @@ function createWindow() {
     titleBarOverlay: {
       color: '#0a0a0a',
       symbolColor: 'white',
-      height: 31,
+      height: 41,
     },
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
   })
-
-  win.webContents.openDevTools()
 
   win.removeMenu()
 

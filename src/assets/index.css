@@ -8,7 +8,7 @@
   }
 
   [data-custom-title-bar="true"] {
-    --titleBarHeight: 32px;
+    --titleBarHeight: 42px;
   }
 
   [data-app-theme="light"] {
@@ -134,4 +134,8 @@
 
 .electron-title-bar {
   -webkit-app-region: drag;
+}
+
+.electron-no-drag {
+  -webkit-app-region: no-drag;
 }
