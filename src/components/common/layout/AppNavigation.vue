@@ -1,20 +1,19 @@
 <script setup lang="ts">
 import IconNav from "@/components/common/layout/nav/IconNav.vue";
 import type {NavLink} from "@/components/common/layout/nav/nav-link";
-import {computed} from "vue";
 import {cn} from "@/lib/utils";
 import {Clock, PanelLeft} from 'lucide-vue-next';
 import {Button} from "@/components/ui/button";
 import {useToggle} from "@vueuse/core";
+import {useElectronService} from "@/services/electronService";
 
 defineProps<{
   links: NavLink[]
 }>()
 
-const customTitleBar = computed(() => {
-  // TODO: this is a hack, we should use a proper way to detect electron
-  return navigator.userAgent?.includes('Electron')
-})
+const electronService = useElectronService()
+
+const customTitleBar = electronService.platform === 'win32'
 
 const [expandSidebar, toggleExpandSidebar] = useToggle(true)
 </script>

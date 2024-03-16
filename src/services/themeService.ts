@@ -1,28 +1,36 @@
 import {createService} from "@/composables/createService";
 import {useSettingsStore} from "@/stores/settingsStore";
 import {computed, reactive} from "vue";
-import {syncRefs, useColorMode} from "@vueuse/core";
+import {type BasicColorSchema, useColorMode, watchImmediate} from "@vueuse/core";
 import {check} from "@/lib/utils";
+import {useElectronService} from "@/services/electronService";
+
+const additionalThemes = ['barf']
+
+type Theme = BasicColorSchema | typeof additionalThemes[number]
 
 export interface ThemeService {
-  theme: string
-  isAuto: boolean
-  availableThemes: ReadonlyArray<string>
+  theme: Theme
+  readonly isAuto: boolean
+  availableThemes: ReadonlyArray<Theme>
 }
 
 export const useThemeService = createService<ThemeService>(() => {
   const store = useSettingsStore()
+  const electronService = useElectronService()
+
   const colorMode = useColorMode({
     attribute: 'data-app-theme',
     storageKey: null,
-    modes: {
-      'barf': 'barf',
-    }
+    modes: additionalThemes.reduce((acc, theme) => {
+      acc[theme] = theme
+      return acc
+    }, {} as Record<string, string>)
   })
 
-  const availableThemes = computed<ThemeService['availableThemes']>(() => ['auto', 'dark', 'light', 'barf'])
+  const availableThemes = computed(() => ['auto', 'dark', 'light', ...additionalThemes] as Theme[])
 
-  const theme = store.getValue('theme', {
+  const theme = store.getValue<'theme', Theme>('theme', {
     get(value) {
       return value
     },
@@ -44,7 +52,14 @@ export const useThemeService = createService<ThemeService>(() => {
     }
   })
 
-  syncRefs(theme, colorMode, { immediate: true })
+  watchImmediate(theme, (value) => {
+    colorMode.value = value
+
+    electronService.setTitleBarColors({
+      backgroundColor: colorMode.value === 'dark' ? 'hsl(0, 0%, 4%)' : 'hsl(0, 0%, 98%)',
+      symbolColor: colorMode.value === 'dark' ? 'hsl(0, 0%, 98%)' : 'hsl(0, 0%, 9%)',
+    })
+  })
 
   return reactive({
     theme,

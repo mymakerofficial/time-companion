@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'node:path'
 
 const distPath = path.join(__dirname, '../dist')
@@ -6,30 +6,53 @@ const publicPath = app.isPackaged ? distPath : path.join(distPath, '../public')
 const viteDevServerUrl = process.env['VITE_DEV_SERVER_URL']
 
 function createWindow() {
-  const win = new BrowserWindow({
+  const isWindows = process.platform === 'win32'
+
+  const mainWindow = new BrowserWindow({
     icon: path.join(publicPath, 'android-chrome-512x512.png'),
-    titleBarStyle: 'hidden',
+    titleBarStyle: isWindows ? 'hidden' : 'default',
     titleBarOverlay: {
-      color: '#0a0a0a',
-      symbolColor: 'white',
+      color: '#000000',
+      symbolColor: '#ffffff',
       height: 41,
     },
+    autoHideMenuBar: true,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: path.join(__dirname, 'preload/index.js'),
     },
   })
 
-  win.removeMenu()
-
   if (viteDevServerUrl) {
-    win.loadURL(viteDevServerUrl)
+    mainWindow.loadURL(viteDevServerUrl)
   } else {
-    win.loadFile(path.join(distPath, 'index.html'))
+    mainWindow.loadFile(path.join(distPath, 'index.html'))
   }
 }
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit()
+function handleSetTitleBarColors(event: Electron.IpcMainEvent, colors: any) {
+  const window = BrowserWindow.fromWebContents(event.sender)
+
+  window.setTitleBarOverlay({
+    color: colors.backgroundColor,
+    symbolColor: colors.symbolColor,
+    height: 41,
+  })
+}
+
+app.whenReady().then(() => {
+  ipcMain.on('set-title-bar-colors', handleSetTitleBarColors)
+
+  createWindow()
+
+  app.on('activate', function () {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow()
+    }
+  })
 })
 
-app.whenReady().then(createWindow)
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
+})

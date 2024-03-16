@@ -22,6 +22,17 @@ export default defineConfig({
         onstart(options) {
           options.reload()
         },
+        vite: {
+          build: {
+            outDir: 'dist-electron/preload',
+            rollupOptions: {
+              output: {
+                // Disable Preload scripts code split
+                inlineDynamicImports: true,
+              },
+            },
+          },
+        },
       },
     ]),
     vitePwa({
