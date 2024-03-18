@@ -1,11 +1,9 @@
-import {fileURLToPath, URL} from 'node:url'
-
 import {defineConfig} from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsxPlugin from "@vitejs/plugin-vue-jsx";
 import vueDevTools from 'vite-plugin-vue-devtools'
 import {VitePWA as vitePwa} from "vite-plugin-pwa";
-import electron from "vite-plugin-electron";
+import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -13,28 +11,6 @@ export default defineConfig({
     vue(),
     vueJsxPlugin(),
     vueDevTools(),
-    electron([
-      {
-        entry: 'electron/main/index.ts',
-      },
-      {
-        entry: 'electron/preload/index.ts',
-        onstart(options) {
-          options.reload()
-        },
-        vite: {
-          build: {
-            outDir: 'dist-electron/preload',
-            rollupOptions: {
-              output: {
-                // Disable Preload scripts code split
-                inlineDynamicImports: true,
-              },
-            },
-          },
-        },
-      },
-    ]),
     vitePwa({
       registerType: 'prompt',
       injectRegister: 'inline',
@@ -75,7 +51,11 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': path.resolve(__dirname, 'src'),
+      '@shared': path.resolve(__dirname, 'src', 'shared'),
+      '@main': path.resolve(__dirname, 'src', 'main'),
+      '@preload': path.resolve(__dirname, 'src', 'preload'),
+      '@renderer': path.resolve(__dirname, 'src', 'renderer'),
     }
   }
 })

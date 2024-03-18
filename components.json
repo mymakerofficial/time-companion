@@ -3,13 +3,13 @@
   "typescript": true,
   "tailwind": {
     "config": "tailwind.config.js",
-    "css": "src/assets/index.css",
-    "baseColor": "slate",
+    "css": "src/renderer/assets/index.css",
+    "baseColor": "neutral",
     "cssVariables": true
   },
   "framework": "vite",
   "aliases": {
-    "components": "@/components",
-    "utils": "@/lib/utils"
+    "components": "@renderer/components",
+    "utils": "@renderer/lib/utils"
   }
 }
