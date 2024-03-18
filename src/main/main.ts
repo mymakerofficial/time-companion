@@ -11,6 +11,7 @@ function createWindow() {
 
   // Create the browser window.
   const mainWindow = new BrowserWindow({
+    icon: path.join(__dirname, 'android-chrome-512x512.png'),
     width: 800,
     height: 600,
     titleBarStyle: isWindows ? 'hidden' : 'default',
