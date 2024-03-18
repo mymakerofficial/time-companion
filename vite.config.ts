@@ -1,10 +1,9 @@
-import {fileURLToPath, URL} from 'node:url'
-
 import {defineConfig} from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsxPlugin from "@vitejs/plugin-vue-jsx";
 import vueDevTools from 'vite-plugin-vue-devtools'
-import {VitePWA} from "vite-plugin-pwa";
+import {VitePWA as vitePwa} from "vite-plugin-pwa";
+import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -12,7 +11,7 @@ export default defineConfig({
     vue(),
     vueJsxPlugin(),
     vueDevTools(),
-    VitePWA({
+    vitePwa({
       registerType: 'prompt',
       injectRegister: 'inline',
       strategies: 'generateSW',
@@ -52,7 +51,11 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': path.resolve(__dirname, 'src'),
+      '@shared': path.resolve(__dirname, 'src', 'shared'),
+      '@main': path.resolve(__dirname, 'src', 'main'),
+      '@preload': path.resolve(__dirname, 'src', 'preload'),
+      '@renderer': path.resolve(__dirname, 'src', 'renderer'),
     }
   }
 })

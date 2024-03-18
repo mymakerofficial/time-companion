@@ -12,13 +12,25 @@ A time tracking app.
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### Start Development Application and Webserver with Hot-Reload
+
+```sh
+npm run start
+```
+
+### Start Development Webserver with Hot-Reload
 
 ```sh
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+### Type-Check, Compile and Minify for Production (Electron)
+
+```sh
+npm run make
+```
+
+### Type-Check, Compile and Minify for Production (Web)
 
 ```sh
 npm run build

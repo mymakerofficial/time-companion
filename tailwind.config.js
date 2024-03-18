@@ -20,10 +20,15 @@ module.exports = {
       },
     },
     extend: {
+      height: {
+        "title-bar": "var(--titleBarHeight)",
+        viewport: "calc(100vh - var(--titleBarHeight))",
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        backdrop: "hsl(var(--backdrop))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         color: {
