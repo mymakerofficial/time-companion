@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {Separator} from "@renderer/components/ui/separator"
-import {Badge} from "@renderer/components/ui/badge";
+import { Separator } from '@renderer/components/ui/separator'
+import { Badge } from '@renderer/components/ui/badge'
 
 defineProps<{
   title: string
@@ -20,9 +20,13 @@ defineSlots<{
       <div class="space-y-1">
         <h2 class="text-sm font-medium text-primary tracking-tight">
           {{ title }}
-          <Badge v-if="isNew" class="ml-2" size="xs" color="lime">{{ $t('common.labels.new') }}</Badge>
+          <Badge v-if="isNew" class="ml-2" size="xs" color="lime">{{
+            $t('common.labels.new')
+          }}</Badge>
         </h2>
-        <p v-if="description" class="text-sm text-muted-foreground">{{ description }}</p>
+        <p v-if="description" class="text-sm text-muted-foreground">
+          {{ description }}
+        </p>
       </div>
       <div v-if="$slots.action" class="mx-6 flex items-center">
         <slot name="action" />

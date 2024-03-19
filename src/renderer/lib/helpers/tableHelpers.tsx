@@ -1,10 +1,22 @@
-import type {Ref} from "vue";
-import type {CellContext, RowData, SortDirection, Table, Updater} from "@tanstack/vue-table";
-import type {Column} from "@tanstack/table-core";
-import type {Icon as LucideIcon} from "lucide-vue-next";
-import {ArrowDown, ArrowDownUp, ArrowUp, ChevronsDownUp, ChevronsUpDown} from "lucide-vue-next";
-import {Button} from "@renderer/components/ui/button";
-import {useI18n} from "vue-i18n";
+import type { Ref } from 'vue'
+import type {
+  CellContext,
+  RowData,
+  SortDirection,
+  Table,
+  Updater,
+} from '@tanstack/vue-table'
+import type { Column } from '@tanstack/table-core'
+import type { Icon as LucideIcon } from 'lucide-vue-next'
+import {
+  ArrowDown,
+  ArrowDownUp,
+  ArrowUp,
+  ChevronsDownUp,
+  ChevronsUpDown,
+} from 'lucide-vue-next'
+import { Button } from '@renderer/components/ui/button'
+import { useI18n } from 'vue-i18n'
 
 /**
  * A function that updates a row's data.
@@ -12,7 +24,11 @@ import {useI18n} from "vue-i18n";
  * @param columnAccessor The column accessor of the cell being updated.
  * @param value The new value for the cell.
  */
-export type DataUpdater<TRow extends RowData> = (original: TRow, columnAccessor: keyof TRow, value: unknown) => void
+export type DataUpdater<TRow extends RowData> = (
+  original: TRow,
+  columnAccessor: keyof TRow,
+  value: unknown,
+) => void
 
 export function updater<T>(updaterOrValue: Updater<T>, value: Ref<T>) {
   value.value =
@@ -21,18 +37,30 @@ export function updater<T>(updaterOrValue: Updater<T>, value: Ref<T>) {
       : updaterOrValue
 }
 
-export function defineTableCell<TData extends RowData, TKey extends keyof TData>
-  (cellFactory: (value: TData[TKey]) => unknown):
-  (context: CellContext<TData, TData[TKey]>) => unknown {
+export function defineTableCell<
+  TData extends RowData,
+  TKey extends keyof TData,
+>(
+  cellFactory: (value: TData[TKey]) => unknown,
+): (context: CellContext<TData, TData[TKey]>) => unknown {
   return (context) => {
     const value = context.getValue() as TData[TKey]
     return cellFactory(value)
   }
 }
 
-export function defineEditableTableCell<TData extends RowData, TKey extends keyof TData>
-  (cellFactory: (value: TData[TKey], updateValue: (newValue: TData[TKey]) => void) => unknown):
-  (context: CellContext<TData, TData[TKey]>, updateData: DataUpdater<TData>) => unknown {
+export function defineEditableTableCell<
+  TData extends RowData,
+  TKey extends keyof TData,
+>(
+  cellFactory: (
+    value: TData[TKey],
+    updateValue: (newValue: TData[TKey]) => void,
+  ) => unknown,
+): (
+  context: CellContext<TData, TData[TKey]>,
+  updateData: DataUpdater<TData>,
+) => unknown {
   return (context, updateData) => {
     const value = context.getValue() as TData[TKey]
     const updateValue = (newValue: TData[TKey]) => {
@@ -47,17 +75,21 @@ export function getSortableHeader<T>(column: Column<T>, label: string) {
   const dir = column.getIsSorted() || 'none'
 
   const icons: Record<'none' | SortDirection, LucideIcon> = {
-    'none': ArrowDownUp,
-    'desc': ArrowUp,
-    'asc': ArrowDown,
+    none: ArrowDownUp,
+    desc: ArrowUp,
+    asc: ArrowDown,
   }
 
   const Icon = icons[dir]
 
   return (
-    <Button onClick={() => column.toggleSorting()} variant="ghost" class="flex gap-2 items-center -mx-2 px-2">
-      <span>{ label }</span>
-      <Icon class="size-3.5"/>
+    <Button
+      onClick={() => column.toggleSorting()}
+      variant='ghost'
+      class='flex gap-2 items-center -mx-2 px-2'
+    >
+      <span>{label}</span>
+      <Icon class='size-3.5' />
     </Button>
   )
 }
@@ -65,18 +97,20 @@ export function getSortableHeader<T>(column: Column<T>, label: string) {
 export function getToggleExpandHeader<T>(table: Table<T>) {
   const { t } = useI18n()
 
-  const label = table.getIsAllRowsExpanded() ?
-    t('common.controls.collapseAll') :
-    t('common.controls.expandAll')
+  const label = table.getIsAllRowsExpanded()
+    ? t('common.controls.collapseAll')
+    : t('common.controls.expandAll')
 
-  const Icon = table.getIsAllRowsExpanded() ?
-    ChevronsDownUp :
-    ChevronsUpDown
+  const Icon = table.getIsAllRowsExpanded() ? ChevronsDownUp : ChevronsUpDown
 
   return (
-    <Button onClick={() => table.toggleAllRowsExpanded()} variant="ghost" class="flex gap-2 items-center ml-auto -mx-2 px-2">
-      <span class="text-nowrap">{ label }</span>
-      <Icon class="size-3.5"/>
+    <Button
+      onClick={() => table.toggleAllRowsExpanded()}
+      variant='ghost'
+      class='flex gap-2 items-center ml-auto -mx-2 px-2'
+    >
+      <span class='text-nowrap'>{label}</span>
+      <Icon class='size-3.5' />
     </Button>
   )
 }

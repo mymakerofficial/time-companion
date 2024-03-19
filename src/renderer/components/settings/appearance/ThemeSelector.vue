@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {useThemeService} from "@renderer/services/themeService";
-import RadioGroup from "@renderer/components/common/inputs/radioGroup/RadioGroup.vue";
+import { useThemeService } from '@renderer/services/themeService'
+import RadioGroup from '@renderer/components/common/inputs/radioGroup/RadioGroup.vue'
 
 const themeService = useThemeService()
 </script>

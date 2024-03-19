@@ -1,14 +1,17 @@
-import type {ReactiveProject} from "@renderer/model/project/types";
-import type {ReactiveActivity} from "@renderer/model/activity/types";
-import {type  MaybeRefOrGetter, ref, toValue, watchEffect} from "vue";
-import type {ReactiveCalendarEventShadow} from "@renderer/model/eventShadow/types";
-import {createEventShadow} from "@renderer/model/eventShadow/model";
-import type {Nullable} from "@renderer/lib/utils";
-import {isNull} from "@renderer/lib/utils";
-import {useProjectsService} from "@renderer/services/projectsService";
-import {dateTimeCompare} from "@renderer/lib/neoTime";
+import type { ReactiveProject } from '@renderer/model/project/types'
+import type { ReactiveActivity } from '@renderer/model/activity/types'
+import { type MaybeRefOrGetter, ref, toValue, watchEffect } from 'vue'
+import type { ReactiveCalendarEventShadow } from '@renderer/model/eventShadow/types'
+import { createEventShadow } from '@renderer/model/eventShadow/model'
+import type { Nullable } from '@renderer/lib/utils'
+import { isNull } from '@renderer/lib/utils'
+import { useProjectsService } from '@renderer/services/projectsService'
+import { dateTimeCompare } from '@renderer/lib/neoTime'
 
-function byLastUsed(a: ReactiveProject | ReactiveActivity, b: ReactiveProject | ReactiveActivity) {
+function byLastUsed(
+  a: ReactiveProject | ReactiveActivity,
+  b: ReactiveProject | ReactiveActivity,
+) {
   return -dateTimeCompare(a.lastUsed, b.lastUsed)
 }
 
@@ -21,7 +24,9 @@ export interface UseQuickAccessOptions {
   exclude?: Nullable<ReactiveCalendarEventShadow>
 }
 
-export function useQuickAccess(options?: MaybeRefOrGetter<UseQuickAccessOptions>) {
+export function useQuickAccess(
+  options?: MaybeRefOrGetter<UseQuickAccessOptions>,
+) {
   const { projects } = useProjectsService()
 
   const shadows = ref<ReactiveCalendarEventShadow[]>([])
@@ -42,17 +47,17 @@ export function useQuickAccess(options?: MaybeRefOrGetter<UseQuickAccessOptions>
             .sort(byLastUsed)
             .map((activity) => createEventShadow({ project, activity }))
             .slice(0, maxActivitiesPerProject),
-          createEventShadow({ project })
+          createEventShadow({ project }),
         ]
       })
-      .sort((a, b) => byLastUsed(
-        a.activity ?? a.project,
-        b.activity ?? b.project
-      ))
+      .sort((a, b) =>
+        byLastUsed(a.activity ?? a.project, b.activity ?? b.project),
+      )
       .slice(0, maxShadows)
-      .filter((shadow) =>
-        shadow.project !== exclude?.project ||
-        shadow.activity !== exclude?.activity
+      .filter(
+        (shadow) =>
+          shadow.project !== exclude?.project ||
+          shadow.activity !== exclude?.activity,
       )
   })
 

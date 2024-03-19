@@ -60,7 +60,7 @@ export default {
       'en-US': 'Meow (Ameowrican)',
       'de-Informal': 'Meow (Meow)',
       'nl-NL': 'Meow',
-      'cat': 'pspsps',
+      cat: 'pspsps',
     },
   },
   app: {
@@ -103,11 +103,11 @@ export default {
       actionType: 'Meow',
     },
     actionType: {
-      'NO_ACTION': '*hiss*',
-      'START_EVENT': 'Meow',
-      'CONTINUE_PREVIOUS_EVENT': 'Meoow',
-      'STOP_CURRENT_EVENT': 'Meooow',
-    }
+      NO_ACTION: '*hiss*',
+      START_EVENT: 'Meow',
+      CONTINUE_PREVIOUS_EVENT: 'Meoow',
+      STOP_CURRENT_EVENT: 'Meooow',
+    },
   },
   dashboard: {
     header: {
@@ -127,21 +127,24 @@ export default {
     },
     labels: {
       whatAreYouWorkingOn: 'Meow meow?...',
-    }
+    },
   },
   report: {
     table: {
       columns: {
         date: 'Meow',
         totalDuration: 'Meeoow',
-      }
+      },
     },
     empty: {
       noProjects: {
         title: 'Meeooow prrr',
-        description: { term: 'Meow meow meoow meow. {0} meow meow meoow.', createProject: 'Meow'},
-      }
-    }
+        description: {
+          term: 'Meow meow meoow meow. {0} meow meow meoow.',
+          createProject: 'Meow',
+        },
+      },
+    },
   },
   settings: {
     projects: {
@@ -157,8 +160,8 @@ export default {
           color: '@:project.properties.color',
           isBillable: '@:project.properties.isBillable',
           lastUsed: '@:project.properties.lastUsed',
-        }
-      }
+        },
+      },
     },
     reminders: {
       title: 'Meow',
@@ -172,8 +175,8 @@ export default {
           startAt: '@:reminder.properties.startAt',
           repeatOn: '@:reminder.properties.repeatOn',
           action: '@:reminder.properties.actionType',
-        }
-      }
+        },
+      },
     },
     general: {
       title: 'Meooow',
@@ -189,7 +192,7 @@ export default {
           sections: {
             breakTime: 'Meoow meow',
             breakProject: 'Meooow mrrrp',
-          }
+          },
         },
         autoStartActiveEventWhenTyping: {
           title: 'Meow Meow',
@@ -202,7 +205,7 @@ export default {
         minimumEventDuration: {
           title: null,
           description: null,
-        }
+        },
       },
     },
     appearance: {
@@ -216,7 +219,7 @@ export default {
         language: {
           title: 'Meow',
           description: 'Meow?',
-        }
+        },
       },
     },
   },
@@ -253,7 +256,7 @@ export default {
           label: '@:project.properties.isBreak',
           description: 'Meow',
         },
-      }
+      },
     },
     activity: {
       new: {
@@ -268,7 +271,7 @@ export default {
         create: '@:common.controls.create',
         save: '@:common.controls.save',
         cancel: '@:common.controls.cancel',
-        delete: '@:common.controls.delete'
+        delete: '@:common.controls.delete',
       },
       form: {
         parentProject: {
@@ -282,7 +285,7 @@ export default {
           label: '@:activity.properties.color',
           description: 'Meow',
         },
-      }
+      },
     },
     reminder: {
       new: {
@@ -297,34 +300,34 @@ export default {
         create: '@:common.controls.create',
         save: '@:common.controls.save',
         cancel: '@:common.controls.cancel',
-        delete: '@:common.controls.delete'
+        delete: '@:common.controls.delete',
       },
       form: {
         displayText: {
-          label: '@:reminder.properties.displayText'
+          label: '@:reminder.properties.displayText',
         },
         actionType: {
-          label: '@:reminder.properties.actionType'
+          label: '@:reminder.properties.actionType',
         },
         actionTarget: {
-          label: 'Meow meow'
+          label: 'Meow meow',
         },
         color: {
-          label: '@:reminder.properties.color'
+          label: '@:reminder.properties.color',
         },
         startAt: {
-          label: '@:reminder.properties.startAt'
+          label: '@:reminder.properties.startAt',
         },
         repeatOn: {
-          label: '@:reminder.properties.repeatOn'
+          label: '@:reminder.properties.repeatOn',
         },
         remindBefore: {
-          label: '@:reminder.properties.remindBefore'
+          label: '@:reminder.properties.remindBefore',
         },
         remindAfter: {
-          label: '@:reminder.properties.remindAfter'
+          label: '@:reminder.properties.remindAfter',
         },
-      }
-    }
+      },
+    },
   },
 }

@@ -1,10 +1,16 @@
-import {computed, reactive} from "vue";
-import type {CalendarEventInit} from "@renderer/model/calendarEvent/types";
-import {createEvent} from "@renderer/model/calendarEvent/model";
-import type {CalendarEventShadowInit, EventShadowContext, ReactiveCalendarEventShadow} from "@renderer/model/eventShadow/types";
-import {mapWritable} from "@renderer/model/modelHelpers";
+import { computed, reactive } from 'vue'
+import type { CalendarEventInit } from '@renderer/model/calendarEvent/types'
+import { createEvent } from '@renderer/model/calendarEvent/model'
+import type {
+  CalendarEventShadowInit,
+  EventShadowContext,
+  ReactiveCalendarEventShadow,
+} from '@renderer/model/eventShadow/types'
+import { mapWritable } from '@renderer/model/modelHelpers'
 
-export function createEventShadow(init: CalendarEventShadowInit): ReactiveCalendarEventShadow {
+export function createEventShadow(
+  init: CalendarEventShadowInit,
+): ReactiveCalendarEventShadow {
   const ctx = reactive<EventShadowContext>({
     project: init.project,
     activity: init.activity ?? null,
@@ -31,10 +37,7 @@ export function createEventShadow(init: CalendarEventShadowInit): ReactiveCalend
   }
 
   return reactive({
-    ...mapWritable(ctx, [
-      'project',
-      'activity',
-    ]),
+    ...mapWritable(ctx, ['project', 'activity']),
     id,
     color,
     combinedName,

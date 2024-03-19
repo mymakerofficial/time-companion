@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import {Slash} from "lucide-vue-next";
-import type {ReactiveCalendarEventShadow} from "@renderer/model/eventShadow/types";
-import {cn, type Nullable} from "@renderer/lib/utils";
-import {computed, type HTMLAttributes} from "vue";
-import {Badge, type BadgeVariants} from "@renderer/components/ui/badge";
-import {cva} from "class-variance-authority";
-import type {ReactiveProject} from "@renderer/model/project/types";
-import type {ReactiveActivity} from "@renderer/model/activity/types";
+import { Slash } from 'lucide-vue-next'
+import type { ReactiveCalendarEventShadow } from '@renderer/model/eventShadow/types'
+import { cn, type Nullable } from '@renderer/lib/utils'
+import { computed, type HTMLAttributes } from 'vue'
+import { Badge, type BadgeVariants } from '@renderer/components/ui/badge'
+import { cva } from 'class-variance-authority'
+import type { ReactiveProject } from '@renderer/model/project/types'
+import type { ReactiveActivity } from '@renderer/model/activity/types'
 
 export interface ShadowBadgeProps {
   project?: Nullable<ReactiveProject>
@@ -28,29 +28,34 @@ defineSlots<{
 }>()
 
 const project = computed(() => props.project ?? props.shadow?.project ?? null)
-const activity = computed(() => props.activity ?? props.shadow?.activity ?? null)
+const activity = computed(
+  () => props.activity ?? props.shadow?.activity ?? null,
+)
 
-const slashVariants = cva(
-  '',
-  {
-    variants: {
-      size: {
-        xs: 'size-2',
-        sm: 'size-3',
-        md: 'size-3',
-        lg: 'size-4',
-      },
-    },
-    defaultVariants: {
-      size: 'sm',
+const slashVariants = cva('', {
+  variants: {
+    size: {
+      xs: 'size-2',
+      sm: 'size-3',
+      md: 'size-3',
+      lg: 'size-4',
     },
   },
-)
+  defaultVariants: {
+    size: 'sm',
+  },
+})
 </script>
 
 <template>
   <Badge
-    v-if="props.shadow || $slots.leading || $slots.project || $slots.activity || $slots.trailing"
+    v-if="
+      props.shadow ||
+      $slots.leading ||
+      $slots.project ||
+      $slots.activity ||
+      $slots.trailing
+    "
     :variant="props.variant"
     :size="props.size"
     :color="shadow?.color"
@@ -62,7 +67,10 @@ const slashVariants = cva(
         <span v-text="project.displayName" class="text-nowrap" />
       </slot>
     </slot>
-    <Slash v-if="activity || $slots.activity" :class="cn(slashVariants({ size }))" />
+    <Slash
+      v-if="activity || $slots.activity"
+      :class="cn(slashVariants({ size }))"
+    />
     <slot name="activity" :value="activity">
       <slot name="part" v-if="activity" :value="activity">
         <span v-text="activity?.displayName" class="text-nowrap" />

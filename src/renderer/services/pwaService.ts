@@ -1,10 +1,8 @@
-import {createService} from "@renderer/composables/createService";
-import {registerSW} from "virtual:pwa-register";
-import {toast} from "vue-sonner";
+import { createService } from '@renderer/composables/createService'
+import { registerSW } from 'virtual:pwa-register'
+import { toast } from 'vue-sonner'
 
-export interface PwaService {
-
-}
+export interface PwaService {}
 
 export const usePwaService = createService<PwaService>(() => {
   const updateSW = registerSW({
@@ -12,12 +10,12 @@ export const usePwaService = createService<PwaService>(() => {
       toast('Update available! Reload?', {
         action: {
           label: 'Reload',
-          onClick: () => updateSW(true)
+          onClick: () => updateSW(true),
         },
         cancel: {
-          label: 'Ask Later'
+          label: 'Ask Later',
         },
-        duration: Infinity
+        duration: Infinity,
       })
     },
     onOfflineReady() {

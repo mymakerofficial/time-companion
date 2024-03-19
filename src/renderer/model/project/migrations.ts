@@ -1,5 +1,5 @@
-import type {SerializedProject} from "@renderer/model/project/types";
-import {defineMigrator} from "@renderer/lib/migrations";
+import type { SerializedProject } from '@renderer/model/project/types'
+import { defineMigrator } from '@renderer/lib/migrations'
 
 function upgradeVersion0(original: any): any {
   return {

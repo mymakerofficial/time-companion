@@ -1,20 +1,20 @@
-import {computed, reactive} from "vue";
-import {v4 as uuid} from "uuid";
-import {isNotNull} from "@renderer/lib/utils";
-import {mapReadonly, mapWritable} from "@renderer/model/modelHelpers";
+import { computed, reactive } from 'vue'
+import { v4 as uuid } from 'uuid'
+import { isNotNull } from '@renderer/lib/utils'
+import { mapReadonly, mapWritable } from '@renderer/model/modelHelpers'
 import type {
   CalendarReminderContext,
   CalendarReminderInit,
   ReactiveCalendarReminder,
-} from "@renderer/model/calendarReminder/types";
-import {
-  ReminderActionType
-} from "@renderer/model/calendarReminder/types";
-import {serializeReminder} from "@renderer/model/calendarReminder/serializer";
-import {minutes, timeNow} from "@renderer/lib/neoTime";
-import {useActiveEventService} from "@renderer/services/activeEventService";
+} from '@renderer/model/calendarReminder/types'
+import { ReminderActionType } from '@renderer/model/calendarReminder/types'
+import { serializeReminder } from '@renderer/model/calendarReminder/serializer'
+import { minutes, timeNow } from '@renderer/lib/neoTime'
+import { useActiveEventService } from '@renderer/services/activeEventService'
 
-export function createReminder(init: CalendarReminderInit): ReactiveCalendarReminder {
+export function createReminder(
+  init: CalendarReminderInit,
+): ReactiveCalendarReminder {
   const activeEventService = useActiveEventService()
 
   const ctx = reactive<CalendarReminderContext>({
@@ -77,9 +77,7 @@ export function createReminder(init: CalendarReminderInit): ReactiveCalendarRemi
       return
     }
 
-    if (
-      ctx.actionType === ReminderActionType.CONTINUE_PREVIOUS_EVENT
-    ) {
+    if (ctx.actionType === ReminderActionType.CONTINUE_PREVIOUS_EVENT) {
       // TODO implement CONTINUE_PREVIOUS_EVENT
       return
     }
@@ -90,10 +88,7 @@ export function createReminder(init: CalendarReminderInit): ReactiveCalendarRemi
   }
 
   return reactive({
-    ...mapReadonly(ctx, [
-      'id',
-      'isDismissed'
-    ]),
+    ...mapReadonly(ctx, ['id', 'isDismissed']),
     ...mapWritable(ctx, [
       'displayText',
       'startAt',

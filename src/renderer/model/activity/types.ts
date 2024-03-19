@@ -1,8 +1,8 @@
-import type {HasId} from "@renderer/lib/types";
-import type {Nullable} from "@renderer/lib/utils";
-import type {ReactiveProject} from "@renderer/model/project/types";
-import type {ProjectsStore} from "@renderer/stores/projectsStore";
-import {Temporal} from "temporal-polyfill";
+import type { HasId } from '@renderer/lib/types'
+import type { Nullable } from '@renderer/lib/utils'
+import type { ReactiveProject } from '@renderer/model/project/types'
+import type { ProjectsStore } from '@renderer/stores/projectsStore'
+import { Temporal } from 'temporal-polyfill'
 
 export interface ActivityContext extends Readonly<HasId> {
   displayName: string
@@ -29,6 +29,4 @@ export interface SerializedActivity {
   lastUsed: string // ISO Date Time (YYYY-MM-DDTHH:mm:ss)
 }
 
-export type ActivityDeserializationAssets = Pick<ProjectsStore,
-  'projects'
->
+export type ActivityDeserializationAssets = Pick<ProjectsStore, 'projects'>

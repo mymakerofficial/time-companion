@@ -1,5 +1,5 @@
-import type {ReactiveProject} from "@renderer/model/project/types";
-import {Temporal} from "temporal-polyfill";
+import type { ReactiveProject } from '@renderer/model/project/types'
+import { Temporal } from 'temporal-polyfill'
 
 export interface TimeReportProjectEntry {
   project: Readonly<ReactiveProject>
@@ -14,4 +14,3 @@ export interface DayTimeReport {
   totalBillableDuration: Readonly<Temporal.Duration>
   entries: ReadonlyArray<TimeReportProjectEntry>
 }
-

@@ -1,8 +1,8 @@
-import type {HasId} from "@renderer/lib/types";
-import type {Nullable} from "@renderer/lib/utils";
-import type {ReactiveCalendarEventShadow} from "@renderer/model/eventShadow/types";
-import {Temporal} from "temporal-polyfill";
-import type {ProjectsService} from "@renderer/services/projectsService";
+import type { HasId } from '@renderer/lib/types'
+import type { Nullable } from '@renderer/lib/utils'
+import type { ReactiveCalendarEventShadow } from '@renderer/model/eventShadow/types'
+import { Temporal } from 'temporal-polyfill'
+import type { ProjectsService } from '@renderer/services/projectsService'
 
 export enum ReminderActionType {
   NO_ACTION = 'NO_ACTION',
@@ -14,9 +14,9 @@ export enum ReminderActionType {
 export interface CalendarReminderContext extends HasId {
   displayText: string
   color: Nullable<string>
-  startAt: Temporal.PlainTime,
-  remindBefore: Temporal.Duration,
-  remindAfter: Temporal.Duration,
+  startAt: Temporal.PlainTime
+  remindBefore: Temporal.Duration
+  remindAfter: Temporal.Duration
   actionType: ReminderActionType
   actionTargetShadow: Nullable<ReactiveCalendarEventShadow>
   isDismissed: boolean
@@ -29,9 +29,9 @@ export interface ReactiveCalendarReminder extends CalendarReminderContext {
   toSerialized: () => SerializedCalendarReminder
 }
 
-export type CalendarReminderInit = Partial<Omit<CalendarReminderContext,
-  'isDismissed'
->>
+export type CalendarReminderInit = Partial<
+  Omit<CalendarReminderContext, 'isDismissed'>
+>
 
 export interface SerializedCalendarReminder {
   id: string
@@ -45,7 +45,7 @@ export interface SerializedCalendarReminder {
   actionTargetActivityId: Nullable<string>
 }
 
-export type ReminderDeserializationAssets = Pick<ProjectsService,
-  'projects' |
-  'activities'
+export type ReminderDeserializationAssets = Pick<
+  ProjectsService,
+  'projects' | 'activities'
 >

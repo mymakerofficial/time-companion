@@ -1,16 +1,27 @@
-import type {CalendarEventInit, ReactiveCalendarEvent} from "@renderer/model/calendarEvent/types";
-import type {Nullable} from "@renderer/lib/utils";
-import {check, isNotNull} from "@renderer/lib/utils";
-import {useActiveEventStore} from "@renderer/stores/activeEventStore";
-import {createEvent} from "@renderer/model/calendarEvent/model";
-import {compareDuration, formatDurationIso, now, parseDuration} from "@renderer/lib/neoTime";
-import {reactive} from "vue";
-import {mapReadonly} from "@renderer/model/modelHelpers";
-import {useActiveDayService} from "@renderer/services/activeDayService";
-import {createService} from "@renderer/composables/createService";
-import {useSettingsStore} from "@renderer/stores/settingsStore";
+import type {
+  CalendarEventInit,
+  ReactiveCalendarEvent,
+} from '@renderer/model/calendarEvent/types'
+import type { Nullable } from '@renderer/lib/utils'
+import { check, isNotNull } from '@renderer/lib/utils'
+import { useActiveEventStore } from '@renderer/stores/activeEventStore'
+import { createEvent } from '@renderer/model/calendarEvent/model'
+import {
+  compareDuration,
+  formatDurationIso,
+  now,
+  parseDuration,
+} from '@renderer/lib/neoTime'
+import { reactive } from 'vue'
+import { mapReadonly } from '@renderer/model/modelHelpers'
+import { useActiveDayService } from '@renderer/services/activeDayService'
+import { createService } from '@renderer/composables/createService'
+import { useSettingsStore } from '@renderer/stores/settingsStore'
 
-export type StartEventProps = Pick<CalendarEventInit, 'project' | 'activity' | 'note'>
+export type StartEventProps = Pick<
+  CalendarEventInit,
+  'project' | 'activity' | 'note'
+>
 
 export interface ActiveEventService {
   readonly event: Nullable<ReactiveCalendarEvent>
@@ -20,7 +31,7 @@ export interface ActiveEventService {
   stopEvent: () => void
 }
 
-export const useActiveEventService = createService<ActiveEventService>(() =>  {
+export const useActiveEventService = createService<ActiveEventService>(() => {
   const activeEventStore = useActiveEventStore()
   const activeDayService = useActiveDayService()
   const settings = useSettingsStore()
@@ -31,11 +42,13 @@ export const useActiveEventService = createService<ActiveEventService>(() =>  {
   })
 
   function setEvent(event: ReactiveCalendarEvent) {
-    check(isNotNull(activeDayService.day),
-      "Failed to set event as active event: Active day is not set."
+    check(
+      isNotNull(activeDayService.day),
+      'Failed to set event as active event: Active day is not set.',
     )
-    check(activeDayService.day!.events.includes(event),
-      "Failed to set event as active event: Event is not in active day."
+    check(
+      activeDayService.day!.events.includes(event),
+      'Failed to set event as active event: Event is not in active day.',
     )
 
     if (isNotNull(activeEventStore.event)) {
@@ -46,16 +59,18 @@ export const useActiveEventService = createService<ActiveEventService>(() =>  {
   }
 
   function unsetEvent() {
-    check(isNotNull(activeEventStore.event),
-      "Failed to unset active event: No active event."
+    check(
+      isNotNull(activeEventStore.event),
+      'Failed to unset active event: No active event.',
     )
 
     activeEventStore.unsafeSetEvent(null)
   }
 
   function startEvent(partialEvent?: StartEventProps) {
-    check(isNotNull(activeDayService.day),
-      "Failed to start event as active event: Active day is not set."
+    check(
+      isNotNull(activeDayService.day),
+      'Failed to start event as active event: Active day is not set.',
     )
 
     const event = createEvent({
@@ -69,8 +84,9 @@ export const useActiveEventService = createService<ActiveEventService>(() =>  {
   }
 
   function stopEvent() {
-    check(isNotNull(activeEventStore.event),
-      "Failed to stop active event: No active event."
+    check(
+      isNotNull(activeEventStore.event),
+      'Failed to stop active event: No active event.',
     )
 
     const event = activeEventStore.event!
@@ -84,9 +100,7 @@ export const useActiveEventService = createService<ActiveEventService>(() =>  {
   }
 
   return reactive({
-    ...mapReadonly(activeEventStore, [
-      "event"
-    ]),
+    ...mapReadonly(activeEventStore, ['event']),
     setEvent,
     unsetEvent,
     startEvent,

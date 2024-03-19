@@ -1,6 +1,6 @@
-import {defineStore} from "pinia";
-import {reactive, readonly} from "vue";
-import type {VNode} from "@vue/runtime-dom";
+import { defineStore } from 'pinia'
+import { reactive, readonly } from 'vue'
+import type { VNode } from '@vue/runtime-dom'
 
 interface DialogStore {
   readonly dialogs: VNode[]

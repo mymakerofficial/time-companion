@@ -1,15 +1,20 @@
-import {isNull, type Nullable} from "@renderer/lib/utils";
-import type {ReactiveCalendarEventShadow} from "@renderer/model/eventShadow/types";
-import {createEventShadow} from "@renderer/model/eventShadow/model";
+import { isNull, type Nullable } from '@renderer/lib/utils'
+import type { ReactiveCalendarEventShadow } from '@renderer/model/eventShadow/types'
+import { createEventShadow } from '@renderer/model/eventShadow/model'
 import type {
   CalendarReminderContext,
   CalendarReminderInit,
   ReminderDeserializationAssets,
-  SerializedCalendarReminder
-} from "@renderer/model/calendarReminder/types";
-import {ReminderActionType} from "@renderer/model/calendarReminder/types";
-import {formatDurationIso, formatTime, parseDuration, parseTime} from "@renderer/lib/neoTime";
-import {whereId} from "@renderer/lib/listUtils";
+  SerializedCalendarReminder,
+} from '@renderer/model/calendarReminder/types'
+import { ReminderActionType } from '@renderer/model/calendarReminder/types'
+import {
+  formatDurationIso,
+  formatTime,
+  parseDuration,
+  parseTime,
+} from '@renderer/lib/neoTime'
+import { whereId } from '@renderer/lib/listUtils'
 
 function getTargetShadow({
   projects,
@@ -21,12 +26,12 @@ function getTargetShadow({
   actionType: ReminderActionType
   targetProjectId: Nullable<string>
   targetActivityId: Nullable<string>
-}) : Nullable<ReactiveCalendarEventShadow> {
+}): Nullable<ReactiveCalendarEventShadow> {
   if (
     isNull(targetProjectId) ||
     [
       ReminderActionType.NO_ACTION,
-      ReminderActionType.STOP_CURRENT_EVENT
+      ReminderActionType.STOP_CURRENT_EVENT,
     ].includes(actionType)
   ) {
     return null
@@ -43,11 +48,14 @@ function getTargetShadow({
 
   return createEventShadow({
     project,
-    activity
+    activity,
   })
 }
 
-export function fromSerializedReminder(serialized: SerializedCalendarReminder, assets: ReminderDeserializationAssets): CalendarReminderInit {
+export function fromSerializedReminder(
+  serialized: SerializedCalendarReminder,
+  assets: ReminderDeserializationAssets,
+): CalendarReminderInit {
   return {
     id: serialized.id,
     displayText: serialized.displayText,
@@ -65,7 +73,9 @@ export function fromSerializedReminder(serialized: SerializedCalendarReminder, a
   }
 }
 
-export function serializeReminder(reminder: CalendarReminderContext): SerializedCalendarReminder {
+export function serializeReminder(
+  reminder: CalendarReminderContext,
+): SerializedCalendarReminder {
   return {
     id: reminder.id,
     displayText: reminder.displayText,

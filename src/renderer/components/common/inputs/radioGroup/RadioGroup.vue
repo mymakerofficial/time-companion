@@ -1,15 +1,18 @@
 <script setup lang="ts" generic="TValue">
-import type {MaybeReadonly} from "@renderer/lib/utils";
-import RadioGroupItem from "@renderer/components/common/inputs/radioGroup/RadioGroupItem.vue";
+import type { MaybeReadonly } from '@renderer/lib/utils'
+import RadioGroupItem from '@renderer/components/common/inputs/radioGroup/RadioGroupItem.vue'
 
 const model = defineModel<TValue>()
 
-withDefaults(defineProps<{
-  options: MaybeReadonly<Array<TValue>>
-  displayValue?: (option: TValue) => string
-}>(), {
-  displayValue: (value: TValue) => String(value)
-})
+withDefaults(
+  defineProps<{
+    options: MaybeReadonly<Array<TValue>>
+    displayValue?: (option: TValue) => string
+  }>(),
+  {
+    displayValue: (value: TValue) => String(value),
+  },
+)
 </script>
 
 <template>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {ComboboxInput} from "radix-vue";
-import type {ComboboxInputProps} from "radix-vue";
-import {computed, onMounted, ref} from "vue";
+import { ComboboxInput } from 'radix-vue'
+import type { ComboboxInputProps } from 'radix-vue'
+import { computed, onMounted, ref } from 'vue'
 
 const model = defineModel({ required: false })
 
@@ -24,8 +24,5 @@ const delegatedProps = computed(() => {
 </script>
 
 <template>
-  <ComboboxInput
-    v-model="model"
-    v-bind="delegatedProps"
-  />
+  <ComboboxInput v-model="model" v-bind="delegatedProps" />
 </template>

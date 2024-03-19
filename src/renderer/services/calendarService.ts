@@ -1,19 +1,19 @@
-import {reactive} from "vue";
-import {useCalendarStore} from "@renderer/stores/calendarStore";
-import type {ReactiveCalendarDay} from "@renderer/model/calendarDay/types";
-import type {ReactiveCalendarEvent} from "@renderer/model/calendarEvent/types";
-import {check, type Optional} from "@renderer/lib/utils";
-import {mapReadonly} from "@renderer/model/modelHelpers";
-import {whereDate, whereId} from "@renderer/lib/listUtils";
-import {createService} from "@renderer/composables/createService";
-import {useInitialize} from "@renderer/composables/useInitialize";
-import {useProjectsService} from "@renderer/services/projectsService";
-import {migrateCalendarDay} from "@renderer/model/calendarDay/migrations";
-import {createDay} from "@renderer/model/calendarDay/model";
-import {fromSerializedDay} from "@renderer/model/calendarDay/serializer";
-import {useActiveEventService} from "@renderer/services/activeEventService";
-import {useSelectedEventService} from "@renderer/services/selectedEventService";
-import {useActiveDayService} from "@renderer/services/activeDayService";
+import { reactive } from 'vue'
+import { useCalendarStore } from '@renderer/stores/calendarStore'
+import type { ReactiveCalendarDay } from '@renderer/model/calendarDay/types'
+import type { ReactiveCalendarEvent } from '@renderer/model/calendarEvent/types'
+import { check, type Optional } from '@renderer/lib/utils'
+import { mapReadonly } from '@renderer/model/modelHelpers'
+import { whereDate, whereId } from '@renderer/lib/listUtils'
+import { createService } from '@renderer/composables/createService'
+import { useInitialize } from '@renderer/composables/useInitialize'
+import { useProjectsService } from '@renderer/services/projectsService'
+import { migrateCalendarDay } from '@renderer/model/calendarDay/migrations'
+import { createDay } from '@renderer/model/calendarDay/model'
+import { fromSerializedDay } from '@renderer/model/calendarDay/serializer'
+import { useActiveEventService } from '@renderer/services/activeEventService'
+import { useSelectedEventService } from '@renderer/services/selectedEventService'
+import { useActiveDayService } from '@renderer/services/activeDayService'
 
 export interface CalendarService {
   days: ReadonlyArray<ReactiveCalendarDay>
@@ -22,9 +22,17 @@ export interface CalendarService {
   addDays: (days: ReactiveCalendarDay[]) => void
   removeDay: (day: ReactiveCalendarDay) => void
   removeDays: (days: ReactiveCalendarDay[]) => void
-  addEventToDay: (day: ReactiveCalendarDay, event: ReactiveCalendarEvent) => void
-  removeEventFromDay: (day: ReactiveCalendarDay, event: ReactiveCalendarEvent) => void
-  findDay: (predicate: (day: ReactiveCalendarDay) => boolean) => Optional<ReactiveCalendarDay>
+  addEventToDay: (
+    day: ReactiveCalendarDay,
+    event: ReactiveCalendarEvent,
+  ) => void
+  removeEventFromDay: (
+    day: ReactiveCalendarDay,
+    event: ReactiveCalendarEvent,
+  ) => void
+  findDay: (
+    predicate: (day: ReactiveCalendarDay) => boolean,
+  ) => Optional<ReactiveCalendarDay>
   forEachEvent: (block: (event: ReactiveCalendarEvent) => void) => void
 }
 
@@ -37,7 +45,7 @@ export const useCalendarService = createService<CalendarService>(() => {
 
     const assets = {
       projects: projectsService.projects,
-      activities: projectsService.activities
+      activities: projectsService.activities,
     }
 
     const serialized = calendarStore.getSerializedStorage()
@@ -52,11 +60,13 @@ export const useCalendarService = createService<CalendarService>(() => {
   })
 
   function addDay(day: ReactiveCalendarDay) {
-    check(!calendarStore.days.some(whereId(day.id)),
-      `Failed to add day: Day with same id "${day.id}" already exists`
+    check(
+      !calendarStore.days.some(whereId(day.id)),
+      `Failed to add day: Day with same id "${day.id}" already exists`,
     )
-    check(!calendarStore.days.some(whereDate(day.date)),
-      'Failed to add day: Day with same date already exists'
+    check(
+      !calendarStore.days.some(whereDate(day.date)),
+      'Failed to add day: Day with same date already exists',
     )
 
     calendarStore.unsafeAddDay(day)
@@ -67,8 +77,9 @@ export const useCalendarService = createService<CalendarService>(() => {
   }
 
   function removeDay(day: ReactiveCalendarDay) {
-    check(calendarStore.days.includes(day),
-      `Failed to remove day: Day with id "${day.id}" does not exist`
+    check(
+      calendarStore.days.includes(day),
+      `Failed to remove day: Day with id "${day.id}" does not exist`,
     )
 
     calendarStore.unsafeRemoveDay(day)
@@ -78,20 +89,29 @@ export const useCalendarService = createService<CalendarService>(() => {
     days.forEach(removeDay)
   }
 
-  function addEventToDay(day: ReactiveCalendarDay, event: ReactiveCalendarEvent) {
-    check(calendarStore.days.includes(day),
-      `Failed to add event to day: Day with id "${day.id}" does not exist`
+  function addEventToDay(
+    day: ReactiveCalendarDay,
+    event: ReactiveCalendarEvent,
+  ) {
+    check(
+      calendarStore.days.includes(day),
+      `Failed to add event to day: Day with id "${day.id}" does not exist`,
     )
 
     day.unsafeAddEvent(event)
   }
 
-  function removeEventFromDay(day: ReactiveCalendarDay, event: ReactiveCalendarEvent) {
-    check(calendarStore.days.includes(day),
-      `Failed to remove event from day: Day with id "${day.id}" does not exist`
+  function removeEventFromDay(
+    day: ReactiveCalendarDay,
+    event: ReactiveCalendarEvent,
+  ) {
+    check(
+      calendarStore.days.includes(day),
+      `Failed to remove event from day: Day with id "${day.id}" does not exist`,
     )
-    check(useActiveEventService().event !== event,
-      `Failed to remove event "${event.id}" from day "${day.id}": Event is active event`
+    check(
+      useActiveEventService().event !== event,
+      `Failed to remove event "${event.id}" from day "${day.id}": Event is active event`,
     )
 
     day.unsafeRemoveEvent(event)
@@ -117,9 +137,7 @@ export const useCalendarService = createService<CalendarService>(() => {
   }
 
   return reactive({
-    ...mapReadonly(calendarStore, [
-      'days',
-    ]),
+    ...mapReadonly(calendarStore, ['days']),
     init,
     addDay,
     addDays,

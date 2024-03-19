@@ -1,11 +1,15 @@
-import {reactive} from "vue";
-import {v4 as uuid} from "uuid";
-import type {ActivityContext, ActivityInit, ReactiveActivity} from "@renderer/model/activity/types";
-import {serializeActivity} from "@renderer/model/activity/serializer";
-import {now} from "@renderer/lib/neoTime";
-import {mapReadonly, mapWritable} from "@renderer/model/modelHelpers";
-import type {ReactiveProject} from "@renderer/model/project/types";
-import type {Nullable} from "@renderer/lib/utils";
+import { reactive } from 'vue'
+import { v4 as uuid } from 'uuid'
+import type {
+  ActivityContext,
+  ActivityInit,
+  ReactiveActivity,
+} from '@renderer/model/activity/types'
+import { serializeActivity } from '@renderer/model/activity/serializer'
+import { now } from '@renderer/lib/neoTime'
+import { mapReadonly, mapWritable } from '@renderer/model/modelHelpers'
+import type { ReactiveProject } from '@renderer/model/project/types'
+import type { Nullable } from '@renderer/lib/utils'
 
 export function createActivity(init: ActivityInit): ReactiveActivity {
   const ctx = reactive<ActivityContext>({
@@ -29,15 +33,8 @@ export function createActivity(init: ActivityInit): ReactiveActivity {
   }
 
   return reactive({
-    ...mapReadonly(ctx, [
-      'id',
-      'parentProject',
-      'lastUsed',
-    ]),
-    ...mapWritable(ctx, [
-      'displayName',
-      'color',
-    ]),
+    ...mapReadonly(ctx, ['id', 'parentProject', 'lastUsed']),
+    ...mapWritable(ctx, ['displayName', 'color']),
     unsafeSetParentProject,
     lastUsedNow,
     toSerialized,

@@ -13,7 +13,7 @@
     "paths": {
       "@/*": ["./src/*"],
       "@shared/*": ["./src/shared/*"],
-      "@renderer/*": ["./src/renderer/*"],
+      "@renderer/*": ["./src/renderer/*"]
     }
   }
 }

@@ -1,14 +1,14 @@
-import type {ReactiveActivity} from "@renderer/model/activity/types";
-import type {ProjectRow} from "@renderer/components/settings/projects/table/types";
-import type {ReactiveProject} from "@renderer/model/project/types";
-import {createEventShadow} from "@renderer/model/eventShadow/model";
+import type { ReactiveActivity } from '@renderer/model/activity/types'
+import type { ProjectRow } from '@renderer/components/settings/projects/table/types'
+import type { ReactiveProject } from '@renderer/model/project/types'
+import { createEventShadow } from '@renderer/model/eventShadow/model'
 
 function toActivityRow(activity: ReactiveActivity): ProjectRow {
   return {
     id: activity.id,
     shadow: createEventShadow({
       project: activity.parentProject!,
-      activity
+      activity,
     }),
     isBillable: null,
     color: activity.color,
@@ -23,7 +23,7 @@ export function toProjectRow(project: ReactiveProject): ProjectRow {
   return {
     id: project.id,
     shadow: createEventShadow({
-      project
+      project,
     }),
     isBillable: project.isBillable,
     color: project.color,

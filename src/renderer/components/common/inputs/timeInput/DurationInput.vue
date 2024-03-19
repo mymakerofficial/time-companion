@@ -1,21 +1,29 @@
 <script setup lang="ts">
-import {ref} from "vue";
-import {Input} from "@renderer/components/ui/input";
-import {formatDuration, humanizeDuration} from "@renderer/lib/neoTime";
-import {parseHumanDurationWithEquation} from "@renderer/lib/parsers";
-import {isNull} from "@renderer/lib/utils";
-import {Temporal} from "temporal-polyfill";
-import {watchImmediate} from "@vueuse/core";
-import type {InputProps, InputSlots} from "@renderer/components/ui/input/Input.vue";
+import { ref } from 'vue'
+import { Input } from '@renderer/components/ui/input'
+import { formatDuration, humanizeDuration } from '@renderer/lib/neoTime'
+import { parseHumanDurationWithEquation } from '@renderer/lib/parsers'
+import { isNull } from '@renderer/lib/utils'
+import { Temporal } from 'temporal-polyfill'
+import { watchImmediate } from '@vueuse/core'
+import type {
+  InputProps,
+  InputSlots,
+} from '@renderer/components/ui/input/Input.vue'
 
 const model = defineModel<Temporal.Duration>({ required: true })
 
-const props = withDefaults(defineProps<Omit<InputProps, 'type'> & {
-  mode?: 'duration' | 'time'
-  allowSeconds?: boolean
-}>(), {
-  mode: 'duration'
-})
+const props = withDefaults(
+  defineProps<
+    Omit<InputProps, 'type'> & {
+      mode?: 'duration' | 'time'
+      allowSeconds?: boolean
+    }
+  >(),
+  {
+    mode: 'duration',
+  },
+)
 
 defineSlots<InputSlots>()
 

@@ -1,5 +1,5 @@
-import type {ReactiveCalendarReminder} from "@renderer/model/calendarReminder/types";
-import type {ReminderRow} from "@renderer/components/settings/reminders/table/types";
+import type { ReactiveCalendarReminder } from '@renderer/model/calendarReminder/types'
+import type { ReminderRow } from '@renderer/components/settings/reminders/table/types'
 
 export function toReminderRow(reminder: ReactiveCalendarReminder): ReminderRow {
   return {
@@ -10,6 +10,6 @@ export function toReminderRow(reminder: ReactiveCalendarReminder): ReminderRow {
       type: reminder.actionType,
       targetProject: reminder.actionTargetShadow?.project ?? null,
       targetActivity: reminder.actionTargetShadow?.activity ?? null,
-    }
+    },
   }
 }

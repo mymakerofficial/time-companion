@@ -1,7 +1,7 @@
-import type {ReactiveCalendarDay} from "@renderer/model/calendarDay/types";
-import type {Nullable} from "@renderer/lib/utils";
-import {defineStore} from "pinia";
-import {ref} from "vue";
+import type { ReactiveCalendarDay } from '@renderer/model/calendarDay/types'
+import type { Nullable } from '@renderer/lib/utils'
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
 
 export const useActiveDayStore = defineStore('active-day', () => {
   const day = ref<Nullable<ReactiveCalendarDay>>(null)
@@ -12,6 +12,6 @@ export const useActiveDayStore = defineStore('active-day', () => {
 
   return {
     day,
-    unsafeSetDay
+    unsafeSetDay,
   }
 })

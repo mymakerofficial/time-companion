@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import DurationInput from "@renderer/components/common/inputs/timeInput/DurationInput.vue";
-import {useWorkingDurationService} from "@renderer/services/workingDurationService";
-import {Clock} from "lucide-vue-next";
+import DurationInput from '@renderer/components/common/inputs/timeInput/DurationInput.vue'
+import { useWorkingDurationService } from '@renderer/services/workingDurationService'
+import { Clock } from 'lucide-vue-next'
 
 const workingDurationService = useWorkingDurationService()
 </script>

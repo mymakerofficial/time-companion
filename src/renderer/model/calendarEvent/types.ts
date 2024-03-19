@@ -1,11 +1,11 @@
-import type {Nullable} from "@renderer/lib/utils";
-import type {HasId} from "@renderer/lib/types";
-import type {ReactiveProject} from "@renderer/model/project/types";
-import type {ReactiveActivity} from "@renderer/model/activity/types";
-import type {ReactiveCalendarEventShadow} from "@renderer/model/eventShadow/types";
-import {Temporal} from "temporal-polyfill";
-import type {ReactiveCalendarDay} from "@renderer/model/calendarDay/types";
-import type {ProjectsService} from "@renderer/services/projectsService";
+import type { Nullable } from '@renderer/lib/utils'
+import type { HasId } from '@renderer/lib/types'
+import type { ReactiveProject } from '@renderer/model/project/types'
+import type { ReactiveActivity } from '@renderer/model/activity/types'
+import type { ReactiveCalendarEventShadow } from '@renderer/model/eventShadow/types'
+import { Temporal } from 'temporal-polyfill'
+import type { ReactiveCalendarDay } from '@renderer/model/calendarDay/types'
+import type { ProjectsService } from '@renderer/services/projectsService'
 
 export interface CalendarEventContext extends HasId {
   day: Nullable<ReactiveCalendarDay>
@@ -46,7 +46,7 @@ export interface SerializedCalendarEvent {
   endAt: Nullable<string> // ISO DateTime (YYYY-MM-DDTHH:mm:ss)
 }
 
-export type EventDeserializationAssets = Pick<ProjectsService,
-  'projects' |
-  'activities'
+export type EventDeserializationAssets = Pick<
+  ProjectsService,
+  'projects' | 'activities'
 >

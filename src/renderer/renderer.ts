@@ -5,9 +5,9 @@ import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import router from './router'
-import {i18n} from "@renderer/locales/locales";
-import {migrateApplication} from "@renderer/lib/migrations/applicationMigrator";
-import {usePwaService} from "@renderer/services/pwaService";
+import { i18n } from '@renderer/locales/locales'
+import { migrateApplication } from '@renderer/lib/migrations/applicationMigrator'
+import { usePwaService } from '@renderer/services/pwaService'
 
 migrateApplication()
 

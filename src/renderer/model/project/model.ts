@@ -1,14 +1,22 @@
-import {reactive} from "vue";
-import {v4 as uuid} from "uuid";
-import {randomTailwindColor} from "@renderer/lib/colorUtils";
-import type {ProjectContext, ProjectInit, ProjectOptions, ReactiveProject} from "@renderer/model/project/types";
-import {now} from "@renderer/lib/neoTime";
-import {serializeProject} from "@renderer/model/project/serializer";
-import {mapReadonly, mapWritable} from "@renderer/model/modelHelpers";
-import type {ReactiveActivity} from "@renderer/model/activity/types";
-import {check} from "@renderer/lib/utils";
+import { reactive } from 'vue'
+import { v4 as uuid } from 'uuid'
+import { randomTailwindColor } from '@renderer/lib/colorUtils'
+import type {
+  ProjectContext,
+  ProjectInit,
+  ProjectOptions,
+  ReactiveProject,
+} from '@renderer/model/project/types'
+import { now } from '@renderer/lib/neoTime'
+import { serializeProject } from '@renderer/model/project/serializer'
+import { mapReadonly, mapWritable } from '@renderer/model/modelHelpers'
+import type { ReactiveActivity } from '@renderer/model/activity/types'
+import { check } from '@renderer/lib/utils'
 
-export function createProject(init: ProjectInit, options?: ProjectOptions): ReactiveProject {
+export function createProject(
+  init: ProjectInit,
+  options?: ProjectOptions,
+): ReactiveProject {
   const ctx = reactive<ProjectContext>({
     id: init.id ?? uuid(),
     displayName: init.displayName ?? '',
@@ -30,7 +38,10 @@ export function createProject(init: ProjectInit, options?: ProjectOptions): Reac
   function unsafeRemoveChildActivity(activity: ReactiveActivity) {
     const index = ctx.childActivities.indexOf(activity)
 
-    check(index !== -1, `Failed to remove child activity "${activity.id}": Activity does not exist as child of project "${ctx.id}".`)
+    check(
+      index !== -1,
+      `Failed to remove child activity "${activity.id}": Activity does not exist as child of project "${ctx.id}".`,
+    )
 
     ctx.childActivities.splice(index, 1)
   }
@@ -44,17 +55,8 @@ export function createProject(init: ProjectInit, options?: ProjectOptions): Reac
   }
 
   return reactive({
-    ...mapReadonly(ctx, [
-      'id',
-      'lastUsed',
-      'childActivities',
-      'isBreak',
-    ]),
-    ...mapWritable(ctx, [
-      'displayName',
-      'color',
-      'isBillable',
-    ]),
+    ...mapReadonly(ctx, ['id', 'lastUsed', 'childActivities', 'isBreak']),
+    ...mapWritable(ctx, ['displayName', 'color', 'isBillable']),
     unsafeSetIsBreak,
     unsafeAddChildActivity,
     unsafeRemoveChildActivity,

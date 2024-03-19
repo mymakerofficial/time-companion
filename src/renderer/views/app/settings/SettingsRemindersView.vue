@@ -1,12 +1,12 @@
 <script setup lang="tsx">
-import SettingsHeader from "@renderer/components/settings/layout/SettingsHeader.vue";
-import {Button} from "@renderer/components/ui/button";
-import {useDialogStore} from "@renderer/stores/dialogStore";
-import NewReminderDialog from "@renderer/components/settings/reminders/dialog/NewReminderDialog.vue";
-import RemindersTable from "@renderer/components/settings/reminders/table/RemindersTable.vue";
-import TableActions from "@renderer/components/common/table/TableActions.vue";
-import {PlusCircle} from "lucide-vue-next";
-import {useRemindersService} from "@renderer/services/remindersService";
+import SettingsHeader from '@renderer/components/settings/layout/SettingsHeader.vue'
+import { Button } from '@renderer/components/ui/button'
+import { useDialogStore } from '@renderer/stores/dialogStore'
+import NewReminderDialog from '@renderer/components/settings/reminders/dialog/NewReminderDialog.vue'
+import RemindersTable from '@renderer/components/settings/reminders/table/RemindersTable.vue'
+import TableActions from '@renderer/components/common/table/TableActions.vue'
+import { PlusCircle } from 'lucide-vue-next'
+import { useRemindersService } from '@renderer/services/remindersService'
 
 const remindersService = useRemindersService()
 const dialogStore = useDialogStore()

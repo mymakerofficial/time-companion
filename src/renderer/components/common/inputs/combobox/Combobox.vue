@@ -1,20 +1,26 @@
 <script lang="ts">
-import type {MaybeReadonly} from "@renderer/lib/utils";
-import {buttonVariants} from "@renderer/components/ui/button";
-import type {HTMLAttributes} from "vue";
+import type { MaybeReadonly } from '@renderer/lib/utils'
+import { buttonVariants } from '@renderer/components/ui/button'
+import type { HTMLAttributes } from 'vue'
 
 type PrimitiveAcceptableValue = string | number | true | false | object
 export type AcceptableValue = string | number | boolean | object | null
 
 type Wrapped<TValue> = { original: TValue }
 
-export interface ComboboxProps<TValue extends AcceptableValue, TMultiple extends boolean> {
+export interface ComboboxProps<
+  TValue extends AcceptableValue,
+  TMultiple extends boolean,
+> {
   options: MaybeReadonly<Array<TValue>>
   multiple?: TMultiple
   allowDeselect?: boolean
-  displayValue?: (option: TValue) => string;
-  filterFunction?: (list: MaybeReadonly<Array<TValue>>, query: string) => TValue[];
-  getKey?: (option: TValue) => string | number;
+  displayValue?: (option: TValue) => string
+  filterFunction?: (
+    list: MaybeReadonly<Array<TValue>>,
+    query: string,
+  ) => TValue[]
+  getKey?: (option: TValue) => string | number
   limit?: number
   variant?: NonNullable<Parameters<typeof buttonVariants>[0]>['variant']
   class?: HTMLAttributes['class']
@@ -33,20 +39,42 @@ export interface ComboboxProps<TValue extends AcceptableValue, TMultiple extends
 }
 </script>
 
-<script setup lang="ts" generic="TValue extends AcceptableValue, TMultiple extends boolean">
-import {cn, isDefined, isNotNull, type MaybeArray, type Nullable} from "@renderer/lib/utils";
-import {ComboboxRoot, PopoverAnchor} from "radix-vue";
-import {Popover, PopoverContent} from "@renderer/components/ui/popover";
-import {CommandInput, CommandItem, CommandList} from "@renderer/components/ui/command";
-import {Button} from "@renderer/components/ui/button";
-import {Check, ChevronsUpDown, Plus} from 'lucide-vue-next'
-import {useToggle} from "@vueuse/core";
-import {asArray, isArray, isEmpty, isNotEmpty} from "@renderer/lib/listUtils";
-import {computed} from "vue";
+<script
+  setup
+  lang="ts"
+  generic="TValue extends AcceptableValue, TMultiple extends boolean"
+>
+import {
+  cn,
+  isDefined,
+  isNotNull,
+  type MaybeArray,
+  type Nullable,
+} from '@renderer/lib/utils'
+import { ComboboxRoot, PopoverAnchor } from 'radix-vue'
+import { Popover, PopoverContent } from '@renderer/components/ui/popover'
+import {
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@renderer/components/ui/command'
+import { Button } from '@renderer/components/ui/button'
+import { Check, ChevronsUpDown, Plus } from 'lucide-vue-next'
+import { useToggle } from '@vueuse/core'
+import { asArray, isArray, isEmpty, isNotEmpty } from '@renderer/lib/listUtils'
+import { computed } from 'vue'
 
-const model = defineModel<TMultiple extends true ? TValue[] : Nullable<TValue>>({ required: true, default: null })
-const searchTerm = defineModel<string>('searchTerm', { required: false, default: '' })
-const openModel = defineModel<boolean>('open', { required: false, default: false })
+const model = defineModel<TMultiple extends true ? TValue[] : Nullable<TValue>>(
+  { required: true, default: null },
+)
+const searchTerm = defineModel<string>('searchTerm', {
+  required: false,
+  default: '',
+})
+const openModel = defineModel<boolean>('open', {
+  required: false,
+  default: false,
+})
 
 const props = withDefaults(defineProps<ComboboxProps<TValue, TMultiple>>(), {
   limit: Infinity,
@@ -55,12 +83,12 @@ const props = withDefaults(defineProps<ComboboxProps<TValue, TMultiple>>(), {
 })
 
 const emit = defineEmits<{
-  'selected': [value: typeof model.value]
-  'create': [value: string]
+  selected: [value: typeof model.value]
+  create: [value: string]
 }>()
 
 defineOptions({
-  inheritAttrs: false
+  inheritAttrs: false,
 })
 
 const toggleOpen = useToggle(openModel)
@@ -77,7 +105,10 @@ function getDisplayValue(option: TValue): string {
   return String(option)
 }
 
-function filterFunction(list: MaybeReadonly<Array<TValue>>, query: string): TValue[] {
+function filterFunction(
+  list: MaybeReadonly<Array<TValue>>,
+  query: string,
+): TValue[] {
   if (isDefined(props.filterFunction)) {
     return props.filterFunction(list, query)
   }
@@ -100,9 +131,7 @@ const label = computed(() => {
     return props.label
   }
 
-  return asArray(model.value)
-      .map(getDisplayValue)
-      .join(', ')
+  return asArray(model.value).map(getDisplayValue).join(', ')
 })
 
 const showLabel = computed(() => {
@@ -119,14 +148,10 @@ function handleSelect(option: TValue) {
       model.value.push(option)
     }
   } else {
-    if (
-        isNotNull(option) &&
-        option === model.value &&
-        props.allowDeselect
-    ) {
-      (model.value as null) = null
+    if (isNotNull(option) && option === model.value && props.allowDeselect) {
+      ;(model.value as null) = null
     } else {
-      (model.value as TValue) = option
+      ;(model.value as TValue) = option
     }
   }
 
@@ -159,9 +184,8 @@ function handleUpdateSearchTerm(value: string) {
   searchTerm.value = value
 }
 
-const filteredOptions = computed(() =>
-    filterFunction(props.options, searchTerm.value)
-        .slice(0, props.limit) // limit the number of options (default: Infinity)
+const filteredOptions = computed(
+  () => filterFunction(props.options, searchTerm.value).slice(0, props.limit), // limit the number of options (default: Infinity)
 )
 
 // radix's Combobox doesn't support null as a value, so to support any value, we need to wrap it
@@ -175,7 +199,9 @@ function wrapMultiple(value: Array<TValue>) {
 }
 
 function wrapModel(value: Nullable<MaybeArray<TValue>>) {
-  return( isArray(value) ? wrapMultiple(value) : wrap(value)) as PrimitiveAcceptableValue
+  return (
+    isArray(value) ? wrapMultiple(value) : wrap(value)
+  ) as PrimitiveAcceptableValue
 }
 
 const primitiveModel = computed(() => wrapModel(model.value))
@@ -206,7 +232,7 @@ const open = computed({
   },
   set(value) {
     openModel.value = value
-  }
+  },
 })
 </script>
 
@@ -222,12 +248,12 @@ const open = computed({
       <PopoverAnchor as-child>
         <slot name="anchor" :value="model" :toggle-open="toggleOpen">
           <Button
-              @click="toggleOpen"
-              role="combobox"
-              aria-haspopup="listbox"
-              :aria-expanded="open"
-              :variant="variant"
-              :class="cn('w-52 justify-start', triggerClass)"
+            @click="toggleOpen"
+            role="combobox"
+            aria-haspopup="listbox"
+            :aria-expanded="open"
+            :variant="variant"
+            :class="cn('w-52 justify-start', triggerClass)"
           >
             <slot name="trigger" :value="model">
               <template v-if="showLabel">
@@ -237,7 +263,9 @@ const open = computed({
                 </slot>
               </template>
               <template v-else>
-                <span class="text-muted-foreground truncate">{{ placeholder ?? $t('common.placeholders.select') }}</span>
+                <span class="text-muted-foreground truncate">{{
+                  placeholder ?? $t('common.placeholders.select')
+                }}</span>
               </template>
               <ChevronsUpDown class="ml-auto size-4 shrink-0 opacity-50" />
             </slot>
@@ -245,26 +273,32 @@ const open = computed({
         </slot>
       </PopoverAnchor>
       <PopoverContent
-          :class="cn('min-w-[200px] w-[200px] p-0', popoverClass)"
-          align="start"
+        :class="cn('min-w-[200px] w-[200px] p-0', popoverClass)"
+        align="start"
       >
-        <div class="flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground">
+        <div
+          class="flex h-full w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground"
+        >
           <CommandInput
-              v-if="!noInput"
-              :placeholder="searchLabel ?? $t('common.placeholders.search')"
+            v-if="!noInput"
+            :placeholder="searchLabel ?? $t('common.placeholders.search')"
           />
           <div v-if="showEmpty" class="py-6 text-center text-sm">
             <slot name="empty">
-              <span class="truncate">{{ emptyLabel ?? $t('common.placeholders.searchEmpty') }}</span>
+              <span class="truncate">{{
+                emptyLabel ?? $t('common.placeholders.searchEmpty')
+              }}</span>
             </slot>
           </div>
           <CommandList>
             <div class="p-1">
               <CommandItem
-                  v-for="option in filteredOptions"
-                  :key="getKey(option) /* keep the index stable */"
-                  :value="wrap(option) /* radix doesn't support null */"
-                  @click.prevent="() => handleSelect(option) /* override default behavior */"
+                v-for="option in filteredOptions"
+                :key="getKey(option) /* keep the index stable */"
+                :value="wrap(option) /* radix doesn't support null */"
+                @click.prevent="
+                  () => handleSelect(option) /* override default behavior */
+                "
               >
                 <slot name="option" :value="option">
                   <slot name="optionLeading" :value="option" />
@@ -273,16 +307,16 @@ const open = computed({
                   </slot>
                   <span class="ml-auto">
                     <Check
-                        :data-active="isSelected(option)"
-                        class="ml-2 size-4 opacity-0 data-[active=true]:opacity-100"
+                      :data-active="isSelected(option)"
+                      class="ml-2 size-4 opacity-0 data-[active=true]:opacity-100"
                     />
                   </span>
                 </slot>
               </CommandItem>
               <CommandItem
-                  v-if="showCreate"
-                  :value="{}"
-                  @click.prevent="() => handleCreate()"
+                v-if="showCreate"
+                :value="{}"
+                @click.prevent="() => handleCreate()"
               >
                 <slot name="create">
                   <slot name="createLeading" :value="searchTerm" />

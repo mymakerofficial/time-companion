@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import ShadowBadge, {type ShadowBadgeProps} from "@renderer/components/common/shadow/ShadowBadge.vue";
-import InplaceInput from "@renderer/components/common/inputs/inplaceInput/InplaceInput.vue";
+import ShadowBadge, {
+  type ShadowBadgeProps,
+} from '@renderer/components/common/shadow/ShadowBadge.vue'
+import InplaceInput from '@renderer/components/common/inputs/inplaceInput/InplaceInput.vue'
 
 const props = defineProps<ShadowBadgeProps>()
 </script>
