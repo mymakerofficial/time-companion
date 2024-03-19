@@ -1,7 +1,7 @@
-import {useDialogStore} from "@renderer/stores/dialogStore";
-import {h} from "vue";
-import ErrorDialog from "@renderer/components/common/dialog/ErrorDialog.vue";
-import {isDefined} from "@renderer/lib/utils";
+import { useDialogStore } from '@renderer/stores/dialogStore'
+import { h } from 'vue'
+import ErrorDialog from '@renderer/components/common/dialog/ErrorDialog.vue'
+import { isDefined } from '@renderer/lib/utils'
 
 export interface ErrorProps {
   title: string
@@ -16,13 +16,17 @@ export interface ErrorProps {
 export function useNotifyError(props: any) {
   const dialogStore = useDialogStore()
 
-  dialogStore.openDialog(h(ErrorDialog, {
-    actions: [{
-      label: 'Confirm',
-      handler: () => {},
-    }],
-    ...props
-  }))
+  dialogStore.openDialog(
+    h(ErrorDialog, {
+      actions: [
+        {
+          label: 'Confirm',
+          handler: () => {},
+        },
+      ],
+      ...props,
+    }),
+  )
 
   if (isDefined(props.error)) {
     console.error(props.error)

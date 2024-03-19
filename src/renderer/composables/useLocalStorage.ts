@@ -1,4 +1,4 @@
-import {isNotDefined, isNull} from "@renderer/lib/utils";
+import { isNotDefined, isNull } from '@renderer/lib/utils'
 
 export function useLocalStorage<T>(key: string, defaultValue: T) {
   function set(value?: T): T {

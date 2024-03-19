@@ -1,48 +1,63 @@
 <script setup lang="ts">
-import {computed, type HTMLAttributes, onMounted, ref, watch} from "vue";
-import {Input} from "@renderer/components/ui/input";
-import Combobox from "@renderer/components/common/inputs/combobox/Combobox.vue";
-import ComboboxInput from "@renderer/components/common/inputs/combobox/ComboboxInput.vue";
-import {isDefined, isNotDefined, isNotNull, isNull, type Nullable} from "@renderer/lib/utils";
-import {useQuickAccess} from "@renderer/composables/useQuickAccess";
-import type {ReactiveCalendarEventShadow} from "@renderer/model/eventShadow/types";
-import {createEventShadow} from "@renderer/model/eventShadow/model";
-import ShadowBadge from "@renderer/components/common/shadow/ShadowBadge.vue";
-import {firstOf, isEmpty, isNotEmpty, secondOf} from "@renderer/lib/listUtils";
-import {onStartTyping, unrefElement, useFocus} from "@vueuse/core";
-import type {ReactiveProject} from "@renderer/model/project/types";
-import {createProject} from "@renderer/model/project/model";
-import type {ReactiveActivity} from "@renderer/model/activity/types";
-import {createActivity} from "@renderer/model/activity/model";
-import {projectActionInputBadgeVariants} from "@renderer/components/common/inputs/projectActionInput/variants";
-import type {BadgeVariants} from "@renderer/components/ui/badge";
-import {useProjectsService} from "@renderer/services/projectsService";
-import EditableShadowBadge from "@renderer/components/common/shadow/EditableShadowBadge.vue";
+import { computed, type HTMLAttributes, onMounted, ref, watch } from 'vue'
+import { Input } from '@renderer/components/ui/input'
+import Combobox from '@renderer/components/common/inputs/combobox/Combobox.vue'
+import ComboboxInput from '@renderer/components/common/inputs/combobox/ComboboxInput.vue'
+import {
+  isDefined,
+  isNotDefined,
+  isNotNull,
+  isNull,
+  type Nullable,
+} from '@renderer/lib/utils'
+import { useQuickAccess } from '@renderer/composables/useQuickAccess'
+import type { ReactiveCalendarEventShadow } from '@renderer/model/eventShadow/types'
+import { createEventShadow } from '@renderer/model/eventShadow/model'
+import ShadowBadge from '@renderer/components/common/shadow/ShadowBadge.vue'
+import { firstOf, isEmpty, isNotEmpty, secondOf } from '@renderer/lib/listUtils'
+import { onStartTyping, unrefElement, useFocus } from '@vueuse/core'
+import type { ReactiveProject } from '@renderer/model/project/types'
+import { createProject } from '@renderer/model/project/model'
+import type { ReactiveActivity } from '@renderer/model/activity/types'
+import { createActivity } from '@renderer/model/activity/model'
+import { projectActionInputBadgeVariants } from '@renderer/components/common/inputs/projectActionInput/variants'
+import type { BadgeVariants } from '@renderer/components/ui/badge'
+import { useProjectsService } from '@renderer/services/projectsService'
+import EditableShadowBadge from '@renderer/components/common/shadow/EditableShadowBadge.vue'
 
-const projectModel = defineModel<Nullable<ReactiveProject>>('project', { required: false, default: null })
-const activityModel = defineModel<Nullable<ReactiveActivity>>('activity', { required: false, default: null })
+const projectModel = defineModel<Nullable<ReactiveProject>>('project', {
+  required: false,
+  default: null,
+})
+const activityModel = defineModel<Nullable<ReactiveActivity>>('activity', {
+  required: false,
+  default: null,
+})
 const noteModel = defineModel<string>('note', { required: false, default: '' })
 
-const props = withDefaults(defineProps<{
-  size?: 'sm' | 'md' | 'lg',
-  variant?: NonNullable<BadgeVariants>['variant'],
-  class?: HTMLAttributes['class']
-  wrapperClass?: HTMLAttributes['class']
-  placeholder?: HTMLAttributes['placeholder']
-  focusWhenTyping?: boolean
-}>(), {
-  size: 'md',
-  variant: 'default',
-})
+const props = withDefaults(
+  defineProps<{
+    size?: 'sm' | 'md' | 'lg'
+    variant?: NonNullable<BadgeVariants>['variant']
+    class?: HTMLAttributes['class']
+    wrapperClass?: HTMLAttributes['class']
+    placeholder?: HTMLAttributes['placeholder']
+    focusWhenTyping?: boolean
+  }>(),
+  {
+    size: 'md',
+    variant: 'default',
+  },
+)
 
 const emit = defineEmits<{
-  'selected': []
-  'startTyping': []
-  'backspace': []
+  selected: []
+  startTyping: []
+  backspace: []
 }>()
 
 defineOptions({
-  inheritAttrs: false
+  inheritAttrs: false,
 })
 
 const projectsService = useProjectsService()
@@ -58,9 +73,13 @@ watch(searchTerm, (newValue, oldValue) => {
 onMounted(() => {
   // wait for the combobox, so it doesn't reset the value
   setTimeout(() => {
-    watch(noteModel, (value) => {
-      searchTerm.value = value
-    }, { immediate: true })
+    watch(
+      noteModel,
+      (value) => {
+        searchTerm.value = value
+      },
+      { immediate: true },
+    )
   }, 2)
   watch(searchTerm, (value) => {
     noteModel.value = value
@@ -97,12 +116,18 @@ const selected = computed<Nullable<ReactiveCalendarEventShadow>>({
 
     projectModel.value = value.project
     activityModel.value = value.activity
-  }
+  },
 })
 
 const shadows = useQuickAccess(() => ({
-  maxActivitiesPerProject: isNotNull(selected.value) || isNotEmpty(searchTerm.value) ? Infinity : undefined,
-  maxShadows: isNotNull(selected.value) || isNotEmpty(searchTerm.value) ? Infinity : undefined,
+  maxActivitiesPerProject:
+    isNotNull(selected.value) || isNotEmpty(searchTerm.value)
+      ? Infinity
+      : undefined,
+  maxShadows:
+    isNotNull(selected.value) || isNotEmpty(searchTerm.value)
+      ? Infinity
+      : undefined,
   project: selected.value?.project ?? null,
   exclude: selected.value ?? null,
 }))
@@ -117,7 +142,7 @@ function handleBackspace(event: KeyboardEvent) {
   if (selected.value?.activity) {
     // replace with new shadow, otherwise the color will not update
     selected.value = createEventShadow({
-      project: selected.value.project
+      project: selected.value.project,
     })
     return
   }
@@ -149,11 +174,14 @@ function createProjectFromTerm() {
     return null
   }
 
-  const project = createProject({
-    displayName,
-  }, {
-    randomColor: true
-  })
+  const project = createProject(
+    {
+      displayName,
+    },
+    {
+      randomColor: true,
+    },
+  )
 
   projectsService.addProject(project)
 
@@ -161,10 +189,7 @@ function createProjectFromTerm() {
 }
 
 function createActivityFromTerm(project: Nullable<ReactiveProject>) {
-  if (
-      isNotNull(selected.value) &&
-      isNotNull(selected.value.activity)
-  ) {
+  if (isNotNull(selected.value) && isNotNull(selected.value.activity)) {
     return selected.value.activity
   }
 
@@ -176,7 +201,7 @@ function createActivityFromTerm(project: Nullable<ReactiveProject>) {
 
   const activity = createActivity({
     displayName,
-    parentProject: project
+    parentProject: project,
   })
 
   projectsService.addActivity(activity)
@@ -194,7 +219,7 @@ function handleCreate() {
 
   selected.value = createEventShadow({
     project,
-    activity
+    activity,
   })
 
   searchTerm.value = ''
@@ -259,7 +284,12 @@ const placeholder = computed(() => {
         v-bind="$attrs"
       >
         <template #leading>
-          <EditableShadowBadge :shadow="selected" :variant="variant" :size="size" :class="projectActionInputBadgeVariants({ size })" />
+          <EditableShadowBadge
+            :shadow="selected"
+            :variant="variant"
+            :size="size"
+            :class="projectActionInputBadgeVariants({ size })"
+          />
         </template>
         <template #input="props">
           <ComboboxInput ref="input" v-bind="props" />

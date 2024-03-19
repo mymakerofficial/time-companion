@@ -1,8 +1,11 @@
-import {defineStore} from "pinia";
-import type {ReactiveCalendarDay, SerializedCalendarDay} from "@renderer/model/calendarDay/types";
-import {reactive, watch} from "vue";
-import {useLocalStorage} from "@renderer/composables/useLocalStorage";
-import {check} from "@renderer/lib/utils";
+import { defineStore } from 'pinia'
+import type {
+  ReactiveCalendarDay,
+  SerializedCalendarDay,
+} from '@renderer/model/calendarDay/types'
+import { reactive, watch } from 'vue'
+import { useLocalStorage } from '@renderer/composables/useLocalStorage'
+import { check } from '@renderer/lib/utils'
 
 export interface CalendarStore {
   days: ReadonlyArray<ReactiveCalendarDay>
@@ -17,7 +20,10 @@ interface CalendarStorageSerialized {
 }
 
 export const useCalendarStore = defineStore('calendar', (): CalendarStore => {
-  const storage = useLocalStorage<CalendarStorageSerialized>('time-companion-calendar-store', { version: 0, days: [] })
+  const storage = useLocalStorage<CalendarStorageSerialized>(
+    'time-companion-calendar-store',
+    { version: 0, days: [] },
+  )
 
   const days = reactive<ReactiveCalendarDay[]>([])
 
@@ -28,10 +34,10 @@ export const useCalendarStore = defineStore('calendar', (): CalendarStore => {
     })
   }
 
-  watch(() => days, commit, {deep: true})
+  watch(() => days, commit, { deep: true })
 
   function getSerializedStorage() {
-    return storage.get();
+    return storage.get()
   }
 
   function unsafeAddDay(day: ReactiveCalendarDay) {
@@ -41,13 +47,13 @@ export const useCalendarStore = defineStore('calendar', (): CalendarStore => {
   function unsafeRemoveDay(day: ReactiveCalendarDay) {
     const index = days.indexOf(day)
 
-    check(index !== -1,
-      `Failed to remove day ${day.id}: Day does not exist in store.`
+    check(
+      index !== -1,
+      `Failed to remove day ${day.id}: Day does not exist in store.`,
     )
 
     days.splice(index, 1)
   }
-
 
   return {
     days,

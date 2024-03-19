@@ -60,7 +60,7 @@ export default {
       'en-US': 'English (US)',
       'de-Informal': 'German (Informal)',
       'nl-NL': 'Dutch',
-      'cat': 'Cat',
+      cat: 'Cat',
     },
   },
   app: {
@@ -103,11 +103,11 @@ export default {
       actionType: 'Action',
     },
     actionType: {
-      'NO_ACTION': 'No Action',
-      'START_EVENT': 'Start Event',
-      'CONTINUE_PREVIOUS_EVENT': 'Continue Previous Event',
-      'STOP_CURRENT_EVENT': 'Stop Current Event',
-    }
+      NO_ACTION: 'No Action',
+      START_EVENT: 'Start Event',
+      CONTINUE_PREVIOUS_EVENT: 'Continue Previous Event',
+      STOP_CURRENT_EVENT: 'Stop Current Event',
+    },
   },
   dashboard: {
     header: {
@@ -127,21 +127,24 @@ export default {
     },
     labels: {
       whatAreYouWorkingOn: 'What are you working on?...',
-    }
+    },
   },
   report: {
     table: {
       columns: {
         date: 'Date',
         totalDuration: 'Total',
-      }
+      },
     },
     empty: {
       noProjects: {
         title: 'No time tracked yet.',
-        description: { term: 'You dont have any projects yet. {0} to start tracking time.', createProject: 'Create one'},
-      }
-    }
+        description: {
+          term: 'You dont have any projects yet. {0} to start tracking time.',
+          createProject: 'Create one',
+        },
+      },
+    },
   },
   settings: {
     projects: {
@@ -157,8 +160,8 @@ export default {
           color: '@:project.properties.color',
           isBillable: '@:project.properties.isBillable',
           lastUsed: '@:project.properties.lastUsed',
-        }
-      }
+        },
+      },
     },
     reminders: {
       title: 'Reminders',
@@ -172,8 +175,8 @@ export default {
           startAt: '@:reminder.properties.startAt',
           repeatOn: '@:reminder.properties.repeatOn',
           action: '@:reminder.properties.actionType',
-        }
-      }
+        },
+      },
     },
     general: {
       title: 'General',
@@ -185,11 +188,12 @@ export default {
         },
         break: {
           title: 'Work Breaks',
-          description: 'Your break time and project are used to calculate how much time you spend on breaks. Break projects may not be billable.',
+          description:
+            'Your break time and project are used to calculate how much time you spend on breaks. Break projects may not be billable.',
           sections: {
             breakTime: 'Break Time',
             breakProject: 'Break Project',
-          }
+          },
         },
         autoStartActiveEventWhenTyping: {
           title: 'Auto start when typing',
@@ -197,12 +201,14 @@ export default {
         },
         stopActiveEventWithBackspace: {
           title: 'Stop with backspace',
-          description: 'Stop the active event when pressing backspace on the input field.',
+          description:
+            'Stop the active event when pressing backspace on the input field.',
         },
         minimumEventDuration: {
           title: 'Minimum Event Duration',
-          description: 'When stopping an event, the duration must be at least this long to be saved.',
-        }
+          description:
+            'When stopping an event, the duration must be at least this long to be saved.',
+        },
       },
     },
     appearance: {
@@ -216,7 +222,7 @@ export default {
         language: {
           title: 'Language',
           description: 'What language do you speak?',
-        }
+        },
       },
     },
   },
@@ -251,9 +257,10 @@ export default {
         },
         isBreak: {
           label: '@:project.properties.isBreak',
-          description: 'This project is set as your break and will be counted differently for time calculations. You can change this in the "General" settings.',
+          description:
+            'This project is set as your break and will be counted differently for time calculations. You can change this in the "General" settings.',
         },
-      }
+      },
     },
     activity: {
       new: {
@@ -268,7 +275,7 @@ export default {
         create: '@:common.controls.create',
         save: '@:common.controls.save',
         cancel: '@:common.controls.cancel',
-        delete: '@:common.controls.delete'
+        delete: '@:common.controls.delete',
       },
       form: {
         parentProject: {
@@ -282,7 +289,7 @@ export default {
           label: '@:activity.properties.color',
           description: 'Give your life some color',
         },
-      }
+      },
     },
     reminder: {
       new: {
@@ -297,34 +304,34 @@ export default {
         create: '@:common.controls.create',
         save: '@:common.controls.save',
         cancel: '@:common.controls.cancel',
-        delete: '@:common.controls.delete'
+        delete: '@:common.controls.delete',
       },
       form: {
         displayText: {
-          label: '@:reminder.properties.displayText'
+          label: '@:reminder.properties.displayText',
         },
         actionType: {
-          label: '@:reminder.properties.actionType'
+          label: '@:reminder.properties.actionType',
         },
         actionTarget: {
-          label: 'Start project'
+          label: 'Start project',
         },
         color: {
-          label: '@:reminder.properties.color'
+          label: '@:reminder.properties.color',
         },
         startAt: {
-          label: '@:reminder.properties.startAt'
+          label: '@:reminder.properties.startAt',
         },
         repeatOn: {
-          label: '@:reminder.properties.repeatOn'
+          label: '@:reminder.properties.repeatOn',
         },
         remindBefore: {
-          label: '@:reminder.properties.remindBefore'
+          label: '@:reminder.properties.remindBefore',
         },
         remindAfter: {
-          label: '@:reminder.properties.remindAfter'
+          label: '@:reminder.properties.remindAfter',
         },
-      }
-    }
+      },
+    },
   },
 }

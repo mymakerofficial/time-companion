@@ -1,8 +1,7 @@
-import type {HasId} from "@renderer/lib/types";
-import type {ReactiveActivity} from "@renderer/model/activity/types";
-import type {Nullable} from "@renderer/lib/utils";
-import {Temporal} from 'temporal-polyfill'
-
+import type { HasId } from '@renderer/lib/types'
+import type { ReactiveActivity } from '@renderer/model/activity/types'
+import type { Nullable } from '@renderer/lib/utils'
+import { Temporal } from 'temporal-polyfill'
 
 export interface ProjectContext extends HasId {
   displayName: string

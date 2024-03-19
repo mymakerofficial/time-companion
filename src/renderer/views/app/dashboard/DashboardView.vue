@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import CalendarView from "@renderer/components/common/calendar/CalendarView.vue";
-import CalendarHeader from "@renderer/components/dashboard/layout/CalendarHeader.vue";
-import {computed} from "vue";
-import CurrentEventCard from "@renderer/components/dashboard/cards/CurrentEventCard.vue";
-import RemindersContainer from "@renderer/components/dashboard/cards/RemindersContainer.vue";
-import type {ReactiveCalendarEvent} from "@renderer/model/calendarEvent/types";
-import type {ReactiveCalendarEventShadow} from "@renderer/model/eventShadow/types";
-import QuickStartCard from "@renderer/components/dashboard/cards/QuickStartCard.vue";
-import ControlsHeader from "@renderer/components/dashboard/layout/ControlsHeader.vue";
-import {isNotNull, isNull} from "@renderer/lib/utils";
-import {useActiveEventService} from "@renderer/services/activeEventService";
-import {useActiveDayService} from "@renderer/services/activeDayService";
-import {useRemindersService} from "@renderer/services/remindersService";
-import EditEventCard from "@renderer/components/dashboard/cards/EditEventCard.vue";
-import {useSelectedEventService} from "@renderer/services/selectedEventService";
-import WorkingDurationCard from "@renderer/components/dashboard/cards/WorkingDurationCard.vue";
+import CalendarView from '@renderer/components/common/calendar/CalendarView.vue'
+import CalendarHeader from '@renderer/components/dashboard/layout/CalendarHeader.vue'
+import { computed } from 'vue'
+import CurrentEventCard from '@renderer/components/dashboard/cards/CurrentEventCard.vue'
+import RemindersContainer from '@renderer/components/dashboard/cards/RemindersContainer.vue'
+import type { ReactiveCalendarEvent } from '@renderer/model/calendarEvent/types'
+import type { ReactiveCalendarEventShadow } from '@renderer/model/eventShadow/types'
+import QuickStartCard from '@renderer/components/dashboard/cards/QuickStartCard.vue'
+import ControlsHeader from '@renderer/components/dashboard/layout/ControlsHeader.vue'
+import { isNotNull, isNull } from '@renderer/lib/utils'
+import { useActiveEventService } from '@renderer/services/activeEventService'
+import { useActiveDayService } from '@renderer/services/activeDayService'
+import { useRemindersService } from '@renderer/services/remindersService'
+import EditEventCard from '@renderer/components/dashboard/cards/EditEventCard.vue'
+import { useSelectedEventService } from '@renderer/services/selectedEventService'
+import WorkingDurationCard from '@renderer/components/dashboard/cards/WorkingDurationCard.vue'
 
 const remindersService = useRemindersService()
 
@@ -39,10 +39,7 @@ function handleEventSelected(event: ReactiveCalendarEvent) {
   selectedEventService.setEvent(event)
 }
 function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
-  if (
-      activeEventHasNoProject.value &&
-      isNotNull(activeEventService.event)
-  ) {
+  if (activeEventHasNoProject.value && isNotNull(activeEventService.event)) {
     activeEventService.event.project = shadow.project
     activeEventService.event.activity = shadow.activity
   } else {
@@ -68,9 +65,7 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
           :icon-pencil="activeEventHasNoProject"
           @start="handleQuickStart"
         />
-        <RemindersContainer
-          :reminders="remindersService.reminders"
-        />
+        <RemindersContainer :reminders="remindersService.reminders" />
         <WorkingDurationCard />
       </div>
     </section>

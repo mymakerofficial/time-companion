@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import {cn} from "@renderer/lib/utils";
+import { cn } from '@renderer/lib/utils'
 
-withDefaults(defineProps<{
-  as?: string
-}>(), {
-  as: 'div',
-})
+withDefaults(
+  defineProps<{
+    as?: string
+  }>(),
+  {
+    as: 'div',
+  },
+)
 </script>
 
 <template>

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import {useWorkingDurationService} from "@renderer/services/workingDurationService";
-import ProjectSelect from "@renderer/components/common/inputs/projectInput/ProjectSelect.vue";
+import { useWorkingDurationService } from '@renderer/services/workingDurationService'
+import ProjectSelect from '@renderer/components/common/inputs/projectInput/ProjectSelect.vue'
 
-const workingDurationService = useWorkingDurationService();
+const workingDurationService = useWorkingDurationService()
 </script>
 
 <template>

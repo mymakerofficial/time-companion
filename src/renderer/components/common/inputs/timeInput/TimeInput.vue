@@ -1,9 +1,16 @@
 <script setup lang="ts">
-import {computed} from "vue";
-import {absDuration, durationSinceStartOfDay, durationToTime} from "@renderer/lib/neoTime";
-import {Temporal} from "temporal-polyfill";
-import DurationInput from "@renderer/components/common/inputs/timeInput/DurationInput.vue";
-import type {InputProps, InputSlots} from "@renderer/components/ui/input/Input.vue";
+import { computed } from 'vue'
+import {
+  absDuration,
+  durationSinceStartOfDay,
+  durationToTime,
+} from '@renderer/lib/neoTime'
+import { Temporal } from 'temporal-polyfill'
+import DurationInput from '@renderer/components/common/inputs/timeInput/DurationInput.vue'
+import type {
+  InputProps,
+  InputSlots,
+} from '@renderer/components/ui/input/Input.vue'
 
 const model = defineModel<Temporal.PlainTime>({ required: true })
 
@@ -17,7 +24,7 @@ const forwardModel = computed<Temporal.Duration>({
   },
   set(value) {
     model.value = durationToTime(absDuration(value))
-  }
+  },
 })
 </script>
 

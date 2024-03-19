@@ -1,9 +1,15 @@
-import {defineStore} from "pinia";
-import {reactive, watch} from "vue";
-import type {ReactiveProject, SerializedProject} from "@renderer/model/project/types";
-import type {ReactiveActivity, SerializedActivity} from "@renderer/model/activity/types";
-import {useLocalStorage} from "@renderer/composables/useLocalStorage";
-import {check} from "@renderer/lib/utils";
+import { defineStore } from 'pinia'
+import { reactive, watch } from 'vue'
+import type {
+  ReactiveProject,
+  SerializedProject,
+} from '@renderer/model/project/types'
+import type {
+  ReactiveActivity,
+  SerializedActivity,
+} from '@renderer/model/activity/types'
+import { useLocalStorage } from '@renderer/composables/useLocalStorage'
+import { check } from '@renderer/lib/utils'
 
 export interface ProjectsStore {
   projects: ReadonlyArray<ReactiveProject>
@@ -22,7 +28,10 @@ interface ProjectsStorageSerialized {
 }
 
 export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
-  const storage = useLocalStorage<ProjectsStorageSerialized>('time-companion-projects-store', { version: 0, projects: [], activities: [] })
+  const storage = useLocalStorage<ProjectsStorageSerialized>(
+    'time-companion-projects-store',
+    { version: 0, projects: [], activities: [] },
+  )
 
   const projects = reactive<ReactiveProject[]>([])
   const activities = reactive<ReactiveActivity[]>([])
@@ -35,10 +44,10 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
     })
   }
 
-  watch([projects, activities], commit, {deep: true})
+  watch([projects, activities], commit, { deep: true })
 
   function getSerializedStorage() {
-    return storage.get();
+    return storage.get()
   }
 
   function unsafeAddProject(project: ReactiveProject) {
@@ -52,7 +61,10 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
   function unsafeRemoveProject(project: ReactiveProject) {
     const index = projects.indexOf(project)
 
-    check(index !== -1, `Failed to remove project "${project.id}": Project does not exist in store.`)
+    check(
+      index !== -1,
+      `Failed to remove project "${project.id}": Project does not exist in store.`,
+    )
 
     projects.splice(index, 1)
   }
@@ -60,7 +72,10 @@ export const useProjectsStore = defineStore('projects', (): ProjectsStore => {
   function unsafeRemoveActivity(activity: ReactiveActivity) {
     const index = activities.indexOf(activity)
 
-    check(index !== -1, `Failed to remove activity "${activity.id}": Activity does not exist in store.`)
+    check(
+      index !== -1,
+      `Failed to remove activity "${activity.id}": Activity does not exist in store.`,
+    )
 
     activities.splice(index, 1)
   }

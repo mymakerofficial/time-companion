@@ -1,9 +1,9 @@
-import {defineConfig} from 'vite'
+import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import vueJsxPlugin from "@vitejs/plugin-vue-jsx";
+import vueJsxPlugin from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
-import {VitePWA as vitePwa} from "vite-plugin-pwa";
-import path from "path";
+import { VitePWA as vitePwa } from 'vite-plugin-pwa'
+import path from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -15,13 +15,11 @@ export default defineConfig({
       registerType: 'prompt',
       injectRegister: 'inline',
       strategies: 'generateSW',
-      includeAssets: [
-        "**/*",
-      ],
+      includeAssets: ['**/*'],
       workbox: {
         cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,vue,txt,woff2}'],
-        maximumFileSizeToCacheInBytes: 5000000
+        maximumFileSizeToCacheInBytes: 5000000,
       },
       devOptions: {
         enabled: true,
@@ -38,16 +36,16 @@ export default defineConfig({
           {
             src: '/android-chrome-192x192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
           },
           {
             src: '/android-chrome-512x512.png',
             sizes: '512x512',
-            type: 'image/png'
-          }
+            type: 'image/png',
+          },
         ],
-      }
-    })
+      },
+    }),
   ],
   resolve: {
     alias: {
@@ -56,6 +54,6 @@ export default defineConfig({
       '@main': path.resolve(__dirname, 'src', 'main'),
       '@preload': path.resolve(__dirname, 'src', 'preload'),
       '@renderer': path.resolve(__dirname, 'src', 'renderer'),
-    }
-  }
+    },
+  },
 })

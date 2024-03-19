@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import {buttonVariants} from "@renderer/components/ui/button";
-import {Tooltip, TooltipContent, TooltipTrigger} from "@renderer/components/ui/tooltip";
-import type {NavLink} from "@renderer/components/common/layout/nav/nav-link";
-import {cn} from "@renderer/lib/utils";
+import { buttonVariants } from '@renderer/components/ui/button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@renderer/components/ui/tooltip'
+import type { NavLink } from '@renderer/components/common/layout/nav/nav-link'
+import { cn } from '@renderer/lib/utils'
 
 const props = defineProps<{
   links: NavLink[]
@@ -18,11 +22,13 @@ const props = defineProps<{
           <RouterLink
             :to="link.to"
             active-class="active"
-            :class="cn(
-              buttonVariants({ variant: 'ghost', size: 'icon' }),
-              '[&.active]:dark:bg-muted [&.active]:dark:text-muted-foreground [&.active]:dark:hover:bg-muted [&.active]:dark:hover:text-white',
-              '[&.active]:bg-primary [&.active]:text-primary-foreground [&.active]:hover:bg-primary/90'
-            )"
+            :class="
+              cn(
+                buttonVariants({ variant: 'ghost', size: 'icon' }),
+                '[&.active]:dark:bg-muted [&.active]:dark:text-muted-foreground [&.active]:dark:hover:bg-muted [&.active]:dark:hover:text-white',
+                '[&.active]:bg-primary [&.active]:text-primary-foreground [&.active]:hover:bg-primary/90',
+              )
+            "
           >
             <component :is="link.icon" class="size-4" />
           </RouterLink>

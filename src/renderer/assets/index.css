@@ -1,27 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
-  [data-custom-title-bar="false"] {
+  [data-custom-title-bar='false'] {
     --titleBarHeight: 0px;
   }
 
-  [data-custom-title-bar="true"] {
+  [data-custom-title-bar='true'] {
     --titleBarHeight: 42px;
   }
 
-  [data-app-theme="light"] {
+  [data-app-theme='light'] {
     --backdrop: 0, 0%, 98%;
 
     --background: 0 0% 100%;
     --foreground: 0, 0%, 9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0, 0%, 9%;;
+    --card-foreground: 0, 0%, 9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0, 0%, 9%;;
+    --popover-foreground: 0, 0%, 9%;
 
     --primary: 0 0% 9%;
     --primary-foreground: 0 0% 98%;
@@ -38,15 +38,15 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border:0 0% 89.8%;
-    --ring:0 0% 3.9%;
+    --border: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
     --radius: 0.5rem;
 
     --color: var(--primary);
     --color-foreground: var(--primary-foreground);
   }
 
-  [data-app-theme="dark"] {
+  [data-app-theme='dark'] {
     color-scheme: dark;
 
     --backdrop: 0, 0%, 4%;
@@ -83,7 +83,7 @@
     --color-foreground: var(--primary-foreground);
   }
 
-  [data-app-theme="barf"] {
+  [data-app-theme='barf'] {
     color-scheme: light;
 
     --background: 329, 100%, 50%;
@@ -118,7 +118,7 @@
     --color-foreground: var(--primary-foreground);
   }
 }
- 
+
 @layer base {
   * {
     @apply border-border;
@@ -129,7 +129,7 @@
 }
 
 [data-sonner-toast] [data-button]:not(:first-of-type) {
-  margin-left: 0!important;
+  margin-left: 0 !important;
 }
 
 .electron-title-bar {

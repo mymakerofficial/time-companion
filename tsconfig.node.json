@@ -27,7 +27,7 @@
       "@/*": ["./src/*"],
       "@shared/*": ["./src/shared/*"],
       "@main/*": ["./src/main/*"],
-      "@preload/*": ["./src/preload/*"],
+      "@preload/*": ["./src/preload/*"]
     }
   }
 }

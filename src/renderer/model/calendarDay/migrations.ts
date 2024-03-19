@@ -1,5 +1,5 @@
-import type {SerializedCalendarDay} from "@renderer/model/calendarDay/types";
-import {defineMigrator} from "@renderer/lib/migrations";
+import type { SerializedCalendarDay } from '@renderer/model/calendarDay/types'
+import { defineMigrator } from '@renderer/lib/migrations'
 
 function upgradeVersion0(original: any): any {
   return {
@@ -11,7 +11,7 @@ function upgradeVersion0(original: any): any {
       endAt: `${original.date}${event.endedAt}`,
       projectId: event.projectId,
       activityId: event.activityId,
-    }))
+    })),
   }
 }
 

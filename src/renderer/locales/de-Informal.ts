@@ -54,13 +54,13 @@ export default {
       auto: 'Auto',
       dark: 'Dunkel',
       light: 'Hell',
-      barf: 'Gräueltat des Auges'
+      barf: 'Gräueltat des Auges',
     },
     locales: {
       'en-US': 'Englisch (US)',
       'de-Informal': 'Deutsch (Du)',
       'nl-NL': 'Niederländisch',
-      'cat': 'Katzensprache',
+      cat: 'Katzensprache',
     },
   },
   app: {
@@ -92,7 +92,8 @@ export default {
   },
   reminder: {
     title: 'Erinnerung | Erinnerungen',
-    description: 'Nutze Erinnerungen, um dich an anstehende Ereignisse zu erinnern',
+    description:
+      'Nutze Erinnerungen, um dich an anstehende Ereignisse zu erinnern',
     properties: {
       displayText: '@:common.properties.displayName',
       color: '@:common.properties.color',
@@ -103,11 +104,11 @@ export default {
       actionType: 'Aktion',
     },
     actionType: {
-      'NO_ACTION': 'Keine Aktion',
-      'START_EVENT': 'Startet Projekt',
-      'CONTINUE_PREVIOUS_EVENT': 'Vorheriges Ereignis fortsetzen',
-      'STOP_CURRENT_EVENT': 'Aktuelles Ereignis beenden',
-    }
+      NO_ACTION: 'Keine Aktion',
+      START_EVENT: 'Startet Projekt',
+      CONTINUE_PREVIOUS_EVENT: 'Vorheriges Ereignis fortsetzen',
+      STOP_CURRENT_EVENT: 'Aktuelles Ereignis beenden',
+    },
   },
   dashboard: {
     header: {
@@ -127,21 +128,24 @@ export default {
     },
     labels: {
       whatAreYouWorkingOn: 'Woran arbeitest du?...',
-    }
+    },
   },
   report: {
     table: {
       columns: {
         date: 'Datum',
         totalDuration: 'Gesamtzeit',
-      }
+      },
     },
     empty: {
       noProjects: {
         title: 'Nichts zu sehen',
-        description: { term: 'Du hast noch keine Projekte. {0} um lost zu legen.', createProject: 'Erstelle eins'},
-      }
-    }
+        description: {
+          term: 'Du hast noch keine Projekte. {0} um lost zu legen.',
+          createProject: 'Erstelle eins',
+        },
+      },
+    },
   },
   settings: {
     projects: {
@@ -157,8 +161,8 @@ export default {
           color: '@:project.properties.color',
           isBillable: '@:project.properties.isBillable',
           lastUsed: '@:project.properties.lastUsed',
-        }
-      }
+        },
+      },
     },
     reminders: {
       title: 'Erinnerungen',
@@ -172,8 +176,8 @@ export default {
           startAt: '@:reminder.properties.startAt',
           repeatOn: '@:reminder.properties.repeatOn',
           action: '@:reminder.properties.actionType',
-        }
-      }
+        },
+      },
     },
     general: {
       title: 'Allgemein',
@@ -185,11 +189,12 @@ export default {
         },
         break: {
           title: 'Arbeitspausen',
-          description: 'Deine Pausenzeit und Pauseprojekt werden verwendet, um deine restliche Arbeitszeit an einem Tag zu berechnen. Pausenprojekte dürfen nicht abrechenbar sein.',
+          description:
+            'Deine Pausenzeit und Pauseprojekt werden verwendet, um deine restliche Arbeitszeit an einem Tag zu berechnen. Pausenprojekte dürfen nicht abrechenbar sein.',
           sections: {
             breakTime: 'Pausenzeit',
             breakProject: 'Pausenprojekt',
-          }
+          },
         },
         autoStartActiveEventWhenTyping: {
           title: null,
@@ -202,7 +207,7 @@ export default {
         minimumEventDuration: {
           title: null,
           description: null,
-        }
+        },
       },
     },
     appearance: {
@@ -216,8 +221,8 @@ export default {
         language: {
           title: 'Sprache',
           description: 'Sprache ändern',
-        }
-      }
+        },
+      },
     },
   },
   dialog: {
@@ -234,7 +239,7 @@ export default {
         create: '@:common.controls.create',
         save: '@:common.controls.save',
         cancel: '@:common.controls.cancel',
-        delete: '@:common.controls.delete'
+        delete: '@:common.controls.delete',
       },
       form: {
         displayName: {
@@ -251,9 +256,10 @@ export default {
         },
         isBreak: {
           label: '@:project.properties.isBreak',
-          description: 'Dieses Projekt ist als Pausenprojekt markiert und beeinflusst die Zeitmessung für deine Pausen anders als normale Projekte. Du kannst das Pausenprojekt in den Einstellungen unter "Allgemein" ändern.',
+          description:
+            'Dieses Projekt ist als Pausenprojekt markiert und beeinflusst die Zeitmessung für deine Pausen anders als normale Projekte. Du kannst das Pausenprojekt in den Einstellungen unter "Allgemein" ändern.',
         },
-      }
+      },
     },
     activity: {
       new: {
@@ -268,7 +274,7 @@ export default {
         create: '@:common.controls.create',
         save: '@:common.controls.save',
         cancel: '@:common.controls.cancel',
-        delete: '@:common.controls.delete'
+        delete: '@:common.controls.delete',
       },
       form: {
         parentProject: {
@@ -282,7 +288,7 @@ export default {
           label: '@:activity.properties.color',
           description: 'Gebe deinen Leben etwas Farbe',
         },
-      }
+      },
     },
     reminder: {
       new: {
@@ -297,34 +303,34 @@ export default {
         create: '@:common.controls.create',
         save: '@:common.controls.save',
         cancel: '@:common.controls.cancel',
-        delete: '@:common.controls.delete'
+        delete: '@:common.controls.delete',
       },
       form: {
         displayText: {
-          label: '@:reminder.properties.displayText'
+          label: '@:reminder.properties.displayText',
         },
         actionType: {
-          label: '@:reminder.properties.actionType'
+          label: '@:reminder.properties.actionType',
         },
         actionTarget: {
-          label: 'Startet Projekt'
+          label: 'Startet Projekt',
         },
         color: {
-          label: '@:reminder.properties.color'
+          label: '@:reminder.properties.color',
         },
         startAt: {
-          label: '@:reminder.properties.startAt'
+          label: '@:reminder.properties.startAt',
         },
         repeatOn: {
-          label: '@:reminder.properties.repeatOn'
+          label: '@:reminder.properties.repeatOn',
         },
         remindBefore: {
-          label: '@:reminder.properties.remindBefore'
+          label: '@:reminder.properties.remindBefore',
         },
         remindAfter: {
-          label: '@:reminder.properties.remindAfter'
+          label: '@:reminder.properties.remindAfter',
         },
-      }
-    }
+      },
+    },
   },
 }

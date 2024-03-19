@@ -1,9 +1,9 @@
-import {createService} from "@renderer/composables/createService";
-import {useSettingsStore} from "@renderer/stores/settingsStore";
-import {computed, reactive} from "vue";
-import {useI18n} from "vue-i18n";
-import {syncRefs} from "@vueuse/core";
-import {check} from "@renderer/lib/utils";
+import { createService } from '@renderer/composables/createService'
+import { useSettingsStore } from '@renderer/stores/settingsStore'
+import { computed, reactive } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { syncRefs } from '@vueuse/core'
+import { check } from '@renderer/lib/utils'
 
 export interface LocaleService {
   locale: string
@@ -21,12 +21,13 @@ export const useLocaleService = createService<LocaleService>(() => {
       return value
     },
     set(value) {
-      check(availableLocales.value.includes(value),
-        `Locale ${value} is not available`
+      check(
+        availableLocales.value.includes(value),
+        `Locale ${value} is not available`,
       )
 
       return value
-    }
+    },
   })
 
   syncRefs(locale, i18n.locale, { immediate: true })

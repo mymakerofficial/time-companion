@@ -60,7 +60,7 @@ export default {
       'en-US': 'Engels (Amerikaans)',
       'de-Informal': 'Duits (Informeel)',
       'nl-NL': 'Nederlands',
-      'cat': 'Kattentaal',
+      cat: 'Kattentaal',
     },
   },
   app: {
@@ -103,11 +103,11 @@ export default {
       actionType: 'Actie',
     },
     actionType: {
-      'NO_ACTION': 'Geen actie',
-      'START_EVENT': 'Start Evenement',
-      'CONTINUE_PREVIOUS_EVENT': 'Ga verder met het vorige evenement',
-      'STOP_CURRENT_EVENT': 'Stop het huidige evenement',
-    }
+      NO_ACTION: 'Geen actie',
+      START_EVENT: 'Start Evenement',
+      CONTINUE_PREVIOUS_EVENT: 'Ga verder met het vorige evenement',
+      STOP_CURRENT_EVENT: 'Stop het huidige evenement',
+    },
   },
   dashboard: {
     header: {
@@ -127,21 +127,24 @@ export default {
     },
     labels: {
       whatAreYouWorkingOn: null,
-    }
+    },
   },
   report: {
     table: {
       columns: {
         date: 'Datum',
         totalDuration: 'Totaal',
-      }
+      },
     },
     empty: {
       noProjects: {
         title: 'Geen tijd bijgehouden tot nu toe.',
-        description: { term: 'Je hebt nog geen projecten. {0} om te starten met het bijhouden van je tijd.', createProject: 'Maak een project aan'},
-      }
-    }
+        description: {
+          term: 'Je hebt nog geen projecten. {0} om te starten met het bijhouden van je tijd.',
+          createProject: 'Maak een project aan',
+        },
+      },
+    },
   },
   settings: {
     projects: {
@@ -157,8 +160,8 @@ export default {
           color: '@:project.properties.color',
           isBillable: '@:project.properties.isBillable',
           lastUsed: '@:project.properties.lastUsed',
-        }
-      }
+        },
+      },
     },
     reminders: {
       title: 'Herinneringen',
@@ -172,8 +175,8 @@ export default {
           startAt: '@:reminder.properties.startAt',
           repeatOn: '@:reminder.properties.repeatOn',
           action: '@:reminder.properties.actionType',
-        }
-      }
+        },
+      },
     },
     general: {
       title: 'Algemeen',
@@ -185,11 +188,12 @@ export default {
         },
         break: {
           title: 'Werk Pauze',
-          description: 'Je pauze tijd en project tijd word gebruikt om te berekenen hoeveel tijd je gebruikt voor pauzes. Pauzes hoeven niet factureerbaar te zijn.',
+          description:
+            'Je pauze tijd en project tijd word gebruikt om te berekenen hoeveel tijd je gebruikt voor pauzes. Pauzes hoeven niet factureerbaar te zijn.',
           sections: {
             breakTime: 'Pauze Tijd',
             breakProject: 'Pauze Project',
-          }
+          },
         },
         autoStartActiveEventWhenTyping: {
           title: null,
@@ -202,7 +206,7 @@ export default {
         minimumEventDuration: {
           title: null,
           description: null,
-        }
+        },
       },
     },
     appearance: {
@@ -216,7 +220,7 @@ export default {
         language: {
           title: 'Taal',
           description: 'Welke taal spreek je?',
-        }
+        },
       },
     },
   },
@@ -251,9 +255,10 @@ export default {
         },
         isBreak: {
           label: '@:project.properties.isBreak',
-          description: 'Dit project is bijgehouden als jouw pauze en zal anders berekend worden in je tijd berekeningen. Je kan dit weizigen in de algemene instellingen.',
+          description:
+            'Dit project is bijgehouden als jouw pauze en zal anders berekend worden in je tijd berekeningen. Je kan dit weizigen in de algemene instellingen.',
         },
-      }
+      },
     },
     activity: {
       new: {
@@ -268,7 +273,7 @@ export default {
         create: '@:common.controls.create',
         save: '@:common.controls.save',
         cancel: '@:common.controls.cancel',
-        delete: '@:common.controls.delete'
+        delete: '@:common.controls.delete',
       },
       form: {
         parentProject: {
@@ -282,7 +287,7 @@ export default {
           label: '@:activity.properties.color',
           description: 'Voeg wat kleur toe aan je leven',
         },
-      }
+      },
     },
     reminder: {
       new: {
@@ -297,34 +302,34 @@ export default {
         create: '@:common.controls.create',
         save: '@:common.controls.save',
         cancel: '@:common.controls.cancel',
-        delete: '@:common.controls.delete'
+        delete: '@:common.controls.delete',
       },
       form: {
         displayText: {
-          label: '@:reminder.properties.displayText'
+          label: '@:reminder.properties.displayText',
         },
         actionType: {
-          label: '@:reminder.properties.actionType'
+          label: '@:reminder.properties.actionType',
         },
         actionTarget: {
-          label: 'Start project'
+          label: 'Start project',
         },
         color: {
-          label: '@:reminder.properties.color'
+          label: '@:reminder.properties.color',
         },
         startAt: {
-          label: '@:reminder.properties.startAt'
+          label: '@:reminder.properties.startAt',
         },
         repeatOn: {
-          label: '@:reminder.properties.repeatOn'
+          label: '@:reminder.properties.repeatOn',
         },
         remindBefore: {
-          label: '@:reminder.properties.remindBefore'
+          label: '@:reminder.properties.remindBefore',
         },
         remindAfter: {
-          label: '@:reminder.properties.remindAfter'
+          label: '@:reminder.properties.remindAfter',
         },
-      }
-    }
+      },
+    },
   },
 }

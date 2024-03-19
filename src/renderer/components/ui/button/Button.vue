@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { buttonVariants } from '.'
-import {cn, isDefined} from '@renderer/lib/utils'
+import { cn, isDefined } from '@renderer/lib/utils'
 
 interface Props {
   variant?: NonNullable<Parameters<typeof buttonVariants>[0]>['variant']

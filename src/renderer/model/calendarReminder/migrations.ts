@@ -1,5 +1,5 @@
-import type {SerializedCalendarReminder} from "@renderer/model/calendarReminder/types";
-import {defineMigrator} from "@renderer/lib/migrations";
+import type { SerializedCalendarReminder } from '@renderer/model/calendarReminder/types'
+import { defineMigrator } from '@renderer/lib/migrations'
 
 function upgradeVersion0(original: any): any {
   return {
@@ -15,6 +15,5 @@ function upgradeVersion0(original: any): any {
   }
 }
 
-export const migrateSerializedReminder = defineMigrator<SerializedCalendarReminder>([
-  upgradeVersion0,
-])
+export const migrateSerializedReminder =
+  defineMigrator<SerializedCalendarReminder>([upgradeVersion0])

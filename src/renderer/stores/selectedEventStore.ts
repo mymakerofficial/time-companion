@@ -1,7 +1,7 @@
-import type {Nullable} from "@renderer/lib/utils";
-import {defineStore} from "pinia";
-import {ref} from "vue";
-import type {ReactiveCalendarEvent} from "@renderer/model/calendarEvent/types";
+import type { Nullable } from '@renderer/lib/utils'
+import { defineStore } from 'pinia'
+import { ref } from 'vue'
+import type { ReactiveCalendarEvent } from '@renderer/model/calendarEvent/types'
 
 export const useSelectedEventStore = defineStore('selected-event', () => {
   const event = ref<Nullable<ReactiveCalendarEvent>>(null)
@@ -12,6 +12,6 @@ export const useSelectedEventStore = defineStore('selected-event', () => {
 
   return {
     event,
-    unsafeSetEvent
+    unsafeSetEvent,
   }
 })

@@ -1,14 +1,26 @@
 <script setup lang="ts">
-import {ArrowRight, Clock, MoreVertical, Trash, EyeOff, Play} from "lucide-vue-next";
-import {Button} from "@renderer/components/ui/button";
-import {isNotNull} from "@renderer/lib/utils";
-import type {ReactiveCalendarEvent} from "@renderer/model/calendarEvent/types";
-import type {ReactiveCalendarEventShadow} from "@renderer/model/eventShadow/types";
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@renderer/components/ui/dropdown-menu";
-import ProjectActionInput from "@renderer/components/common/inputs/projectActionInput/ProjectActionInput.vue";
-import DateTimeInput from "@renderer/components/common/inputs/timeInput/DateTimeInput.vue";
-import DurationInput from "@renderer/components/common/inputs/timeInput/DurationInput.vue";
-import DashboardSection from "@renderer/components/dashboard/cards/DashboardSection.vue";
+import {
+  ArrowRight,
+  Clock,
+  MoreVertical,
+  Trash,
+  EyeOff,
+  Play,
+} from 'lucide-vue-next'
+import { Button } from '@renderer/components/ui/button'
+import { isNotNull } from '@renderer/lib/utils'
+import type { ReactiveCalendarEvent } from '@renderer/model/calendarEvent/types'
+import type { ReactiveCalendarEventShadow } from '@renderer/model/eventShadow/types'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@renderer/components/ui/dropdown-menu'
+import ProjectActionInput from '@renderer/components/common/inputs/projectActionInput/ProjectActionInput.vue'
+import DateTimeInput from '@renderer/components/common/inputs/timeInput/DateTimeInput.vue'
+import DurationInput from '@renderer/components/common/inputs/timeInput/DurationInput.vue'
+import DashboardSection from '@renderer/components/dashboard/cards/DashboardSection.vue'
 
 const props = defineProps<{
   event: ReactiveCalendarEvent
@@ -50,21 +62,63 @@ function handleDismiss() {
         />
       </div>
       <div class="flex items-center gap-2">
-        <DateTimeInput v-if="event.startAt" v-model="event.startAt" placeholder="00:00" size="sm" class="border-none h-11 w-fit text-sm" input-class="w-12" v-slot:leading>
+        <DateTimeInput
+          v-if="event.startAt"
+          v-model="event.startAt"
+          placeholder="00:00"
+          size="sm"
+          class="border-none h-11 w-fit text-sm"
+          input-class="w-12"
+          v-slot:leading
+        >
           <Clock class="mx-3 size-4 text-muted-foreground" />
         </DateTimeInput>
-        <DateTimeInput v-if="event.endAt" v-model="event.endAt" placeholder="00:00" size="sm" class="border-none h-11 w-fit text-sm" input-class="w-12" v-slot:leading>
+        <DateTimeInput
+          v-if="event.endAt"
+          v-model="event.endAt"
+          placeholder="00:00"
+          size="sm"
+          class="border-none h-11 w-fit text-sm"
+          input-class="w-12"
+          v-slot:leading
+        >
           <ArrowRight class="mx-3 size-4 text-muted-foreground" />
         </DateTimeInput>
-        <DurationInput v-if="event.endAt" v-model="event.duration" size="sm" class="border-none h-11 w-fit text-lg font-medium" input-class="w-24 text-center" />
+        <DurationInput
+          v-if="event.endAt"
+          v-model="event.duration"
+          size="sm"
+          class="border-none h-11 w-fit text-lg font-medium"
+          input-class="w-24 text-center"
+        />
       </div>
       <div>
         <DropdownMenu>
-          <DropdownMenuTrigger><Button variant="ghost" size="icon"><MoreVertical class="size-4" /></Button></DropdownMenuTrigger>
+          <DropdownMenuTrigger
+            ><Button variant="ghost" size="icon"
+              ><MoreVertical class="size-4" /></Button
+          ></DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem v-if="isNotNull(event.project)" @click="handleContinue()" class="space-x-2"><Play class="size-4" /><span>{{ $t('dashboard.controls.continueEvent') }}</span></DropdownMenuItem>
-            <DropdownMenuItem @click="handleDismiss()" class="space-x-2"><EyeOff class="size-4" /><span>{{ $t('common.controls.dismiss') }}</span></DropdownMenuItem>
-            <DropdownMenuItem @click="handleRemove()" class="text-destructive space-x-2"><Trash class="size-4" /><span>{{ $t('dashboard.controls.deleteEvent') }}</span></DropdownMenuItem>
+            <DropdownMenuItem
+              v-if="isNotNull(event.project)"
+              @click="handleContinue()"
+              class="space-x-2"
+              ><Play class="size-4" /><span>{{
+                $t('dashboard.controls.continueEvent')
+              }}</span></DropdownMenuItem
+            >
+            <DropdownMenuItem @click="handleDismiss()" class="space-x-2"
+              ><EyeOff class="size-4" /><span>{{
+                $t('common.controls.dismiss')
+              }}</span></DropdownMenuItem
+            >
+            <DropdownMenuItem
+              @click="handleRemove()"
+              class="text-destructive space-x-2"
+              ><Trash class="size-4" /><span>{{
+                $t('dashboard.controls.deleteEvent')
+              }}</span></DropdownMenuItem
+            >
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

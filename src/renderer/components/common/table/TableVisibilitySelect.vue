@@ -1,9 +1,9 @@
 <script setup lang="ts" generic="TData">
-import type {Table, VisibilityState} from "@tanstack/vue-table";
-import {computed} from "vue";
-import Combobox from "@renderer/components/common/inputs/combobox/Combobox.vue";
-import {getOrRun} from "@renderer/lib/utils";
-import type {Column} from "@tanstack/table-core";
+import type { Table, VisibilityState } from '@tanstack/vue-table'
+import { computed } from 'vue'
+import Combobox from '@renderer/components/common/inputs/combobox/Combobox.vue'
+import { getOrRun } from '@renderer/lib/utils'
+import type { Column } from '@tanstack/table-core'
 
 const props = defineProps<{
   table: Table<TData>
@@ -11,11 +11,13 @@ const props = defineProps<{
 }>()
 
 const columns = computed<Column<TData>[]>(() =>
-  props.table.getAllColumns().filter((column) => column.getCanHide())
+  props.table.getAllColumns().filter((column) => column.getCanHide()),
 )
 
 const selected = computed(() =>
-  columns.value.filter((column) => props.table.getColumn(column.id)?.getIsVisible())
+  columns.value.filter((column) =>
+    props.table.getColumn(column.id)?.getIsVisible(),
+  ),
 )
 
 function update(value: Column<TData>[]) {
@@ -23,7 +25,7 @@ function update(value: Column<TData>[]) {
     columns.value.reduce((acc, column) => {
       acc[column.id] = value.includes(column)
       return acc
-    }, {} as VisibilityState)
+    }, {} as VisibilityState),
   )
 }
 </script>

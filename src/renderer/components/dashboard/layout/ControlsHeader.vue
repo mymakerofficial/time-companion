@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import {useNow} from "@vueuse/core";
-import {computed} from "vue";
-import {useI18n} from "vue-i18n";
+import { useNow } from '@vueuse/core'
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const now = useNow({ interval: 900000 }) // update every 15 minutes
 const { t } = useI18n()
@@ -26,7 +26,9 @@ const welcomeMessage = computed(() => {
 </script>
 
 <template>
-  <div class="h-16 px-8 border-b border-border flex flex-row justify-between items-center gap-8">
+  <div
+    class="h-16 px-8 border-b border-border flex flex-row justify-between items-center gap-8"
+  >
     <div>
       <h3 class="text-md font-medium tracking-wide">{{ welcomeMessage }}</h3>
     </div>

@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import BaseDialog from "@renderer/components/common/dialog/BaseDialog.vue";
-import {reactive, ref} from "vue";
-import {Button} from "@renderer/components/ui/button";
-import ActivityForm from "@renderer/components/settings/projects/activityDialog/ActivityForm.vue";
+import BaseDialog from '@renderer/components/common/dialog/BaseDialog.vue'
+import { reactive, ref } from 'vue'
+import { Button } from '@renderer/components/ui/button'
+import ActivityForm from '@renderer/components/settings/projects/activityDialog/ActivityForm.vue'
 import {
   createActivityForm,
   createActivityFromForm,
-} from "@renderer/components/settings/projects/activityDialog/helpers";
-import {useProjectsService} from "@renderer/services/projectsService";
+} from '@renderer/components/settings/projects/activityDialog/helpers'
+import { useProjectsService } from '@renderer/services/projectsService'
 
 const emit = defineEmits<{
   close: []
@@ -38,8 +38,12 @@ function handleSubmit() {
     <ActivityForm :form="form" />
     <template #footer>
       <div class="flex flex-row justify-end gap-4">
-        <Button variant="ghost" @click="close()">{{ $t('dialog.activity.controls.cancel') }}</Button>
-        <Button @click="handleSubmit">{{ $t('dialog.activity.controls.create') }}</Button>
+        <Button variant="ghost" @click="close()">{{
+          $t('dialog.activity.controls.cancel')
+        }}</Button>
+        <Button @click="handleSubmit">{{
+          $t('dialog.activity.controls.create')
+        }}</Button>
       </div>
     </template>
   </BaseDialog>

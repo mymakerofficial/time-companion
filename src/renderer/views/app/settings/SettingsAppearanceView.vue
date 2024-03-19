@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import SettingsHeader from "@renderer/components/settings/layout/SettingsHeader.vue";
-import ThemeSelector from "@renderer/components/settings/appearance/ThemeSelector.vue";
-import LocaleSelector from "@renderer/components/settings/appearance/LocaleSelector.vue";
-import SettingsSection from "@renderer/components/settings/layout/SettingsSection.vue";
+import SettingsHeader from '@renderer/components/settings/layout/SettingsHeader.vue'
+import ThemeSelector from '@renderer/components/settings/appearance/ThemeSelector.vue'
+import LocaleSelector from '@renderer/components/settings/appearance/LocaleSelector.vue'
+import SettingsSection from '@renderer/components/settings/layout/SettingsSection.vue'
 </script>
 
 <template>

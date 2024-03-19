@@ -1,26 +1,29 @@
-import type {Maybe, Nullable} from "@renderer/lib/utils";
-import {isNotNull, isNull} from "@renderer/lib/utils";
-import type {ReactiveCalendarReminder} from "@renderer/model/calendarReminder/types";
-import {ReminderActionType} from "@renderer/model/calendarReminder/types";
-import {createReminder} from "@renderer/model/calendarReminder/model";
-import {createEventShadow} from "@renderer/model/eventShadow/model";
-import {minutes, timeNow} from "@renderer/lib/neoTime";
-import type {ReactiveProject} from "@renderer/model/project/types";
-import type {ReactiveActivity} from "@renderer/model/activity/types";
+import type { Maybe, Nullable } from '@renderer/lib/utils'
+import { isNotNull, isNull } from '@renderer/lib/utils'
+import type { ReactiveCalendarReminder } from '@renderer/model/calendarReminder/types'
+import { ReminderActionType } from '@renderer/model/calendarReminder/types'
+import { createReminder } from '@renderer/model/calendarReminder/model'
+import { createEventShadow } from '@renderer/model/eventShadow/model'
+import { minutes, timeNow } from '@renderer/lib/neoTime'
+import type { ReactiveProject } from '@renderer/model/project/types'
+import type { ReactiveActivity } from '@renderer/model/activity/types'
 
-export type ReminderFormState = Pick<ReactiveCalendarReminder,
-  'displayText' |
-  'color' |
-  'startAt' |
-  'remindBefore' |
-  'remindAfter' |
-  'actionType'
+export type ReminderFormState = Pick<
+  ReactiveCalendarReminder,
+  | 'displayText'
+  | 'color'
+  | 'startAt'
+  | 'remindBefore'
+  | 'remindAfter'
+  | 'actionType'
 > & {
   actionTargetProject: Nullable<ReactiveProject>
   actionTargetActivity: Nullable<ReactiveActivity>
 }
 
-export function createReminderForm(reminder?: Maybe<ReactiveCalendarReminder>): ReminderFormState {
+export function createReminderForm(
+  reminder?: Maybe<ReactiveCalendarReminder>,
+): ReminderFormState {
   return {
     displayText: reminder?.displayText ?? '',
     color: reminder?.color ?? null,
@@ -34,10 +37,14 @@ export function createReminderForm(reminder?: Maybe<ReactiveCalendarReminder>): 
 }
 
 export function createReminderFromForm(form: ReminderFormState) {
-  const shadow = form.actionType === ReminderActionType.START_EVENT &&  isNotNull(form.actionTargetProject) ? createEventShadow({
-    project: form.actionTargetProject,
-    activity: form.actionTargetActivity,
-  }) : null
+  const shadow =
+    form.actionType === ReminderActionType.START_EVENT &&
+    isNotNull(form.actionTargetProject)
+      ? createEventShadow({
+          project: form.actionTargetProject,
+          activity: form.actionTargetActivity,
+        })
+      : null
 
   return createReminder({
     displayText: form.displayText,
@@ -46,13 +53,17 @@ export function createReminderFromForm(form: ReminderFormState) {
     remindBefore: form.remindBefore,
     remindAfter: form.remindAfter,
     actionType: form.actionType,
-    actionTargetShadow: shadow
+    actionTargetShadow: shadow,
   })
 }
 
-export function patchReminderWithForm(reminder: ReactiveCalendarReminder, form: ReminderFormState) {
+export function patchReminderWithForm(
+  reminder: ReactiveCalendarReminder,
+  form: ReminderFormState,
+) {
   reminder.displayText = form.displayText
-  reminder.color = form.actionType !== ReminderActionType.START_EVENT ? form.color : null
+  reminder.color =
+    form.actionType !== ReminderActionType.START_EVENT ? form.color : null
   reminder.startAt = form.startAt
   reminder.remindBefore = form.remindBefore
   reminder.remindAfter = form.remindAfter

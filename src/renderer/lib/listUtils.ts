@@ -1,19 +1,25 @@
-import type {Maybe, MaybeArray, MaybeReadonly} from "@renderer/lib/utils";
-import {isDefined, isNotDefined, isNull} from "@renderer/lib/utils";
-import type {HasId, ID} from "@renderer/lib/types";
-import {isSameDay} from "@renderer/lib/neoTime";
-import {Temporal} from "temporal-polyfill";
+import type { Maybe, MaybeArray, MaybeReadonly } from '@renderer/lib/utils'
+import { isDefined, isNotDefined, isNull } from '@renderer/lib/utils'
+import type { HasId, ID } from '@renderer/lib/types'
+import { isSameDay } from '@renderer/lib/neoTime'
+import { Temporal } from 'temporal-polyfill'
 
-export function isArray<T>(value: Maybe<MaybeReadonly<MaybeArray<T>>>): value is T[] {
+export function isArray<T>(
+  value: Maybe<MaybeReadonly<MaybeArray<T>>>,
+): value is T[] {
   return Array.isArray(value)
 }
 
-export function isNotArray<T>(value: Maybe<MaybeReadonly<MaybeArray<T>>>): value is Maybe<T> {
+export function isNotArray<T>(
+  value: Maybe<MaybeReadonly<MaybeArray<T>>>,
+): value is Maybe<T> {
   return !isArray(value)
 }
 
 // if given an array, returns true if the array is empty, if not given an array, returns true if the value is null or undefined
-export function isEmpty<T>(value: Maybe<MaybeReadonly<MaybeArray<T>>>): value is Maybe<[]> {
+export function isEmpty<T>(
+  value: Maybe<MaybeReadonly<MaybeArray<T>>>,
+): value is Maybe<[]> {
   if (typeof value === 'string') {
     return value.length === 0
   }
@@ -26,7 +32,9 @@ export function isEmpty<T>(value: Maybe<MaybeReadonly<MaybeArray<T>>>): value is
 }
 
 // if given an array, returns true if the array is not empty, if not given an array, returns true if the value is not null or undefined
-export function isNotEmpty<T>(value: Maybe<MaybeReadonly<MaybeArray<T>>>): value is [T, ...T[]] {
+export function isNotEmpty<T>(
+  value: Maybe<MaybeReadonly<MaybeArray<T>>>,
+): value is [T, ...T[]] {
   if (typeof value === 'string') {
     return value.length > 0
   }
@@ -65,7 +73,9 @@ export function asArray<T>(value: Maybe<MaybeReadonly<MaybeArray<T>>>): T[] {
 }
 
 // if given an array, returns the first element, if given a single value, returns that value
-export function firstOf<T>(value: Maybe<MaybeReadonly<MaybeArray<T>>>): Maybe<T> {
+export function firstOf<T>(
+  value: Maybe<MaybeReadonly<MaybeArray<T>>>,
+): Maybe<T> {
   if (isEmpty(value)) {
     return null
   }
@@ -78,7 +88,9 @@ export function firstOf<T>(value: Maybe<MaybeReadonly<MaybeArray<T>>>): Maybe<T>
 }
 
 // if given an array, returns second element, if given a single value, returns that value
-export function secondOf<T>(value: Maybe<MaybeReadonly<MaybeArray<T>>>): Maybe<T> {
+export function secondOf<T>(
+  value: Maybe<MaybeReadonly<MaybeArray<T>>>,
+): Maybe<T> {
   if (isEmpty(value)) {
     return null
   }
@@ -95,7 +107,9 @@ export function secondOf<T>(value: Maybe<MaybeReadonly<MaybeArray<T>>>): Maybe<T
 }
 
 // if given an array, returns the last element, if given a single value, returns that value
-export function lastOf<T>(value: Maybe<MaybeReadonly<MaybeArray<T>>>): Maybe<T> {
+export function lastOf<T>(
+  value: Maybe<MaybeReadonly<MaybeArray<T>>>,
+): Maybe<T> {
   if (isEmpty(value)) {
     return null
   }
@@ -116,7 +130,9 @@ export function whereId<T extends HasId>(id: Maybe<ID>) {
   return (it: T) => it.id === id
 }
 
-export function whereDate<T extends { date: Temporal.PlainDate }>(date: Maybe<Temporal.PlainDate>) {
+export function whereDate<T extends { date: Temporal.PlainDate }>(
+  date: Maybe<Temporal.PlainDate>,
+) {
   if (isNotDefined(date)) {
     return () => false
   }
@@ -124,7 +140,9 @@ export function whereDate<T extends { date: Temporal.PlainDate }>(date: Maybe<Te
   return (it: T) => isSameDay(it.date, date)
 }
 
-export function whereDisplayName<T extends { displayName: string }>(displayName: Maybe<string>) {
+export function whereDisplayName<T extends { displayName: string }>(
+  displayName: Maybe<string>,
+) {
   if (isNotDefined(displayName)) {
     return () => false
   }

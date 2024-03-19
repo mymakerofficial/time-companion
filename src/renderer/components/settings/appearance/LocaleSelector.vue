@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {useLocaleService} from "@renderer/services/localeService";
-import RadioGroup from "@renderer/components/common/inputs/radioGroup/RadioGroup.vue";
+import { useLocaleService } from '@renderer/services/localeService'
+import RadioGroup from '@renderer/components/common/inputs/radioGroup/RadioGroup.vue'
 
 const localeService = useLocaleService()
 </script>

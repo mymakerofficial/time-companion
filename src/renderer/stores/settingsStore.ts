@@ -1,6 +1,6 @@
-import {defineStore} from "pinia";
-import {useLocalStorage} from "@renderer/composables/useLocalStorage";
-import {customRef, type Ref, unref} from "vue";
+import { defineStore } from 'pinia'
+import { useLocalStorage } from '@renderer/composables/useLocalStorage'
+import { customRef, type Ref, unref } from 'vue'
 
 interface SettingsValues {
   locale: string
@@ -28,10 +28,13 @@ export const useSettingsStore = defineStore('settings', () => {
     minimumEventDuration: 'PT30S',
   }
 
-  const storage = useLocalStorage<SettingsStorageSerialized>('time-companion-settings-store', {
-    values: defaultValues,
-    version: 0,
-  })
+  const storage = useLocalStorage<SettingsStorageSerialized>(
+    'time-companion-settings-store',
+    {
+      values: defaultValues,
+      version: 0,
+    },
+  )
 
   function commit(values: SettingsStorageSerialized['values']) {
     storage.set({
@@ -40,23 +43,21 @@ export const useSettingsStore = defineStore('settings', () => {
     })
   }
 
-  function getValue
-    <
-      TKey extends keyof SettingsStorageSerialized['values'],
-      TValue extends unknown = SettingsStorageSerialized['values'][TKey]
-    >
-    (
-      key: TKey,
-      options: {
-        get: (value: SettingsStorageSerialized['values'][TKey]) => TValue,
-        set: (value: TValue) => SettingsStorageSerialized['values'][TKey],
-      } = {
-        get: (value) => value as unknown as TValue,
-        set: (value) => value as unknown as SettingsStorageSerialized['values'][TKey],
-      }
-    ): Ref<TValue>
-  {
-    const {get: getTransformer, set: setTransformer} = options
+  function getValue<
+    TKey extends keyof SettingsStorageSerialized['values'],
+    TValue extends unknown = SettingsStorageSerialized['values'][TKey],
+  >(
+    key: TKey,
+    options: {
+      get: (value: SettingsStorageSerialized['values'][TKey]) => TValue
+      set: (value: TValue) => SettingsStorageSerialized['values'][TKey]
+    } = {
+      get: (value) => value as unknown as TValue,
+      set: (value) =>
+        value as unknown as SettingsStorageSerialized['values'][TKey],
+    },
+  ): Ref<TValue> {
+    const { get: getTransformer, set: setTransformer } = options
     return customRef<TValue>((track, trigger) => {
       return {
         get() {

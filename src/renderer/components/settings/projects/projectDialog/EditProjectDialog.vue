@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import BaseDialog from "@renderer/components/common/dialog/BaseDialog.vue";
-import {isNotDefined, type Nullable} from "@renderer/lib/utils";
-import {ref} from "vue";
-import {Button} from "@renderer/components/ui/button";
-import ProjectForm from "@renderer/components/settings/projects/projectDialog/ProjectForm.vue";
-import {createProjectForm, patchProjectWithForm} from "@renderer/components/settings/projects/projectDialog/helpers";
-import {useProjectsService} from "@renderer/services/projectsService";
-import {useGetFrom} from "@renderer/composables/useGetFrom";
-import {whereId} from "@renderer/lib/listUtils";
-import {reactiveComputed} from "@vueuse/core";
+import BaseDialog from '@renderer/components/common/dialog/BaseDialog.vue'
+import { isNotDefined, type Nullable } from '@renderer/lib/utils'
+import { ref } from 'vue'
+import { Button } from '@renderer/components/ui/button'
+import ProjectForm from '@renderer/components/settings/projects/projectDialog/ProjectForm.vue'
+import {
+  createProjectForm,
+  patchProjectWithForm,
+} from '@renderer/components/settings/projects/projectDialog/helpers'
+import { useProjectsService } from '@renderer/services/projectsService'
+import { useGetFrom } from '@renderer/composables/useGetFrom'
+import { whereId } from '@renderer/lib/listUtils'
+import { reactiveComputed } from '@vueuse/core'
 
 const props = defineProps<{
   id: Nullable<string>
@@ -59,11 +62,17 @@ function handleSubmit() {
     <template #footer>
       <div class="flex flex-row gap-4 justify-between">
         <div class="flex flex-row gap-4">
-          <Button variant="destructive" @click="handleRemove">{{ $t('dialog.project.controls.delete') }}</Button>
+          <Button variant="destructive" @click="handleRemove">{{
+            $t('dialog.project.controls.delete')
+          }}</Button>
         </div>
         <div class="flex flex-row gap-4">
-          <Button variant="ghost" @click="close()">{{ $t('dialog.project.controls.cancel') }}</Button>
-          <Button @click="handleSubmit">{{ $t('dialog.project.controls.save') }}</Button>
+          <Button variant="ghost" @click="close()">{{
+            $t('dialog.project.controls.cancel')
+          }}</Button>
+          <Button @click="handleSubmit">{{
+            $t('dialog.project.controls.save')
+          }}</Button>
         </div>
       </div>
     </template>

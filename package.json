@@ -6,11 +6,13 @@
   "scripts": {
     "start": "electron-forge start",
     "dev": "vite dev",
-    "build": "run-p type-check \"build-only {@}\" --",
-    "make": "electron-forge make",
     "preview": "vite preview",
+    "build": "run-p check \"build-only {@}\" --",
+    "make": "run-s build make-only",
+    "make-only": "electron-forge make",
     "build-only": "vite build",
-    "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false"
+    "check": "npx prettier . --check & vue-tsc --noEmit -p tsconfig.app.json --composite false",
+    "format": "npx prettier . --write"
   },
   "dependencies": {
     "@js-joda/core": "^5.6.1",

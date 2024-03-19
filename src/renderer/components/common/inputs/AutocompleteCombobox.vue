@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import {Popover, PopoverContent} from "@renderer/components/ui/popover";
-import {computed, ref} from "vue";
-import {useMagicKeys, whenever} from "@vueuse/core";
-import {PopoverAnchor} from "radix-vue";
-import {clamp} from "@renderer/lib/utils";
-import {CornerDownLeft} from "lucide-vue-next";
+import { Popover, PopoverContent } from '@renderer/components/ui/popover'
+import { computed, ref } from 'vue'
+import { useMagicKeys, whenever } from '@vueuse/core'
+import { PopoverAnchor } from 'radix-vue'
+import { clamp } from '@renderer/lib/utils'
+import { CornerDownLeft } from 'lucide-vue-next'
 
 interface Option {
   label: string
   value: string
 }
 
-const open = defineModel<boolean>('open', { required: true})
+const open = defineModel<boolean>('open', { required: true })
 
 const props = defineProps<{
   options: Option[]
@@ -31,7 +31,11 @@ whenever(down, () => {
     return
   }
 
-  selectedIndex.value = clamp(selectedIndex.value + 1, 0, props.options.length - 1)
+  selectedIndex.value = clamp(
+    selectedIndex.value + 1,
+    0,
+    props.options.length - 1,
+  )
 })
 
 whenever(up, () => {
@@ -39,7 +43,11 @@ whenever(up, () => {
     return
   }
 
-  selectedIndex.value = clamp(selectedIndex.value - 1, 0, props.options.length - 1)
+  selectedIndex.value = clamp(
+    selectedIndex.value - 1,
+    0,
+    props.options.length - 1,
+  )
 })
 
 whenever(enter, () => {

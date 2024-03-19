@@ -1,11 +1,11 @@
-import type {HasId} from "@renderer/lib/types";
+import type { HasId } from '@renderer/lib/types'
 import type {
   EventDeserializationAssets,
   ReactiveCalendarEvent,
-  SerializedCalendarEvent
-} from "@renderer/model/calendarEvent/types";
-import type {Nullable} from "@renderer/lib/utils";
-import {Temporal} from "temporal-polyfill";
+  SerializedCalendarEvent,
+} from '@renderer/model/calendarEvent/types'
+import type { Nullable } from '@renderer/lib/utils'
+import { Temporal } from 'temporal-polyfill'
 
 export interface CalendarDayContext extends HasId {
   date: Temporal.PlainDate

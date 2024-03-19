@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import {Input} from "@renderer/components/ui/input";
-import Combobox from "@renderer/components/common/inputs/combobox/Combobox.vue";
-import ColorSelect from "@renderer/components/common/inputs/colorSelect/ColorSelect.vue";
-import {Label} from "@renderer/components/ui/label";
-import {computed} from "vue";
-import {ReminderActionType} from "@renderer/model/calendarReminder/types";
-import type {ReminderFormState} from "@renderer/components/settings/reminders/dialog/helpers";
-import ProjectActionInput from "@renderer/components/common/inputs/projectActionInput/ProjectActionInput.vue";
-import TimeInput from "@renderer/components/common/inputs/timeInput/TimeInput.vue";
-import {Separator} from "radix-vue";
+import { Input } from '@renderer/components/ui/input'
+import Combobox from '@renderer/components/common/inputs/combobox/Combobox.vue'
+import ColorSelect from '@renderer/components/common/inputs/colorSelect/ColorSelect.vue'
+import { Label } from '@renderer/components/ui/label'
+import { computed } from 'vue'
+import { ReminderActionType } from '@renderer/model/calendarReminder/types'
+import type { ReminderFormState } from '@renderer/components/settings/reminders/dialog/helpers'
+import ProjectActionInput from '@renderer/components/common/inputs/projectActionInput/ProjectActionInput.vue'
+import TimeInput from '@renderer/components/common/inputs/timeInput/TimeInput.vue'
+import { Separator } from 'radix-vue'
 
 const props = defineProps<{
   form: ReminderFormState
@@ -26,16 +26,22 @@ const showColorInput = computed(() => {
 <template>
   <div class="flex flex-col gap-4">
     <div class="grid grid-cols-4 items-center gap-4">
-      <Label class="text-right">{{ $t('dialog.reminder.form.displayText.label') }}</Label>
+      <Label class="text-right">{{
+        $t('dialog.reminder.form.displayText.label')
+      }}</Label>
       <Input v-model="form.displayText" class="col-span-3" />
     </div>
     <div class="grid grid-cols-4 items-center gap-4">
-      <Label class="text-right">{{ $t('dialog.reminder.form.startAt.label') }}</Label>
+      <Label class="text-right">{{
+        $t('dialog.reminder.form.startAt.label')
+      }}</Label>
       <TimeInput v-model="form.startAt" />
     </div>
     <Separator />
     <div class="grid grid-cols-4 items-center gap-4">
-      <Label class="text-right">{{ $t('dialog.reminder.form.actionType.label') }}</Label>
+      <Label class="text-right">{{
+        $t('dialog.reminder.form.actionType.label')
+      }}</Label>
       <Combobox
         v-model="form.actionType"
         :options="Object.keys(ReminderActionType)"
@@ -43,11 +49,19 @@ const showColorInput = computed(() => {
       />
     </div>
     <div v-if="showTargetInput" class="grid grid-cols-4 items-center gap-4">
-      <Label class="text-right">{{ $t('dialog.reminder.form.actionTarget.label') }}</Label>
-      <ProjectActionInput v-model:project="form.actionTargetProject" v-model:activity="form.actionTargetActivity" wrapper-class="col-span-3" />
+      <Label class="text-right">{{
+        $t('dialog.reminder.form.actionTarget.label')
+      }}</Label>
+      <ProjectActionInput
+        v-model:project="form.actionTargetProject"
+        v-model:activity="form.actionTargetActivity"
+        wrapper-class="col-span-3"
+      />
     </div>
     <div v-if="showColorInput" class="grid grid-cols-4 items-center gap-4">
-      <Label class="text-right">{{ $t('dialog.reminder.form.color.label') }}</Label>
+      <Label class="text-right">{{
+        $t('dialog.reminder.form.color.label')
+      }}</Label>
       <ColorSelect v-model="form.color" class="col-span-3" />
     </div>
   </div>

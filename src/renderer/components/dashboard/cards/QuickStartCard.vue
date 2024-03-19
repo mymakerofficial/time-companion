@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type {ReactiveCalendarEventShadow} from "@renderer/model/eventShadow/types";
-import {vProvideColor} from "@renderer/directives/vProvideColor";
-import {PencilLine, Play} from "lucide-vue-next";
-import {useQuickAccess} from "@renderer/composables/useQuickAccess";
-import ShadowBadge from "@renderer/components/common/shadow/ShadowBadge.vue";
-import {useActiveEventService} from "@renderer/services/activeEventService";
-import {computed} from "vue";
-import DashboardSection from "@renderer/components/dashboard/cards/DashboardSection.vue";
+import type { ReactiveCalendarEventShadow } from '@renderer/model/eventShadow/types'
+import { vProvideColor } from '@renderer/directives/vProvideColor'
+import { PencilLine, Play } from 'lucide-vue-next'
+import { useQuickAccess } from '@renderer/composables/useQuickAccess'
+import ShadowBadge from '@renderer/components/common/shadow/ShadowBadge.vue'
+import { useActiveEventService } from '@renderer/services/activeEventService'
+import { computed } from 'vue'
+import DashboardSection from '@renderer/components/dashboard/cards/DashboardSection.vue'
 
 const emit = defineEmits<{
   start: [shadow: ReactiveCalendarEventShadow]
@@ -17,7 +17,9 @@ defineProps<{
 }>()
 
 const activeEventService = useActiveEventService()
-const activeEventShadow = computed(() => activeEventService.event?.createShadow() ?? null)
+const activeEventShadow = computed(
+  () => activeEventService.event?.createShadow() ?? null,
+)
 
 const shadows = useQuickAccess(() => ({
   exclude: activeEventShadow.value,

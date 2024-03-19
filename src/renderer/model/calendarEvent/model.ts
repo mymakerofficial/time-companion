@@ -1,12 +1,28 @@
-import {computed, reactive} from "vue";
-import {v4 as uuid} from "uuid";
-import {check, isNotNull, isNull, type Nullable, runIf} from "@renderer/lib/utils";
-import {dateTimeIsAfter, dateTimeIsBefore, dateTimeZero, durationBetween, durationZero} from "@renderer/lib/neoTime";
-import {createEventShadow} from "@renderer/model/eventShadow/model";
-import type {CalendarEventContext, CalendarEventInit, ReactiveCalendarEvent} from "@renderer/model/calendarEvent/types";
-import {serializeEvent} from "@renderer/model/calendarEvent/serializer";
-import {mapReadonly, mapWritable} from "@renderer/model/modelHelpers";
-import type {ReactiveCalendarDay} from "@renderer/model/calendarDay/types";
+import { computed, reactive } from 'vue'
+import { v4 as uuid } from 'uuid'
+import {
+  check,
+  isNotNull,
+  isNull,
+  type Nullable,
+  runIf,
+} from '@renderer/lib/utils'
+import {
+  dateTimeIsAfter,
+  dateTimeIsBefore,
+  dateTimeZero,
+  durationBetween,
+  durationZero,
+} from '@renderer/lib/neoTime'
+import { createEventShadow } from '@renderer/model/eventShadow/model'
+import type {
+  CalendarEventContext,
+  CalendarEventInit,
+  ReactiveCalendarEvent,
+} from '@renderer/model/calendarEvent/types'
+import { serializeEvent } from '@renderer/model/calendarEvent/serializer'
+import { mapReadonly, mapWritable } from '@renderer/model/modelHelpers'
+import type { ReactiveCalendarDay } from '@renderer/model/calendarDay/types'
 
 export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
   const ctx = reactive<CalendarEventContext>({
@@ -20,25 +36,31 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
   })
 
   const startAt = computed<CalendarEventContext['startAt']>({
-    get() { return ctx.startAt },
+    get() {
+      return ctx.startAt
+    },
     set(value) {
-      check(isNull(endAt.value) || dateTimeIsBefore(value, endAt.value),
-        'Tried to set startAt to a value after endAt.'
+      check(
+        isNull(endAt.value) || dateTimeIsBefore(value, endAt.value),
+        'Tried to set startAt to a value after endAt.',
       )
 
       ctx.startAt = value
-    }
+    },
   })
 
   const endAt = computed<CalendarEventContext['endAt']>({
-    get() { return ctx.endAt },
+    get() {
+      return ctx.endAt
+    },
     set(value) {
-      check(isNull(value) || dateTimeIsAfter(value, startAt.value),
-        'Tried to set endAt to a value before startAt.'
+      check(
+        isNull(value) || dateTimeIsAfter(value, startAt.value),
+        'Tried to set endAt to a value before startAt.',
       )
 
       ctx.endAt = value
-    }
+    },
   })
 
   const duration = computed<ReactiveCalendarEvent['duration']>({
@@ -50,12 +72,10 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
       return durationBetween(startAt.value, endAt.value)
     },
     set(value) {
-      check(value.sign >= 0,
-        'Tried to set duration to a negative value.'
-      )
+      check(value.sign >= 0, 'Tried to set duration to a negative value.')
 
       endAt.value = startAt.value.add(value)
-    }
+    },
   })
 
   const hasStarted = computed(() => isNotNull(ctx.startAt))
@@ -81,22 +101,21 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
   }
 
   return reactive({
-    ...mapReadonly(ctx, [
-      'id',
-      'day',
-    ]),
-    ...mapWritable(ctx, [
-      'note',
-      'project',
-      'activity'
-    ]),
+    ...mapReadonly(ctx, ['id', 'day']),
+    ...mapWritable(ctx, ['note', 'project', 'activity']),
     projectDisplayName: computed({
       get: () => ctx.project?.displayName ?? '',
-      set: (value) => runIf(ctx.project, isNotNull, () => ctx.project!.displayName = value)
+      set: (value) =>
+        runIf(ctx.project, isNotNull, () => (ctx.project!.displayName = value)),
     }),
     activityDisplayName: computed({
       get: () => ctx.activity?.displayName ?? '',
-      set: (value) => runIf(ctx.project, isNotNull, () => ctx.activity!.displayName = value)
+      set: (value) =>
+        runIf(
+          ctx.project,
+          isNotNull,
+          () => (ctx.activity!.displayName = value),
+        ),
     }),
     color: computed({
       get: () => ctx.activity?.color ?? ctx.project?.color ?? null,
@@ -109,7 +128,7 @@ export function createEvent(init: CalendarEventInit): ReactiveCalendarEvent {
         if (ctx.project) {
           ctx.project.color = value
         }
-      }
+      },
     }),
     startAt,
     endAt,

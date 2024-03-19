@@ -1,14 +1,17 @@
-import {formatDateTime, parseDateTime} from "@renderer/lib/neoTime";
+import { formatDateTime, parseDateTime } from '@renderer/lib/neoTime'
 import type {
   CalendarEventContext,
   CalendarEventInit,
   EventDeserializationAssets,
-  SerializedCalendarEvent
-} from "@renderer/model/calendarEvent/types";
-import {isNotNull} from "@renderer/lib/utils";
-import {whereId} from "@renderer/lib/listUtils";
+  SerializedCalendarEvent,
+} from '@renderer/model/calendarEvent/types'
+import { isNotNull } from '@renderer/lib/utils'
+import { whereId } from '@renderer/lib/listUtils'
 
-export function fromSerializedEvent(serialized: SerializedCalendarEvent, assets: EventDeserializationAssets): CalendarEventInit {
+export function fromSerializedEvent(
+  serialized: SerializedCalendarEvent,
+  assets: EventDeserializationAssets,
+): CalendarEventInit {
   return {
     id: serialized.id,
     note: serialized.note,
@@ -19,7 +22,9 @@ export function fromSerializedEvent(serialized: SerializedCalendarEvent, assets:
   }
 }
 
-export function serializeEvent(event: CalendarEventContext): SerializedCalendarEvent {
+export function serializeEvent(
+  event: CalendarEventContext,
+): SerializedCalendarEvent {
   return {
     id: event.id,
     projectId: event.project?.id ?? null,

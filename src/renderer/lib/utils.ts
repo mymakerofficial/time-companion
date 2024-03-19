@@ -1,6 +1,6 @@
-import type {ClassValue} from "clsx";
-import {clsx} from "clsx";
-import {twMerge} from "tailwind-merge";
+import type { ClassValue } from 'clsx'
+import { clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -30,13 +30,21 @@ export function isNotDefined<T>(value: Maybe<T>): value is null | undefined {
   return !isDefined(value)
 }
 
-export function runIf<T>(value: T, predicate: (value: T) => boolean, block: (value: T) => void) {
+export function runIf<T>(
+  value: T,
+  predicate: (value: T) => boolean,
+  block: (value: T) => void,
+) {
   if (predicate(value)) {
     block(value)
   }
 }
 
-export function takeIf<T, G>(condition: G, predicate: (condition: G) => boolean, value: T): Nullable<T> {
+export function takeIf<T, G>(
+  condition: G,
+  predicate: (condition: G) => boolean,
+  value: T,
+): Nullable<T> {
   if (predicate(condition)) {
     return value
   }
@@ -48,7 +56,9 @@ export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max)
 }
 
-export function isCallable(maybeFunction: unknown | ((...args: any[]) => any)): maybeFunction is (...args: any[]) => void {
+export function isCallable(
+  maybeFunction: unknown | ((...args: any[]) => any),
+): maybeFunction is (...args: any[]) => void {
   return typeof maybeFunction === 'function'
 }
 

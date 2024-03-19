@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import AutoGrowInput from "@renderer/components/common/inputs/AutoGrowInput.vue";
-import {isEmpty} from "@renderer/lib/listUtils";
-import {ref, watch} from "vue";
+import AutoGrowInput from '@renderer/components/common/inputs/AutoGrowInput.vue'
+import { isEmpty } from '@renderer/lib/listUtils'
+import { ref, watch } from 'vue'
 
 const model = defineModel<string>({ required: true })
 
@@ -22,5 +22,9 @@ async function handleChange(newValue: string) {
 </script>
 
 <template>
-  <AutoGrowInput v-model="inputValue" @change="handleChange" class="focus-visible:outline-none" />
+  <AutoGrowInput
+    v-model="inputValue"
+    @change="handleChange"
+    class="focus-visible:outline-none"
+  />
 </template>

@@ -1,4 +1,4 @@
-import {cva, type VariantProps} from "class-variance-authority";
+import { cva, type VariantProps } from 'class-variance-authority'
 
 export { default as Input } from './Input.vue'
 export { default as InputPrimitive } from './InputPrimitive.vue'

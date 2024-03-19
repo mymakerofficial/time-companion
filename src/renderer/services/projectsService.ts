@@ -1,19 +1,19 @@
-import {useProjectsStore} from "@renderer/stores/projectsStore";
-import {computed, reactive, toValue} from "vue";
-import type {ReactiveProject} from "@renderer/model/project/types";
-import type {ReactiveActivity} from "@renderer/model/activity/types";
-import {check, isNotNull, type Nullable} from "@renderer/lib/utils";
-import {whereDisplayName, whereId} from "@renderer/lib/listUtils";
-import {mapReadonly} from "@renderer/model/modelHelpers";
-import {useCalendarService} from "@renderer/services/calendarService";
-import {migrateSerializedProject} from "@renderer/model/project/migrations";
-import {fromSerializedProject} from "@renderer/model/project/serializer";
-import {createProject} from "@renderer/model/project/model";
-import {migrateSerializedActivity} from "@renderer/model/activity/migrations";
-import {createActivity} from "@renderer/model/activity/model";
-import {fromSerializedActivity} from "@renderer/model/activity/serializer";
-import {createService} from "@renderer/composables/createService";
-import {useInitialize} from "@renderer/composables/useInitialize";
+import { useProjectsStore } from '@renderer/stores/projectsStore'
+import { computed, reactive, toValue } from 'vue'
+import type { ReactiveProject } from '@renderer/model/project/types'
+import type { ReactiveActivity } from '@renderer/model/activity/types'
+import { check, isNotNull, type Nullable } from '@renderer/lib/utils'
+import { whereDisplayName, whereId } from '@renderer/lib/listUtils'
+import { mapReadonly } from '@renderer/model/modelHelpers'
+import { useCalendarService } from '@renderer/services/calendarService'
+import { migrateSerializedProject } from '@renderer/model/project/migrations'
+import { fromSerializedProject } from '@renderer/model/project/serializer'
+import { createProject } from '@renderer/model/project/model'
+import { migrateSerializedActivity } from '@renderer/model/activity/migrations'
+import { createActivity } from '@renderer/model/activity/model'
+import { fromSerializedActivity } from '@renderer/model/activity/serializer'
+import { createService } from '@renderer/composables/createService'
+import { useInitialize } from '@renderer/composables/useInitialize'
 
 export interface ProjectsService {
   projects: ReadonlyArray<ReactiveProject>
@@ -57,8 +57,9 @@ export const useProjectsService = createService<ProjectsService>(() => {
     const oldProject = breakProject.value
 
     // TODO for some reason the project properties are refs here???
-    check(!toValue(newProject?.isBillable),
-      `Failed to set break project: Project with id "${toValue(newProject?.id)}" is billable.`
+    check(
+      !toValue(newProject?.isBillable),
+      `Failed to set break project: Project with id "${toValue(newProject?.id)}" is billable.`,
     )
 
     if (isNotNull(oldProject)) {
@@ -74,15 +75,17 @@ export const useProjectsService = createService<ProjectsService>(() => {
     get() {
       return projectsStore.projects.find((it) => it.isBreak) ?? null
     },
-    set: setBreakProject
+    set: setBreakProject,
   })
 
   function addProject(project: ReactiveProject) {
-    check(!projectsStore.projects.some(whereId(project.id)),
-      `Failed to add project: Project with id "${project.id}" already exists.`
+    check(
+      !projectsStore.projects.some(whereId(project.id)),
+      `Failed to add project: Project with id "${project.id}" already exists.`,
     )
-    check(!projectsStore.projects.some(whereDisplayName(project.displayName)),
-      `Failed to add project: Project with displayName "${project.displayName}" already exists.`
+    check(
+      !projectsStore.projects.some(whereDisplayName(project.displayName)),
+      `Failed to add project: Project with displayName "${project.displayName}" already exists.`,
     )
 
     projectsStore.unsafeAddProject(project)
@@ -99,8 +102,9 @@ export const useProjectsService = createService<ProjectsService>(() => {
   }
 
   function removeProject(project: ReactiveProject) {
-    check(projectsStore.projects.includes(project),
-      `Failed to remove project "${project.id}": Project not found.`
+    check(
+      projectsStore.projects.includes(project),
+      `Failed to remove project "${project.id}": Project not found.`,
     )
 
     // remove all child activities
@@ -123,11 +127,17 @@ export const useProjectsService = createService<ProjectsService>(() => {
   }
 
   function addActivity(activity: ReactiveActivity) {
-    check(!projectsStore.activities.some(whereId(activity.id)),
-      `Failed to add activity: Activity with id "${activity.id}" already exists.`
+    check(
+      !projectsStore.activities.some(whereId(activity.id)),
+      `Failed to add activity: Activity with id "${activity.id}" already exists.`,
     )
-    check(!projectsStore.activities.some((it) => it.displayName === activity.displayName && it.parentProject === activity.parentProject),
-      `Failed to add activity: Activity with displayName "${activity.displayName}" and same parentProject already exists.`
+    check(
+      !projectsStore.activities.some(
+        (it) =>
+          it.displayName === activity.displayName &&
+          it.parentProject === activity.parentProject,
+      ),
+      `Failed to add activity: Activity with displayName "${activity.displayName}" and same parentProject already exists.`,
     )
 
     projectsStore.unsafeAddActivity(activity)
@@ -144,8 +154,9 @@ export const useProjectsService = createService<ProjectsService>(() => {
   }
 
   function removeActivity(activity: ReactiveActivity) {
-    check(projectsStore.activities.includes(activity),
-      `Failed to remove activity "${activity.id}": Activity not found.`
+    check(
+      projectsStore.activities.includes(activity),
+      `Failed to remove activity "${activity.id}": Activity not found.`,
     )
 
     // if the activity has a parent project, remove it from the project
@@ -198,10 +209,7 @@ export const useProjectsService = createService<ProjectsService>(() => {
   }
 
   return reactive({
-    ...mapReadonly(projectsStore, [
-      'projects',
-      'activities'
-    ]),
+    ...mapReadonly(projectsStore, ['projects', 'activities']),
     breakProject,
     init,
     addProject,
@@ -213,6 +221,6 @@ export const useProjectsService = createService<ProjectsService>(() => {
     removeActivity,
     removeActivities,
     unlink,
-    link
+    link,
   })
 })

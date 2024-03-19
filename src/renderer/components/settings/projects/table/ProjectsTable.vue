@@ -1,18 +1,22 @@
 <script setup lang="tsx">
-import {computed, ref} from "vue";
-import type {ReactiveProject} from "@renderer/model/project/types";
-import type {ProjectRow} from "@renderer/components/settings/projects/table/types";
-import {createProjectsColumns} from "@renderer/components/settings/projects/table/projectsColumns";
-import Table from "@renderer/components/common/table/Table.vue";
-import type {ExpandedState, SortingState, TableOptions} from '@tanstack/vue-table'
-import {getExpandedRowModel, getSortedRowModel} from "@tanstack/vue-table";
-import EditProjectDialog from "@renderer/components/settings/projects/projectDialog/EditProjectDialog.vue";
-import EditActivityDialog from "@renderer/components/settings/projects/activityDialog/EditActivityDialog.vue";
-import {useDialogStore} from "@renderer/stores/dialogStore";
-import {toProjectRow} from "@renderer/components/settings/projects/table/helpers";
-import {updater} from "@renderer/lib/helpers/tableHelpers";
-import type {MaybeReadonly} from "@renderer/lib/utils";
-import {whereId} from "@renderer/lib/listUtils";
+import { computed, ref } from 'vue'
+import type { ReactiveProject } from '@renderer/model/project/types'
+import type { ProjectRow } from '@renderer/components/settings/projects/table/types'
+import { createProjectsColumns } from '@renderer/components/settings/projects/table/projectsColumns'
+import Table from '@renderer/components/common/table/Table.vue'
+import type {
+  ExpandedState,
+  SortingState,
+  TableOptions,
+} from '@tanstack/vue-table'
+import { getExpandedRowModel, getSortedRowModel } from '@tanstack/vue-table'
+import EditProjectDialog from '@renderer/components/settings/projects/projectDialog/EditProjectDialog.vue'
+import EditActivityDialog from '@renderer/components/settings/projects/activityDialog/EditActivityDialog.vue'
+import { useDialogStore } from '@renderer/stores/dialogStore'
+import { toProjectRow } from '@renderer/components/settings/projects/table/helpers'
+import { updater } from '@renderer/lib/helpers/tableHelpers'
+import type { MaybeReadonly } from '@renderer/lib/utils'
+import { whereId } from '@renderer/lib/listUtils'
 
 const props = defineProps<{
   projects: MaybeReadonly<Array<ReactiveProject>>
@@ -29,9 +33,15 @@ const projectsColumns = createProjectsColumns({
       // @ts-ignore types are not the same but compatible in this case
       props.projects[projectIndex][columnAccessor] = value
     } else {
-      const activityIndex = props.projects[projectIndex].childActivities.findIndex(whereId(original.id))
-      // @ts-ignore types are not the same but compatible in this case
-      props.projects[projectIndex].childActivities[activityIndex][columnAccessor] = value
+      const activityIndex = props.projects[
+        projectIndex
+      ].childActivities.findIndex(whereId(original.id))
+      props.projects[projectIndex].childActivities[activityIndex][
+          // prettier-ignore
+          // @ts-ignore types are not the same but compatible in this case
+          columnAccessor
+      ] =
+        value
     }
   },
   onOpenEditProjectDialog: (id) => {
@@ -49,8 +59,12 @@ const expanded = ref<ExpandedState>({})
 
 const tableOptions: Partial<TableOptions<ProjectRow>> = {
   state: {
-    get sorting() { return sorting.value },
-    get expanded() { return expanded.value }
+    get sorting() {
+      return sorting.value
+    },
+    get expanded() {
+      return expanded.value
+    },
   },
   onSortingChange: (updaterOrValue) => updater(updaterOrValue, sorting),
   onExpandedChange: (updaterOrValue) => updater(updaterOrValue, expanded),

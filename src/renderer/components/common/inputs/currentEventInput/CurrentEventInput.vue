@@ -1,17 +1,25 @@
 <script setup lang="ts">
-import ProjectActionInput from "@renderer/components/common/inputs/projectActionInput/ProjectActionInput.vue";
-import {Button} from "@renderer/components/ui/button";
-import {computed, ref} from "vue";
-import {useI18n} from "vue-i18n";
-import {isDefined, isNotDefined, isNotNull, type Nullable} from "@renderer/lib/utils";
-import type {ReactiveCalendarEvent} from "@renderer/model/calendarEvent/types";
-import type {ReactiveProject} from "@renderer/model/project/types";
-import type {ReactiveActivity} from "@renderer/model/activity/types";
-import type {StartEventProps} from "@renderer/services/activeEventService";
-import {useSettingsStore} from "@renderer/stores/settingsStore";
-import {refDebounced, whenever} from "@vueuse/core";
+import ProjectActionInput from '@renderer/components/common/inputs/projectActionInput/ProjectActionInput.vue'
+import { Button } from '@renderer/components/ui/button'
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import {
+  isDefined,
+  isNotDefined,
+  isNotNull,
+  type Nullable,
+} from '@renderer/lib/utils'
+import type { ReactiveCalendarEvent } from '@renderer/model/calendarEvent/types'
+import type { ReactiveProject } from '@renderer/model/project/types'
+import type { ReactiveActivity } from '@renderer/model/activity/types'
+import type { StartEventProps } from '@renderer/services/activeEventService'
+import { useSettingsStore } from '@renderer/stores/settingsStore'
+import { refDebounced, whenever } from '@vueuse/core'
 
-const event = defineModel<Nullable<ReactiveCalendarEvent>>( { required: false, default: null })
+const event = defineModel<Nullable<ReactiveCalendarEvent>>({
+  required: false,
+  default: null,
+})
 
 const emit = defineEmits<{
   start: [partialEvent: StartEventProps]
@@ -21,9 +29,13 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const settings = useSettingsStore()
 
-const autoStartEventWhenTyping = settings.getValue('autoStartActiveEventWhenTyping')
+const autoStartEventWhenTyping = settings.getValue(
+  'autoStartActiveEventWhenTyping',
+)
 
-const isRunning = computed(() => isDefined(event.value?.startAt) && isNotDefined(event.value?.endAt))
+const isRunning = computed(
+  () => isDefined(event.value?.startAt) && isNotDefined(event.value?.endAt),
+)
 
 const debounceTime = 1000
 
@@ -44,7 +56,7 @@ const project = computed<Nullable<ReactiveProject>>({
     } else {
       projectPlaceholder.value = value
     }
-  }
+  },
 })
 const projectDebounced = refDebounced(project, debounceTime)
 
@@ -63,7 +75,7 @@ const activity = computed<Nullable<ReactiveActivity>>({
     } else {
       activityPlaceholder.value = value
     }
-  }
+  },
 })
 const activityDebounced = refDebounced(activity, debounceTime)
 
@@ -82,22 +94,25 @@ const note = computed({
     } else {
       notePlaceholder.value = value
     }
-  }
+  },
 })
 const noteDebounced = refDebounced(note, debounceTime)
 
-whenever(() => isDefined(event.value), () => {
-  projectPlaceholder.value = null
-  activityPlaceholder.value = null
-  notePlaceholder.value = ''
-})
+whenever(
+  () => isDefined(event.value),
+  () => {
+    projectPlaceholder.value = null
+    activityPlaceholder.value = null
+    notePlaceholder.value = ''
+  },
+)
 
 function handleStart() {
   if (!isRunning.value) {
     emit('start', {
       project: project.value,
       activity: activity.value,
-      note: note.value
+      note: note.value,
     })
   }
 }
@@ -161,7 +176,9 @@ const buttonLabel = computed(() => {
       size="lg"
       v-slot:trailing
     >
-      <Button @click="handleStartStop" size="sm" class="mr-1 px-3 py-1">{{ buttonLabel }}</Button>
+      <Button @click="handleStartStop" size="sm" class="mr-1 px-3 py-1">{{
+        buttonLabel
+      }}</Button>
     </ProjectActionInput>
   </div>
 </template>
