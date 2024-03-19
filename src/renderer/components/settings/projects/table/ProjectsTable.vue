@@ -36,10 +36,12 @@ const projectsColumns = createProjectsColumns({
       const activityIndex = props.projects[
         projectIndex
       ].childActivities.findIndex(whereId(original.id))
-      // @ts-ignore types are not the same but compatible in this case
       props.projects[projectIndex].childActivities[activityIndex][
-        columnAccessor
-      ] = value
+          // prettier-ignore
+          // @ts-ignore types are not the same but compatible in this case
+          columnAccessor
+      ] =
+        value
     }
   },
   onOpenEditProjectDialog: (id) => {
