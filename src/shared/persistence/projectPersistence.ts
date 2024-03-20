@@ -36,7 +36,7 @@ export class ProjectPersistenceImpl implements ProjectPersistence {
   async getProjectById(id: string): Promise<Readonly<ProjectEntityDto>> {
     return await this.database.getFirst<ProjectEntityDto>({
       table: 'projects',
-      where: { id: { eq: id } },
+      where: { id: { equals: id } },
     })
   }
 
@@ -69,7 +69,7 @@ export class ProjectPersistenceImpl implements ProjectPersistence {
 
     return await this.database.updateOne<ProjectEntityDto>({
       table: 'projects',
-      where: { id: { eq: id } },
+      where: { id: { equals: id } },
       data: patchedProject,
     })
   }
@@ -77,7 +77,7 @@ export class ProjectPersistenceImpl implements ProjectPersistence {
   async deleteProject(id: string): Promise<void> {
     await this.database.deleteOne<ProjectEntityDto>({
       table: 'projects',
-      where: { id: { eq: id } },
+      where: { id: { equals: id } },
     })
   }
 }

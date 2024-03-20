@@ -1,5 +1,7 @@
+export type DatabaseWhereCondition = 'equals' | 'notEquals'
+
 export type DatabaseWhere<T> = {
-  [K in keyof T]?: { eq: T[K] } | { ne: T[K] }
+  [K in keyof T]?: { [P in DatabaseWhereCondition]?: T[K] }
 }
 
 export interface DatabaseOperation {
@@ -20,7 +22,7 @@ export interface DatabaseInsert<T> extends DatabaseOperation {
 
 export interface DatabaseUpdate<T> extends DatabaseOperation {
   where: DatabaseWhere<T>
-  data: Partial<T>
+  data: T
 }
 
 export interface DatabaseDelete<T> extends DatabaseOperation {
@@ -28,6 +30,7 @@ export interface DatabaseDelete<T> extends DatabaseOperation {
 }
 
 export interface Database {
+  createTable(tableName: string): Promise<void>
   getFirst<T>(operation: DatabaseQuery<T>): Promise<T>
   getAll<T>(operation: DatabaseQuery<T>): Promise<Array<T>>
   insertOne<T>(operation: DatabaseInsert<T>): Promise<T>
