@@ -44,7 +44,7 @@ describe.sequential('In memory database', () => {
   it('should be able to update data', async () => {
     await database.updateOne<User>({
       table: 'users',
-      where: { name: { eq: 'John Doe' } },
+      where: { name: { equals: 'John Doe' } },
       data: { name: 'John Smith' },
     })
 
