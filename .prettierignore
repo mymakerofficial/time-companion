@@ -2,3 +2,5 @@
 dist
 dev-dist
 dist-electron
+
+vercel.json
