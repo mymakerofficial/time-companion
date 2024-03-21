@@ -42,7 +42,7 @@ function where<T>(
   })
 }
 
-export class InMemoryDatabase implements Database {
+class InMemoryDatabase implements Database {
   data: Map<string, any>
 
   constructor() {
@@ -128,4 +128,8 @@ export class InMemoryDatabase implements Database {
 
     tableData.splice(index, 1)
   }
+}
+
+export function createInMemoryDatabase(): Database {
+  return new InMemoryDatabase()
 }

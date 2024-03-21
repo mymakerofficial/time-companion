@@ -1,14 +1,14 @@
 import { beforeAll, describe, expect, expectTypeOf, test } from 'vitest'
-import { ProjectServiceImpl } from '@shared/service/projectService'
-import { ProjectPersistenceImpl } from '@shared/persistence/projectPersistence'
-import { InMemoryDatabase } from '@shared/database/inMemoryDatabase'
 import type { ProjectEntityDto } from '@shared/model/project'
+import { createInMemoryDatabase } from '@shared/database/inMemoryDatabase'
+import { createProjectService } from '@shared/service/projectService'
+import { createProjectPersistence } from '@shared/persistence/projectPersistence'
 
 describe('projectService', () => {
-  const database = new InMemoryDatabase()
+  const database = createInMemoryDatabase()
 
-  const projectService = new ProjectServiceImpl({
-    projectsPersistence: new ProjectPersistenceImpl({
+  const projectService = createProjectService({
+    projectPersistence: createProjectPersistence({
       database,
     }),
   })

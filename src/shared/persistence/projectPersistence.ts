@@ -20,7 +20,7 @@ export interface ProjectPersistence {
   deleteProject(id: string): Promise<void>
 }
 
-export class ProjectPersistenceImpl implements ProjectPersistence {
+class ProjectPersistenceImpl implements ProjectPersistence {
   private readonly database: Database
 
   constructor({ database }: ProjectPersistenceDependencies) {
@@ -82,7 +82,13 @@ export class ProjectPersistenceImpl implements ProjectPersistence {
   }
 }
 
+export function createProjectPersistence(
+  deps: ProjectPersistenceDependencies,
+): ProjectPersistence {
+  return new ProjectPersistenceImpl(deps)
+}
+
 export const projectsPersistence = createSingleton<
   [ProjectPersistenceDependencies],
   ProjectPersistence
->((deps) => new ProjectPersistenceImpl(deps))
+>(createProjectPersistence)

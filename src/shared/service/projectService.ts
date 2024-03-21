@@ -3,7 +3,7 @@ import type { ProjectPersistence } from '@shared/persistence/projectPersistence'
 import { createSingleton } from '@shared/lib/helpers/createSingleton'
 
 export interface ProjectServiceDependencies {
-  projectsPersistence: ProjectPersistence
+  projectPersistence: ProjectPersistence
 }
 
 export interface ProjectService {
@@ -19,11 +19,11 @@ export interface ProjectService {
   deleteProject(id: string): Promise<void>
 }
 
-export class ProjectServiceImpl implements ProjectService {
+class ProjectServiceImpl implements ProjectService {
   private readonly projectsPersistence: ProjectPersistence
 
-  constructor({ projectsPersistence }: ProjectServiceDependencies) {
-    this.projectsPersistence = projectsPersistence
+  constructor({ projectPersistence }: ProjectServiceDependencies) {
+    this.projectsPersistence = projectPersistence
   }
 
   async getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>> {
@@ -52,7 +52,13 @@ export class ProjectServiceImpl implements ProjectService {
   }
 }
 
+export function createProjectService(
+  deps: ProjectServiceDependencies,
+): ProjectService {
+  return new ProjectServiceImpl(deps)
+}
+
 export const projectsController = createSingleton<
   [ProjectServiceDependencies],
   ProjectService
->((deps) => new ProjectServiceImpl(deps))
+>(createProjectService)
