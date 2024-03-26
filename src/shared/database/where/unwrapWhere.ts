@@ -3,8 +3,9 @@ import {
   whereBooleanOperators,
   type WhereInput,
   type WhereOperator,
-  whereOperators,
 } from '@shared/database/database'
+import { firstOf } from '@shared/lib/utils/list'
+import { entriesOf } from '@shared/lib/utils/object'
 
 export type UnwrapWhereCondition<TData extends object> = {
   key: keyof TData
@@ -24,16 +25,17 @@ export type UnwrapWhere<TData extends object> =
 export function unwrapWhere<TData extends object>(
   where: WhereInput<TData>,
 ): UnwrapWhere<TData> {
-  const [groupKey, groupValue] = Object.entries(where)[0]
+  const [groupKey, groupValue] = firstOf(entriesOf(where))
 
   if (whereBooleanOperators.includes(groupKey as WhereBooleanOperator)) {
     return {
       type: 'booleanGroup',
       booleanOperator: groupKey as WhereBooleanOperator,
-      conditions: groupValue.map(unwrapWhere),
+      conditions: (groupValue as Array<WhereInput<TData>>).map(unwrapWhere),
     }
   } else {
-    const [operator, value] = Object.entries(groupValue)[0]
+    const [operator, value] = firstOf(entriesOf(groupValue))
+
     return {
       type: 'condition',
       key: groupKey as keyof TData,

@@ -4,16 +4,17 @@ import {
   type UnwrapWhereBooleanGroup,
   type UnwrapWhereCondition,
 } from '@shared/database/where/unwrapWhere'
+import { isUndefined } from '@shared/lib/utils/checks'
 
 function resolveBooleanGroup<TData extends object>(
   data: TData,
   { booleanOperator, conditions }: UnwrapWhereBooleanGroup<TData>,
 ): boolean {
   if (booleanOperator === 'AND') {
-    return conditions.every((condition) => byWhere(data, condition))
+    return conditions.every((condition) => wherePredicateFn(data, condition))
   }
   if (booleanOperator === 'OR') {
-    return conditions.some((condition) => byWhere(data, condition))
+    return conditions.some((condition) => wherePredicateFn(data, condition))
   }
 
   return false
@@ -57,10 +58,14 @@ function resolveCondition<TData extends object>(
   return false
 }
 
-export function byWhere<TData extends object>(
+export function wherePredicateFn<TData extends object>(
   data: TData,
-  where: WhereInput<TData>,
+  where?: WhereInput<TData>,
 ): boolean {
+  if (isUndefined(where)) {
+    return true
+  }
+
   const { type, ...unwrappedWhere } = unwrapWhere(where)
 
   if (type === 'booleanGroup') {
