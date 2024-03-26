@@ -40,7 +40,7 @@ const orderDirections = ['asc', 'desc'] as const
 export type OrderByDirection = (typeof orderDirections)[number]
 
 export type OrderByInput<TData extends object> = {
-  [K in keyof TData]: OrderByDirection
+  [K in keyof TData]?: OrderByDirection
 }
 
 export type CreateArgs<TData extends object> = {
@@ -74,15 +74,27 @@ export type DeleteArgs<TData extends object> = {
 
 export type DeleteManyArgs<TData extends object> = DeleteArgs<TData>
 
-export interface Table<TData extends object> {
-  create(args: CreateArgs<TData>): Promise<TData>
-  createMany(args: CreateManyArgs<TData>): Promise<Array<TData>>
+export interface Queryable<TData extends object> {
   findFirst(args?: FindArgs<TData>): Promise<TData>
   findMany(args?: FindManyArgs<TData>): Promise<Array<TData>>
+}
+
+export interface Updatable<TData extends object> {
   update(args: UpdateArgs<TData>): Promise<TData>
   updateMany(args: UpdateManyArgs<TData>): Promise<Array<TData>>
+}
+
+export interface Deletable<TData extends object> {
   delete(args: DeleteArgs<TData>): Promise<void>
   deleteMany(args: DeleteManyArgs<TData>): Promise<void>
+}
+
+export interface Table<TData extends object>
+  extends Queryable<TData>,
+    Updatable<TData>,
+    Deletable<TData> {
+  create(args: CreateArgs<TData>): Promise<TData>
+  createMany(args: CreateManyArgs<TData>): Promise<Array<TData>>
 }
 
 export type LeftJoinArgs<
@@ -95,10 +107,7 @@ export type LeftJoinArgs<
   where?: WhereInput<TRightData>
 }
 
-export interface LeftJoin<TData extends object> {
-  findFirst(args?: FindArgs<TData>): Promise<TData>
-  findMany(args?: FindManyArgs<TData>): Promise<Array<TData>>
-}
+export interface LeftJoin<TData extends object> extends Queryable<TData> {}
 
 export interface Join<TLeftData extends object, TRightData extends object> {
   left(args: LeftJoinArgs<TLeftData, TRightData>): LeftJoin<TLeftData>
