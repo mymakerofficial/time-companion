@@ -4,13 +4,12 @@ import type {
   Join,
   Table,
 } from '@shared/database/database'
-import { todo } from '@shared/lib/utils/todo'
 import { InMemoryDatabaseTable } from '@shared/database/inMemory/table'
 import type { Optional } from '@shared/lib/utils/types'
 import { check, isDefined } from '@shared/lib/utils/checks'
 import { InMemoryDatabaseJoin } from '@shared/database/inMemory/join'
 
-export class InMemoryDatabase implements Database {
+class InMemoryDatabase implements Database {
   data: Map<string, Array<object>>
 
   constructor() {
@@ -48,4 +47,8 @@ export class InMemoryDatabase implements Database {
   async createTable(args: CreateTableArgs): Promise<void> {
     this.data.set(args.name, [])
   }
+}
+
+export function createInMemoryDatabase(): Database {
+  return new InMemoryDatabase()
 }

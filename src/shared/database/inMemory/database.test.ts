@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { InMemoryDatabase } from '@shared/database/inMemory/database'
+import { createInMemoryDatabase } from '@shared/database/inMemory/database'
 import { uuid } from '@shared/lib/utils/uuid'
 import { faker } from '@faker-js/faker'
 import { firstOf } from '@shared/lib/utils/list'
@@ -19,7 +19,7 @@ interface Project {
 }
 
 describe.sequential('In memory database', () => {
-  const db = new InMemoryDatabase()
+  const database = createInMemoryDatabase()
 
   const usersLength = 6
   const projectsPerUserLength = 6
@@ -43,12 +43,12 @@ describe.sequential('In memory database', () => {
   )
 
   it('should be able to create a table', async () => {
-    await db.createTable({
+    await database.createTable({
       name: 'users',
       schema: { id: 'string', name: 'string', number: 'number' },
     })
 
-    await db.createTable({
+    await database.createTable({
       name: 'projects',
       schema: {
         id: 'string',
@@ -60,11 +60,11 @@ describe.sequential('In memory database', () => {
   })
 
   it('should be able to insert data', async () => {
-    const resUsers = await db.table<User>('users').createMany({
+    const resUsers = await database.table<User>('users').createMany({
       data: users,
     })
 
-    const resProjects = await db.table<Project>('projects').createMany({
+    const resProjects = await database.table<Project>('projects').createMany({
       data: projects,
     })
 
@@ -73,19 +73,19 @@ describe.sequential('In memory database', () => {
   })
 
   it('should throw an error when trying to access a non-existing table', () => {
-    expect(() => db.table('non-existing-table')).toThrowError(
+    expect(() => database.table('non-existing-table')).toThrowError(
       `Table "non-existing-table" does not exist`,
     )
   })
 
   it('should be able to find all entries in a table', async () => {
-    const resProjects = await db.table<User>('projects').findMany()
+    const resProjects = await database.table<User>('projects').findMany()
 
     expect(resProjects).toEqual(projects)
   })
 
   it('should be able to find a single entry in a table with order ascending', async () => {
-    const resUser = await db.table<User>('users').findFirst({
+    const resUser = await database.table<User>('users').findFirst({
       orderBy: { number: 'asc' },
     })
 
@@ -95,7 +95,7 @@ describe.sequential('In memory database', () => {
   })
 
   it('should be able to find a single entry in a table with order descending', async () => {
-    const resUser = await db.table<User>('users').findFirst({
+    const resUser = await database.table<User>('users').findFirst({
       orderBy: { number: 'desc' },
     })
 
@@ -109,12 +109,12 @@ describe.sequential('In memory database', () => {
       safetyOffset: projectsPerUserLength,
     })
 
-    const resProjects = await db.table<Project>('projects').findMany({
+    const resProjects = await database.table<Project>('projects').findMany({
       where: { color: { equals: randomProject.color } },
     })
 
     expect(resProjects).toEqual(
-      projects.filter((p) => p.color === randomProject.color),
+      projects.filter((project) => project.color === randomProject.color),
     )
   })
 
@@ -125,7 +125,7 @@ describe.sequential('In memory database', () => {
     })
 
     // find a user by project id
-    const res = await db
+    const res = await database
       .join<User, Project>('users', 'projects')
       .left({
         on: { id: 'userId' },
@@ -145,7 +145,7 @@ describe.sequential('In memory database', () => {
 
     const newName = faker.commerce.productName()
 
-    const resProjects = await db.table<Project>('projects').update({
+    const resProjects = await database.table<Project>('projects').update({
       where: { id: { equals: randomProject.id } },
       data: { name: newName },
     })
@@ -158,11 +158,11 @@ describe.sequential('In memory database', () => {
       safetyOffset: projectsPerUserLength,
     })
 
-    await db
+    await database
       .table<User>('projects')
       .delete({ where: { id: { equals: randomProject.id } } })
 
-    const resUsers = await db.table<User>('users').findMany()
+    const resUsers = await database.table<User>('users').findMany()
 
     expect(resUsers).not.toContain(randomProject)
   })

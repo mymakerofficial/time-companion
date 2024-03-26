@@ -1,14 +1,12 @@
-import type {
-  CreateTableArgs,
-  Database,
-  Table,
-} from '@shared/database/database'
+import type { Database } from '@shared/database/database'
 import { createSingleton } from '@shared/lib/helpers/createSingleton'
-import { todo } from '@shared/lib/utils/todo'
-import { InMemoryDatabase } from '@shared/database/inMemory/database'
+import {
+  createInMemoryDatabase,
+  InMemoryDatabase,
+} from '@shared/database/inMemory/database'
 
-export const testDatabase = createSingleton<[], Database>(() => {
-  const database = new InMemoryDatabase()
+export const testDatabase = createSingleton((): Database => {
+  const database = createInMemoryDatabase()
 
   // TODO this is a hack to create the tables
 

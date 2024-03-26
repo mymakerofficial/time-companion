@@ -1,9 +1,5 @@
 import type { ProjectDto, ProjectEntityDto } from '@shared/model/project'
-import {
-  type ProjectPersistence,
-  projectsPersistence,
-} from '@shared/persistence/projectPersistence'
-import { createSingleton } from '@shared/lib/helpers/createSingleton'
+import { type ProjectPersistence } from '@shared/persistence/projectPersistence'
 
 export interface ProjectServiceDependencies {
   projectPersistence: ProjectPersistence
@@ -24,51 +20,46 @@ export interface ProjectService {
 }
 
 class ProjectServiceImpl implements ProjectService {
-  private readonly projectsPersistence: ProjectPersistence
+  private readonly projectPersistence: ProjectPersistence
 
-  constructor(deps: Partial<ProjectServiceDependencies> = {}) {
-    this.projectsPersistence = deps.projectPersistence ?? projectsPersistence()
+  constructor(deps: ProjectServiceDependencies) {
+    this.projectPersistence = deps.projectPersistence
   }
 
   async getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>> {
-    return await this.projectsPersistence.getProjects()
+    return await this.projectPersistence.getProjects()
   }
 
   async getProjectById(id: string): Promise<Readonly<ProjectEntityDto>> {
-    return await this.projectsPersistence.getProjectById(id)
+    return await this.projectPersistence.getProjectById(id)
   }
 
   async getProjectByTaskId(
     taskId: string,
   ): Promise<Readonly<ProjectEntityDto>> {
-    return await this.projectsPersistence.getProjectByTaskId(taskId)
+    return await this.projectPersistence.getProjectByTaskId(taskId)
   }
 
   async createProject(
     project: Readonly<ProjectDto>,
   ): Promise<Readonly<ProjectEntityDto>> {
-    return await this.projectsPersistence.createProject(project)
+    return await this.projectPersistence.createProject(project)
   }
 
   async patchProjectById(
     id: string,
     partialProject: Partial<Readonly<ProjectDto>>,
   ): Promise<Readonly<ProjectEntityDto>> {
-    return await this.projectsPersistence.patchProjectById(id, partialProject)
+    return await this.projectPersistence.patchProjectById(id, partialProject)
   }
 
   async deleteProject(id: string): Promise<void> {
-    return await this.projectsPersistence.deleteProject(id)
+    return await this.projectPersistence.deleteProject(id)
   }
 }
 
 export function createProjectService(
-  deps?: ProjectServiceDependencies,
+  deps: ProjectServiceDependencies,
 ): ProjectService {
   return new ProjectServiceImpl(deps)
 }
-
-export const projectService = createSingleton<
-  [ProjectServiceDependencies] | [],
-  ProjectService
->(createProjectService)

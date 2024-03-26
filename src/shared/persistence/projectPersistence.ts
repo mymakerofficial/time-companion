@@ -1,9 +1,7 @@
 import type { ProjectDto, ProjectEntityDto } from '@shared/model/project'
 import type { Database } from '@shared/database/database'
-import { createSingleton } from '@shared/lib/helpers/createSingleton'
 import { uuid } from '@shared/lib/utils/uuid'
 import type { TaskEntityDto } from '@shared/model/task'
-import { testDatabase } from '@shared/database/testDatabase'
 
 export interface ProjectPersistenceDependencies {
   database: Database
@@ -26,8 +24,8 @@ export interface ProjectPersistence {
 class ProjectPersistenceImpl implements ProjectPersistence {
   private readonly database: Database
 
-  constructor(deps: Partial<ProjectPersistenceDependencies> = {}) {
-    this.database = deps.database ?? testDatabase()
+  constructor(deps: ProjectPersistenceDependencies) {
+    this.database = deps.database
   }
 
   async getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>> {
@@ -99,12 +97,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
 }
 
 export function createProjectPersistence(
-  deps?: Partial<ProjectPersistenceDependencies>,
+  deps: ProjectPersistenceDependencies,
 ): ProjectPersistence {
   return new ProjectPersistenceImpl(deps)
 }
-
-export const projectsPersistence = createSingleton<
-  [Partial<ProjectPersistenceDependencies>] | [],
-  ProjectPersistence
->(createProjectPersistence)
