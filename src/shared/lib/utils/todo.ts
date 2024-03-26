@@ -4,6 +4,6 @@ export class NotImplementedException extends Error {
   }
 }
 
-export function todo() {
+export function todo(): never {
   throw new NotImplementedException()
 }
