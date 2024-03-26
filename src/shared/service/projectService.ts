@@ -68,7 +68,7 @@ export function createProjectService(
   return new ProjectServiceImpl(deps)
 }
 
-export const projectsController = createSingleton<
+export const projectService = createSingleton<
   [ProjectServiceDependencies] | [],
   ProjectService
 >(createProjectService)
