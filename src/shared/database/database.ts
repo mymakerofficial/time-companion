@@ -1,14 +1,26 @@
-export type WhereBooleanOperator = 'AND' | 'OR'
+export const whereBooleanOperators = ['AND', 'OR'] as const
+export type WhereBooleanOperator = (typeof whereBooleanOperators)[number]
 
-export type WhereEqualityOperator = 'equals' | 'notEquals'
-export type WhereStringOperator = 'contains' | 'notContains'
-export type WhereListOperator = 'in' | 'notIn'
-export type WhereNumberOperator = 'lt' | 'lte' | 'gt' | 'gte'
-export type WhereOperator =
-  | WhereEqualityOperator
-  | WhereStringOperator
-  | WhereListOperator
-  | WhereNumberOperator
+export const whereEqualityOperators = ['equals', 'notEquals'] as const
+export type WhereEqualityOperator = (typeof whereEqualityOperators)[number]
+
+export const whereStringOperators = ['contains', 'notContains'] as const
+export type WhereStringOperator = (typeof whereStringOperators)[number]
+
+export const whereListOperators = ['in', 'notIn'] as const
+export type WhereListOperator = (typeof whereListOperators)[number]
+
+export const whereNumberOperators = ['lt', 'lte', 'gt', 'gte'] as const
+export type WhereNumberOperator = (typeof whereNumberOperators)[number]
+
+export const whereOperators = [
+  ...whereEqualityOperators,
+  ...whereStringOperators,
+  ...whereListOperators,
+  ...whereNumberOperators,
+] as const
+
+export type WhereOperator = (typeof whereOperators)[number]
 
 export type WhereInput<TData extends object> = {
   [O in WhereBooleanOperator]?: Array<WhereInput<TData>>
@@ -24,7 +36,8 @@ export type WhereInput<TData extends object> = {
   }
 }
 
-export type OrderByDirection = 'asc' | 'desc'
+const orderDirections = ['asc', 'desc'] as const
+export type OrderByDirection = (typeof orderDirections)[number]
 
 export type OrderByInput<TData extends object> = {
   [K in keyof TData]: OrderByDirection
@@ -91,7 +104,8 @@ export interface Join<TLeftData extends object, TRightData extends object> {
   left(args: LeftJoinArgs<TLeftData, TRightData>): LeftJoin<TLeftData>
 }
 
-export type ColumnType = 'string' | 'number' | 'boolean'
+export const columnTypes = ['string', 'number', 'boolean'] as const
+export type ColumnType = (typeof columnTypes)[number]
 
 export type CreateTableArgs = {
   name: string
