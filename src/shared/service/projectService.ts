@@ -1,5 +1,8 @@
 import type { ProjectDto, ProjectEntityDto } from '@shared/model/project'
-import type { ProjectPersistence } from '@shared/persistence/projectPersistence'
+import {
+  type ProjectPersistence,
+  projectsPersistence,
+} from '@shared/persistence/projectPersistence'
 import { createSingleton } from '@shared/lib/helpers/createSingleton'
 
 export interface ProjectServiceDependencies {
@@ -9,6 +12,7 @@ export interface ProjectServiceDependencies {
 export interface ProjectService {
   getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>>
   getProjectById(id: string): Promise<Readonly<ProjectEntityDto>>
+  getProjectByTaskId(taskId: string): Promise<Readonly<ProjectEntityDto>>
   createProject(
     project: Readonly<ProjectDto>,
   ): Promise<Readonly<ProjectEntityDto>>
@@ -22,8 +26,8 @@ export interface ProjectService {
 class ProjectServiceImpl implements ProjectService {
   private readonly projectsPersistence: ProjectPersistence
 
-  constructor({ projectPersistence }: ProjectServiceDependencies) {
-    this.projectsPersistence = projectPersistence
+  constructor(deps: Partial<ProjectServiceDependencies> = {}) {
+    this.projectsPersistence = deps.projectPersistence ?? projectsPersistence()
   }
 
   async getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>> {
@@ -32,6 +36,12 @@ class ProjectServiceImpl implements ProjectService {
 
   async getProjectById(id: string): Promise<Readonly<ProjectEntityDto>> {
     return await this.projectsPersistence.getProjectById(id)
+  }
+
+  async getProjectByTaskId(
+    taskId: string,
+  ): Promise<Readonly<ProjectEntityDto>> {
+    return await this.projectsPersistence.getProjectByTaskId(taskId)
   }
 
   async createProject(
@@ -53,12 +63,12 @@ class ProjectServiceImpl implements ProjectService {
 }
 
 export function createProjectService(
-  deps: ProjectServiceDependencies,
+  deps?: ProjectServiceDependencies,
 ): ProjectService {
   return new ProjectServiceImpl(deps)
 }
 
 export const projectsController = createSingleton<
-  [ProjectServiceDependencies],
+  [ProjectServiceDependencies] | [],
   ProjectService
 >(createProjectService)

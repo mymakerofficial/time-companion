@@ -2,6 +2,8 @@ import type { ProjectDto, ProjectEntityDto } from '@shared/model/project'
 import type { Database } from '@shared/database/database'
 import { createSingleton } from '@shared/lib/helpers/createSingleton'
 import { uuid } from '@shared/lib/utils/uuid'
+import type { TaskEntityDto } from '@shared/model/task'
+import { testDatabase } from '@shared/database/testDatabase'
 
 export interface ProjectPersistenceDependencies {
   database: Database
@@ -10,6 +12,7 @@ export interface ProjectPersistenceDependencies {
 export interface ProjectPersistence {
   getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>>
   getProjectById(id: string): Promise<Readonly<ProjectEntityDto>>
+  getProjectByTaskId(taskId: string): Promise<Readonly<ProjectEntityDto>>
   createProject(
     project: Readonly<ProjectDto>,
   ): Promise<Readonly<ProjectEntityDto>>
@@ -23,28 +26,42 @@ export interface ProjectPersistence {
 class ProjectPersistenceImpl implements ProjectPersistence {
   private readonly database: Database
 
-  constructor({ database }: ProjectPersistenceDependencies) {
-    this.database = database
+  constructor(deps: Partial<ProjectPersistenceDependencies> = {}) {
+    this.database = deps.database ?? testDatabase()
   }
 
   async getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>> {
-    return await this.database.getAll<ProjectEntityDto>({
-      table: 'projects',
+    return await this.database.table<ProjectEntityDto>('projects').findMany({
+      where: { deletedAt: { equals: null } },
     })
   }
 
   async getProjectById(id: string): Promise<Readonly<ProjectEntityDto>> {
-    return await this.database.getFirst<ProjectEntityDto>({
-      table: 'projects',
-      where: { id: { equals: id } },
+    return await this.database.table<ProjectEntityDto>('projects').findFirst({
+      where: {
+        AND: [{ id: { equals: id } }, { deletedAt: { equals: null } }],
+      },
     })
+  }
+
+  async getProjectByTaskId(
+    taskId: string,
+  ): Promise<Readonly<ProjectEntityDto>> {
+    return await this.database
+      .join<ProjectEntityDto, TaskEntityDto>('projects', 'tasks')
+      .left({
+        on: { id: 'projectId' },
+        where: { id: { equals: taskId } },
+      })
+      .findFirst({
+        where: { deletedAt: { equals: null } },
+      })
   }
 
   async createProject(
     project: Readonly<ProjectDto>,
   ): Promise<Readonly<ProjectEntityDto>> {
-    return await this.database.insertOne<ProjectEntityDto>({
-      table: 'projects',
+    return await this.database.table<ProjectEntityDto>('projects').create({
       data: {
         id: uuid(),
         ...project,
@@ -67,28 +84,27 @@ class ProjectPersistenceImpl implements ProjectPersistence {
       modifiedAt: new Date().toISOString(),
     }
 
-    return await this.database.updateOne<ProjectEntityDto>({
-      table: 'projects',
+    return await this.database.table<ProjectEntityDto>('projects').update({
       where: { id: { equals: id } },
       data: patchedProject,
     })
   }
 
   async deleteProject(id: string): Promise<void> {
-    await this.database.deleteOne<ProjectEntityDto>({
-      table: 'projects',
+    await this.database.table<ProjectEntityDto>('projects').update({
       where: { id: { equals: id } },
+      data: { deletedAt: new Date().toISOString() },
     })
   }
 }
 
 export function createProjectPersistence(
-  deps: ProjectPersistenceDependencies,
+  deps?: Partial<ProjectPersistenceDependencies>,
 ): ProjectPersistence {
   return new ProjectPersistenceImpl(deps)
 }
 
 export const projectsPersistence = createSingleton<
-  [ProjectPersistenceDependencies],
+  [Partial<ProjectPersistenceDependencies>] | [],
   ProjectPersistence
 >(createProjectPersistence)
