@@ -1,17 +1,18 @@
 import type { ProjectDto, ProjectEntityDto } from '@shared/model/project'
 import { type ProjectPersistence } from '@shared/persistence/projectPersistence'
 import {
-  type ProjectPublisher,
-  ProjectPublisherImpl,
-} from '@shared/events/projectPublisher'
+  type EntityPublisher,
+  EntityPublisherImpl,
+} from '@shared/events/entityPublisher'
 import { asyncGetOrDefault, asyncGetOrNull } from '@shared/lib/utils/result'
 import type { Nullable } from '@shared/lib/utils/types'
+import { keysOf } from '@shared/lib/utils/object'
 
 export interface ProjectServiceDependencies {
   projectPersistence: ProjectPersistence
 }
 
-export interface ProjectService extends ProjectPublisher {
+export interface ProjectService extends EntityPublisher<ProjectEntityDto> {
   // get all non-deleted projects ordered by displayName
   getProjects(): Promise<ReadonlyArray<ProjectEntityDto>>
   // get a project by its id. returns null if the project does not exist
@@ -35,7 +36,7 @@ export interface ProjectService extends ProjectPublisher {
 }
 
 class ProjectServiceImpl
-  extends ProjectPublisherImpl
+  extends EntityPublisherImpl<ProjectEntityDto>
   implements ProjectService
 {
   private readonly projectPersistence: ProjectPersistence
@@ -73,12 +74,18 @@ class ProjectServiceImpl
     id: string,
     partialProject: Partial<Readonly<ProjectDto>>,
   ): Promise<Readonly<ProjectEntityDto>> {
+    const changedFields = keysOf(partialProject)
+
     const patchedProject = await this.projectPersistence.patchProjectById(
       id,
       partialProject,
     )
 
-    this.notify(id, { type: 'updated', project: patchedProject })
+    this.notify(id, {
+      type: 'updated',
+      data: patchedProject,
+      changedFields,
+    })
 
     return patchedProject
   }
@@ -86,7 +93,7 @@ class ProjectServiceImpl
   async deleteProject(id: string): Promise<void> {
     await this.projectPersistence.deleteProject(id)
 
-    this.notify(id, { type: 'deleted', project: null })
+    this.notify(id, { type: 'deleted', data: null, changedFields: [] })
   }
 }
 

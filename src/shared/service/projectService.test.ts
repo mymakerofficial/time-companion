@@ -110,9 +110,10 @@ describe.sequential('projectService', () => {
       expect(subscriber).toHaveBeenCalledTimes(1)
       expect(subscriber).toHaveBeenCalledWith({
         type: 'updated',
-        project: expect.objectContaining({
+        data: expect.objectContaining({
           displayName: 'Patched Project',
         }),
+        changedFields: ['displayName'],
       })
 
       projectService.unsubscribe(project.id, subscriber)
@@ -150,7 +151,8 @@ describe.sequential('projectService', () => {
       expect(subscriber).toHaveBeenCalledTimes(1)
       expect(subscriber).toHaveBeenCalledWith({
         type: 'deleted',
-        project: null,
+        data: null,
+        changedFields: [],
       })
 
       projectService.unsubscribe(project.id, subscriber)
