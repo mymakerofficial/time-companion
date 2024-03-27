@@ -1,86 +1,93 @@
 import { describe, expectTypeOf, it, expect, vi } from 'vitest'
-import type { ProjectDto, ProjectEntityDto } from '@shared/model/project'
-import { createProjectService } from '@shared/service/projectService'
-import { createProjectPersistence } from '@shared/persistence/projectPersistence'
-import { testDatabase } from '@shared/database/testDatabase'
+import type { ProjectEntityDto } from '@shared/model/project'
 import { firstOf, lastOf } from '@shared/lib/utils/list'
 import { noop } from '@shared/lib/utils/noop'
+import { ProjectsAndTasksTestFixture } from '@shared/service/projectsAndTasksTestFixture'
+import { randomElement } from '@shared/lib/utils/random'
 
-describe.sequential('projectService', () => {
-  const projectService = createProjectService({
-    projectPersistence: createProjectPersistence({
-      database: testDatabase(),
-    }),
-  })
+describe.sequential('projectService', async () => {
+  const fixture = new ProjectsAndTasksTestFixture()
 
-  const projects: Array<ProjectDto> = [
-    { displayName: 'Taking over the world', color: 'blue', isBillable: true },
-    { displayName: 'Eating some cheese', color: 'yellow', isBillable: true },
-    { displayName: 'Break', color: 'green', isBillable: false },
-  ]
+  describe('createProject', async () => {
+    it.each(await fixture.getSampleProjects())(
+      'should create a project %o',
+      async (project) => {
+        const res = await fixture.projectService.createProject(project)
 
-  describe('createProject', () => {
-    it.each(projects)('should create a project %o', async (project) => {
-      const res = await projectService.createProject(project)
+        expectTypeOf(res).toMatchTypeOf<ProjectEntityDto>()
 
-      expectTypeOf(res).toMatchTypeOf<ProjectEntityDto>()
-
-      // TODO actually test the values
-    })
+        // TODO actually test the values
+      },
+    )
   })
 
   describe('getProjects', () => {
     it('should get all projects', async () => {
-      const res = await projectService.getProjects()
+      const res = await fixture.projectService.getProjects()
 
-      expect(res).toHaveLength(projects.length)
+      expect(res).toHaveLength(fixture.getExpectedProjectsLength())
 
       // TODO actually test the values
     })
 
     it('should be ordered by displayName', async () => {
-      const res = await projectService.getProjects()
+      const expected = await fixture.getSortedSampleProjects()
+      const expectedNames = expected.map((project) => project.displayName)
 
+      const res = await fixture.projectService.getProjects()
       const resNames = res.map((project) => project.displayName)
-      const expected = projects.map((project) => project.displayName).sort()
 
-      expect(resNames).toEqual(expected)
+      expect(resNames).toEqual(expectedNames)
     })
   })
 
   describe('getProjectById', () => {
     it('should get a project by id', async (index) => {
-      const resAll = await projectService.getProjects()
+      const project = lastOf(await fixture.getProjects())
 
-      const project = lastOf(resAll)
-
-      const resById = await projectService.getProjectById(project.id)
+      const resById = await fixture.projectService.getProjectById(project.id)
 
       expect(resById).toEqual(project)
     })
 
     it('should return null if project with id is not found', async () => {
-      const res = await projectService.getProjectById('non-existent-id')
+      const res = await fixture.projectService.getProjectById('non-existent-id')
 
       expect(res).toBeNull()
     })
   })
 
   describe('getProjectByTaskId', () => {
-    it.todo('should get a project by task id')
+    it('should get a project by task id', async () => {
+      await fixture.createSampleTasks()
 
-    it.todo('should return null if project with task id is not found')
+      const task = firstOf(await fixture.getTasks())
+
+      const res = await fixture.projectService.getProjectByTaskId(task.id)
+
+      expect(res).toMatchObject({
+        id: task.projectId,
+      })
+    })
+
+    it('should return null if project with task id is not found', async () => {
+      const res =
+        await fixture.projectService.getProjectByTaskId('non-existent-id')
+
+      expect(res).toBeNull()
+    })
   })
 
   describe('patchProjectById', () => {
     it('should patch a project by id', async () => {
-      const resAll = await projectService.getProjects()
+      const project = randomElement(await fixture.getProjects())
 
-      const project = firstOf(resAll)
-
-      const resPatched = await projectService.patchProjectById(project.id, {
-        displayName: 'Patched Project',
-      })
+      const resPatched = await fixture.projectService.patchProjectById(
+        project.id,
+        {
+          displayName: 'Patched Project',
+        },
+      )
 
       expect(resPatched.displayName).toBe('Patched Project')
 
@@ -89,64 +96,61 @@ describe.sequential('projectService', () => {
 
     it('should throw if project with id is not found', () => {
       expect(
-        projectService.patchProjectById('non-existent-id', {
+        fixture.projectService.patchProjectById('non-existent-id', {
           displayName: 'Patched Project',
         }),
       ).rejects.toThrowError('Project with id non-existent-id not found')
     })
 
     it('should notify subscribers of the change', async () => {
-      const resAll = await projectService.getProjects()
-      const project = firstOf(resAll)
+      const project = randomElement(await fixture.getProjects())
 
       const subscriber = vi.fn(noop)
 
-      projectService.subscribe(project.id, subscriber)
+      fixture.projectService.subscribe(project.id, subscriber)
 
-      await projectService.patchProjectById(project.id, {
-        displayName: 'Patched Project',
+      await fixture.projectService.patchProjectById(project.id, {
+        displayName: 'Other Patched Project',
       })
 
       expect(subscriber).toHaveBeenCalledTimes(1)
       expect(subscriber).toHaveBeenCalledWith({
         type: 'updated',
         data: expect.objectContaining({
-          displayName: 'Patched Project',
+          displayName: 'Other Patched Project',
         }),
         changedFields: ['displayName'],
       })
 
-      projectService.unsubscribe(project.id, subscriber)
+      fixture.projectService.unsubscribe(project.id, subscriber)
     })
   })
 
   describe('deleteProject', () => {
     it('should delete a project by id', async () => {
-      const resAll = await projectService.getProjects()
-      const project = firstOf(resAll)
+      const project = randomElement(await fixture.getProjects())
 
-      await projectService.deleteProject(project.id)
+      await fixture.projectService.deleteProject(project.id)
 
-      const resAllAfterDelete = await projectService.getProjects()
+      const res = await fixture.projectService.getProjects()
 
-      expect(resAllAfterDelete).not.toContain(project)
+      expect(res).not.toContain(project)
     })
 
     it('should throw if project with id is not found', () => {
       expect(
-        projectService.deleteProject('non-existent-id'),
+        fixture.projectService.deleteProject('non-existent-id'),
       ).rejects.toThrowError('Project with id non-existent-id not found')
     })
 
     it('should notify subscribers of the change', async () => {
-      const resAll = await projectService.getProjects()
-      const project = firstOf(resAll)
+      const project = randomElement(await fixture.getProjects())
 
       const subscriber = vi.fn(noop)
 
-      projectService.subscribe(project.id, subscriber)
+      fixture.projectService.subscribe(project.id, subscriber)
 
-      await projectService.deleteProject(project.id)
+      await fixture.projectService.deleteProject(project.id)
 
       expect(subscriber).toHaveBeenCalledTimes(1)
       expect(subscriber).toHaveBeenCalledWith({
@@ -155,7 +159,7 @@ describe.sequential('projectService', () => {
         changedFields: [],
       })
 
-      projectService.unsubscribe(project.id, subscriber)
+      fixture.projectService.unsubscribe(project.id, subscriber)
     })
   })
 })
