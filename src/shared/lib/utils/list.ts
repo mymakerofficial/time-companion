@@ -1,5 +1,13 @@
-export function firstOf<T extends Array<unknown>>(values: T): T[0] {
+export function firstOf<T extends ReadonlyArray<unknown>>(values: T): T[0] {
   return values[0]
+}
+
+export function secondOf<T extends ReadonlyArray<unknown>>(values: T): T[1] {
+  return values[1]
+}
+
+export function lastOf<T extends ReadonlyArray<unknown>>(values: T): T[number] {
+  return values[values.length - 1]
 }
 
 export function asArray(value: null): [null]
