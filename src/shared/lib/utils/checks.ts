@@ -42,3 +42,7 @@ export function isArray<T>(value: Array<T> | any): value is Array<T> {
 export function isNotArray<T>(value: T): value is Exclude<T, Array<unknown>> {
   return !Array.isArray(value)
 }
+
+export function isFunction(value: unknown): value is Function {
+  return typeof value === 'function'
+}
