@@ -9,7 +9,9 @@ interface Window {
       }) => void
     }
     service: {
-      project: object
+      project: {
+        invoke: (method: string, ...args: any[]) => Promise<any>
+      }
     }
   }
 }

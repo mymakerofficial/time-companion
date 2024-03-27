@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ResponsiveContainer from '@renderer/components/common/layout/ResponsiveContainer.vue'
-import { projectService } from '@renderer/facade/service/projectService'
+import { projectService } from '@renderer/factory/service/projectService'
 import { computedAsync } from '@vueuse/core'
 
 const projects = computedAsync(async () => {

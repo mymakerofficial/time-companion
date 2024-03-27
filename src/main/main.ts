@@ -1,8 +1,8 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'path'
-import { database } from '@main/facade/database/database'
-import { projectService } from '@main/facade/service/projectService'
-import { ProjectDto } from '@shared/model/project'
+import { database } from './factory/database/database'
+import { projectService } from './factory/service/projectService'
+import { createIpcListener } from '@main/ipc/listener'
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -32,7 +32,7 @@ function createWindow() {
     },
   })
 
-  // and load the splashWindow.html of the app.
+  // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL)
   } else {
@@ -103,15 +103,8 @@ function handleSetTitleBarColors(event: Electron.IpcMainEvent, colors: any) {
 
 function registerIpcHandlers() {
   ipcMain.on('window:setTitleBarColors', handleSetTitleBarColors)
-  ipcMain.handle(
-    'service:project:getProjects',
-    async (_) => await projectService().getProjects(),
-  )
-  ipcMain.handle(
-    'service:project:createProject',
-    async (_, project: ProjectDto) =>
-      await projectService().createProject(project),
-  )
+
+  ipcMain.handle('service:project', createIpcListener(projectService()))
 }
 
 // This method will be called when Electron has finished

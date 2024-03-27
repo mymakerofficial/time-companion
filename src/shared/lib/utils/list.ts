@@ -22,3 +22,7 @@ export function asArray(value: any): Array<any> {
 
   return [value]
 }
+
+export function setOf<T>(values: Array<T>): Set<T> {
+  return new Set(values)
+}

@@ -1,9 +1,6 @@
 import type { Database } from '@shared/database/database'
 import { createSingleton } from '@shared/lib/helpers/createSingleton'
-import {
-  createInMemoryDatabase,
-  InMemoryDatabase,
-} from '@shared/database/inMemory/database'
+import { createInMemoryDatabase } from '@shared/database/inMemory/database'
 
 export const testDatabase = createSingleton((): Database => {
   const database = createInMemoryDatabase()

@@ -8,8 +8,8 @@ import router from './router'
 import { i18n } from '@renderer/locales/locales'
 import { migrateApplication } from '@renderer/lib/migrations/applicationMigrator'
 import { usePwaService } from '@renderer/services/pwaService'
-import { database } from '@renderer/facade/database/database'
-import { projectService } from '@renderer/facade/service/projectService'
+import { database } from '@renderer/factory/database/database'
+import { projectService } from '@renderer/factory/service/projectService'
 
 migrateApplication()
 
