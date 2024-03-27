@@ -43,6 +43,14 @@ export function isNotArray<T>(value: T): value is Exclude<T, Array<unknown>> {
   return !Array.isArray(value)
 }
 
+export function isPromise(value: unknown): value is Promise<unknown> {
+  return value instanceof Promise
+}
+
 export function isFunction(value: unknown): value is Function {
   return typeof value === 'function'
+}
+
+export function isString(value: unknown): value is string {
+  return typeof value === 'string'
 }
