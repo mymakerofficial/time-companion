@@ -2,6 +2,7 @@ import type { ProjectDto, ProjectEntityDto } from '@shared/model/project'
 import type { Database } from '@shared/database/database'
 import { uuid } from '@shared/lib/utils/uuid'
 import type { TaskEntityDto } from '@shared/model/task'
+import { asyncGetOrThrow } from '@shared/lib/utils/result'
 
 export interface ProjectPersistenceDependencies {
   database: Database
@@ -31,29 +32,36 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   async getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>> {
     return await this.database.table<ProjectEntityDto>('projects').findMany({
       where: { deletedAt: { equals: null } },
+      orderBy: { displayName: 'asc' },
     })
   }
 
   async getProjectById(id: string): Promise<Readonly<ProjectEntityDto>> {
-    return await this.database.table<ProjectEntityDto>('projects').findFirst({
-      where: {
-        AND: [{ id: { equals: id } }, { deletedAt: { equals: null } }],
-      },
-    })
+    return await asyncGetOrThrow(
+      this.database.table<ProjectEntityDto>('projects').findFirst({
+        where: {
+          AND: [{ id: { equals: id } }, { deletedAt: { equals: null } }],
+        },
+      }),
+      `Project with id ${id} not found`,
+    )
   }
 
   async getProjectByTaskId(
     taskId: string,
   ): Promise<Readonly<ProjectEntityDto>> {
-    return await this.database
-      .join<ProjectEntityDto, TaskEntityDto>('projects', 'tasks')
-      .left({
-        on: { id: 'projectId' },
-        where: { id: { equals: taskId } },
-      })
-      .findFirst({
-        where: { deletedAt: { equals: null } },
-      })
+    return await asyncGetOrThrow(
+      this.database
+        .join<ProjectEntityDto, TaskEntityDto>('projects', 'tasks')
+        .left({
+          on: { id: 'projectId' },
+          where: { id: { equals: taskId } },
+        })
+        .findFirst({
+          where: { deletedAt: { equals: null } },
+        }),
+      `Project with task id ${taskId} not found`,
+    )
   }
 
   async createProject(
@@ -89,6 +97,8 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   }
 
   async deleteProject(id: string): Promise<void> {
+    await this.getProjectById(id) // ensure project exists
+
     await this.database.table<ProjectEntityDto>('projects').update({
       where: { id: { equals: id } },
       data: { deletedAt: new Date().toISOString() },
