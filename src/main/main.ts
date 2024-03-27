@@ -1,5 +1,8 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'path'
+import { database } from '@main/facade/database/database'
+import { projectService } from '@main/facade/service/projectService'
+import { ProjectDto } from '@shared/model/project'
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -44,6 +47,45 @@ function createWindow() {
   })
 }
 
+function initialize() {
+  database()
+  projectService()
+
+  // TODO this is a hack to create the tables
+
+  database().createTable({
+    name: 'projects',
+    schema: {
+      id: 'string',
+      displayName: 'string',
+      color: 'string',
+      isBillable: 'boolean',
+      createdAt: 'string',
+      modifiedAt: 'string',
+      deletedAt: 'string',
+    },
+  })
+
+  database().createTable({
+    name: 'tasks',
+    schema: {
+      id: 'string',
+      projectId: 'string',
+      displayName: 'string',
+      color: 'string',
+      createdAt: 'string',
+      modifiedAt: 'string',
+      deletedAt: 'string',
+    },
+  })
+
+  projectService().createProject({
+    displayName: 'Test Project from node',
+    color: 'red',
+    isBillable: true,
+  })
+}
+
 function handleSetTitleBarColors(event: Electron.IpcMainEvent, colors: any) {
   const eventWindow = BrowserWindow.fromWebContents(event.sender)
 
@@ -60,13 +102,23 @@ function handleSetTitleBarColors(event: Electron.IpcMainEvent, colors: any) {
 }
 
 function registerIpcHandlers() {
-  ipcMain.on('set-title-bar-colors', handleSetTitleBarColors)
+  ipcMain.on('window:setTitleBarColors', handleSetTitleBarColors)
+  ipcMain.handle(
+    'service:project:getProjects',
+    async (_) => await projectService().getProjects(),
+  )
+  ipcMain.handle(
+    'service:project:createProject',
+    async (_, project: ProjectDto) =>
+      await projectService().createProject(project),
+  )
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
+  initialize()
   registerIpcHandlers()
   createWindow()
 })
