@@ -13,7 +13,7 @@ export interface ProjectServiceDependencies {
 
 export interface ProjectService extends ProjectPublisher {
   // get all non-deleted projects ordered by displayName
-  getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>>
+  getProjects(): Promise<ReadonlyArray<ProjectEntityDto>>
   // get a project by its id. returns null if the project does not exist
   getProjectById(id: string): Promise<Nullable<Readonly<ProjectEntityDto>>>
   // get a project by a task id. returns null if the project does not exist

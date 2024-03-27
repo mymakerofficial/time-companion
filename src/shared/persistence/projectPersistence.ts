@@ -9,7 +9,7 @@ export interface ProjectPersistenceDependencies {
 }
 
 export interface ProjectPersistence {
-  getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>>
+  getProjects(): Promise<ReadonlyArray<ProjectEntityDto>>
   getProjectById(id: string): Promise<Readonly<ProjectEntityDto>>
   getProjectByTaskId(taskId: string): Promise<Readonly<ProjectEntityDto>>
   createProject(
