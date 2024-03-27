@@ -25,8 +25,6 @@ describe('ipc invoker', () => {
 
     const invoker = createInvoker(testClass)
 
-    expect(async () => {
-      await invoker.invoke('fizz')
-    }).rejects.toThrowError('Method fizz not found')
+    expect(invoker.invoke('fizz')).rejects.toThrowError('Method fizz not found')
   })
 })
