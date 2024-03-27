@@ -1,5 +1,6 @@
 import { createInvoker } from '@main/ipc/invoker'
 
+// creates an IPC listener that forwards method calls to the receiver object
 export function createIpcListener(
   receiver: object,
 ): (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any {

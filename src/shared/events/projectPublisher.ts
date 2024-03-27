@@ -1,13 +1,15 @@
 import { type Publisher, PublisherImpl } from '@shared/events/publisher'
 import type { ProjectEntityDto } from '@shared/model/project'
-import type { Nullable } from '@shared/lib/utils/types'
 
-export type ProjectPublisherEventType = 'updated' | 'deleted'
-
-export type ProjectPublisherEvent = {
-  type: ProjectPublisherEventType
-  project: Readonly<Nullable<ProjectEntityDto>>
-}
+export type ProjectPublisherEvent =
+  | {
+      type: 'updated'
+      project: Readonly<ProjectEntityDto>
+    }
+  | {
+      type: 'deleted'
+      project: null
+    }
 
 export interface ProjectPublisher extends Publisher<ProjectPublisherEvent> {}
 
