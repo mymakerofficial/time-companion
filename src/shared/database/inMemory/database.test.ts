@@ -118,6 +118,28 @@ describe.sequential('In memory database', () => {
     )
   })
 
+  it('should be able to find a entity in a table with AND filter', async () => {
+    const randomProject = randomElement(projects, {
+      safetyOffset: projectsPerUserLength,
+    })
+
+    const resProjects = await database.table<Project>('projects').findFirst({
+      where: {
+        AND: [
+          { color: { equals: randomProject.color } },
+          {
+            AND: [
+              { name: { equals: randomProject.name } },
+              { id: { notEquals: 'not-an-id' } },
+            ],
+          },
+        ],
+      },
+    })
+
+    expect(resProjects).toEqual(randomProject)
+  })
+
   it('should be able to find a entity by joined entity id', async () => {
     const randomProject = randomElement(projects, {
       // exclude the projects from the first user as this would make the test succeed every time

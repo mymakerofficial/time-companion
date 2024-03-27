@@ -1,5 +1,6 @@
 import type { WhereInput } from '@shared/database/database'
 import {
+  type UnwrapWhere,
   unwrapWhere,
   type UnwrapWhereBooleanGroup,
   type UnwrapWhereCondition,
@@ -11,10 +12,14 @@ function resolveBooleanGroup<TData extends object>(
   { booleanOperator, conditions }: UnwrapWhereBooleanGroup<TData>,
 ): boolean {
   if (booleanOperator === 'AND') {
-    return conditions.every((condition) => wherePredicateFn(data, condition))
+    return conditions.every((condition) =>
+      unwrappedWherePredicateFn(data, condition),
+    )
   }
   if (booleanOperator === 'OR') {
-    return conditions.some((condition) => wherePredicateFn(data, condition))
+    return conditions.some((condition) =>
+      unwrappedWherePredicateFn(data, condition),
+    )
   }
 
   return false
@@ -58,6 +63,19 @@ function resolveCondition<TData extends object>(
   return false
 }
 
+function unwrappedWherePredicateFn<TData extends object>(
+  data: TData,
+  unwrappedWhere: UnwrapWhere<TData>,
+): boolean {
+  if (unwrappedWhere.type === 'booleanGroup') {
+    return resolveBooleanGroup(data, unwrappedWhere)
+  } else if (unwrappedWhere.type === 'condition') {
+    return resolveCondition(data, unwrappedWhere)
+  }
+
+  return false
+}
+
 export function wherePredicateFn<TData extends object>(
   data: TData,
   where?: WhereInput<TData>,
@@ -66,16 +84,5 @@ export function wherePredicateFn<TData extends object>(
     return true
   }
 
-  const { type, ...unwrappedWhere } = unwrapWhere(where)
-
-  if (type === 'booleanGroup') {
-    return resolveBooleanGroup(
-      data,
-      unwrappedWhere as UnwrapWhereBooleanGroup<TData>,
-    )
-  } else if (type === 'condition') {
-    return resolveCondition(data, unwrappedWhere as UnwrapWhereCondition<TData>)
-  }
-
-  return false
+  return unwrappedWherePredicateFn(data, unwrapWhere(where))
 }
