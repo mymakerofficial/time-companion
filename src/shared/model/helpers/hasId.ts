@@ -1,3 +1,3 @@
-export interface HasId {
+export type HasId = {
   id: string
 }

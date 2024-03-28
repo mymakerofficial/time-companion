@@ -1,5 +1,5 @@
 import type { Nullable } from '@shared/lib/utils/types'
 
-export interface HasDeletedAt {
+export type HasDeletedAt = {
   deletedAt: Nullable<string>
 }

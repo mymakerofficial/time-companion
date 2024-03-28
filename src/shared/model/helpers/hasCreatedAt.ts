@@ -1,3 +1,3 @@
-export interface HasCreatedAt {
+export type HasCreatedAt = {
   createdAt: string
 }

@@ -4,19 +4,16 @@ import type { HasModifiedAt } from '@shared/model/helpers/hasModifiedAt'
 import type { HasDeletedAt } from '@shared/model/helpers/hasDeletedAt'
 import type { Nullable } from '@shared/lib/utils/types'
 
-export interface ProjectDto {
+export type ProjectDto = {
   displayName: string
   color: Nullable<string>
   isBillable: boolean
 }
 
-export interface ProjectEntityDto
-  extends ProjectDto,
-    HasId,
-    HasCreatedAt,
-    HasModifiedAt,
-    HasDeletedAt {}
+type ProjectEntityBase = HasId & HasCreatedAt & HasModifiedAt & HasDeletedAt
 
-export type ProjectEntityDao = Partial<
-  ProjectEntityDto & Readonly<Omit<ProjectEntityDto, keyof ProjectDto>>
->
+export type ProjectEntityDto = ProjectDto & ProjectEntityBase
+
+export type ProjectEntityDao = Partial<ProjectDto> & {
+  readonly [K in keyof ProjectEntityBase]: Nullable<ProjectEntityBase[K]>
+}

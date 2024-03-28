@@ -1,5 +1,5 @@
 import type { Nullable } from '@shared/lib/utils/types'
 
-export interface HasModifiedAt {
+export type HasModifiedAt = {
   modifiedAt: Nullable<string>
 }
