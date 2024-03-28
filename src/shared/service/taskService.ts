@@ -2,11 +2,11 @@ import type { TaskPersistence } from '@shared/persistence/taskPersistence'
 import {
   type EntityPublisher,
   EntityPublisherImpl,
+  getEntityChannel,
 } from '@shared/events/entityPublisher'
 import type { TaskDto, TaskEntityDto } from '@shared/model/task'
 import { asyncGetOrDefault, asyncGetOrNull } from '@shared/lib/utils/result'
 import type { Nullable } from '@shared/lib/utils/types'
-import { todo } from '@shared/lib/utils/todo'
 import { keysOf } from '@shared/lib/utils/object'
 
 export interface TaskServiceDependencies {
@@ -67,7 +67,7 @@ class TaskServiceImpl
       partialTask,
     )
 
-    this.notify(id, {
+    this.notify(getEntityChannel(id), {
       type: 'updated',
       data: patchedTask,
       changedFields,
@@ -79,7 +79,7 @@ class TaskServiceImpl
   async deleteTask(id: string): Promise<void> {
     await this.taskPersistence.deleteTask(id)
 
-    this.notify(id, { type: 'deleted', data: null, changedFields: [] })
+    this.notify(getEntityChannel(id), { type: 'deleted', id })
   }
 }
 

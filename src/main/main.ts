@@ -1,15 +1,16 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'path'
-import { database } from './factory/database/database'
-import { projectService } from './factory/service/projectService'
+import { database } from '@main/factory/database/database'
+import { projectService } from '@main/factory/service/projectService'
 import { createIpcListener } from '@main/ipc/listener'
+import { taskService } from '@main/factory/service/taskService'
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
   app.quit()
 }
 
-function createWindow() {
+function createMainWindow() {
   const isWindows = process.platform === 'win32'
 
   // Create the browser window.
@@ -45,15 +46,14 @@ function createWindow() {
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
   })
+
+  return mainWindow
 }
 
 function initialize() {
-  database()
-  projectService()
-
   // TODO this is a hack to create the tables
 
-  database().createTable({
+  database.createTable({
     name: 'projects',
     schema: {
       id: 'string',
@@ -66,7 +66,7 @@ function initialize() {
     },
   })
 
-  database().createTable({
+  database.createTable({
     name: 'tasks',
     schema: {
       id: 'string',
@@ -77,12 +77,6 @@ function initialize() {
       modifiedAt: 'string',
       deletedAt: 'string',
     },
-  })
-
-  projectService().createProject({
-    displayName: 'Test Project from node',
-    color: 'red',
-    isBillable: true,
   })
 }
 
@@ -104,7 +98,17 @@ function handleSetTitleBarColors(event: Electron.IpcMainEvent, colors: any) {
 function registerIpcHandlers() {
   ipcMain.on('window:setTitleBarColors', handleSetTitleBarColors)
 
-  ipcMain.handle('service:project', createIpcListener(projectService()))
+  ipcMain.handle('service:project:invoke', createIpcListener(projectService))
+  ipcMain.handle('service:task', createIpcListener(taskService))
+}
+
+function registerIpcPublishers(mainWindow: BrowserWindow) {
+  projectService.subscribeAll((event, channel) => {
+    mainWindow.webContents.send('service:project:notify', event, channel)
+  })
+  taskService.subscribeAll((event, channel) => {
+    mainWindow.webContents.send('service:task:notify', event, channel)
+  })
 }
 
 // This method will be called when Electron has finished
@@ -113,7 +117,8 @@ function registerIpcHandlers() {
 app.on('ready', () => {
   initialize()
   registerIpcHandlers()
-  createWindow()
+  const mainWindow = createMainWindow()
+  registerIpcPublishers(mainWindow)
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -129,6 +134,6 @@ app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow()
+    createMainWindow()
   }
 })

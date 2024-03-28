@@ -2,8 +2,7 @@
 export function createReceiverProxy<T extends object>(
   invoke: (method: string, ...args: any[]) => Promise<any>,
 ): T {
-  // be warned, javascript magic ahead
-
+  // scary javascript magic
   return new Proxy(
     {},
     {

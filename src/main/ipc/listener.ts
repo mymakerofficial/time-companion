@@ -1,4 +1,4 @@
-import { createInvoker } from '@main/ipc/invoker'
+import { createInvoker } from '@shared/ipc/invoker'
 
 // creates an IPC listener that forwards method calls to the receiver object
 export function createIpcListener(

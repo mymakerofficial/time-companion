@@ -11,7 +11,9 @@ class InvokerImpl implements Invoker {
   private methods: Set<string>
 
   constructor(private readonly receiver: object) {
-    this.methods = setOf(propertiesOf(this.receiver))
+    this.methods = setOf(
+      propertiesOf(this.receiver).filter((prop) => prop !== 'constructor'),
+    )
   }
 
   async invoke(method: string, ...args: any[]) {

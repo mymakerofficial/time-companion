@@ -4,4 +4,4 @@ import type { Database } from '@shared/database/database'
 
 export const database = createSingleton((): Database => {
   return createInMemoryDatabase()
-})
+})()

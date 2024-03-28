@@ -1,6 +1,5 @@
 import { describe, vi, it, expect, beforeAll, afterAll } from 'vitest'
 import { PublisherImpl } from '@shared/events/publisher'
-import { noop } from '@shared/lib/utils/noop'
 
 type TestEvent = {
   type: string
@@ -12,11 +11,11 @@ class TestPublisherImpl extends PublisherImpl<TestEvent> {
   }
 }
 
-describe.sequential('Publisher', () => {
+describe.sequential('publisher', () => {
   const publisher = new TestPublisherImpl()
 
-  const fooSubscriber = vi.fn(noop)
-  const barSubscriber = vi.fn(noop)
+  const fooSubscriber = vi.fn()
+  const barSubscriber = vi.fn()
 
   beforeAll(() => {
     publisher.subscribe('foo', fooSubscriber)
@@ -34,7 +33,7 @@ describe.sequential('Publisher', () => {
     publisher.testNotify('foo', event)
 
     expect(fooSubscriber).toHaveBeenCalledTimes(1)
-    expect(fooSubscriber).toHaveBeenCalledWith(event)
+    expect(fooSubscriber).toHaveBeenCalledWith(event, 'foo')
   })
 
   it('should not notify a subscriber on a different channel', () => {

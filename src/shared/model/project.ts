@@ -16,3 +16,7 @@ export interface ProjectEntityDto
     HasCreatedAt,
     HasModifiedAt,
     HasDeletedAt {}
+
+export type ProjectEntityDao = Partial<
+  ProjectEntityDto & Readonly<Omit<ProjectEntityDto, keyof ProjectDto>>
+>

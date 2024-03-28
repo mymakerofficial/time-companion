@@ -1,6 +1,5 @@
-import type { Database, Table } from '@shared/database/database'
+import type { Database } from '@shared/database/database'
 import type { TaskDto, TaskEntityDto } from '@shared/model/task'
-import { todo } from '@shared/lib/utils/todo'
 import { asyncGetOrThrow } from '@shared/lib/utils/result'
 import { uuid } from '@shared/lib/utils/uuid'
 import type { ProjectEntityDto } from '@shared/model/project'
@@ -26,17 +25,13 @@ export interface TaskPersistence {
 
 export class TaskPersistenceImpl implements TaskPersistence {
   private readonly database: Database
-  private readonly tasksTable: Table<TaskEntityDto>
-  private readonly projectsTable: Table<ProjectEntityDto>
 
   constructor(deps: TaskPersistenceDependencies) {
     this.database = deps.database
-    this.tasksTable = this.database.table('tasks')
-    this.projectsTable = this.database.table('projects')
   }
 
   async getTasks(): Promise<ReadonlyArray<TaskEntityDto>> {
-    return await this.tasksTable.findMany({
+    return await this.database.table<TaskEntityDto>('tasks').findMany({
       where: {
         deletedAt: { equals: null },
       },
@@ -46,7 +41,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
 
   async getTaskById(id: string): Promise<Readonly<TaskEntityDto>> {
     return await asyncGetOrThrow(
-      this.tasksTable.findFirst({
+      this.database.table<TaskEntityDto>('tasks').findFirst({
         where: {
           AND: [{ id: { equals: id } }, { deletedAt: { equals: null } }],
         },
@@ -58,15 +53,17 @@ export class TaskPersistenceImpl implements TaskPersistence {
   async getTasksByProjectId(
     projectId: string,
   ): Promise<ReadonlyArray<TaskEntityDto>> {
-    const project = await this.projectsTable.findFirst({
-      where: {
-        AND: [{ id: { equals: projectId } }, { deletedAt: { equals: null } }],
-      },
-    })
+    const project = await this.database
+      .table<ProjectEntityDto>('projects')
+      .findFirst({
+        where: {
+          AND: [{ id: { equals: projectId } }, { deletedAt: { equals: null } }],
+        },
+      })
 
     check(isDefined(project), `Project with id ${projectId} not found`)
 
-    return await this.tasksTable.findMany({
+    return await this.database.table<TaskEntityDto>('tasks').findMany({
       where: {
         AND: [
           { projectId: { equals: projectId } },
@@ -78,18 +75,20 @@ export class TaskPersistenceImpl implements TaskPersistence {
   }
 
   async createTask(task: Readonly<TaskDto>): Promise<Readonly<TaskEntityDto>> {
-    const project = await this.projectsTable.findFirst({
-      where: {
-        AND: [
-          { id: { equals: task.projectId } },
-          { deletedAt: { equals: null } },
-        ],
-      },
-    })
+    const project = await this.database
+      .table<ProjectEntityDto>('projects')
+      .findFirst({
+        where: {
+          AND: [
+            { id: { equals: task.projectId } },
+            { deletedAt: { equals: null } },
+          ],
+        },
+      })
 
     check(isDefined(project), `Project with id ${task.projectId} not found`)
 
-    return await this.tasksTable.create({
+    return await this.database.table<TaskEntityDto>('tasks').create({
       data: {
         id: uuid(),
         ...task,
@@ -112,7 +111,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
       modifiedAt: new Date().toISOString(),
     }
 
-    return await this.tasksTable.update({
+    return await this.database.table<TaskEntityDto>('tasks').update({
       where: { id: { equals: id } },
       data: patchedTask,
     })
@@ -121,7 +120,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
   async deleteTask(id: string): Promise<void> {
     await this.getTaskById(id) // ensure task exists
 
-    await this.tasksTable.update({
+    await this.database.table<TaskEntityDto>('tasks').update({
       where: { id: { equals: id } },
       data: { deletedAt: new Date().toISOString() },
     })

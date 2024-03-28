@@ -3,6 +3,17 @@
 
 import { contextBridge, ipcRenderer } from 'electron'
 
+function getServiceApi(service: string) {
+  return {
+    invoke: async (method: string, ...args: any[]) =>
+      await ipcRenderer.invoke(`service:${service}:invoke`, method, ...args),
+    onNotify: (callback: (event: any, channel: string) => void) =>
+      ipcRenderer.on(`service:${service}:notify`, (_, event, channel) =>
+        callback(event, channel),
+      ),
+  }
+}
+
 contextBridge.exposeInMainWorld('electronAPI', {
   isElectron: true,
   electron: {
@@ -12,8 +23,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   service: {
     project: {
-      invoke: async (method: string, ...args: any[]) =>
-        await ipcRenderer.invoke('service:project', method, ...args),
+      ...getServiceApi('project'),
+    },
+    task: {
+      ...getServiceApi('task'),
     },
   },
 })

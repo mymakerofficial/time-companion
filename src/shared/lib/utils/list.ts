@@ -34,3 +34,15 @@ export function asArray(value: any): Array<any> {
 export function setOf<T>(values: Array<T>): Set<T> {
   return new Set(values)
 }
+
+export function mapOf<K, V>(entries: Array<[K, V]>): Map<K, V> {
+  return new Map(entries)
+}
+
+export function emptySet<T>(): Set<T> {
+  return new Set()
+}
+
+export function emptyMap<K, V>(): Map<K, V> {
+  return new Map()
+}
