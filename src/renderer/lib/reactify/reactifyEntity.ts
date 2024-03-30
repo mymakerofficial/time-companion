@@ -56,7 +56,7 @@ export function entityFieldToRef<
   } = options
 
   return customRef((track, trigger) => {
-    let value: TValue
+    let value: TValue = defaultValue
 
     function update(entity: Nullable<TEntity>) {
       value = getOrDefault(
