@@ -14,6 +14,6 @@ type ProjectEntityBase = HasId & HasCreatedAt & HasModifiedAt & HasDeletedAt
 
 export type ProjectEntityDto = ProjectDto & ProjectEntityBase
 
-export type ProjectEntityDao = Partial<ProjectDto> & {
+export type ProjectEntityDao = ProjectDto & {
   readonly [K in keyof ProjectEntityBase]: Nullable<ProjectEntityBase[K]>
 }
