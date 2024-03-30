@@ -1,9 +1,9 @@
-import { computed, type MaybeRefOrGetter, reactive, type Ref } from 'vue'
+import type { MaybeRefOrGetter, Ref } from 'vue'
 import { projectService } from '@renderer/factory/service/projectService'
 import { customRef, toValue, watch } from 'vue'
-import type { Maybe, Nullable, Optional } from '@shared/lib/utils/types'
-import { computedAsync, watchImmediate } from '@vueuse/core'
-import { check, isAbsent, isDefined, isPresent } from '@shared/lib/utils/checks'
+import type { Maybe, Nullable } from '@shared/lib/utils/types'
+import { computedAsync, toReactive, watchImmediate } from '@vueuse/core'
+import { check, isAbsent, isPresent } from '@shared/lib/utils/checks'
 import {
   type EntityPublisher,
   type EntityPublisherEvent,
@@ -11,60 +11,82 @@ import {
 } from '@shared/events/entityPublisher'
 import type { ProjectEntityDao, ProjectEntityDto } from '@shared/model/project'
 import type { SubscriberCallback } from '@shared/events/publisher'
-import { getOrDefault, getOrNull } from '@shared/lib/utils/result'
+import { getOrDefault } from '@shared/lib/utils/result'
+import { entriesOf } from '@shared/lib/utils/object'
+import { toString } from '@shared/lib/utils/casting'
 
-function entityFieldToRef<TSource extends object, TValue extends unknown>(
-  field: string,
-  options: {
-    defaultValue: TValue
-    entityId: MaybeRefOrGetter<Maybe<string>>
-    initialEntity: Ref<Nullable<Readonly<TSource>>>
-    publisher: EntityPublisher<TSource>
-    onUpdated: (newValue: TValue) => void
-  },
+function createSubscriber<TEntity extends object>(
+  fieldName: string,
+  onUpdate: (newEntity: Nullable<TEntity>) => void,
+): SubscriberCallback<EntityPublisherEvent<TEntity>> {
+  return (event) => {
+    if (event.type === 'deleted') {
+      onUpdate(null)
+    }
+
+    if (
+      event.type === 'updated' &&
+      event.changedFields.includes(fieldName as any as keyof TEntity)
+    ) {
+      onUpdate(event.data)
+    }
+  }
+}
+
+interface EntityFieldToRefOptions<
+  TEntity extends object,
+  TValue extends unknown,
+> {
+  fieldName: string
+  defaultValue: TValue
+  entityId: MaybeRefOrGetter<Maybe<string>>
+  initialEntity: Ref<Nullable<Readonly<TEntity>>>
+  publisher: EntityPublisher<TEntity>
+  onChanged: (newValue: TValue) => void
+}
+
+function entityFieldToRef<TEntity extends object, TValue extends unknown>(
+  options: EntityFieldToRefOptions<TEntity, TValue>,
 ): Ref<TValue> {
-  const { defaultValue, entityId, initialEntity, publisher, onUpdated } =
-    options
+  const {
+    fieldName,
+    defaultValue,
+    entityId,
+    initialEntity,
+    publisher,
+    onChanged,
+  } = options
 
   return customRef((track, trigger) => {
     let value: TValue
 
-    function update(entity: Nullable<TSource>) {
+    function update(entity: Nullable<TEntity>) {
       value = getOrDefault(
-        entity?.[field as any as keyof TSource] as TValue,
+        entity?.[fieldName as any as keyof TEntity] as TValue,
         defaultValue,
       )
       trigger()
     }
 
-    const subscriber: SubscriberCallback<EntityPublisherEvent<TSource>> = (
-      event,
-    ) => {
-      if (event.type === 'deleted') {
-        update(null)
-      }
+    const subscriber = createSubscriber(fieldName, update)
 
-      if (
-        event.type === 'updated' &&
-        event.changedFields.includes(field as any as keyof TSource)
-      ) {
-        update(event.data)
-      }
-    }
-
+    // the entityId might change or not be present, so we need to dynamically subscribe and unsubscribe
     watchImmediate(
       () => toValue(entityId),
       (newValue, oldValue) => {
+        // unsubscribe from the old entity
         if (isPresent(oldValue)) {
           publisher.unsubscribe(getEntityChannel(oldValue), subscriber)
         }
 
+        // subscribe to the new entity
         if (isPresent(newValue)) {
           publisher.subscribe(getEntityChannel(newValue), subscriber)
         }
       },
     )
 
+    // set the initial value
     watch(initialEntity, (newValue) => {
       update(newValue)
     })
@@ -75,7 +97,7 @@ function entityFieldToRef<TSource extends object, TValue extends unknown>(
         return value
       },
       set(newValue: TValue) {
-        onUpdated(newValue)
+        onChanged(newValue)
 
         // optimistic update
         value = newValue
@@ -85,65 +107,79 @@ function entityFieldToRef<TSource extends object, TValue extends unknown>(
   })
 }
 
-export function useProjectById(
-  projectId: MaybeRefOrGetter<Maybe<string>>,
-): ProjectEntityDao {
-  const initialProject = computedAsync(async () => {
-    const id = toValue(projectId)
+interface EntityToRefsOptions<TIn extends TOut, TOut extends object> {
+  entityId: MaybeRefOrGetter<Maybe<string>>
+  publisher: EntityPublisher<TIn>
+  getterFn: (id: string) => Promise<Nullable<Readonly<TIn>>>
+  patchFn: (id: string, patch: Partial<TIn>) => Promise<Readonly<TIn>>
+  // the object returned will only contain fields that are present in the defaultValues object
+  defaultValues: Partial<TOut>
+}
+
+function entityToRefs<TIn extends TOut, TOut extends object>(
+  options: EntityToRefsOptions<TIn, TOut>,
+): {
+  [K in keyof TOut]: Ref<TOut[K]>
+} {
+  const { entityId, publisher, getterFn, patchFn, defaultValues } = options
+
+  const initialEntity = computedAsync(async () => {
+    const id = toValue(entityId)
 
     if (isAbsent(id)) {
       return null
     }
 
-    return await projectService.getProjectById(id)
-  })
+    return await getterFn(id)
+  }, null)
 
-  const displayName = entityFieldToRef<ProjectEntityDto, string>(
-    'displayName',
-    {
-      defaultValue: '',
-      entityId: projectId,
-      initialEntity: initialProject,
-      publisher: projectService,
-      onUpdated(newValue) {
-        projectService.patchProjectById(toValue(projectId)!, {
-          displayName: newValue,
-        })
+  return entriesOf(defaultValues).reduce((acc, [fieldName, defaultValue]) => {
+    acc[fieldName] = entityFieldToRef({
+      fieldName: fieldName as any as string,
+      defaultValue,
+      entityId,
+      initialEntity,
+      publisher,
+      onChanged(newValue) {
+        const id = toValue(entityId)
+
+        check(
+          isPresent(id),
+          `Tried to update field ${toString(fieldName)} on entity dao with absent id`,
+        )
+
+        patchFn(
+          id,
+          // @ts-expect-error
+          {
+            [fieldName]: newValue,
+          },
+        )
       },
-    },
+    })
+
+    return acc
+  }, {} as any)
+}
+
+export function useProjectById(
+  projectId: MaybeRefOrGetter<Maybe<string>>,
+): ProjectEntityDao {
+  return toReactive(
+    entityToRefs<ProjectEntityDto, ProjectEntityDao>({
+      entityId: projectId,
+      publisher: projectService,
+      getterFn: projectService.getProjectById,
+      patchFn: projectService.patchProjectById,
+      defaultValues: {
+        id: null,
+        displayName: '',
+        color: null,
+        isBillable: false,
+        createdAt: null,
+        modifiedAt: null,
+        deletedAt: null,
+      },
+    }),
   )
-
-  const color = entityFieldToRef<ProjectEntityDto, Nullable<string>>('color', {
-    defaultValue: null,
-    entityId: projectId,
-    initialEntity: initialProject,
-    publisher: projectService,
-    onUpdated(newValue) {
-      projectService.patchProjectById(toValue(projectId)!, {
-        color: newValue,
-      })
-    },
-  })
-
-  const isBillable = entityFieldToRef<ProjectEntityDto, boolean>('isBillable', {
-    defaultValue: false,
-    entityId: projectId,
-    initialEntity: initialProject,
-    publisher: projectService,
-    onUpdated(newValue) {
-      projectService.patchProjectById(toValue(projectId)!, {
-        isBillable: newValue,
-      })
-    },
-  })
-
-  return reactive({
-    id: computed(() => getOrNull(toValue(projectId))),
-    displayName,
-    color,
-    isBillable,
-    createdAt: computed(() => getOrNull(initialProject.value?.createdAt)),
-    modifiedAt: computed(() => getOrNull(initialProject.value?.modifiedAt)),
-    deletedAt: computed(() => getOrNull(initialProject.value?.deletedAt)),
-  })
 }
