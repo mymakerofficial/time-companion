@@ -103,11 +103,11 @@ function registerIpcHandlers() {
 }
 
 function registerIpcPublishers(mainWindow: BrowserWindow) {
-  projectService.subscribe({}, (topics, event) => {
-    mainWindow.webContents.send('service:project:notify', topics, event)
+  projectService.subscribe({}, (event, topics) => {
+    mainWindow.webContents.send('service:project:notify', event, topics)
   })
-  taskService.subscribe({}, (topics, event) => {
-    mainWindow.webContents.send('service:task:notify', topics, event)
+  taskService.subscribe({}, (event, topics) => {
+    mainWindow.webContents.send('service:task:notify', event, topics)
   })
 }
 

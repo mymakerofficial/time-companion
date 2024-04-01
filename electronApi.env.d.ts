@@ -11,11 +11,11 @@ interface Window {
     service: {
       project: {
         invoke: (method: string, ...args: any[]) => Promise<any>
-        onNotify: (callback: (topics: object, event: object) => void) => void
+        onNotify: (callback: (event: object, topics: object) => void) => void
       }
       task: {
         invoke: (method: string, ...args: any[]) => Promise<any>
-        onNotify: (callback: (topics: object, event: object) => void) => void
+        onNotify: (callback: (event: object, topics: object) => void) => void
       }
     }
   }

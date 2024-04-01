@@ -133,7 +133,7 @@ describe.sequential('taskService', async () => {
       ).rejects.toThrowError('Task with id non-existent-id not found')
     })
 
-    it.todo('should notify subscribers of the change', async () => {
+    it('should notify subscribers of the change', async () => {
       const task = randomElement(await fixture.getTasks())
 
       await fixture.taskService.patchTaskById(task.id, {
@@ -143,15 +143,15 @@ describe.sequential('taskService', async () => {
       expect(subscriber).toHaveBeenCalledWith(
         {
           type: 'updated',
-          entityId: task.id,
-          field: ['displayName'],
-        },
-        {
-          type: 'updated',
           data: expect.objectContaining({
             displayName: 'Other Patched Task',
           }),
           changedFields: ['displayName'],
+        },
+        {
+          type: 'updated',
+          entityId: task.id,
+          field: ['displayName'],
         },
       )
     })
@@ -174,7 +174,7 @@ describe.sequential('taskService', async () => {
       ).rejects.toThrowError('Task with id non-existent-id not found')
     })
 
-    it.todo('should notify subscribers of the change', async () => {
+    it('should notify subscribers of the change', async () => {
       const task = randomElement(await fixture.getTasks())
 
       await fixture.taskService.deleteTask(task.id)
@@ -182,11 +182,11 @@ describe.sequential('taskService', async () => {
       expect(subscriber).toHaveBeenCalledWith(
         {
           type: 'deleted',
-          entityId: task.id,
+          id: task.id,
         },
         {
           type: 'deleted',
-          id: task.id,
+          entityId: task.id,
         },
       )
     })

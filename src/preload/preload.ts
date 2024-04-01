@@ -7,9 +7,9 @@ function getServiceApi(service: string) {
   return {
     invoke: async (method: string, ...args: any[]) =>
       await ipcRenderer.invoke(`service:${service}:invoke`, method, ...args),
-    onNotify: (callback: (topics: object, event: object) => void) =>
-      ipcRenderer.on(`service:${service}:notify`, (_, topics, event) =>
-        callback(topics, event),
+    onNotify: (callback: (event: object, topics: object) => void) =>
+      ipcRenderer.on(`service:${service}:notify`, (_, event, topics) =>
+        callback(event, topics),
       ),
   }
 }

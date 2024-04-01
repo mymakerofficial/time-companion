@@ -10,7 +10,7 @@ export type PublisherTopics<TTopics extends object> = {
 export type SubscriberCallback<
   TTopics extends object,
   TEvent extends object,
-> = (topics: PublisherTopics<TTopics>, event: TEvent) => void
+> = (event: TEvent, topics: PublisherTopics<TTopics>) => void
 
 export interface Publisher<TTopics extends object, TEvent extends object> {
   /***
@@ -116,6 +116,6 @@ export class PublisherImpl<TTopics extends object, TEvent extends object>
   protected notify(topics: PublisherTopics<TTopics>, event: TEvent) {
     const subscribers = this.getTopicSubscribers(topics)
 
-    subscribers.forEach((callback) => callback(topics, event))
+    subscribers.forEach((callback) => callback(event, topics))
   }
 }

@@ -58,12 +58,7 @@ describe('publisher service proxy and invoker', () => {
     EntityPublisherEvent<TestEntity>
   >({
     invoke: async (method, ...args) => await invoker.invoke(method, ...args),
-    onNotify: (
-      callback: SubscriberCallback<
-        EntityPublisherTopics<TestEntity>,
-        EntityPublisherEvent<TestEntity>
-      >,
-    ) => {
+    onNotify: (callback: (event: object, topics: object) => void) => {
       service.subscribe({}, callback)
     },
   })
@@ -100,10 +95,10 @@ describe('publisher service proxy and invoker', () => {
       proxy.testNotify(topics, event)
 
       expect(directSubscriber).toHaveBeenCalledTimes(1)
-      expect(directSubscriber).toHaveBeenCalledWith(topics, event)
+      expect(directSubscriber).toHaveBeenCalledWith(event, topics)
 
       expect(proxySubscriber).toHaveBeenCalledTimes(1)
-      expect(proxySubscriber).toHaveBeenCalledWith(topics, event)
+      expect(proxySubscriber).toHaveBeenCalledWith(event, topics)
     })
 
     it('should not forward events from other channels', () => {

@@ -28,7 +28,7 @@ export function createPublisherServiceProxy<
   onNotify,
 }: {
   invoke: (method: string, ...args: any[]) => Promise<any>
-  onNotify: (callback: (topics: object, event: object) => void) => void
+  onNotify: (callback: (event: object, topics: object) => void) => void
 }): TService {
   // we create a new publisher instead of forwarding the subscribe and unsubscribe methods
   //  because we can't serialize the callbacks
@@ -36,7 +36,7 @@ export function createPublisherServiceProxy<
 
   // to receive events from the actual service in the main process
   // we register a callback that subscribes us to all events
-  onNotify((topics: object, event: object) => {
+  onNotify((event, topics) => {
     publisher.notify(topics as PublisherTopics<TTopics>, event as TEvent)
   })
 

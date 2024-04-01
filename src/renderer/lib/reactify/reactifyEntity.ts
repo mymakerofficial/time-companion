@@ -21,7 +21,7 @@ function createSubscriber<TEntity extends object>(
   EntityPublisherTopics<TEntity>,
   EntityPublisherEvent<TEntity>
 > {
-  return (_, event) => {
+  return (event) => {
     if (event.type === 'deleted') {
       onUpdate(null)
     }

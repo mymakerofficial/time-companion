@@ -44,8 +44,8 @@ describe('publisher', () => {
       publisher.testNotify({ type: 'updated', entity: 42 }, { message: 'test' })
 
       expect(subscriber).toHaveBeenCalledWith(
-        { type: 'updated', entity: 42 },
         { message: 'test' },
+        { type: 'updated', entity: 42 },
       )
 
       publisher.unsubscribe({}, subscriber)
@@ -79,8 +79,8 @@ describe('publisher', () => {
       publisher.testNotify({ type: 'updated', entity: 42 }, { message: 'test' })
 
       expect(subscriber).toHaveBeenCalledWith(
-        { type: 'updated', entity: 42 },
         { message: 'test' },
+        { type: 'updated', entity: 42 },
       )
 
       publisher.unsubscribe({ type: 'updated' }, subscriber)
@@ -94,15 +94,15 @@ describe('publisher', () => {
       publisher.testNotify({ type: 'updated', entity: 42 }, { message: 'test' })
 
       expect(subscriber).toHaveBeenCalledWith(
-        { type: 'updated', entity: 42 },
         { message: 'test' },
+        { type: 'updated', entity: 42 },
       )
 
       publisher.testNotify({ type: 'deleted', entity: 42 }, { message: 'test' })
 
       expect(subscriber).toHaveBeenCalledWith(
-        { type: 'updated', entity: 42 },
         { message: 'test' },
+        { type: 'updated', entity: 42 },
       )
 
       publisher.unsubscribe({ type: ['updated', 'deleted'] }, subscriber)
@@ -121,12 +121,12 @@ describe('publisher', () => {
       )
 
       expect(updateSubscriber).toHaveBeenCalledWith(
-        { type: ['updated', 'deleted'] },
         { message: 'test' },
+        { type: ['updated', 'deleted'] },
       )
       expect(deleteSubscriber).toHaveBeenCalledWith(
-        { type: ['updated', 'deleted'] },
         { message: 'test' },
+        { type: ['updated', 'deleted'] },
       )
     })
 

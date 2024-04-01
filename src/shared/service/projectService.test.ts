@@ -129,15 +129,15 @@ describe.sequential('projectService', async () => {
       expect(subscriber).toHaveBeenCalledWith(
         {
           type: 'updated',
-          entityId: project.id,
-          field: ['displayName'],
-        },
-        {
-          type: 'updated',
           data: expect.objectContaining({
             displayName: 'Other Patched Project',
           }),
           changedFields: ['displayName'],
+        },
+        {
+          type: 'updated',
+          entityId: project.id,
+          field: ['displayName'],
         },
       )
     })
@@ -168,11 +168,11 @@ describe.sequential('projectService', async () => {
       expect(subscriber).toHaveBeenCalledWith(
         {
           type: 'deleted',
-          entityId: project.id,
+          id: project.id,
         },
         {
           type: 'deleted',
-          id: project.id,
+          entityId: project.id,
         },
       )
     })
