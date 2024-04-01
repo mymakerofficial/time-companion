@@ -97,6 +97,11 @@ function handleSetTitleBarColors(event: Electron.IpcMainEvent, colors: any) {
 
 function registerIpcHandlers() {
   ipcMain.on('window:setTitleBarColors', handleSetTitleBarColors)
+  ipcMain.on('window:createNewWindow', () => {
+    // TODO this is just for testing and should be removed
+    const mainWindow = createMainWindow()
+    registerIpcPublishers(mainWindow)
+  })
 
   ipcMain.handle('service:project:invoke', createIpcListener(projectService))
   ipcMain.handle('service:task', createIpcListener(taskService))

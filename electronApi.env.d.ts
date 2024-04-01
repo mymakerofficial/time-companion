@@ -7,6 +7,7 @@ interface Window {
         backgroundColor: string
         symbolColor: string
       }) => void
+      createNewWindow: () => void
     }
     service: {
       project: {

@@ -20,6 +20,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getPlatform: () => process.platform,
     setTitleBarColors: (colors: any) =>
       ipcRenderer.send('window:setTitleBarColors', colors),
+    createNewWindow: () => ipcRenderer.send('window:createNewWindow'),
   },
   service: {
     project: {

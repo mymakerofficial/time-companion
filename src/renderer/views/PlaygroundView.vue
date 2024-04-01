@@ -18,6 +18,8 @@ import { toast } from 'vue-sonner'
 import type { PublisherTopics } from '@shared/events/publisher'
 import PlaygroundCreateProject from '@renderer/views/PlaygroundCreateProject.vue'
 import { watchImmediate } from '@vueuse/core'
+import { isDefined } from '@shared/lib/utils/checks'
+import { Button } from '@renderer/components/ui/button'
 
 const projects = useProjectsList()
 
@@ -60,11 +62,20 @@ onUnmounted(() => {
   projectService.unsubscribe({ type: 'created' }, onNewProjectCreated)
   projectService.unsubscribe({}, onNotify)
 })
+
+function handleNewWindow() {
+  if (!isDefined(window.electronAPI)) {
+    return
+  }
+
+  window.electronAPI.electron.createNewWindow()
+}
 </script>
 
 <template>
   <ResponsiveContainer class="my-14 flex flex-col gap-4">
-    <div class="border rounded-md flex flex-col gap-4 p-4">
+    <div class="border rounded-md flex items-center justify-between gap-4 p-4">
+      <Button @click="handleNewWindow">New Window</Button>
       <div class="ml-4 flex items-center gap-4">
         <Label class="text-right">Show toasts</Label>
         <Switch v-model:checked="showToasts" />
