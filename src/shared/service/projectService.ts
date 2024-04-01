@@ -7,6 +7,8 @@ import {
 import type { Nullable } from '@shared/lib/utils/types'
 import { keysOf } from '@shared/lib/utils/object'
 import { assertOnlyValidFieldsChanged } from '@shared/service/helpers/assertOnlyValidFieldsChanged'
+import { asyncGetOrNull } from '@shared/lib/utils/result'
+import { check, isAbsent, isPresent } from '@shared/lib/utils/checks'
 
 export interface ProjectServiceDependencies {
   projectPersistence: ProjectPersistence
@@ -65,6 +67,15 @@ class ProjectServiceImpl
   async createProject(
     project: Readonly<ProjectDto>,
   ): Promise<Readonly<ProjectEntityDto>> {
+    const existingProject = await asyncGetOrNull(
+      this.projectPersistence.getProjectByDisplayName(project.displayName),
+    )
+
+    check(
+      isAbsent(existingProject),
+      `Project with displayName ${project.displayName} already exists`,
+    )
+
     const newProject = await this.projectPersistence.createProject(project)
 
     this.notify(

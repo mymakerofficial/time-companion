@@ -36,6 +36,20 @@ describe.sequential('projectService', async () => {
         // TODO actually test the values
       },
     )
+
+    it('should throw if project with displayName already exists', async () => {
+      const project = randomElement(await fixture.getProjects())
+
+      expect(
+        fixture.projectService.createProject({
+          displayName: project.displayName,
+          color: null,
+          isBillable: false,
+        }),
+      ).rejects.toThrowError(
+        `Project with displayName ${project.displayName} already exists`,
+      )
+    })
   })
 
   describe('getProjects', () => {

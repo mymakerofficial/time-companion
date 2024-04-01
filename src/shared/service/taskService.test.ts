@@ -52,6 +52,20 @@ describe.sequential('taskService', async () => {
         }),
       ).rejects.toThrowError('Project with id non-existing-id not found')
     })
+
+    it('should throw if task with displayName and same project already exists', async () => {
+      const task = randomElement(await fixture.getTasks())
+
+      expect(
+        fixture.taskService.createTask({
+          projectId: task.projectId,
+          displayName: task.displayName,
+          color: null,
+        }),
+      ).rejects.toThrowError(
+        `Task with displayName ${task.displayName} already exists in project ${task.projectId}`,
+      )
+    })
   })
 
   describe('getTasks', () => {

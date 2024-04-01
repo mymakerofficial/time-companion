@@ -12,6 +12,10 @@ export interface TaskPersistenceDependencies {
 export interface TaskPersistence {
   getTasks: () => Promise<ReadonlyArray<TaskEntityDto>>
   getTaskById: (id: string) => Promise<Readonly<TaskEntityDto>>
+  getTaskByDisplayNameAndProjectId: (
+    displayName: string,
+    projectId: string,
+  ) => Promise<Readonly<TaskEntityDto>>
   getTasksByProjectId: (
     projectId: string,
   ) => Promise<ReadonlyArray<TaskEntityDto>>
@@ -47,6 +51,24 @@ export class TaskPersistenceImpl implements TaskPersistence {
         },
       }),
       `Task with id ${id} not found`,
+    )
+  }
+
+  async getTaskByDisplayNameAndProjectId(
+    displayName: string,
+    projectId: string,
+  ): Promise<Readonly<TaskEntityDto>> {
+    return await asyncGetOrThrow(
+      this.database.table<TaskEntityDto>('tasks').findFirst({
+        where: {
+          AND: [
+            { displayName: { equals: displayName } },
+            { projectId: { equals: projectId } },
+            { deletedAt: { equals: null } },
+          ],
+        },
+      }),
+      `Task with displayName ${displayName} and projectId ${projectId} not found`,
     )
   }
 

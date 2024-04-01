@@ -8,6 +8,8 @@ import type { Nullable } from '@shared/lib/utils/types'
 import { keysOf } from '@shared/lib/utils/object'
 import { assertOnlyValidFieldsChanged } from '@shared/service/helpers/assertOnlyValidFieldsChanged'
 import type { ProjectPersistence } from '@shared/persistence/projectPersistence'
+import { check, isAbsent } from '@shared/lib/utils/checks'
+import { asyncGetOrNull } from '@shared/lib/utils/result'
 
 export interface TaskServiceDependencies {
   taskPersistence: TaskPersistence
@@ -60,6 +62,18 @@ class TaskServiceImpl
   }
 
   async createTask(task: Readonly<TaskDto>): Promise<Readonly<TaskEntityDto>> {
+    const existingTask = await asyncGetOrNull(
+      this.taskPersistence.getTaskByDisplayNameAndProjectId(
+        task.displayName,
+        task.projectId,
+      ),
+    )
+
+    check(
+      isAbsent(existingTask),
+      `Task with displayName ${task.displayName} already exists in project ${task.projectId}`,
+    )
+
     const newTask = await this.taskPersistence.createTask(task)
 
     this.notify(

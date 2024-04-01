@@ -11,6 +11,9 @@ export interface ProjectPersistenceDependencies {
 export interface ProjectPersistence {
   getProjects(): Promise<ReadonlyArray<ProjectEntityDto>>
   getProjectById(id: string): Promise<Readonly<ProjectEntityDto>>
+  getProjectByDisplayName(
+    displayName: string,
+  ): Promise<Readonly<ProjectEntityDto>>
   getProjectByTaskId(taskId: string): Promise<Readonly<ProjectEntityDto>>
   createProject(
     project: Readonly<ProjectDto>,
@@ -44,6 +47,22 @@ class ProjectPersistenceImpl implements ProjectPersistence {
         },
       }),
       `Project with id ${id} not found`,
+    )
+  }
+
+  async getProjectByDisplayName(
+    displayName: string,
+  ): Promise<Readonly<ProjectEntityDto>> {
+    return await asyncGetOrThrow(
+      this.database.table<ProjectEntityDto>('projects').findFirst({
+        where: {
+          AND: [
+            { displayName: { equals: displayName } },
+            { deletedAt: { equals: null } },
+          ],
+        },
+      }),
+      `Project with displayName ${displayName} not found`,
     )
   }
 
