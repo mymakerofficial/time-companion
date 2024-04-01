@@ -4,12 +4,23 @@ import { Input } from '@renderer/components/ui/input'
 import type { Maybe } from '@shared/lib/utils/types'
 import { Switch } from '@renderer/components/ui/switch'
 import { Label } from '@renderer/components/ui/label'
+import { Button } from '@renderer/components/ui/button'
+import { projectService } from '@renderer/factory/service/projectService'
+import { isAbsent } from '@shared/lib/utils/checks'
 
 const props = defineProps<{
   projectId: Maybe<string>
 }>()
 
 const project = useProjectById(() => props.projectId)
+
+function handleDelete() {
+  if (isAbsent(props.projectId)) {
+    return
+  }
+
+  projectService.deleteProject(props.projectId)
+}
 </script>
 
 <template>
@@ -28,6 +39,9 @@ const project = useProjectById(() => props.projectId)
     <div class="ml-4 flex items-center gap-4">
       <Label class="text-right">Billable</Label>
       <Switch v-model:checked="project.isBillable" />
+    </div>
+    <div class="flex justify-end">
+      <Button @click="handleDelete" variant="destructive">Delete</Button>
     </div>
     <pre class="p-4 bg-muted rounded-md">{{ project }}</pre>
   </div>
