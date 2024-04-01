@@ -10,8 +10,12 @@ export function useProjectById(
   return createEntityDao<ProjectEntityDto, ProjectEntityDao>({
     entityId: projectId,
     publisher: projectService,
-    getterFn: projectService.getProjectById,
-    patchFn: projectService.patchProjectById,
+    getterFn: async (id: string) => {
+      return await projectService.getProjectById(id)
+    },
+    patchFn: async (id: string, patch: Partial<ProjectEntityDto>) => {
+      return await projectService.patchProjectById(id, patch)
+    },
     defaultValues: {
       id: null,
       displayName: '',
