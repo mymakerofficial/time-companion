@@ -8,6 +8,7 @@ import { Button } from '@renderer/components/ui/button'
 import { projectService } from '@renderer/factory/service/projectService'
 import { isAbsent } from '@shared/lib/utils/checks'
 import { Separator } from '@renderer/components/ui/separator'
+import ColorSelect from '@renderer/components/common/inputs/colorSelect/ColorSelect.vue'
 
 const props = defineProps<{
   projectId: Maybe<string>
@@ -36,7 +37,7 @@ function handleDelete() {
     </div>
     <div class="ml-4 flex items-center gap-4">
       <Label class="text-right">Color</Label>
-      <Input v-model="project.color" />
+      <ColorSelect v-model="project.color" />
     </div>
     <div class="ml-4 flex items-center gap-4">
       <Label class="text-right">Billable</Label>

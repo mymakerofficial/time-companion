@@ -5,6 +5,7 @@ import { Switch } from '@renderer/components/ui/switch'
 import { Label } from '@renderer/components/ui/label'
 import { ref } from 'vue'
 import { projectService } from '@renderer/factory/service/projectService'
+import ColorSelect from '@renderer/components/common/inputs/colorSelect/ColorSelect.vue'
 
 const createProjectDisplayName = ref<string>('Test Project')
 const createProjectColor = ref<string>('red')
@@ -27,7 +28,7 @@ function handleCreateProject() {
     </div>
     <div class="ml-4 flex items-center gap-4">
       <Label class="text-right">Color</Label>
-      <Input v-model="createProjectColor" />
+      <ColorSelect v-model="createProjectColor" />
     </div>
     <div class="ml-4 flex items-center gap-4">
       <Label class="text-right">Billable</Label>
