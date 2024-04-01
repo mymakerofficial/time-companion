@@ -60,7 +60,14 @@ class TaskServiceImpl
   }
 
   async createTask(task: Readonly<TaskDto>): Promise<Readonly<TaskEntityDto>> {
-    return await this.taskPersistence.createTask(task)
+    const newTask = await this.taskPersistence.createTask(task)
+
+    this.notify(
+      { type: 'created', entityId: newTask.id },
+      { type: 'created', data: newTask },
+    )
+
+    return newTask
   }
 
   private async uncheckedPatchTaskById(
