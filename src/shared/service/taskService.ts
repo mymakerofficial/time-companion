@@ -1,8 +1,4 @@
 import type { TaskPersistence } from '@shared/persistence/taskPersistence'
-import {
-  type EntityPublisher,
-  EntityPublisherImpl,
-} from '@shared/events/entityPublisher'
 import type { TaskDto, TaskEntityDto } from '@shared/model/task'
 import type { Nullable } from '@shared/lib/utils/types'
 import { keysOf } from '@shared/lib/utils/object'
@@ -10,13 +6,17 @@ import { assertOnlyValidFieldsChanged } from '@shared/service/helpers/assertOnly
 import type { ProjectPersistence } from '@shared/persistence/projectPersistence'
 import { check, isAbsent } from '@shared/lib/utils/checks'
 import { asyncGetOrNull } from '@shared/lib/utils/result'
+import {
+  type EntityService,
+  EntityServiceImpl,
+} from '@shared/service/helpers/entityService'
 
 export interface TaskServiceDependencies {
   taskPersistence: TaskPersistence
   projectPersistence: ProjectPersistence
 }
 
-export interface TaskService extends EntityPublisher<TaskEntityDto> {
+export interface TaskService extends EntityService<TaskEntityDto> {
   getTasks: () => Promise<ReadonlyArray<Readonly<TaskEntityDto>>>
   getTaskById: (id: string) => Promise<Nullable<Readonly<TaskEntityDto>>>
   getTasksByProjectId: (
@@ -35,7 +35,7 @@ export interface TaskService extends EntityPublisher<TaskEntityDto> {
 }
 
 class TaskServiceImpl
-  extends EntityPublisherImpl<TaskEntityDto>
+  extends EntityServiceImpl<TaskEntityDto>
   implements TaskService
 {
   private readonly taskPersistence: TaskPersistence
@@ -76,10 +76,7 @@ class TaskServiceImpl
 
     const newTask = await this.taskPersistence.createTask(task)
 
-    this.notify(
-      { type: 'created', entityId: newTask.id },
-      { type: 'created', data: newTask },
-    )
+    this.publishCreated(newTask)
 
     return newTask
   }
@@ -94,18 +91,7 @@ class TaskServiceImpl
       partialTask,
     )
 
-    this.notify(
-      {
-        type: 'updated',
-        entityId: id,
-        field: [...changedFields, 'modifiedAt'],
-      },
-      {
-        type: 'updated',
-        data: patchedTask,
-        changedFields,
-      },
-    )
+    this.publishUpdated(patchedTask, changedFields)
 
     return patchedTask
   }
@@ -138,7 +124,7 @@ class TaskServiceImpl
   async deleteTask(id: string): Promise<void> {
     await this.taskPersistence.deleteTask(id)
 
-    this.notify({ type: 'deleted', entityId: id }, { type: 'deleted', id })
+    this.publishDeleted(id)
   }
 }
 

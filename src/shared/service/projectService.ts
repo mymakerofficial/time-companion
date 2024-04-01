@@ -1,20 +1,20 @@
 import type { ProjectDto, ProjectEntityDto } from '@shared/model/project'
 import { type ProjectPersistence } from '@shared/persistence/projectPersistence'
-import {
-  type EntityPublisher,
-  EntityPublisherImpl,
-} from '@shared/events/entityPublisher'
 import type { Nullable } from '@shared/lib/utils/types'
 import { keysOf } from '@shared/lib/utils/object'
 import { assertOnlyValidFieldsChanged } from '@shared/service/helpers/assertOnlyValidFieldsChanged'
 import { asyncGetOrNull } from '@shared/lib/utils/result'
-import { check, isAbsent, isPresent } from '@shared/lib/utils/checks'
+import { check, isAbsent } from '@shared/lib/utils/checks'
+import {
+  type EntityService,
+  EntityServiceImpl,
+} from '@shared/service/helpers/entityService'
 
 export interface ProjectServiceDependencies {
   projectPersistence: ProjectPersistence
 }
 
-export interface ProjectService extends EntityPublisher<ProjectEntityDto> {
+export interface ProjectService extends EntityService<ProjectEntityDto> {
   // get all non-deleted projects ordered by displayName
   getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>>
   // get a project by its id. returns null if the project does not exist
@@ -38,7 +38,7 @@ export interface ProjectService extends EntityPublisher<ProjectEntityDto> {
 }
 
 class ProjectServiceImpl
-  extends EntityPublisherImpl<ProjectEntityDto>
+  extends EntityServiceImpl<ProjectEntityDto>
   implements ProjectService
 {
   private readonly projectPersistence: ProjectPersistence
@@ -78,10 +78,7 @@ class ProjectServiceImpl
 
     const newProject = await this.projectPersistence.createProject(project)
 
-    this.notify(
-      { type: 'created', entityId: newProject.id },
-      { type: 'created', data: newProject },
-    )
+    this.publishCreated(newProject)
 
     return newProject
   }
@@ -103,18 +100,7 @@ class ProjectServiceImpl
       partialProject,
     )
 
-    this.notify(
-      {
-        type: 'updated',
-        entityId: id,
-        field: [...changedFields, 'modifiedAt'],
-      },
-      {
-        type: 'updated',
-        data: patchedProject,
-        changedFields,
-      },
-    )
+    this.publishUpdated(patchedProject, changedFields)
 
     return patchedProject
   }
@@ -122,7 +108,7 @@ class ProjectServiceImpl
   async deleteProject(id: string): Promise<void> {
     await this.projectPersistence.deleteProject(id)
 
-    this.notify({ type: 'deleted', entityId: id }, { type: 'deleted', id })
+    this.publishDeleted(id)
   }
 }
 
