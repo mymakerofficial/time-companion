@@ -8,19 +8,21 @@ withDefaults(
   defineProps<{
     options: MaybeReadonly<Array<TValue>>
     displayValue?: (option: TValue) => string
+    getKey?: (option: TValue) => string | number
   }>(),
   {
     displayValue: (value: TValue) => String(value),
+    getKey: (value: TValue) => String(value),
   },
 )
 </script>
 
 <template>
   <div role="radiogroup" class="flex flex-col gap-2">
-    <template v-for="option in options">
+    <template v-for="option in options" :key="getKey(option)">
       <RadioGroupItem
         @click.prevent="model = option"
-        :active="model === option"
+        :active="getKey(model!) === getKey(option)"
         :label="displayValue(option)"
       />
     </template>
