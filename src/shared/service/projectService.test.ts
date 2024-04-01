@@ -67,10 +67,10 @@ describe.sequential('projectService', async () => {
       expect(resById).toEqual(project)
     })
 
-    it('should return null if project with id is not found', async () => {
-      const res = await fixture.projectService.getProjectById('non-existent-id')
-
-      expect(res).toBeNull()
+    it('should throw if project with id is not found', async () => {
+      expect(
+        fixture.projectService.getProjectById('non-existent-id'),
+      ).rejects.toThrowError('Project with id non-existent-id not found')
     })
   })
 
@@ -87,11 +87,10 @@ describe.sequential('projectService', async () => {
       })
     })
 
-    it('should return null if project with task id is not found', async () => {
-      const res =
-        await fixture.projectService.getProjectByTaskId('non-existent-id')
-
-      expect(res).toBeNull()
+    it('should throw if project with task id is not found', async () => {
+      expect(
+        fixture.projectService.getProjectByTaskId('non-existent-id'),
+      ).rejects.toThrowError('Project with task id non-existent-id not found')
     })
   })
 

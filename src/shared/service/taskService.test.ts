@@ -78,10 +78,10 @@ describe.sequential('taskService', async () => {
       expect(res).toEqual(task)
     })
 
-    it('should return null if task with id is not found', async () => {
-      const res = await fixture.taskService.getTaskById('non-existent-id')
-
-      expect(res).toBeNull()
+    it('should throw if task with id is not found', async () => {
+      expect(
+        fixture.taskService.getTaskById('non-existent-id'),
+      ).rejects.toThrowError('Task with id non-existent-id not found')
     })
   })
 
@@ -178,9 +178,9 @@ describe.sequential('taskService', async () => {
 
       await fixture.taskService.deleteTask(task.id)
 
-      const res = await fixture.taskService.getTaskById(task.id)
-
-      expect(res).toBeNull()
+      expect(fixture.taskService.getTaskById(task.id)).rejects.toThrow(
+        `Task with id ${task.id} not found`,
+      )
     })
 
     it('should throw if task with id is not found', async () => {

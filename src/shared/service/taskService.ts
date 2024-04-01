@@ -4,7 +4,6 @@ import {
   EntityPublisherImpl,
 } from '@shared/events/entityPublisher'
 import type { TaskDto, TaskEntityDto } from '@shared/model/task'
-import { asyncGetOrDefault, asyncGetOrNull } from '@shared/lib/utils/result'
 import type { Nullable } from '@shared/lib/utils/types'
 import { keysOf } from '@shared/lib/utils/object'
 import { assertOnlyValidFieldsChanged } from '@shared/service/helpers/assertOnlyValidFieldsChanged'
@@ -39,11 +38,11 @@ class TaskServiceImpl
   }
 
   async getTasks(): Promise<ReadonlyArray<TaskEntityDto>> {
-    return await asyncGetOrDefault(this.taskPersistence.getTasks(), [])
+    return await this.taskPersistence.getTasks()
   }
 
   async getTaskById(id: string): Promise<Nullable<Readonly<TaskEntityDto>>> {
-    return await asyncGetOrNull(this.taskPersistence.getTaskById(id))
+    return await this.taskPersistence.getTaskById(id)
   }
 
   async getTasksByProjectId(

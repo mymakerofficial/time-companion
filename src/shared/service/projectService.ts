@@ -4,7 +4,6 @@ import {
   type EntityPublisher,
   EntityPublisherImpl,
 } from '@shared/events/entityPublisher'
-import { asyncGetOrDefault, asyncGetOrNull } from '@shared/lib/utils/result'
 import type { Nullable } from '@shared/lib/utils/types'
 import { keysOf } from '@shared/lib/utils/object'
 import { assertOnlyValidFieldsChanged } from '@shared/service/helpers/assertOnlyValidFieldsChanged'
@@ -48,21 +47,19 @@ class ProjectServiceImpl
   }
 
   async getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>> {
-    return await asyncGetOrDefault(this.projectPersistence.getProjects(), [])
+    return await this.projectPersistence.getProjects()
   }
 
   async getProjectById(
     id: string,
   ): Promise<Nullable<Readonly<ProjectEntityDto>>> {
-    return await asyncGetOrNull(this.projectPersistence.getProjectById(id))
+    return await this.projectPersistence.getProjectById(id)
   }
 
   async getProjectByTaskId(
     taskId: string,
   ): Promise<Nullable<Readonly<ProjectEntityDto>>> {
-    return await asyncGetOrNull(
-      this.projectPersistence.getProjectByTaskId(taskId),
-    )
+    return await this.projectPersistence.getProjectByTaskId(taskId)
   }
 
   async createProject(
