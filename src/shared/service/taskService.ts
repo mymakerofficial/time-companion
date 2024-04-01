@@ -13,7 +13,7 @@ export interface TaskServiceDependencies {
 }
 
 export interface TaskService extends EntityPublisher<TaskEntityDto> {
-  getTasks: () => Promise<ReadonlyArray<TaskEntityDto>>
+  getTasks: () => Promise<ReadonlyArray<Readonly<TaskEntityDto>>>
   getTaskById: (id: string) => Promise<Nullable<Readonly<TaskEntityDto>>>
   getTasksByProjectId: (
     projectId: string,

@@ -14,7 +14,7 @@ export interface ProjectServiceDependencies {
 
 export interface ProjectService extends EntityPublisher<ProjectEntityDto> {
   // get all non-deleted projects ordered by displayName
-  getProjects(): Promise<ReadonlyArray<ProjectEntityDto>>
+  getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>>
   // get a project by its id. returns null if the project does not exist
   getProjectById(id: string): Promise<Nullable<Readonly<ProjectEntityDto>>>
   // get a project by a task id. returns null if the project does not exist
@@ -67,7 +67,14 @@ class ProjectServiceImpl
   async createProject(
     project: Readonly<ProjectDto>,
   ): Promise<Readonly<ProjectEntityDto>> {
-    return await this.projectPersistence.createProject(project)
+    const newProject = await this.projectPersistence.createProject(project)
+
+    this.notify(
+      { type: 'created', entityId: newProject.id },
+      { type: 'created', data: newProject },
+    )
+
+    return newProject
   }
 
   async patchProjectById(

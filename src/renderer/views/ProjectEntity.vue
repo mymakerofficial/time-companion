@@ -7,6 +7,7 @@ import { Label } from '@renderer/components/ui/label'
 import { Button } from '@renderer/components/ui/button'
 import { projectService } from '@renderer/factory/service/projectService'
 import { isAbsent } from '@shared/lib/utils/checks'
+import { Separator } from '@renderer/components/ui/separator'
 
 const props = defineProps<{
   projectId: Maybe<string>
@@ -25,6 +26,7 @@ function handleDelete() {
 
 <template>
   <div class="border rounded-md p-4 flex flex-col gap-4">
+    <slot />
     <div class="mx-4 text-xs text-muted-foreground">
       {{ projectId ?? 'n/a' }}
     </div>
@@ -43,6 +45,7 @@ function handleDelete() {
     <div class="flex justify-end">
       <Button @click="handleDelete" variant="destructive">Delete</Button>
     </div>
+    <Separator />
     <pre class="p-4 bg-muted rounded-md">{{ project }}</pre>
   </div>
 </template>
