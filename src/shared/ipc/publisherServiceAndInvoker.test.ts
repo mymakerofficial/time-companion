@@ -2,11 +2,16 @@ import { describe, it, vi, expect } from 'vitest'
 import {
   EntityPublisherEvent,
   EntityPublisherImpl,
+  EntityPublisherTopics,
 } from '@shared/events/entityPublisher'
 import { createInvoker } from '@shared/ipc/invoker'
 import { createPublisherServiceProxy } from '@shared/ipc/publisherServiceProxy'
 import { faker } from '@faker-js/faker'
 import { uuid } from '@shared/lib/utils/uuid'
+import type {
+  PublisherTopics,
+  SubscriberCallback,
+} from '@shared/events/publisher'
 
 type TestEntity = {
   id: string
@@ -14,13 +19,20 @@ type TestEntity = {
 }
 
 class TestService extends EntityPublisherImpl<TestEntity> {
-  testNotify(event: EntityPublisherEvent<TestEntity>): void {
-    super.notify('test', event)
+  testNotify(
+    topics: PublisherTopics<EntityPublisherTopics<TestEntity>>,
+    event: EntityPublisherEvent<TestEntity>,
+  ): void {
+    super.notify(topics, event)
   }
 
   async testMethod(value: string): Promise<string> {
     return value
   }
+}
+
+function getTestTopics(): PublisherTopics<EntityPublisherTopics<TestEntity>> {
+  return { type: 'updated' }
 }
 
 function getTestEvent(): EntityPublisherEvent<TestEntity> {
@@ -42,11 +54,17 @@ describe('publisher service proxy and invoker', () => {
   // in reality proxy would live in the renderer process
   const proxy = createPublisherServiceProxy<
     TestService,
+    EntityPublisherTopics<TestEntity>,
     EntityPublisherEvent<TestEntity>
   >({
     invoke: async (method, ...args) => await invoker.invoke(method, ...args),
-    onNotify: (callback: (event: object, channel: string) => void) => {
-      service.subscribeAll(callback)
+    onNotify: (
+      callback: SubscriberCallback<
+        EntityPublisherTopics<TestEntity>,
+        EntityPublisherEvent<TestEntity>
+      >,
+    ) => {
+      service.subscribe({}, callback)
     },
   })
 
@@ -70,48 +88,48 @@ describe('publisher service proxy and invoker', () => {
 
   describe('events', () => {
     it('should forward events', () => {
+      const topics = getTestTopics()
       const event = getTestEvent()
 
       const directSubscriber = vi.fn()
       const proxySubscriber = vi.fn()
 
-      service.subscribe('test', directSubscriber)
-      proxy.subscribe('test', proxySubscriber)
+      service.subscribe(topics, directSubscriber)
+      proxy.subscribe(topics, proxySubscriber)
 
-      proxy.testNotify(event)
+      proxy.testNotify(topics, event)
 
       expect(directSubscriber).toHaveBeenCalledTimes(1)
-      expect(directSubscriber).toHaveBeenCalledWith(event, 'test')
+      expect(directSubscriber).toHaveBeenCalledWith(topics, event)
 
       expect(proxySubscriber).toHaveBeenCalledTimes(1)
-      expect(proxySubscriber).toHaveBeenCalledWith(event, 'test')
+      expect(proxySubscriber).toHaveBeenCalledWith(topics, event)
     })
 
     it('should not forward events from other channels', () => {
-      const event = getTestEvent()
-
       const subscriber = vi.fn()
 
-      proxy.subscribe('other', subscriber)
+      proxy.subscribe({ type: 'deleted' }, subscriber)
 
-      proxy.testNotify(event)
+      proxy.testNotify(getTestTopics(), getTestEvent())
 
       expect(subscriber).toHaveBeenCalledTimes(0)
     })
 
     it('should not forward events after unsubscribing', () => {
+      const topics = getTestTopics()
       const event = getTestEvent()
 
       const directSubscriber = vi.fn()
       const proxySubscriber = vi.fn()
 
-      service.subscribe('test', directSubscriber)
-      proxy.subscribe('test', proxySubscriber)
+      service.subscribe(topics, directSubscriber)
+      proxy.subscribe(topics, proxySubscriber)
 
-      service.unsubscribe('test', directSubscriber)
-      proxy.unsubscribe('test', proxySubscriber)
+      service.unsubscribe(topics, directSubscriber)
+      proxy.unsubscribe(topics, proxySubscriber)
 
-      proxy.testNotify(event)
+      proxy.testNotify(topics, event)
 
       expect(directSubscriber).toHaveBeenCalledTimes(0)
       expect(proxySubscriber).toHaveBeenCalledTimes(0)

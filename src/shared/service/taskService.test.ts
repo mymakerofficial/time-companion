@@ -1,4 +1,12 @@
-import { describe, expectTypeOf, it, expect } from 'vitest'
+import {
+  describe,
+  expectTypeOf,
+  it,
+  expect,
+  vi,
+  beforeAll,
+  afterAll,
+} from 'vitest'
 import type { TaskEntityDto } from '@shared/model/task'
 import { ProjectsAndTasksTestFixture } from '@shared/service/projectsAndTasksTestFixture'
 import { randomElement } from '@shared/lib/utils/random'
@@ -7,6 +15,16 @@ describe.sequential('taskService', async () => {
   const fixture = new ProjectsAndTasksTestFixture()
 
   await fixture.createSampleProjects()
+
+  const subscriber = vi.fn()
+
+  beforeAll(() => {
+    fixture.taskService.subscribe({}, subscriber)
+  })
+
+  afterAll(() => {
+    fixture.taskService.unsubscribe({}, subscriber)
+  })
 
   describe('createTask', async () => {
     it.each(await fixture.getSampleTasks())(
@@ -115,7 +133,28 @@ describe.sequential('taskService', async () => {
       ).rejects.toThrowError('Task with id non-existent-id not found')
     })
 
-    it.todo('should notify subscribers of the change')
+    it.todo('should notify subscribers of the change', async () => {
+      const task = randomElement(await fixture.getTasks())
+
+      await fixture.taskService.patchTaskById(task.id, {
+        displayName: 'Other Patched Task',
+      })
+
+      expect(subscriber).toHaveBeenCalledWith(
+        {
+          type: 'updated',
+          entityId: task.id,
+          field: ['displayName'],
+        },
+        {
+          type: 'updated',
+          data: expect.objectContaining({
+            displayName: 'Other Patched Task',
+          }),
+          changedFields: ['displayName'],
+        },
+      )
+    })
   })
 
   describe('deleteTask', () => {
@@ -135,6 +174,21 @@ describe.sequential('taskService', async () => {
       ).rejects.toThrowError('Task with id non-existent-id not found')
     })
 
-    it.todo('should notify subscribers of the change')
+    it.todo('should notify subscribers of the change', async () => {
+      const task = randomElement(await fixture.getTasks())
+
+      await fixture.taskService.deleteTask(task.id)
+
+      expect(subscriber).toHaveBeenCalledWith(
+        {
+          type: 'deleted',
+          entityId: task.id,
+        },
+        {
+          type: 'deleted',
+          id: task.id,
+        },
+      )
+    })
   })
 })

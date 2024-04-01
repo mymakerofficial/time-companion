@@ -46,3 +46,8 @@ export function emptySet<T>(): Set<T> {
 export function emptyMap<K, V>(): Map<K, V> {
   return new Map()
 }
+
+// returns true if the arrays have at least one element in common
+export function arraysHaveOverlap<T>(a: Array<T>, b: Array<T>): boolean {
+  return a.some((value) => b.includes(value))
+}

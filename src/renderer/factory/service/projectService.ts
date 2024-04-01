@@ -7,13 +7,17 @@ import { createProjectPersistence } from '@shared/persistence/projectPersistence
 import { database } from '@renderer/factory/database/database'
 import { isDefined } from '@shared/lib/utils/checks'
 import { createPublisherServiceProxy } from '@shared/ipc/publisherServiceProxy'
-import type { EntityPublisherEvent } from '@shared/events/entityPublisher'
+import type {
+  EntityPublisherEvent,
+  EntityPublisherTopics,
+} from '@shared/events/entityPublisher'
 import type { ProjectEntityDto } from '@shared/model/project'
 
 export const projectService = createSingleton((): ProjectService => {
   if (isDefined(window.electronAPI)) {
     return createPublisherServiceProxy<
       ProjectService,
+      EntityPublisherTopics<ProjectEntityDto>,
       EntityPublisherEvent<ProjectEntityDto>
     >(window.electronAPI.service.project)
   }

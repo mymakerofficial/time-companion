@@ -3,7 +3,6 @@ import { type ProjectPersistence } from '@shared/persistence/projectPersistence'
 import {
   type EntityPublisher,
   EntityPublisherImpl,
-  getEntityChannel,
 } from '@shared/events/entityPublisher'
 import { asyncGetOrDefault, asyncGetOrNull } from '@shared/lib/utils/result'
 import type { Nullable } from '@shared/lib/utils/types'
@@ -82,11 +81,14 @@ class ProjectServiceImpl
       partialProject,
     )
 
-    this.notify(getEntityChannel(id), {
-      type: 'updated',
-      data: patchedProject,
-      changedFields,
-    })
+    this.notify(
+      { type: 'updated', entityId: id, field: changedFields },
+      {
+        type: 'updated',
+        data: patchedProject,
+        changedFields,
+      },
+    )
 
     return patchedProject
   }
@@ -94,7 +96,7 @@ class ProjectServiceImpl
   async deleteProject(id: string): Promise<void> {
     await this.projectPersistence.deleteProject(id)
 
-    this.notify(getEntityChannel(id), { type: 'deleted', id })
+    this.notify({ type: 'deleted', entityId: id }, { type: 'deleted', id })
   }
 }
 

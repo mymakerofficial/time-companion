@@ -1,10 +1,17 @@
-import type { Publisher, PublisherChannel } from '@shared/events/publisher'
+import type {
+  Publisher,
+  PublisherTopics,
+  SubscriberCallback,
+} from '@shared/events/publisher'
 import { PublisherImpl } from '@shared/events/publisher'
 
 // notify is a protected method, but we need to call it, so we expose it
-class OpenPublisher<TEvent extends object> extends PublisherImpl<TEvent> {
-  notify(channel: PublisherChannel, event: TEvent) {
-    super.notify(channel, event)
+class OpenPublisher<
+  TTopics extends object,
+  TEvent extends object,
+> extends PublisherImpl<TTopics, TEvent> {
+  notify(topics: PublisherTopics<TTopics>, event: TEvent) {
+    super.notify(topics, event)
   }
 }
 
@@ -13,23 +20,24 @@ class OpenPublisher<TEvent extends object> extends PublisherImpl<TEvent> {
 // <br/>
 // An internal publisher is created to handle subscribers, since we can't serialize the callbacks.
 export function createPublisherServiceProxy<
-  TService extends Publisher<TEvent>,
+  TService extends Publisher<TTopics, TEvent>,
+  TTopics extends object,
   TEvent extends object,
 >({
   invoke,
   onNotify,
 }: {
   invoke: (method: string, ...args: any[]) => Promise<any>
-  onNotify: (callback: (event: object, channel: string) => void) => void
+  onNotify: (callback: (topics: object, event: object) => void) => void
 }): TService {
   // we create a new publisher instead of forwarding the subscribe and unsubscribe methods
   //  because we can't serialize the callbacks
-  const publisher = new OpenPublisher<TEvent>()
+  const publisher = new OpenPublisher<TTopics, TEvent>()
 
   // to receive events from the actual service in the main process
   // we register a callback that subscribes us to all events
-  onNotify((event, channel) => {
-    publisher.notify(channel, event as TEvent)
+  onNotify((topics: object, event: object) => {
+    publisher.notify(topics as PublisherTopics<TTopics>, event as TEvent)
   })
 
   // scary javascript magic
@@ -39,15 +47,21 @@ export function createPublisherServiceProxy<
       get(_, method) {
         // forward subscribe to the internal publisher
         if (method === 'subscribe') {
-          return (channel: string, callback: (event: TEvent) => void) => {
-            publisher.subscribe(channel, callback)
+          return (
+            topics: PublisherTopics<TTopics>,
+            callback: SubscriberCallback<TTopics, TEvent>,
+          ) => {
+            publisher.subscribe(topics, callback)
           }
         }
 
         // forward unsubscribe to the internal publisher
         if (method === 'unsubscribe') {
-          return (channel: string, callback: (event: TEvent) => void) => {
-            publisher.unsubscribe(channel, callback)
+          return (
+            topics: PublisherTopics<TTopics>,
+            callback: SubscriberCallback<TTopics, TEvent>,
+          ) => {
+            publisher.unsubscribe(topics, callback)
           }
         }
 

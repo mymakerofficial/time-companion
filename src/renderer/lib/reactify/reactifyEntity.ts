@@ -1,9 +1,12 @@
 import type { Maybe, Nullable } from '@shared/lib/utils/types'
-import type { SubscriberCallback } from '@shared/events/publisher'
-import {
-  type EntityPublisher,
-  type EntityPublisherEvent,
-  getEntityChannel,
+import type {
+  PublisherTopics,
+  SubscriberCallback,
+} from '@shared/events/publisher'
+import type {
+  EntityPublisher,
+  EntityPublisherEvent,
+  EntityPublisherTopics,
 } from '@shared/events/entityPublisher'
 import { customRef, type MaybeRefOrGetter, type Ref, toValue, watch } from 'vue'
 import { getOrDefault } from '@shared/lib/utils/result'
@@ -13,20 +16,30 @@ import { entriesOf } from '@shared/lib/utils/object'
 import { toString } from '@shared/lib/utils/casting'
 
 function createSubscriber<TEntity extends object>(
-  fieldName: string,
   onUpdate: (newEntity: Nullable<TEntity>) => void,
-): SubscriberCallback<EntityPublisherEvent<TEntity>> {
-  return (event) => {
+): SubscriberCallback<
+  EntityPublisherTopics<TEntity>,
+  EntityPublisherEvent<TEntity>
+> {
+  return (_, event) => {
     if (event.type === 'deleted') {
       onUpdate(null)
     }
 
-    if (
-      event.type === 'updated' &&
-      event.changedFields.includes(fieldName as any as keyof TEntity)
-    ) {
+    if (event.type === 'updated') {
       onUpdate(event.data)
     }
+  }
+}
+
+function getTopics<TEntity extends object>(
+  entityId: string,
+  fieldName: string,
+): PublisherTopics<EntityPublisherTopics<TEntity>> {
+  return {
+    type: ['updated', 'deleted'],
+    entityId: entityId,
+    field: fieldName as any as keyof TEntity,
   }
 }
 
@@ -66,20 +79,20 @@ export function entityFieldToRef<
       trigger()
     }
 
-    const subscriber = createSubscriber(fieldName, update)
+    const subscriber = createSubscriber(update)
 
     // the entityId might change or not be present, so we need to dynamically subscribe and unsubscribe
     watchImmediate(
       () => toValue(entityId),
-      (newValue, oldValue) => {
+      (newId, oldId) => {
         // unsubscribe from the old entity
-        if (isPresent(oldValue)) {
-          publisher.unsubscribe(getEntityChannel(oldValue), subscriber)
+        if (isPresent(oldId)) {
+          publisher.unsubscribe(getTopics(oldId, fieldName), subscriber)
         }
 
         // subscribe to the new entity
-        if (isPresent(newValue)) {
-          publisher.subscribe(getEntityChannel(newValue), subscriber)
+        if (isPresent(newId)) {
+          publisher.subscribe(getTopics(newId, fieldName), subscriber)
         }
       },
     )

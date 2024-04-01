@@ -1,73 +1,121 @@
-import { emptySet, mapOf, setOf } from '@shared/lib/utils/list'
-import { isDefined } from '@shared/lib/utils/checks'
+import type { MaybeArray, Nullable, Pair } from '@shared/lib/utils/types'
+import { entriesOf } from '@shared/lib/utils/object'
+import { isAbsent } from '@shared/lib/utils/checks'
+import { arraysHaveOverlap, asArray } from '@shared/lib/utils/list'
 
-export type PublisherChannel = string
-
-export type SubscriberCallback<TEvent extends object> = (
-  event: TEvent,
-  channel: PublisherChannel,
-) => void
-
-export interface Publisher<TEvent extends object> {
-  // register a callback to be called when an event is published on the channel
-  subscribe(
-    channel: PublisherChannel,
-    callback: SubscriberCallback<TEvent>,
-  ): void
-  // unregister a callback from the channel
-  unsubscribe(
-    channel: PublisherChannel,
-    callback: SubscriberCallback<TEvent>,
-  ): void
-  // register a callback to be called when an event is published to any channel
-  subscribeAll(callback: SubscriberCallback<TEvent>): void
+export type PublisherTopics<TTopics extends object> = {
+  [K in keyof TTopics]?: Nullable<MaybeArray<TTopics[K]>>
 }
 
-export class PublisherImpl<TEvent extends object> implements Publisher<TEvent> {
-  private static readonly allChannels: PublisherChannel = '__all_channels__'
+export type SubscriberCallback<
+  TTopics extends object,
+  TEvent extends object,
+> = (topics: PublisherTopics<TTopics>, event: TEvent) => void
 
-  private callbacks: Map<PublisherChannel, Set<SubscriberCallback<TEvent>>> =
-    mapOf([[PublisherImpl.allChannels, emptySet()]])
+export interface Publisher<TTopics extends object, TEvent extends object> {
+  /***
+   * Subscribe a callback to one or more topics.
+   *
+   *
+   * Topic matching works as follows:
+   * - If a topic is not specified, it will match any value for that topic
+   * - If a topic is specified, it will only match that value for that topic
+   * - If a topic is an array, it will match any value in that array
+   * - **for a subscriber to be notified, all topics must match**
+   *
+   * @param topics - the topics to subscribe to
+   * @param callback - the callback to be notified
+   *
+   * @example
+   * ```typescript
+   * publisher.subscribe({ type: 'updated' }, subscriber) // subscribe to all 'updated' events
+   * publisher.notify({ type: 'updated', entityId: '1' }, { data: 'new data' }) // subscriber will be notified
+   * ```
+   *
+   * @example
+   * ```typescript
+   * publisher.subscribe({ type: ['updated', 'deleted'] }, subscriber) // subscribe to all 'updated' or 'deleted' events
+   * publisher.notify({ type: 'updated', entityId: '1' }, { data: 'new data' }) // subscriber will be notified
+   * ```
+   *
+   * @example
+   * ```typescript
+   * publisher.subscribe({ type:  'updated', entityId: '1' }, subscriber) // subscribe to all 'updated' events for entity '1'
+   * publisher.notify({ type: 'updated', entityId: '2' }, { data: 'new data' }) // subscriber will NOT be notified
+   * ```
+   */
+  subscribe(
+    topics: PublisherTopics<TTopics>,
+    callback: SubscriberCallback<TTopics, TEvent>,
+  ): void
+  // unsubscribe a callback.
+  unsubscribe(
+    topics: PublisherTopics<TTopics>,
+    callback: SubscriberCallback<TTopics, TEvent>,
+  ): void
+}
+
+export class PublisherImpl<TTopics extends object, TEvent extends object>
+  implements Publisher<TTopics, TEvent>
+{
+  protected subscribers: Array<
+    Pair<PublisherTopics<TTopics>, SubscriberCallback<TTopics, TEvent>>
+  > = []
+
+  protected matches(
+    notifyTopics: PublisherTopics<TTopics>,
+    subscribedTopics: PublisherTopics<TTopics>,
+  ): boolean {
+    return !entriesOf(subscribedTopics)
+      .map(([key, value]) => {
+        if (isAbsent(notifyTopics[key])) {
+          return true
+        }
+
+        if (isAbsent(value)) {
+          return true
+        }
+
+        if (arraysHaveOverlap(asArray(value), asArray(notifyTopics[key]))) {
+          return true
+        }
+
+        return false
+      })
+      .includes(false)
+  }
+
+  protected getTopicSubscribers(
+    notifyTopics: PublisherTopics<TTopics>,
+  ): SubscriberCallback<TTopics, TEvent>[] {
+    return this.subscribers
+      .filter(([subscribedTopics]) =>
+        this.matches(notifyTopics, subscribedTopics),
+      )
+      .map(([, callback]) => callback)
+  }
 
   subscribe(
-    channel: PublisherChannel,
-    callback: SubscriberCallback<TEvent>,
-  ): void {
-    const channelCallbacks = this.callbacks.get(channel)
-
-    if (isDefined(channelCallbacks)) {
-      channelCallbacks.add(callback)
-    } else {
-      this.callbacks.set(channel, setOf([callback]))
-    }
+    topics: PublisherTopics<TTopics>,
+    callback: SubscriberCallback<TTopics, TEvent>,
+  ) {
+    this.subscribers.push([topics, callback])
   }
 
   unsubscribe(
-    channel: PublisherChannel,
-    callback: SubscriberCallback<TEvent>,
-  ): void {
-    const channelCallbacks = this.callbacks.get(channel)
-
-    if (isDefined(channelCallbacks)) {
-      channelCallbacks.delete(callback)
-    }
+    topics: PublisherTopics<TTopics>,
+    callback: SubscriberCallback<TTopics, TEvent>,
+  ) {
+    this.subscribers = this.subscribers.filter(
+      ([subscribedTopics, subscribedCallback]) =>
+        subscribedCallback !== callback ||
+        !this.matches(topics, subscribedTopics),
+    )
   }
 
-  subscribeAll(callback: SubscriberCallback<TEvent>): void {
-    this.subscribe(PublisherImpl.allChannels, callback)
-  }
+  protected notify(topics: PublisherTopics<TTopics>, event: TEvent) {
+    const subscribers = this.getTopicSubscribers(topics)
 
-  protected notify(channel: PublisherChannel, event: TEvent): void {
-    const channelCallbacks = this.callbacks.get(channel)
-
-    if (isDefined(channelCallbacks)) {
-      channelCallbacks.forEach((callback) => callback(event, channel))
-    }
-
-    const allChannelsCallbacks = this.callbacks.get(PublisherImpl.allChannels)
-
-    if (isDefined(allChannelsCallbacks)) {
-      allChannelsCallbacks.forEach((callback) => callback(event, channel))
-    }
+    subscribers.forEach((callback) => callback(topics, event))
   }
 }

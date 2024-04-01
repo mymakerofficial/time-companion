@@ -1,12 +1,29 @@
-import { describe, expectTypeOf, it, expect, vi } from 'vitest'
+import {
+  describe,
+  expectTypeOf,
+  it,
+  expect,
+  vi,
+  beforeAll,
+  afterAll,
+} from 'vitest'
 import type { ProjectEntityDto } from '@shared/model/project'
 import { firstOf, lastOf } from '@shared/lib/utils/list'
 import { ProjectsAndTasksTestFixture } from '@shared/service/projectsAndTasksTestFixture'
 import { randomElement } from '@shared/lib/utils/random'
-import { getEntityChannel } from '@shared/events/entityPublisher'
 
 describe.sequential('projectService', async () => {
   const fixture = new ProjectsAndTasksTestFixture()
+
+  const subscriber = vi.fn()
+
+  beforeAll(() => {
+    fixture.projectService.subscribe({}, subscriber)
+  })
+
+  afterAll(() => {
+    fixture.projectService.unsubscribe({}, subscriber)
+  })
 
   describe('createProject', async () => {
     it.each(await fixture.getSampleProjects())(
@@ -105,16 +122,16 @@ describe.sequential('projectService', async () => {
     it('should notify subscribers of the change', async () => {
       const project = randomElement(await fixture.getProjects())
 
-      const subscriber = vi.fn()
-
-      fixture.projectService.subscribe(getEntityChannel(project.id), subscriber)
-
       await fixture.projectService.patchProjectById(project.id, {
         displayName: 'Other Patched Project',
       })
 
-      expect(subscriber).toHaveBeenCalledTimes(1)
       expect(subscriber).toHaveBeenCalledWith(
+        {
+          type: 'updated',
+          entityId: project.id,
+          field: ['displayName'],
+        },
         {
           type: 'updated',
           data: expect.objectContaining({
@@ -122,10 +139,7 @@ describe.sequential('projectService', async () => {
           }),
           changedFields: ['displayName'],
         },
-        getEntityChannel(project.id),
       )
-
-      fixture.projectService.unsubscribe(project.id, subscriber)
     })
   })
 
@@ -149,22 +163,18 @@ describe.sequential('projectService', async () => {
     it('should notify subscribers of the change', async () => {
       const project = randomElement(await fixture.getProjects())
 
-      const subscriber = vi.fn()
-
-      fixture.projectService.subscribe(getEntityChannel(project.id), subscriber)
-
       await fixture.projectService.deleteProject(project.id)
 
-      expect(subscriber).toHaveBeenCalledTimes(1)
       expect(subscriber).toHaveBeenCalledWith(
+        {
+          type: 'deleted',
+          entityId: project.id,
+        },
         {
           type: 'deleted',
           id: project.id,
         },
-        getEntityChannel(project.id),
       )
-
-      fixture.projectService.unsubscribe(project.id, subscriber)
     })
   })
 })
