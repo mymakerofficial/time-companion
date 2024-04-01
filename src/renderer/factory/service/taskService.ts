@@ -5,6 +5,7 @@ import { createReceiverProxy } from '@shared/ipc/receiverProxy'
 import type { TaskService } from '@shared/service/taskService'
 import { createTaskService } from '@shared/service/taskService'
 import { createTaskPersistence } from '@shared/persistence/taskPersistence'
+import { createProjectPersistence } from '@shared/persistence/projectPersistence'
 
 export const taskService = createSingleton((): TaskService => {
   if (isDefined(window.electronAPI)) {
@@ -15,6 +16,9 @@ export const taskService = createSingleton((): TaskService => {
 
   return createTaskService({
     taskPersistence: createTaskPersistence({
+      database,
+    }),
+    projectPersistence: createProjectPersistence({
       database,
     }),
   })

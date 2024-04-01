@@ -34,6 +34,9 @@ export class ProjectsAndTasksTestFixture {
       taskPersistence: createTaskPersistence({
         database: this.database,
       }),
+      projectPersistence: createProjectPersistence({
+        database: this.database,
+      }),
     })
   }
 

@@ -7,9 +7,11 @@ import type { TaskDto, TaskEntityDto } from '@shared/model/task'
 import type { Nullable } from '@shared/lib/utils/types'
 import { keysOf } from '@shared/lib/utils/object'
 import { assertOnlyValidFieldsChanged } from '@shared/service/helpers/assertOnlyValidFieldsChanged'
+import type { ProjectPersistence } from '@shared/persistence/projectPersistence'
 
 export interface TaskServiceDependencies {
   taskPersistence: TaskPersistence
+  projectPersistence: ProjectPersistence
 }
 
 export interface TaskService extends EntityPublisher<TaskEntityDto> {
@@ -23,6 +25,10 @@ export interface TaskService extends EntityPublisher<TaskEntityDto> {
     id: string,
     partialTask: Partial<Readonly<TaskDto>>,
   ) => Promise<Readonly<TaskEntityDto>>
+  changeProjectOnTaskById: (
+    taskId: string,
+    projectId: string,
+  ) => Promise<Readonly<TaskEntityDto>>
   deleteTask: (id: string) => Promise<void>
 }
 
@@ -31,10 +37,12 @@ class TaskServiceImpl
   implements TaskService
 {
   private readonly taskPersistence: TaskPersistence
+  private readonly projectPersistence: ProjectPersistence
 
   constructor(deps: TaskServiceDependencies) {
     super()
     this.taskPersistence = deps.taskPersistence
+    this.projectPersistence = deps.projectPersistence
   }
 
   async getTasks(): Promise<ReadonlyArray<TaskEntityDto>> {
@@ -55,14 +63,11 @@ class TaskServiceImpl
     return await this.taskPersistence.createTask(task)
   }
 
-  async patchTaskById(
+  private async uncheckedPatchTaskById(
     id: string,
     partialTask: Partial<Readonly<TaskDto>>,
+    changedFields: ReadonlyArray<keyof TaskDto>,
   ): Promise<Readonly<TaskEntityDto>> {
-    const changedFields = keysOf(partialTask)
-
-    assertOnlyValidFieldsChanged(changedFields, ['displayName', 'color'])
-
     const patchedTask = await this.taskPersistence.patchTaskById(
       id,
       partialTask,
@@ -82,6 +87,31 @@ class TaskServiceImpl
     )
 
     return patchedTask
+  }
+
+  async patchTaskById(
+    id: string,
+    partialTask: Partial<Readonly<TaskDto>>,
+  ): Promise<Readonly<TaskEntityDto>> {
+    const changedFields = keysOf(partialTask)
+
+    assertOnlyValidFieldsChanged(changedFields, ['displayName', 'color'])
+
+    return await this.uncheckedPatchTaskById(id, partialTask, changedFields)
+  }
+
+  async changeProjectOnTaskById(
+    taskId: string,
+    projectId: string,
+  ): Promise<Readonly<TaskEntityDto>> {
+    await this.getTaskById(taskId) // Ensure task exists
+    const project = await this.projectPersistence.getProjectById(projectId) // Ensure project exists
+
+    return await this.uncheckedPatchTaskById(
+      taskId,
+      { projectId: project.id },
+      ['projectId'],
+    )
   }
 
   async deleteTask(id: string): Promise<void> {

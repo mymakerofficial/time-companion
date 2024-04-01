@@ -6,6 +6,7 @@ import {
   vi,
   beforeAll,
   afterAll,
+  afterEach,
 } from 'vitest'
 import type { TaskEntityDto } from '@shared/model/task'
 import { ProjectsAndTasksTestFixture } from '@shared/service/projectsAndTasksTestFixture'
@@ -24,6 +25,10 @@ describe.sequential('taskService', async () => {
 
   afterAll(() => {
     fixture.taskService.unsubscribe({}, subscriber)
+  })
+
+  afterEach(() => {
+    subscriber.mockClear()
   })
 
   describe('createTask', async () => {
@@ -141,10 +146,10 @@ describe.sequential('taskService', async () => {
           // @ts-expect-error
           id: 'invalid',
           createdAt: 'invalid',
-          invalidField: 'invalid',
+          projectId: 'invalid',
         }),
       ).rejects.toThrowError(
-        'tried to patch with invalid fields: id, createdAt, invalidField',
+        'tried to patch with invalid fields: id, createdAt, projectId',
       )
     })
 
@@ -169,6 +174,40 @@ describe.sequential('taskService', async () => {
           field: ['displayName', 'modifiedAt'],
         },
       )
+    })
+  })
+
+  describe('changeProjectOnTaskById', () => {
+    it('should throw if task with id is not found', async () => {
+      expect(
+        fixture.taskService.changeProjectOnTaskById('non-existent-id', 'id'),
+      ).rejects.toThrowError('Task with id non-existent-id not found')
+    })
+
+    it('should throw if project with id is not found', async () => {
+      const task = randomElement(await fixture.getTasks())
+
+      expect(
+        fixture.taskService.changeProjectOnTaskById(task.id, 'non-existent-id'),
+      ).rejects.toThrowError('Project with id non-existent-id not found')
+    })
+
+    it('should change the project', async () => {
+      const task = randomElement(await fixture.getTasks())
+      const project = randomElement(await fixture.getProjectsWithoutTasks())
+
+      const res = await fixture.taskService.changeProjectOnTaskById(
+        task.id,
+        project.id,
+      )
+
+      expect(fixture.projectService.getProjectByTaskId(task.id)).resolves.toBe(
+        project,
+      )
+
+      expect(res.projectId).toBe(project.id)
+
+      expect(subscriber).toHaveBeenCalledOnce()
     })
   })
 
