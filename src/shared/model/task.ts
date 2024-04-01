@@ -4,15 +4,18 @@ import type { HasModifiedAt } from '@shared/model/helpers/hasModifiedAt'
 import type { HasDeletedAt } from '@shared/model/helpers/hasDeletedAt'
 import type { Nullable } from '@shared/lib/utils/types'
 
-export interface TaskDto {
+export type TaskDto = {
   projectId: string
   displayName: string
   color: Nullable<string>
 }
 
-export interface TaskEntityDto
-  extends TaskDto,
-    HasId,
-    HasCreatedAt,
-    HasModifiedAt,
-    HasDeletedAt {}
+type TaskEntityBase = HasId & HasCreatedAt & HasModifiedAt & HasDeletedAt
+
+export type TaskEntityDto = TaskDto & TaskEntityBase
+
+export type TaskEntityDao = Omit<TaskDto, 'projectId'> & {
+  readonly projectId: Nullable<string>
+} & {
+  readonly [K in keyof TaskEntityBase]: Nullable<TaskEntityBase[K]>
+}
