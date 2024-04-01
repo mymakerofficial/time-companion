@@ -22,7 +22,7 @@ import { isDefined } from '@shared/lib/utils/checks'
 import { Button } from '@renderer/components/ui/button'
 import SettingsSection from '@renderer/components/settings/layout/SettingsSection.vue'
 import PlaygroundCreateTask from '@renderer/components/playground/PlaygroundCreateTask.vue'
-import { AppWindow } from 'lucide-vue-next'
+import { AppWindow, Plus } from 'lucide-vue-next'
 import { useTasksList } from '@renderer/composables/project/useTasksList'
 import type { TaskEntityDto } from '@shared/model/task'
 import { taskService } from '@renderer/factory/service/taskService'
@@ -33,9 +33,11 @@ const tasks = useTasksList()
 
 const showToasts = ref<boolean>(false)
 
+const showSecondProject = ref<boolean>(false)
 const selectedProject1 = ref<Nullable<ProjectEntityDto>>(null)
 const selectedProject2 = ref<Nullable<ProjectEntityDto>>(null)
 
+const showSecondTask = ref<boolean>(false)
 const selectedTask1 = ref<Nullable<TaskEntityDto>>(null)
 const selectedTask2 = ref<Nullable<TaskEntityDto>>(null)
 
@@ -146,7 +148,11 @@ function handleNewWindow() {
           />
           <Separator />
         </ProjectEntity>
-        <ProjectEntity :project-id="selectedProject2?.id" class="flex-grow">
+        <ProjectEntity
+          v-if="showSecondProject"
+          :project-id="selectedProject2?.id"
+          class="flex-grow"
+        >
           <RadioGroup
             :options="[null, ...projects]"
             v-model="selectedProject2"
@@ -155,6 +161,13 @@ function handleNewWindow() {
           />
           <Separator />
         </ProjectEntity>
+        <button
+          v-else
+          @click="() => (showSecondProject = true)"
+          class="w-1/6 flex justify-center items-center border rounded-md"
+        >
+          <Plus class="size-6" />
+        </button>
       </div>
     </SettingsSection>
     <SettingsSection title="Tasks">
@@ -169,7 +182,11 @@ function handleNewWindow() {
           />
           <Separator />
         </TaskEntity>
-        <TaskEntity :task-id="selectedTask2?.id" class="flex-grow">
+        <TaskEntity
+          v-if="showSecondTask"
+          :task-id="selectedTask2?.id"
+          class="flex-grow"
+        >
           <RadioGroup
             :options="[null, ...tasks]"
             v-model="selectedTask2"
@@ -178,6 +195,13 @@ function handleNewWindow() {
           />
           <Separator />
         </TaskEntity>
+        <button
+          v-else
+          @click="() => (showSecondTask = true)"
+          class="w-1/6 flex justify-center items-center border rounded-md"
+        >
+          <Plus class="size-6" />
+        </button>
       </div>
     </SettingsSection>
   </ResponsiveContainer>
