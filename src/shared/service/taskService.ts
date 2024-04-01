@@ -7,6 +7,7 @@ import type { TaskDto, TaskEntityDto } from '@shared/model/task'
 import { asyncGetOrDefault, asyncGetOrNull } from '@shared/lib/utils/result'
 import type { Nullable } from '@shared/lib/utils/types'
 import { keysOf } from '@shared/lib/utils/object'
+import { assertOnlyValidFieldsChanged } from '@shared/service/helpers/assertOnlyValidFieldsChanged'
 
 export interface TaskServiceDependencies {
   taskPersistence: TaskPersistence
@@ -60,6 +61,8 @@ class TaskServiceImpl
     partialTask: Partial<Readonly<TaskDto>>,
   ): Promise<Readonly<TaskEntityDto>> {
     const changedFields = keysOf(partialTask)
+
+    assertOnlyValidFieldsChanged(changedFields, ['displayName', 'color'])
 
     const patchedTask = await this.taskPersistence.patchTaskById(
       id,

@@ -54,3 +54,21 @@ export function isFunction(value: unknown): value is Function {
 export function isString(value: unknown): value is string {
   return typeof value === 'string'
 }
+
+export function isEmpty(value: unknown): value is null | undefined | '' | [] {
+  if (isString(value)) {
+    return value.length === 0
+  }
+
+  if (isArray(value)) {
+    return value.length === 0
+  }
+
+  return isAbsent(value)
+}
+
+export function isNotEmpty(
+  value: unknown,
+): value is Exclude<unknown, null | undefined | '' | []> {
+  return !isEmpty(value)
+}

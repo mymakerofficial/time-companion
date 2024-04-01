@@ -133,6 +133,21 @@ describe.sequential('taskService', async () => {
       ).rejects.toThrowError('Task with id non-existent-id not found')
     })
 
+    it('should throw if invalid fields are changed', async () => {
+      const task = randomElement(await fixture.getTasks())
+
+      expect(
+        fixture.taskService.patchTaskById(task.id, {
+          // @ts-expect-error
+          id: 'invalid',
+          createdAt: 'invalid',
+          invalidField: 'invalid',
+        }),
+      ).rejects.toThrowError(
+        'tried to patch with invalid fields: id, createdAt, invalidField',
+      )
+    })
+
     it('should notify subscribers of the change', async () => {
       const task = randomElement(await fixture.getTasks())
 

@@ -7,6 +7,7 @@ import {
 import { asyncGetOrDefault, asyncGetOrNull } from '@shared/lib/utils/result'
 import type { Nullable } from '@shared/lib/utils/types'
 import { keysOf } from '@shared/lib/utils/object'
+import { assertOnlyValidFieldsChanged } from '@shared/service/helpers/assertOnlyValidFieldsChanged'
 
 export interface ProjectServiceDependencies {
   projectPersistence: ProjectPersistence
@@ -82,6 +83,12 @@ class ProjectServiceImpl
     partialProject: Partial<Readonly<ProjectDto>>,
   ): Promise<Readonly<ProjectEntityDto>> {
     const changedFields = keysOf(partialProject)
+
+    assertOnlyValidFieldsChanged(changedFields, [
+      'displayName',
+      'color',
+      'isBillable',
+    ])
 
     const patchedProject = await this.projectPersistence.patchProjectById(
       id,

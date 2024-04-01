@@ -119,6 +119,21 @@ describe.sequential('projectService', async () => {
       ).rejects.toThrowError('Project with id non-existent-id not found')
     })
 
+    it('should throw if invalid fields are changed', async () => {
+      const project = randomElement(await fixture.getProjects())
+
+      expect(
+        fixture.projectService.patchProjectById(project.id, {
+          // @ts-expect-error
+          id: 'invalid',
+          createdAt: 'invalid',
+          invalidField: 'invalid',
+        }),
+      ).rejects.toThrowError(
+        'tried to patch with invalid fields: id, createdAt, invalidField',
+      )
+    })
+
     it('should notify subscribers of the change', async () => {
       const project = randomElement(await fixture.getProjects())
 
