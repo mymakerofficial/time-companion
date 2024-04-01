@@ -151,7 +151,7 @@ describe.sequential('taskService', async () => {
         {
           type: 'updated',
           entityId: task.id,
-          field: ['displayName'],
+          field: ['displayName', 'modifiedAt'],
         },
       )
     })

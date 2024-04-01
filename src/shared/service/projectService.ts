@@ -82,7 +82,11 @@ class ProjectServiceImpl
     )
 
     this.notify(
-      { type: 'updated', entityId: id, field: changedFields },
+      {
+        type: 'updated',
+        entityId: id,
+        field: [...changedFields, 'modifiedAt'],
+      },
       {
         type: 'updated',
         data: patchedProject,

@@ -137,7 +137,7 @@ describe.sequential('projectService', async () => {
         {
           type: 'updated',
           entityId: project.id,
-          field: ['displayName'],
+          field: ['displayName', 'modifiedAt'],
         },
       )
     })
