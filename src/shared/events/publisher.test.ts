@@ -1,5 +1,5 @@
 import { describe, it, vi, expect } from 'vitest'
-import { PublisherImpl, PublisherTopics } from '@shared/events/publisher'
+import { PublisherImpl, type PublisherTopics } from '@shared/events/publisher'
 
 type TestTypes = 'updated' | 'deleted' | 'created'
 

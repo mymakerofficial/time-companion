@@ -1,17 +1,14 @@
 import { describe, it, vi, expect } from 'vitest'
 import {
-  EntityPublisherEvent,
+  type EntityPublisherEvent,
   EntityPublisherImpl,
-  EntityPublisherTopics,
+  type EntityPublisherTopics,
 } from '@shared/events/entityPublisher'
 import { createInvoker } from '@shared/ipc/invoker'
 import { createPublisherServiceProxy } from '@shared/ipc/publisherServiceProxy'
 import { faker } from '@faker-js/faker'
 import { uuid } from '@shared/lib/utils/uuid'
-import type {
-  PublisherTopics,
-  SubscriberCallback,
-} from '@shared/events/publisher'
+import type { PublisherTopics } from '@shared/events/publisher'
 
 type TestEntity = {
   id: string
