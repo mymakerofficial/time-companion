@@ -104,7 +104,7 @@ function registerIpcHandlers() {
   })
 
   ipcMain.handle('service:project:invoke', createIpcListener(projectService))
-  ipcMain.handle('service:task', createIpcListener(taskService))
+  ipcMain.handle('service:task:invoke', createIpcListener(taskService))
 }
 
 function registerIpcPublishers(mainWindow: BrowserWindow) {
