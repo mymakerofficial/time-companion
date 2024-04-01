@@ -20,13 +20,24 @@ import PlaygroundCreateProject from '@renderer/components/playground/PlaygroundC
 import { watchImmediate } from '@vueuse/core'
 import { isDefined } from '@shared/lib/utils/checks'
 import { Button } from '@renderer/components/ui/button'
+import SettingsSection from '@renderer/components/settings/layout/SettingsSection.vue'
+import PlaygroundCreateTask from '@renderer/components/playground/PlaygroundCreateTask.vue'
+import { AppWindow } from 'lucide-vue-next'
+import { useTasksList } from '@renderer/composables/project/useTasksList'
+import type { TaskEntityDto } from '@shared/model/task'
+import { taskService } from '@renderer/factory/service/taskService'
+import TaskEntity from '@renderer/components/playground/TaskEntity.vue'
 
 const projects = useProjectsList()
+const tasks = useTasksList()
 
-const showToasts = ref<boolean>(true)
+const showToasts = ref<boolean>(false)
 
 const selectedProject1 = ref<Nullable<ProjectEntityDto>>(null)
 const selectedProject2 = ref<Nullable<ProjectEntityDto>>(null)
+
+const selectedTask1 = ref<Nullable<TaskEntityDto>>(null)
+const selectedTask2 = ref<Nullable<TaskEntityDto>>(null)
 
 function onNewProjectCreated(event: EntityPublisherEvent<ProjectEntityDto>) {
   if (event.type !== 'created') {
@@ -37,30 +48,68 @@ function onNewProjectCreated(event: EntityPublisherEvent<ProjectEntityDto>) {
   selectedProject2.value = event.data
 }
 
-function onNotify(
+function onNewTaskCreated(event: EntityPublisherEvent<TaskEntityDto>) {
+  if (event.type !== 'created') {
+    return
+  }
+
+  selectedTask1.value = event.data
+  selectedTask2.value = event.data
+}
+
+function onProjectsNotify(
   event: EntityPublisherEvent<ProjectEntityDto>,
   topics: PublisherTopics<EntityPublisherTopics<ProjectEntityDto>>,
 ) {
-  toast.message(`${topics.type} ${topics.entityId} ${topics.field}`, {
+  toast.message(`project ${topics.type} ${topics.entityId} ${topics.field}`, {
+    description: JSON.stringify(event),
+  })
+}
+
+function onTasksNotify(
+  event: EntityPublisherEvent<TaskEntityDto>,
+  topics: PublisherTopics<EntityPublisherTopics<TaskEntityDto>>,
+) {
+  toast.message(`task ${topics.type} ${topics.entityId} ${topics.field}`, {
     description: JSON.stringify(event),
   })
 }
 
 projectService.subscribe({ type: 'created' }, onNewProjectCreated)
+taskService.subscribe({ type: 'created' }, onNewTaskCreated)
 
 watchImmediate(showToasts, (value) => {
   if (value) {
-    toast.message('Toasts enabled')
-    projectService.subscribe({}, onNotify)
+    toast.message('Toasts enabled', {
+      action: {
+        label: 'disable',
+        onClick: () => {
+          showToasts.value = false
+        },
+      },
+    })
+    projectService.subscribe({}, onProjectsNotify)
+    taskService.subscribe({}, onTasksNotify)
   } else {
-    toast.message('Toasts disabled')
-    projectService.unsubscribe({}, onNotify)
+    toast.message('Toasts disabled', {
+      action: {
+        label: 'enable',
+        onClick: () => {
+          showToasts.value = true
+        },
+      },
+    })
+    projectService.unsubscribe({}, onProjectsNotify)
+    taskService.unsubscribe({}, onTasksNotify)
   }
 })
 
 onUnmounted(() => {
   projectService.unsubscribe({ type: 'created' }, onNewProjectCreated)
-  projectService.unsubscribe({}, onNotify)
+  taskService.unsubscribe({ type: 'created' }, onNewTaskCreated)
+
+  projectService.unsubscribe({}, onProjectsNotify)
+  taskService.unsubscribe({}, onTasksNotify)
 })
 
 function handleNewWindow() {
@@ -73,18 +122,22 @@ function handleNewWindow() {
 </script>
 
 <template>
-  <ResponsiveContainer class="my-14 flex flex-col gap-4">
-    <div class="border rounded-md flex items-center justify-between gap-4 p-4">
-      <Button @click="handleNewWindow">New Window</Button>
-      <div class="ml-4 flex items-center gap-4">
-        <Label class="text-right">Show toasts</Label>
-        <Switch v-model:checked="showToasts" />
+  <ResponsiveContainer class="my-14 flex flex-col">
+    <SettingsSection title="Playground">
+      <div class="flex items-center justify-between gap-4">
+        <Button @click="handleNewWindow" class="gap-2">
+          New Window <AppWindow class="size-4" />
+        </Button>
+        <div class="ml-4 flex items-center gap-4">
+          <Label class="text-right">Show toasts</Label>
+          <Switch v-model:checked="showToasts" />
+        </div>
       </div>
-    </div>
-    <PlaygroundCreateProject />
-    <div class="flex flex-row gap-4">
-      <div class="flex-grow flex flex-col gap-4">
-        <ProjectEntity :project-id="selectedProject1?.id">
+    </SettingsSection>
+    <SettingsSection title="Projects">
+      <PlaygroundCreateProject />
+      <div class="flex flex-row gap-4">
+        <ProjectEntity :project-id="selectedProject1?.id" class="flex-grow">
           <RadioGroup
             :options="[null, ...projects]"
             v-model="selectedProject1"
@@ -93,9 +146,7 @@ function handleNewWindow() {
           />
           <Separator />
         </ProjectEntity>
-      </div>
-      <div class="flex-grow flex flex-col gap-4">
-        <ProjectEntity :project-id="selectedProject2?.id">
+        <ProjectEntity :project-id="selectedProject2?.id" class="flex-grow">
           <RadioGroup
             :options="[null, ...projects]"
             v-model="selectedProject2"
@@ -105,6 +156,29 @@ function handleNewWindow() {
           <Separator />
         </ProjectEntity>
       </div>
-    </div>
+    </SettingsSection>
+    <SettingsSection title="Tasks">
+      <PlaygroundCreateTask />
+      <div class="flex flex-row gap-4">
+        <TaskEntity :task-id="selectedTask1?.id" class="flex-grow">
+          <RadioGroup
+            :options="[null, ...tasks]"
+            v-model="selectedTask1"
+            :display-value="(task) => task?.displayName ?? 'None'"
+            :get-key="(task) => task?.id ?? 'none'"
+          />
+          <Separator />
+        </TaskEntity>
+        <TaskEntity :task-id="selectedTask2?.id" class="flex-grow">
+          <RadioGroup
+            :options="[null, ...tasks]"
+            v-model="selectedTask2"
+            :display-value="(task) => task?.displayName ?? 'None'"
+            :get-key="(task) => task?.id ?? 'none'"
+          />
+          <Separator />
+        </TaskEntity>
+      </div>
+    </SettingsSection>
   </ResponsiveContainer>
 </template>

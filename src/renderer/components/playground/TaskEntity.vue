@@ -1,28 +1,27 @@
 <script setup lang="ts">
-import { useProjectById } from '@renderer/composables/project/useProjectById'
 import { Input } from '@renderer/components/ui/input'
 import type { Maybe } from '@shared/lib/utils/types'
-import { Switch } from '@renderer/components/ui/switch'
 import { Label } from '@renderer/components/ui/label'
 import { Button } from '@renderer/components/ui/button'
-import { projectService } from '@renderer/factory/service/projectService'
 import { isAbsent } from '@shared/lib/utils/checks'
 import { Separator } from '@renderer/components/ui/separator'
 import ColorSelect from '@renderer/components/common/inputs/colorSelect/ColorSelect.vue'
+import { taskService } from '@renderer/factory/service/taskService'
+import { useTaskById } from '@renderer/composables/project/useTaskById'
 import { Trash } from 'lucide-vue-next'
 
 const props = defineProps<{
-  projectId: Maybe<string>
+  taskId: Maybe<string>
 }>()
 
-const project = useProjectById(() => props.projectId)
+const task = useTaskById(() => props.taskId)
 
 function handleDelete() {
-  if (isAbsent(props.projectId)) {
+  if (isAbsent(props.taskId)) {
     return
   }
 
-  projectService.deleteProject(props.projectId)
+  taskService.deleteTask(props.taskId)
 }
 </script>
 
@@ -30,19 +29,15 @@ function handleDelete() {
   <div class="border rounded-md p-4 flex flex-col gap-4">
     <slot />
     <div class="mx-4 text-xs text-muted-foreground">
-      {{ projectId ?? 'n/a' }}
+      {{ taskId ?? 'n/a' }}
     </div>
     <div class="ml-4 flex items-center gap-4">
       <Label class="text-right">Name</Label>
-      <Input v-model="project.displayName" />
+      <Input v-model="task.displayName" />
     </div>
     <div class="ml-4 flex items-center gap-4">
       <Label class="text-right">Color</Label>
-      <ColorSelect v-model="project.color" />
-    </div>
-    <div class="ml-4 flex items-center gap-4">
-      <Label class="text-right">Billable</Label>
-      <Switch v-model:checked="project.isBillable" />
+      <ColorSelect v-model="task.color" />
     </div>
     <div class="flex justify-end">
       <Button @click="handleDelete" variant="destructive" class="gap-2">
@@ -50,6 +45,6 @@ function handleDelete() {
       </Button>
     </div>
     <Separator />
-    <pre class="p-4 bg-muted rounded-md">{{ project }}</pre>
+    <pre class="p-4 bg-muted rounded-md">{{ task }}</pre>
   </div>
 </template>
