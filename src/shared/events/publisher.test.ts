@@ -128,6 +128,9 @@ describe('publisher', () => {
         { message: 'test' },
         { type: ['updated', 'deleted'] },
       )
+
+      publisher.unsubscribe({ type: 'updated' }, updateSubscriber)
+      publisher.unsubscribe({ type: 'deleted' }, deleteSubscriber)
     })
 
     it('should not notify a subscriber with a different topic', () => {
