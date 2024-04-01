@@ -8,7 +8,14 @@ import type {
   EntityPublisherEvent,
   EntityPublisherTopics,
 } from '@shared/events/entityPublisher'
-import { customRef, type MaybeRefOrGetter, type Ref, toValue, watch } from 'vue'
+import {
+  customRef,
+  type MaybeRefOrGetter,
+  onScopeDispose,
+  type Ref,
+  toValue,
+  watch,
+} from 'vue'
 import { getOrDefault } from '@shared/lib/utils/result'
 import { computedAsync, toReactive, watchImmediate } from '@vueuse/core'
 import { check, isAbsent, isPresent } from '@shared/lib/utils/checks'
@@ -96,6 +103,14 @@ export function entityFieldToRef<
         }
       },
     )
+
+    onScopeDispose(() => {
+      const id = toValue(entityId)
+
+      if (isPresent(id)) {
+        publisher.unsubscribe(getTopics(id, fieldName), subscriber)
+      }
+    })
 
     // set the initial value
     watch(initialEntity, (newValue) => {
