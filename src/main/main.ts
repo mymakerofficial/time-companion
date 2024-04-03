@@ -2,8 +2,13 @@ import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'path'
 import { database } from '@main/factory/database/database'
 import { projectService } from '@main/factory/service/projectService'
-import { createIpcListener } from '@main/ipc/listener'
+import { registerIpcHandler } from '@main/ipc/handler'
 import { taskService } from '@main/factory/service/taskService'
+import { registerIpcPublisher } from '@main/ipc/publisher'
+import {
+  serviceInvokeChannel,
+  servicePublishChannel,
+} from '@shared/ipc/helpers/channels'
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -103,17 +108,13 @@ function registerIpcHandlers() {
     registerIpcPublishers(mainWindow)
   })
 
-  ipcMain.handle('service:project:invoke', createIpcListener(projectService))
-  ipcMain.handle('service:task:invoke', createIpcListener(taskService))
+  registerIpcHandler(serviceInvokeChannel('project'), projectService)
+  registerIpcHandler(serviceInvokeChannel('task'), taskService)
 }
 
-function registerIpcPublishers(mainWindow: BrowserWindow) {
-  projectService.subscribe({}, (event, topics) => {
-    mainWindow.webContents.send('service:project:notify', event, topics)
-  })
-  taskService.subscribe({}, (event, topics) => {
-    mainWindow.webContents.send('service:task:notify', event, topics)
-  })
+function registerIpcPublishers(window: BrowserWindow) {
+  registerIpcPublisher(servicePublishChannel('project'), projectService, window)
+  registerIpcPublisher(servicePublishChannel('task'), taskService, window)
 }
 
 // This method will be called when Electron has finished

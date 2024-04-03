@@ -47,7 +47,7 @@ export interface Publisher<TTopics extends object, TEvent extends object> {
   subscribe(
     topics: PublisherTopics<TTopics>,
     callback: SubscriberCallback<TTopics, TEvent>,
-  ): void
+  ): SubscriberCallback<TTopics, TEvent>
   // unsubscribe a callback.
   unsubscribe(
     topics: PublisherTopics<TTopics>,
@@ -100,6 +100,7 @@ export class PublisherImpl<TTopics extends object, TEvent extends object>
     callback: SubscriberCallback<TTopics, TEvent>,
   ) {
     this.subscribers.push([topics, callback])
+    return callback
   }
 
   unsubscribe(

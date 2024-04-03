@@ -2,17 +2,7 @@
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
 import { contextBridge, ipcRenderer } from 'electron'
-
-function getServiceApi(service: string) {
-  return {
-    invoke: async (method: string, ...args: any[]) =>
-      await ipcRenderer.invoke(`service:${service}:invoke`, method, ...args),
-    onNotify: (callback: (event: object, topics: object) => void) =>
-      ipcRenderer.on(`service:${service}:notify`, (_, event, topics) =>
-        callback(event, topics),
-      ),
-  }
-}
+import { createServiceApi } from '@preload/helpers/createServiceApi'
 
 contextBridge.exposeInMainWorld('electronAPI', {
   isElectron: true,
@@ -24,10 +14,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   service: {
     project: {
-      ...getServiceApi('project'),
+      ...createServiceApi('project'),
     },
     task: {
-      ...getServiceApi('task'),
+      ...createServiceApi('task'),
     },
   },
 })
