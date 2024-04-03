@@ -52,6 +52,8 @@ function createMainWindow() {
     mainWindow.show()
   })
 
+  registerIpcPublishers(mainWindow)
+
   return mainWindow
 }
 
@@ -123,8 +125,7 @@ function registerIpcPublishers(window: BrowserWindow) {
 app.on('ready', () => {
   initialize()
   registerIpcHandlers()
-  const mainWindow = createMainWindow()
-  registerIpcPublishers(mainWindow)
+  createMainWindow()
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
