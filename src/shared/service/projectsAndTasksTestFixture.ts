@@ -13,6 +13,7 @@ import {
 } from '@shared/service/taskService'
 import { createProjectPersistence } from '@shared/persistence/projectPersistence'
 import { createTaskPersistence } from '@shared/persistence/taskPersistence'
+import { randomElement, RandomElementOptions } from '@shared/lib/utils/random'
 
 export class ProjectsAndTasksTestFixture {
   public database: Database
@@ -40,11 +41,15 @@ export class ProjectsAndTasksTestFixture {
     })
   }
 
-  async getProjects() {
+  async getExistingProjects() {
     return await this.projectService.getProjects()
   }
 
-  async getProjectsWithTasks() {
+  async getRandomExistingProject(options?: RandomElementOptions) {
+    return randomElement(await this.getExistingProjects(), options)
+  }
+
+  async getExistingProjectsWithTasks() {
     const projects = await this.projectService.getProjects()
     const tasks = await this.taskService.getTasks()
 
@@ -53,7 +58,11 @@ export class ProjectsAndTasksTestFixture {
     )
   }
 
-  async getProjectsWithoutTasks() {
+  async getRandomExistingProjectWithTasks(options?: RandomElementOptions) {
+    return randomElement(await this.getExistingProjectsWithTasks(), options)
+  }
+
+  async getExistingProjectsWithoutTasks() {
     const projects = await this.projectService.getProjects()
     const tasks = await this.taskService.getTasks()
 
@@ -62,12 +71,33 @@ export class ProjectsAndTasksTestFixture {
     )
   }
 
-  async getTasks() {
+  async getRandomExistingProjectWithoutTasks(options?: RandomElementOptions) {
+    return randomElement(await this.getExistingProjectsWithoutTasks(), options)
+  }
+
+  async getExistingTasks() {
     return await this.taskService.getTasks()
   }
 
-  async getTasksForProject(projectId: string) {
-    const tasks = await this.getTasks()
+  async getRandomExistingTask(options?: RandomElementOptions) {
+    return randomElement(await this.getExistingTasks(), options)
+  }
+
+  async getExistingTasksWithProject() {
+    const tasks = await this.getExistingTasks()
+    const projects = await this.getExistingProjects()
+
+    return tasks.filter((task) =>
+      projects.some((project) => project.id === task.projectId),
+    )
+  }
+
+  async getRandomExistingTaskWithProject(options?: RandomElementOptions) {
+    return randomElement(await this.getExistingTasksWithProject(), options)
+  }
+
+  async getExistingTasksForProject(projectId: string) {
+    const tasks = await this.getExistingTasks()
 
     return tasks.filter((task) => task.projectId === projectId)
   }
@@ -95,7 +125,7 @@ export class ProjectsAndTasksTestFixture {
   }
 
   async getSampleTasks() {
-    const projects = await this.getProjects()
+    const projects = await this.getExistingProjects()
 
     check(
       projects.length > 0,

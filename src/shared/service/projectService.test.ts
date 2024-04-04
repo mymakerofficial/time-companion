@@ -1,16 +1,14 @@
 import {
+  afterAll,
+  beforeAll,
   describe,
+  expect,
   expectTypeOf,
   it,
-  expect,
   vi,
-  beforeAll,
-  afterAll,
 } from 'vitest'
 import type { ProjectEntityDto } from '@shared/model/project'
-import { firstOf, lastOf } from '@shared/lib/utils/list'
 import { ProjectsAndTasksTestFixture } from '@shared/service/projectsAndTasksTestFixture'
-import { randomElement } from '@shared/lib/utils/random'
 
 describe.sequential('projectService', async () => {
   const fixture = new ProjectsAndTasksTestFixture()
@@ -38,35 +36,38 @@ describe.sequential('projectService', async () => {
     )
 
     it('should throw if project with displayName already exists', async () => {
-      const project = randomElement(await fixture.getProjects())
+      const randomProject = await fixture.getRandomExistingProject()
 
       expect(
         fixture.projectService.createProject({
-          displayName: project.displayName,
+          displayName: randomProject.displayName,
           color: null,
           isBillable: false,
         }),
       ).rejects.toThrowError(
-        `Project with displayName ${project.displayName} already exists`,
+        `Project with displayName ${randomProject.displayName} already exists`,
       )
     })
   })
 
   describe('getProjects', () => {
     it('should get all projects', async () => {
-      const res = await fixture.projectService.getProjects()
+      const resProject = await fixture.projectService.getProjects()
 
-      expect(res).toHaveLength(fixture.getExpectedProjectsLength())
+      expect(resProject).toHaveLength(fixture.getExpectedProjectsLength())
 
       // TODO actually test the values
     })
 
     it('should be ordered by displayName', async () => {
-      const expected = await fixture.getSortedSampleProjects()
-      const expectedNames = expected.map((project) => project.displayName)
+      const expectedProjects = await fixture.getSortedSampleProjects()
 
-      const res = await fixture.projectService.getProjects()
-      const resNames = res.map((project) => project.displayName)
+      const resProjects = await fixture.projectService.getProjects()
+
+      const expectedNames = expectedProjects.map(
+        (project) => project.displayName,
+      )
+      const resNames = resProjects.map((project) => project.displayName)
 
       expect(resNames).toEqual(expectedNames)
     })
@@ -74,11 +75,15 @@ describe.sequential('projectService', async () => {
 
   describe('getProjectById', () => {
     it('should get a project by id', async (index) => {
-      const project = lastOf(await fixture.getProjects())
+      const randomProject = await fixture.getRandomExistingProject({
+        safetyOffset: 1, // exclude first and last elements
+      })
 
-      const resById = await fixture.projectService.getProjectById(project.id)
+      const resProject = await fixture.projectService.getProjectById(
+        randomProject.id,
+      )
 
-      expect(resById).toEqual(project)
+      expect(resProject).toEqual(randomProject)
     })
 
     it('should throw if project with id is not found', async () => {
@@ -92,12 +97,16 @@ describe.sequential('projectService', async () => {
     it('should get a project by task id', async () => {
       await fixture.createSampleTasks()
 
-      const task = firstOf(await fixture.getTasks())
+      const randomTask = await fixture.getRandomExistingTaskWithProject({
+        safetyOffset: 1, // exclude first and last elements
+      })
 
-      const res = await fixture.projectService.getProjectByTaskId(task.id)
+      const resProject = await fixture.projectService.getProjectByTaskId(
+        randomTask.id,
+      )
 
-      expect(res).toMatchObject({
-        id: task.projectId,
+      expect(resProject).toMatchObject({
+        id: randomTask.projectId,
       })
     })
 
@@ -110,10 +119,10 @@ describe.sequential('projectService', async () => {
 
   describe('patchProjectById', () => {
     it('should patch a project by id', async () => {
-      const project = randomElement(await fixture.getProjects())
+      const randomProject = await fixture.getRandomExistingProject()
 
       const resPatched = await fixture.projectService.patchProjectById(
-        project.id,
+        randomProject.id,
         {
           displayName: 'Patched Project',
         },
@@ -133,10 +142,10 @@ describe.sequential('projectService', async () => {
     })
 
     it('should throw if invalid fields are changed', async () => {
-      const project = randomElement(await fixture.getProjects())
+      const randomProject = await fixture.getRandomExistingProject()
 
       expect(
-        fixture.projectService.patchProjectById(project.id, {
+        fixture.projectService.patchProjectById(randomProject.id, {
           // @ts-expect-error
           id: 'invalid',
           createdAt: 'invalid',
@@ -148,9 +157,9 @@ describe.sequential('projectService', async () => {
     })
 
     it('should notify subscribers of the change', async () => {
-      const project = randomElement(await fixture.getProjects())
+      const randomProject = await fixture.getRandomExistingProject()
 
-      await fixture.projectService.patchProjectById(project.id, {
+      await fixture.projectService.patchProjectById(randomProject.id, {
         displayName: 'Other Patched Project',
       })
 
@@ -164,7 +173,7 @@ describe.sequential('projectService', async () => {
         },
         {
           type: 'updated',
-          entityId: project.id,
+          entityId: randomProject.id,
           field: ['displayName', 'modifiedAt'],
         },
       )
@@ -173,13 +182,13 @@ describe.sequential('projectService', async () => {
 
   describe('deleteProject', () => {
     it('should delete a project by id', async () => {
-      const project = randomElement(await fixture.getProjects())
+      const randomProject = await fixture.getRandomExistingProject()
 
-      await fixture.projectService.deleteProject(project.id)
+      await fixture.projectService.deleteProject(randomProject.id)
 
-      const res = await fixture.projectService.getProjects()
+      const resProjects = await fixture.projectService.getProjects()
 
-      expect(res).not.toContain(project)
+      expect(resProjects).not.toContain(randomProject)
     })
 
     it('should throw if project with id is not found', () => {
@@ -189,18 +198,18 @@ describe.sequential('projectService', async () => {
     })
 
     it('should notify subscribers of the change', async () => {
-      const project = randomElement(await fixture.getProjects())
+      const randomProject = await fixture.getRandomExistingProject()
 
-      await fixture.projectService.deleteProject(project.id)
+      await fixture.projectService.deleteProject(randomProject.id)
 
       expect(subscriber).toHaveBeenCalledWith(
         {
           type: 'deleted',
-          id: project.id,
+          id: randomProject.id,
         },
         {
           type: 'deleted',
-          entityId: project.id,
+          entityId: randomProject.id,
         },
       )
     })
