@@ -191,6 +191,16 @@ describe.sequential('projectService', async () => {
       expect(resProjects).not.toContain(randomProject)
     })
 
+    it('should delete tasks associated with the project', async () => {
+      const randomProject = await fixture.getRandomExistingProjectWithTasks()
+
+      await fixture.projectService.deleteProject(randomProject.id)
+
+      const tasks = await fixture.getExistingTasksForProject(randomProject.id)
+
+      expect(tasks).toHaveLength(0)
+    })
+
     it('should throw if project with id is not found', async () => {
       await expect(() =>
         fixture.projectService.deleteProject('non-existent-id'),

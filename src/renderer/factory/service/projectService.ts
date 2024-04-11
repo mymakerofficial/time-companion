@@ -11,6 +11,7 @@ import type {
   EntityPublisherTopics,
 } from '@shared/events/entityPublisher'
 import type { ProjectEntityDto } from '@shared/model/project'
+import { taskService } from '@renderer/factory/service/taskService'
 
 export const projectService: ProjectService = (() => {
   if (isDefined(window.electronAPI)) {
@@ -25,5 +26,6 @@ export const projectService: ProjectService = (() => {
     projectPersistence: createProjectPersistence({
       database,
     }),
+    taskService,
   })
 })()

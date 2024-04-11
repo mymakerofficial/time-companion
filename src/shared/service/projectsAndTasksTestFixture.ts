@@ -28,12 +28,6 @@ export class ProjectsAndTasksTestFixture {
   constructor() {
     this.database = createTestDatabase()
 
-    this.projectService = createProjectService({
-      projectPersistence: createProjectPersistence({
-        database: this.database,
-      }),
-    })
-
     this.taskService = createTaskService({
       taskPersistence: createTaskPersistence({
         database: this.database,
@@ -41,6 +35,13 @@ export class ProjectsAndTasksTestFixture {
       projectPersistence: createProjectPersistence({
         database: this.database,
       }),
+    })
+
+    this.projectService = createProjectService({
+      projectPersistence: createProjectPersistence({
+        database: this.database,
+      }),
+      taskService: this.taskService,
     })
   }
 

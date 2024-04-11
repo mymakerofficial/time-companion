@@ -9,9 +9,11 @@ import {
   type EntityService,
   EntityServiceImpl,
 } from '@shared/service/helpers/entityService'
+import type { TaskService } from '@shared/service/taskService'
 
 export interface ProjectServiceDependencies {
   projectPersistence: ProjectPersistence
+  taskService: TaskService
 }
 
 export interface ProjectService extends EntityService<ProjectEntityDto> {
@@ -42,10 +44,12 @@ class ProjectServiceImpl
   implements ProjectService
 {
   private readonly projectPersistence: ProjectPersistence
+  private readonly taskService: TaskService
 
   constructor(deps: ProjectServiceDependencies) {
     super()
     this.projectPersistence = deps.projectPersistence
+    this.taskService = deps.taskService
   }
 
   async getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>> {
@@ -106,6 +110,8 @@ class ProjectServiceImpl
   }
 
   async deleteProject(id: string): Promise<void> {
+    await this.taskService.deleteTasksByProjectId(id)
+
     await this.projectPersistence.deleteProject(id)
 
     this.publishDeleted(id)

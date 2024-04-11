@@ -28,6 +28,7 @@ export interface TaskService extends EntityService<TaskEntityDto> {
     partialTask: Partial<Readonly<TaskDto>>,
   ) => Promise<Readonly<TaskEntityDto>>
   deleteTask: (id: string) => Promise<void>
+  deleteTasksByProjectId: (projectId: string) => Promise<void>
 }
 
 class TaskServiceImpl
@@ -110,6 +111,14 @@ class TaskServiceImpl
     await this.taskPersistence.deleteTask(id)
 
     this.publishDeleted(id)
+  }
+
+  async deleteTasksByProjectId(projectId: string): Promise<void> {
+    const tasks = await this.taskPersistence.getTasksByProjectId(projectId)
+
+    for (const task of tasks) {
+      await this.deleteTask(task.id)
+    }
   }
 }
 
