@@ -134,19 +134,10 @@ export function entityFieldToRef<
       updateValue(newValue)
     })
 
-    // sets the value and triggers the onChanged callback
-    function setFn(newValue: TValue) {
-      onChanged(newValue)
-
-      // optimistic update
-      value = newValue
-      trigger()
-    }
-
-    // setting the value is debounced to avoid spamming all subscribers and improve performance
-    const debouncedSet = isNotZeroOrNull(debounceMs)
-      ? useDebounceFn(setFn, debounceMs)
-      : setFn
+    // sending the value to the service is debounced to avoid spamming all subscribers and improve performance
+    const debouncedOnChanged = isNotZeroOrNull(debounceMs)
+      ? useDebounceFn(onChanged, debounceMs)
+      : onChanged
 
     return {
       get() {
@@ -154,7 +145,11 @@ export function entityFieldToRef<
         return value
       },
       set(newValue: TValue) {
-        debouncedSet(newValue)
+        // optimistic update
+        value = newValue
+        trigger()
+
+        debouncedOnChanged(newValue)
       },
     }
   })
