@@ -10,6 +10,7 @@ import {
   EntityServiceImpl,
 } from '@shared/service/helpers/entityService'
 import type { TaskService } from '@shared/service/taskService'
+import { uuid } from '@shared/lib/utils/uuid'
 
 export interface ProjectServiceDependencies {
   projectPersistence: ProjectPersistence
@@ -80,7 +81,13 @@ class ProjectServiceImpl
       `Project with displayName "${project.displayName}" already exists.`,
     )
 
-    const newProject = await this.projectPersistence.createProject(project)
+    const newProject = await this.projectPersistence.createProject({
+      id: uuid(),
+      ...project,
+      createdAt: new Date().toISOString(),
+      modifiedAt: null,
+      deletedAt: null,
+    })
 
     this.publishCreated(newProject)
 

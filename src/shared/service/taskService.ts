@@ -10,6 +10,7 @@ import {
   type EntityService,
   EntityServiceImpl,
 } from '@shared/service/helpers/entityService'
+import { uuid } from '@shared/lib/utils/uuid'
 
 export interface TaskServiceDependencies {
   taskPersistence: TaskPersistence
@@ -71,7 +72,13 @@ class TaskServiceImpl
       `Task with displayName "${task.displayName}" already exists in project "${task.projectId}".`,
     )
 
-    const newTask = await this.taskPersistence.createTask(task)
+    const newTask = await this.taskPersistence.createTask({
+      id: uuid(),
+      ...task,
+      createdAt: new Date().toISOString(),
+      modifiedAt: null,
+      deletedAt: null,
+    })
 
     this.publishCreated(newTask)
 

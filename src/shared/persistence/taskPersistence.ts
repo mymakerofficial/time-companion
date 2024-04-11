@@ -1,7 +1,6 @@
 import type { Database } from '@shared/database/database'
-import type { TaskDto, TaskEntityDto } from '@shared/model/task'
+import type { TaskEntityDto } from '@shared/model/task'
 import { asyncGetOrThrow } from '@shared/lib/utils/result'
-import { uuid } from '@shared/lib/utils/uuid'
 import type { ProjectEntityDto } from '@shared/model/project'
 import { check, isDefined } from '@shared/lib/utils/checks'
 
@@ -19,7 +18,9 @@ export interface TaskPersistence {
   getTasksByProjectId: (
     projectId: string,
   ) => Promise<ReadonlyArray<TaskEntityDto>>
-  createTask: (task: Readonly<TaskDto>) => Promise<Readonly<TaskEntityDto>>
+  createTask: (
+    task: Readonly<TaskEntityDto>,
+  ) => Promise<Readonly<TaskEntityDto>>
   patchTaskById: (
     id: string,
     partialTask: Partial<Readonly<TaskEntityDto>>,
@@ -95,7 +96,9 @@ export class TaskPersistenceImpl implements TaskPersistence {
     })
   }
 
-  async createTask(task: Readonly<TaskDto>): Promise<Readonly<TaskEntityDto>> {
+  async createTask(
+    task: Readonly<TaskEntityDto>,
+  ): Promise<Readonly<TaskEntityDto>> {
     const project = await this.database
       .table<ProjectEntityDto>('projects')
       .findFirst({
@@ -110,19 +113,13 @@ export class TaskPersistenceImpl implements TaskPersistence {
     check(isDefined(project), `Project with id "${task.projectId}" not found.`)
 
     return await this.database.table<TaskEntityDto>('tasks').create({
-      data: {
-        id: uuid(),
-        ...task,
-        createdAt: new Date().toISOString(),
-        modifiedAt: null,
-        deletedAt: null,
-      },
+      data: task,
     })
   }
 
   async patchTaskById(
     id: string,
-    partialTask: Partial<Readonly<TaskDto>>,
+    partialTask: Partial<Readonly<TaskEntityDto>>,
   ): Promise<Readonly<TaskEntityDto>> {
     const originalProject = await this.getTaskById(id)
 

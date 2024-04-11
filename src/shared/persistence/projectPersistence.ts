@@ -1,6 +1,5 @@
-import type { ProjectDto, ProjectEntityDto } from '@shared/model/project'
+import type { ProjectEntityDto } from '@shared/model/project'
 import type { Database } from '@shared/database/database'
-import { uuid } from '@shared/lib/utils/uuid'
 import type { TaskEntityDto } from '@shared/model/task'
 import { asyncGetOrThrow } from '@shared/lib/utils/result'
 
@@ -16,7 +15,7 @@ export interface ProjectPersistence {
   ): Promise<Readonly<ProjectEntityDto>>
   getProjectByTaskId(taskId: string): Promise<Readonly<ProjectEntityDto>>
   createProject(
-    project: Readonly<ProjectDto>,
+    project: Readonly<ProjectEntityDto>,
   ): Promise<Readonly<ProjectEntityDto>>
   patchProjectById(
     id: string,
@@ -83,22 +82,16 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   }
 
   async createProject(
-    project: Readonly<ProjectDto>,
+    project: Readonly<ProjectEntityDto>,
   ): Promise<Readonly<ProjectEntityDto>> {
     return await this.database.table<ProjectEntityDto>('projects').create({
-      data: {
-        id: uuid(),
-        ...project,
-        createdAt: new Date().toISOString(),
-        modifiedAt: null,
-        deletedAt: null,
-      },
+      data: project,
     })
   }
 
   async patchProjectById(
     id: string,
-    partialProject: Partial<Readonly<ProjectDto>>,
+    partialProject: Partial<Readonly<ProjectEntityDto>>,
   ): Promise<Readonly<ProjectEntityDto>> {
     const originalProject = await this.getProjectById(id)
 
