@@ -1,4 +1,3 @@
-import { createSingleton } from '@shared/lib/helpers/createSingleton'
 import {
   createProjectService,
   type ProjectService,
@@ -13,7 +12,7 @@ import type {
 } from '@shared/events/entityPublisher'
 import type { ProjectEntityDto } from '@shared/model/project'
 
-export const projectService = createSingleton((): ProjectService => {
+export const projectService: ProjectService = (() => {
   if (isDefined(window.electronAPI)) {
     return createPublisherServiceProxy<
       ProjectService,

@@ -1,4 +1,4 @@
-import { testDatabase } from '@shared/database/testDatabase'
+import { createTestDatabase } from '@shared/database/testDatabase'
 import {
   createProjectService,
   type ProjectService,
@@ -26,7 +26,7 @@ export class ProjectsAndTasksTestFixture {
   public taskService: TaskService
 
   constructor() {
-    this.database = testDatabase()
+    this.database = createTestDatabase()
 
     this.projectService = createProjectService({
       projectPersistence: createProjectPersistence({

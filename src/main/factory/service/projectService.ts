@@ -1,4 +1,3 @@
-import { createSingleton } from '@shared/lib/helpers/createSingleton'
 import {
   createProjectService,
   type ProjectService,
@@ -6,7 +5,7 @@ import {
 import { createProjectPersistence } from '@shared/persistence/projectPersistence'
 import { database } from '@main/factory/database/database'
 
-export const projectService = createSingleton((): ProjectService => {
+export const projectService: ProjectService = (() => {
   return createProjectService({
     projectPersistence: createProjectPersistence({
       database,

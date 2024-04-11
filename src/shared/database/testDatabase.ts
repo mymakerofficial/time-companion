@@ -1,8 +1,7 @@
 import type { Database } from '@shared/database/database'
-import { createSingleton } from '@shared/lib/helpers/createSingleton'
 import { createInMemoryDatabase } from '@shared/database/inMemory/database'
 
-export const testDatabase = createSingleton((): Database => {
+export function createTestDatabase(): Database {
   const database = createInMemoryDatabase()
 
   // TODO this is a hack to create the tables
@@ -34,4 +33,4 @@ export const testDatabase = createSingleton((): Database => {
   })
 
   return database
-})
+}

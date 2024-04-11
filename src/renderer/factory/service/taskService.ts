@@ -1,4 +1,3 @@
-import { createSingleton } from '@shared/lib/helpers/createSingleton'
 import { database } from '@renderer/factory/database/database'
 import { isDefined } from '@shared/lib/utils/checks'
 import type { TaskService } from '@shared/service/taskService'
@@ -12,7 +11,7 @@ import type {
 } from '@shared/events/entityPublisher'
 import type { TaskEntityDto } from '@shared/model/task'
 
-export const taskService = createSingleton((): TaskService => {
+export const taskService: TaskService = (() => {
   if (isDefined(window.electronAPI)) {
     return createPublisherServiceProxy<
       TaskService,
