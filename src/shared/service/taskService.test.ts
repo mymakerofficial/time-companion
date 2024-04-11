@@ -202,8 +202,12 @@ describe.sequential('taskService', async () => {
 
   describe('changeProjectOnTaskById', () => {
     it('should throw if task with id is not found', async () => {
+      const randomProject = await fixture.getRandomExistingProjectWithoutTasks()
+
       expect(
-        fixture.taskService.changeProjectOnTaskById('non-existent-id', 'id'),
+        fixture.taskService.patchTaskById('non-existent-id', {
+          projectId: randomProject.id,
+        }),
       ).rejects.toThrowError('Task with id non-existent-id not found')
     })
 
@@ -211,21 +215,21 @@ describe.sequential('taskService', async () => {
       const randomTask = await fixture.getRandomExistingTask()
 
       expect(
-        fixture.taskService.changeProjectOnTaskById(
-          randomTask.id,
-          'non-existent-id',
-        ),
-      ).rejects.toThrowError('Project with id non-existent-id not found')
+        fixture.taskService.patchTaskById(randomTask.id, {
+          projectId: 'non-existent-id',
+        }),
+      ).rejects.toThrowError(
+        `Tried to set projectId on Task with id ${randomTask.id} to non-existent-id which does not exist`,
+      )
     })
 
     it('should change the project', async () => {
       const randomTask = await fixture.getRandomExistingTask()
       const randomProject = await fixture.getRandomExistingProjectWithoutTasks()
 
-      const resTask = await fixture.taskService.changeProjectOnTaskById(
-        randomTask.id,
-        randomProject.id,
-      )
+      const resTask = await fixture.taskService.patchTaskById(randomTask.id, {
+        projectId: randomProject.id,
+      })
 
       expect(
         fixture.projectService.getProjectByTaskId(randomTask.id),

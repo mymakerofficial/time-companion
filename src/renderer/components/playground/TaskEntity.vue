@@ -32,6 +32,10 @@ function handleDelete() {
       {{ taskId ?? 'n/a' }}
     </div>
     <div class="ml-4 flex items-center gap-4">
+      <Label class="text-right">ProjectId</Label>
+      <Input v-model="task.projectId" />
+    </div>
+    <div class="ml-4 flex items-center gap-4">
       <Label class="text-right">Name</Label>
       <Input v-model="task.displayName" />
     </div>
