@@ -1,6 +1,7 @@
 import { propertiesOf } from '@shared/lib/utils/object'
 import { check } from '@shared/lib/utils/checks'
 import { setOf } from '@shared/lib/utils/list'
+import { asyncRunResulting } from '@shared/lib/helpers/resulting'
 
 export interface Invoker {
   // invoke a method on the receiver object
@@ -18,8 +19,9 @@ class InvokerImpl implements Invoker {
 
   async invoke(method: string, ...args: any[]) {
     check(this.methods.has(method), `Method ${method} not found`)
+
     // @ts-expect-error we already checked that the method exists
-    return await this.receiver[method](...args)
+    return await asyncRunResulting(this.receiver[method](...args))
   }
 }
 

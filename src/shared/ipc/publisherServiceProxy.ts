@@ -4,6 +4,10 @@ import type {
   SubscriberCallback,
 } from '@shared/events/publisher'
 import { PublisherImpl } from '@shared/events/publisher'
+import {
+  asyncResolveResult,
+  resolveResult,
+} from '@shared/lib/helpers/resulting'
 
 // notify is a protected method, but we need to call it, so we expose it
 class OpenPublisher<
@@ -66,7 +70,9 @@ export function createPublisherServiceProxy<
         }
 
         // forward all other methods to the invoke function
-        return async (...args: any[]) => await invoke(method as string, ...args)
+        return async (...args: any[]) => {
+          return await asyncResolveResult(invoke(method as string, ...args))
+        }
       },
     },
   ) as TService
