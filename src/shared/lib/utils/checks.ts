@@ -1,3 +1,5 @@
+import type { Nullable } from '@shared/lib/utils/types'
+
 export class IllegalStateError extends Error {
   constructor(message: string) {
     super(message)
@@ -33,6 +35,16 @@ export function isAbsent(value: unknown): value is null | undefined {
 
 export function isPresent<T>(value: T): value is Exclude<T, null | undefined> {
   return value !== null && value !== undefined
+}
+
+export function isZeroOrNull(value: Nullable<number>): value is 0 | null {
+  return value === 0 || value === null
+}
+
+export function isNotZeroOrNull(
+  value: Nullable<number>,
+): value is Exclude<number, 0 | null> {
+  return value !== 0 && value !== null
 }
 
 export function isArray<T>(value: Array<T> | any): value is Array<T> {

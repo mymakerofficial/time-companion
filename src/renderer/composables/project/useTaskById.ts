@@ -1,11 +1,16 @@
 import type { MaybeRefOrGetter } from 'vue'
 import type { Maybe } from '@shared/lib/utils/types'
-import { createEntityDao } from '@renderer/lib/reactify/reactifyEntity'
+import {
+  createEntityDao,
+  type UseEntityDaoOptions,
+} from '@renderer/lib/reactify/reactifyEntity'
 import type { TaskEntityDao, TaskEntityDto } from '@shared/model/task'
 import { taskService } from '@renderer/factory/service/taskService'
+import type { ProjectEntityDao, ProjectEntityDto } from '@shared/model/project'
 
 export function useTaskById(
   taskId: MaybeRefOrGetter<Maybe<string>>,
+  options?: UseEntityDaoOptions<ProjectEntityDto, ProjectEntityDao>,
 ): TaskEntityDao {
   return createEntityDao<TaskEntityDto, TaskEntityDao>({
     entityId: taskId,
@@ -25,5 +30,6 @@ export function useTaskById(
       modifiedAt: null,
       deletedAt: null,
     },
+    ...options,
   })
 }

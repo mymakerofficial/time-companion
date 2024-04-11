@@ -17,10 +17,22 @@ import {
   watch,
 } from 'vue'
 import { getOrDefault } from '@shared/lib/utils/result'
-import { computedAsync, toReactive, watchImmediate } from '@vueuse/core'
-import { check, isAbsent, isPresent } from '@shared/lib/utils/checks'
+import {
+  computedAsync,
+  toReactive,
+  useDebounceFn,
+  watchImmediate,
+} from '@vueuse/core'
+import {
+  check,
+  isAbsent,
+  isNotZeroOrNull,
+  isPresent,
+} from '@shared/lib/utils/checks'
 import { entriesOf } from '@shared/lib/utils/object'
 import { toString } from '@shared/lib/utils/casting'
+
+const DEFAULT_DEBOUNCE_MS = 300
 
 function createSubscriber<TEntity extends object>(
   onUpdate: (newEntity: Nullable<TEntity>) => void,
@@ -60,6 +72,7 @@ export interface EntityFieldToRefOptions<
   initialEntity: Ref<Nullable<Readonly<TEntity>>>
   publisher: EntityPublisher<TEntity>
   onChanged: (newValue: TValue) => void
+  debounceMs?: Nullable<number>
 }
 
 export function entityFieldToRef<
@@ -73,12 +86,14 @@ export function entityFieldToRef<
     initialEntity,
     publisher,
     onChanged,
+    debounceMs = DEFAULT_DEBOUNCE_MS,
   } = options
 
   return customRef((track, trigger) => {
     let value: TValue = defaultValue
 
-    function update(entity: Nullable<TEntity>) {
+    // sets the value to the field or the default value
+    function updateValue(entity: Nullable<TEntity>) {
       value = getOrDefault(
         entity?.[fieldName as any as keyof TEntity] as TValue,
         defaultValue,
@@ -86,7 +101,7 @@ export function entityFieldToRef<
       trigger()
     }
 
-    const subscriber = createSubscriber(update)
+    const subscriber = createSubscriber(updateValue)
 
     // the entityId might change or not be present, so we need to dynamically subscribe and unsubscribe
     watchImmediate(
@@ -104,6 +119,8 @@ export function entityFieldToRef<
       },
     )
 
+    // the scope of this ref might be disposed at any time,
+    //  to avoid having the owner of the ref to manually unsubscribe, we do it here
     onScopeDispose(() => {
       const id = toValue(entityId)
 
@@ -114,8 +131,22 @@ export function entityFieldToRef<
 
     // set the initial value
     watch(initialEntity, (newValue) => {
-      update(newValue)
+      updateValue(newValue)
     })
+
+    // sets the value and triggers the onChanged callback
+    function setFn(newValue: TValue) {
+      onChanged(newValue)
+
+      // optimistic update
+      value = newValue
+      trigger()
+    }
+
+    // setting the value is debounced to avoid spamming all subscribers and improve performance
+    const debouncedSet = isNotZeroOrNull(debounceMs)
+      ? useDebounceFn(setFn, debounceMs)
+      : setFn
 
     return {
       get() {
@@ -123,11 +154,7 @@ export function entityFieldToRef<
         return value
       },
       set(newValue: TValue) {
-        onChanged(newValue)
-
-        // optimistic update
-        value = newValue
-        trigger()
+        debouncedSet(newValue)
       },
     }
   })
@@ -144,6 +171,8 @@ export interface EntityToRefsOptions<TIn extends TOut, TOut extends object> {
   patchFn: (id: string, patch: Partial<TIn>) => Promise<Readonly<TIn>>
   // the default values object is used to find all fields that should exist in the output object
   defaultValues: TOut
+  // debounce time for all fields, null to disable
+  debounceMs?: EntityFieldToRefOptions<TIn, any>['debounceMs']
 }
 
 export function entityToRefs<TIn extends TOut, TOut extends object>(
@@ -194,9 +223,14 @@ export function entityToRefs<TIn extends TOut, TOut extends object>(
 
 // creates a reactive object from an entity.
 //  the returned dao will stay in sync with the entity in the database and all other dao's of the same entity.
-//  all changes will be immediately patched to the database.
+//  all changes will be immediately (debounced by default) patched to the database.
 export function createEntityDao<TIn extends TOut, TOut extends object>(
   options: EntityToRefsOptions<TIn, TOut>,
 ): TOut {
   return toReactive(entityToRefs(options)) as TOut
 }
+
+export type UseEntityDaoOptions<
+  TIn extends TOut,
+  TOut extends object,
+> = Partial<Pick<EntityToRefsOptions<TIn, TOut>, 'debounceMs'>>
