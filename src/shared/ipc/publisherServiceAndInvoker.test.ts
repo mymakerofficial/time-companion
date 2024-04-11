@@ -24,7 +24,7 @@ class TestService extends EntityPublisherImpl<TestEntity> {
   }
 
   async testMethod(value: string): Promise<string> {
-    return value
+    return Promise.resolve(value)
   }
 }
 
@@ -72,7 +72,7 @@ describe('publisher service proxy and invoker', () => {
 
     it('should throw if the method does not exist', async () => {
       // @ts-expect-error
-      expect(proxy.notAMethod()).rejects.toThrowError(
+      await expect(() => proxy.notAMethod()).rejects.toThrowError(
         'Method notAMethod not found',
       )
     })

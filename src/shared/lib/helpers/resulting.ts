@@ -1,5 +1,6 @@
 import type { ValueOrGetter } from '@shared/lib/utils/types'
 import { toValue } from '@shared/lib/utils/result'
+import { ensurePromise } from '@shared/lib/utils/guards'
 
 type ResultSuccess<TValue> = {
   isError: false
@@ -50,7 +51,7 @@ export function runResulting<TValue, TError>(
 export async function asyncRunResulting<TValue, TError>(
   valueOrGetter: ValueOrGetter<Promise<TValue>>,
 ): Promise<Result<TValue, TError>> {
-  return toValue(valueOrGetter)
+  return ensurePromise(toValue(valueOrGetter))
     .then((value) => resultSuccess(value))
     .catch((error) => resultError(error))
 }
@@ -70,5 +71,5 @@ export function resolveResult<TValue, TError>(
 export async function asyncResolveResult<TValue, TError>(
   result: Promise<Result<TValue, TError>>,
 ): Promise<TValue> {
-  return result.then(resolveResult)
+  return ensurePromise(result).then(resolveResult)
 }

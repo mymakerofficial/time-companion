@@ -8,3 +8,5 @@ export type ValueOrGetter<T> = T | (() => T)
 export type ErrorOrString = Error | string
 
 export type MaybeArray<T> = T | Array<T>
+
+export type MaybePromise<T> = T | Promise<T>
