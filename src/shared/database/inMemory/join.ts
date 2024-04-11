@@ -34,7 +34,7 @@ export class InMemoryDatabaseJoin<
 
     const [leftKey, rightKey] = firstOf(entriesOf(on))
 
-    check(isDefined(rightKey), 'Right key is not defined')
+    check(isDefined(rightKey), 'Right key is not defined.')
 
     const filteredLeftTableData = this.leftTableData.filter((leftData) =>
       filteredRightTableData.some(

@@ -19,7 +19,7 @@ class InMemoryDatabase implements Database {
   table<TData extends object>(tableName: string): Table<TData> {
     const tableData = this.data.get(tableName) as Optional<Array<TData>>
 
-    check(isDefined(tableData), `Table "${tableName}" does not exist`)
+    check(isDefined(tableData), `Table "${tableName}" does not exist.`)
 
     return new InMemoryDatabaseTable<TData>(tableData) as Table<TData>
   }
@@ -35,8 +35,11 @@ class InMemoryDatabase implements Database {
       Array<TRightData>
     >
 
-    check(isDefined(leftTableData), `Table "${leftTableName}" does not exist`)
-    check(isDefined(rightTableData), `Table "${rightTableName}" does not exist`)
+    check(isDefined(leftTableData), `Table "${leftTableName}" does not exist.`)
+    check(
+      isDefined(rightTableData),
+      `Table "${rightTableName}" does not exist.`,
+    )
 
     return new InMemoryDatabaseJoin<TLeftData, TRightData>(
       leftTableData,

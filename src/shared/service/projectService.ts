@@ -73,7 +73,7 @@ class ProjectServiceImpl
 
     check(
       isAbsent(existingProject),
-      `Project with displayName ${project.displayName} already exists`,
+      `Project with displayName "${project.displayName}" already exists.`,
     )
 
     const newProject = await this.projectPersistence.createProject(project)

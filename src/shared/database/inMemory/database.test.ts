@@ -74,7 +74,7 @@ describe.sequential('In memory database', () => {
 
   it('should throw an error when trying to access a non-existing table', () => {
     expect(() => database.table('non-existing-table')).toThrowError(
-      `Table "non-existing-table" does not exist`,
+      `Table "non-existing-table" does not exist.`,
     )
   })
 

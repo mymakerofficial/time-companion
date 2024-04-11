@@ -38,14 +38,14 @@ describe.sequential('projectService', async () => {
     it('should throw if project with displayName already exists', async () => {
       const randomProject = await fixture.getRandomExistingProject()
 
-      expect(
+      await expect(() =>
         fixture.projectService.createProject({
           displayName: randomProject.displayName,
           color: null,
           isBillable: false,
         }),
       ).rejects.toThrowError(
-        `Project with displayName ${randomProject.displayName} already exists`,
+        `Project with displayName "${randomProject.displayName}" already exists.`,
       )
     })
   })
@@ -87,9 +87,9 @@ describe.sequential('projectService', async () => {
     })
 
     it('should throw if project with id is not found', async () => {
-      expect(
+      await expect(() =>
         fixture.projectService.getProjectById('non-existent-id'),
-      ).rejects.toThrowError('Project with id non-existent-id not found')
+      ).rejects.toThrowError('Project with id "non-existent-id" not found.')
     })
   })
 
@@ -110,10 +110,10 @@ describe.sequential('projectService', async () => {
       })
     })
 
-    it('should throw if project with task id is not found', async () => {
-      expect(
+    it('should throw if project with taskId is not found', async () => {
+      await expect(() =>
         fixture.projectService.getProjectByTaskId('non-existent-id'),
-      ).rejects.toThrowError('Project with task id non-existent-id not found')
+      ).rejects.toThrowError('Project with taskId "non-existent-id" not found.')
     })
   })
 
@@ -133,18 +133,18 @@ describe.sequential('projectService', async () => {
       // TODO test other values
     })
 
-    it('should throw if project with id is not found', () => {
-      expect(
+    it('should throw if project with id is not found', async () => {
+      await expect(() =>
         fixture.projectService.patchProjectById('non-existent-id', {
           displayName: 'Patched Project',
         }),
-      ).rejects.toThrowError('Project with id non-existent-id not found')
+      ).rejects.toThrowError('Project with id "non-existent-id" not found.')
     })
 
     it('should throw if invalid fields are changed', async () => {
       const randomProject = await fixture.getRandomExistingProject()
 
-      expect(
+      await expect(() =>
         fixture.projectService.patchProjectById(randomProject.id, {
           // @ts-expect-error
           id: 'invalid',
@@ -152,7 +152,7 @@ describe.sequential('projectService', async () => {
           invalidField: 'invalid',
         }),
       ).rejects.toThrowError(
-        'tried to patch with invalid fields: id, createdAt, invalidField',
+        `Tried to patch entity using illegal fields: "id", "createdAt", "invalidField".`,
       )
     })
 
@@ -191,10 +191,10 @@ describe.sequential('projectService', async () => {
       expect(resProjects).not.toContain(randomProject)
     })
 
-    it('should throw if project with id is not found', () => {
-      expect(
+    it('should throw if project with id is not found', async () => {
+      await expect(() =>
         fixture.projectService.deleteProject('non-existent-id'),
-      ).rejects.toThrowError('Project with id non-existent-id not found')
+      ).rejects.toThrowError('Project with id "non-existent-id" not found.')
     })
 
     it('should notify subscribers of the change', async () => {

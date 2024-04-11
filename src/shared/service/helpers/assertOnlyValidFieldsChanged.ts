@@ -2,8 +2,14 @@ import { isNotEmpty } from '@shared/lib/utils/checks'
 
 class InvalidFieldsError<T extends object> extends Error {
   constructor(invalidFields: Array<keyof T>) {
-    super(`tried to patch with invalid fields: ${invalidFields.join(', ')}`)
+    super(
+      `Tried to patch entity using illegal fields: ${invalidFields.map(quote).join(', ')}.`,
+    )
   }
+}
+
+function quote(str: any): string {
+  return `"${str}"`
 }
 
 // throws an error if any of the changed fields are not allowed

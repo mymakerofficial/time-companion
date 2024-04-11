@@ -50,7 +50,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
           AND: [{ id: { equals: id } }, { deletedAt: { equals: null } }],
         },
       }),
-      `Task with id ${id} not found`,
+      `Task with id "${id}" not found.`,
     )
   }
 
@@ -68,7 +68,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
           ],
         },
       }),
-      `Task with displayName ${displayName} and projectId ${projectId} not found`,
+      `Task with displayName "${displayName}" and projectId "${projectId}" not found.`,
     )
   }
 
@@ -83,7 +83,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
         },
       })
 
-    check(isDefined(project), `Project with id ${projectId} not found`)
+    check(isDefined(project), `Project with id "${projectId}" not found.`)
 
     return await this.database.table<TaskEntityDto>('tasks').findMany({
       where: {
@@ -108,7 +108,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
         },
       })
 
-    check(isDefined(project), `Project with id ${task.projectId} not found`)
+    check(isDefined(project), `Project with id "${task.projectId}" not found.`)
 
     return await this.database.table<TaskEntityDto>('tasks').create({
       data: {

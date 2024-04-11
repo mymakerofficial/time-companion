@@ -46,7 +46,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
           AND: [{ id: { equals: id } }, { deletedAt: { equals: null } }],
         },
       }),
-      `Project with id ${id} not found`,
+      `Project with id "${id}" not found.`,
     )
   }
 
@@ -62,7 +62,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
           ],
         },
       }),
-      `Project with displayName ${displayName} not found`,
+      `Project with displayName "${displayName}" not found.`,
     )
   }
 
@@ -79,7 +79,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
         .findFirst({
           where: { deletedAt: { equals: null } },
         }),
-      `Project with task id ${taskId} not found`,
+      `Project with taskId "${taskId}" not found.`,
     )
   }
 

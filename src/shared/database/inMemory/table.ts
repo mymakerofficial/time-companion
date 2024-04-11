@@ -31,7 +31,7 @@ export class InMemoryDatabaseTable<TData extends object>
       wherePredicateFn(item, where),
     )
 
-    check(index !== -1, 'No item found to update')
+    check(index !== -1, 'No item found to update.')
 
     this.tableData[index] = { ...this.tableData[index], ...data }
 
@@ -45,7 +45,7 @@ export class InMemoryDatabaseTable<TData extends object>
       .map((item, index) => (wherePredicateFn(item, where) ? index : null))
       .filter((index) => isNotNull(index)) as Array<number>
 
-    check(indexes.length > 0, 'No items found to update')
+    check(indexes.length > 0, 'No items found to update.')
 
     indexes.forEach((index) => {
       this.tableData[index] = { ...this.tableData[index], ...data }
@@ -61,7 +61,7 @@ export class InMemoryDatabaseTable<TData extends object>
       wherePredicateFn(item, where),
     )
 
-    check(index !== -1, 'No item found to delete')
+    check(index !== -1, 'No item found to delete.')
 
     this.tableData.splice(index, 1)
   }
@@ -73,7 +73,7 @@ export class InMemoryDatabaseTable<TData extends object>
       .map((item, index) => (wherePredicateFn(item, where) ? index : null))
       .filter((index) => isNotNull(index)) as Array<number>
 
-    check(indexes.length > 0, 'No items found to delete')
+    check(indexes.length > 0, 'No items found to delete.')
 
     indexes.forEach((index) => {
       this.tableData.splice(index, 1)

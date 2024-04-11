@@ -67,7 +67,7 @@ class TaskServiceImpl
 
     check(
       isAbsent(existingTask),
-      `Task with displayName ${task.displayName} already exists in project ${task.projectId}`,
+      `Task with displayName "${task.displayName}" already exists in project "${task.projectId}".`,
     )
 
     const newTask = await this.taskPersistence.createTask(task)
@@ -92,7 +92,7 @@ class TaskServiceImpl
     if (isPresent(partialTask.projectId)) {
       await asyncGetOrThrow(
         this.projectPersistence.getProjectById(partialTask.projectId),
-        `Tried to set projectId on Task with id ${id} to ${partialTask.projectId} which does not exist`,
+        `Tried to set projectId on Task with id "${id}" to "${partialTask.projectId}" which does not exist.`,
       )
     }
 
