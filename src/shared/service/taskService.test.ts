@@ -240,11 +240,11 @@ describe.sequential('taskService', async () => {
     })
   })
 
-  describe('deleteTask', () => {
+  describe('softDeleteTask', () => {
     it('should delete a task by id', async () => {
       const randomTask = await fixture.getRandomExistingTask()
 
-      await fixture.taskService.deleteTask(randomTask.id)
+      await fixture.taskService.softDeleteTask(randomTask.id)
 
       await expect(() =>
         fixture.taskService.getTaskById(randomTask.id),
@@ -253,14 +253,14 @@ describe.sequential('taskService', async () => {
 
     it('should throw if task with id is not found', async () => {
       await expect(() =>
-        fixture.taskService.deleteTask('non-existent-id'),
+        fixture.taskService.softDeleteTask('non-existent-id'),
       ).rejects.toThrowError('Task with id "non-existent-id" not found.')
     })
 
     it('should notify subscribers of the change', async () => {
       const randomTask = await fixture.getRandomExistingTask()
 
-      await fixture.taskService.deleteTask(randomTask.id)
+      await fixture.taskService.softDeleteTask(randomTask.id)
 
       expect(subscriber).toHaveBeenCalledWith(
         {

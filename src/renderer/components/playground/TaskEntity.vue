@@ -21,7 +21,7 @@ function handleDelete() {
     return
   }
 
-  taskService.deleteTask(props.taskId)
+  taskService.softDeleteTask(props.taskId)
 }
 </script>
 

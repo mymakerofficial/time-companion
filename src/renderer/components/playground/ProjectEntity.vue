@@ -22,7 +22,7 @@ function handleDelete() {
     return
   }
 
-  projectService.deleteProject(props.projectId)
+  projectService.softDeleteProject(props.projectId)
 }
 </script>
 

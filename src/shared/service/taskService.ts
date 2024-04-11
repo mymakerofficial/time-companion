@@ -27,8 +27,8 @@ export interface TaskService extends EntityService<TaskEntityDto> {
     id: string,
     partialTask: Partial<Readonly<TaskDto>>,
   ) => Promise<Readonly<TaskEntityDto>>
-  deleteTask: (id: string) => Promise<void>
-  deleteTasksByProjectId: (projectId: string) => Promise<void>
+  softDeleteTask: (id: string) => Promise<void>
+  softDeleteTasksByProjectId: (projectId: string) => Promise<void>
 }
 
 class TaskServiceImpl
@@ -97,27 +97,29 @@ class TaskServiceImpl
       )
     }
 
-    const patchedTask = await this.taskPersistence.patchTaskById(
-      id,
-      partialTask,
-    )
+    const patchedTask = await this.taskPersistence.patchTaskById(id, {
+      ...partialTask,
+      modifiedAt: new Date().toISOString(),
+    })
 
     this.publishUpdated(patchedTask, changedFields)
 
     return patchedTask
   }
 
-  async deleteTask(id: string): Promise<void> {
-    await this.taskPersistence.deleteTask(id)
+  async softDeleteTask(id: string): Promise<void> {
+    await this.taskPersistence.patchTaskById(id, {
+      deletedAt: new Date().toISOString(),
+    })
 
     this.publishDeleted(id)
   }
 
-  async deleteTasksByProjectId(projectId: string): Promise<void> {
+  async softDeleteTasksByProjectId(projectId: string): Promise<void> {
     const tasks = await this.taskPersistence.getTasksByProjectId(projectId)
 
     for (const task of tasks) {
-      await this.deleteTask(task.id)
+      await this.softDeleteTask(task.id)
     }
   }
 }

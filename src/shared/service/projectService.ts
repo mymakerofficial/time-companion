@@ -35,8 +35,8 @@ export interface ProjectService extends EntityService<ProjectEntityDto> {
     partialProject: Partial<Readonly<ProjectDto>>,
   ): Promise<Readonly<ProjectEntityDto>>
   // soft deletes a project by its id,
-  // this does not delete the project from the database but sets the deletedAt field
-  deleteProject(id: string): Promise<void>
+  //  this does not delete the project from the database but sets the deletedAt field
+  softDeleteProject(id: string): Promise<void>
 }
 
 class ProjectServiceImpl
@@ -99,20 +99,22 @@ class ProjectServiceImpl
       'isBillable',
     ])
 
-    const patchedProject = await this.projectPersistence.patchProjectById(
-      id,
-      partialProject,
-    )
+    const patchedProject = await this.projectPersistence.patchProjectById(id, {
+      ...partialProject,
+      modifiedAt: new Date().toISOString(),
+    })
 
     this.publishUpdated(patchedProject, changedFields)
 
     return patchedProject
   }
 
-  async deleteProject(id: string): Promise<void> {
-    await this.taskService.deleteTasksByProjectId(id)
+  async softDeleteProject(id: string): Promise<void> {
+    await this.taskService.softDeleteTasksByProjectId(id)
 
-    await this.projectPersistence.deleteProject(id)
+    await this.projectPersistence.patchProjectById(id, {
+      deletedAt: new Date().toISOString(),
+    })
 
     this.publishDeleted(id)
   }

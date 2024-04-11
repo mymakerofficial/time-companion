@@ -180,11 +180,11 @@ describe.sequential('projectService', async () => {
     })
   })
 
-  describe('deleteProject', () => {
+  describe('softDeleteProject', () => {
     it('should delete a project by id', async () => {
       const randomProject = await fixture.getRandomExistingProject()
 
-      await fixture.projectService.deleteProject(randomProject.id)
+      await fixture.projectService.softDeleteProject(randomProject.id)
 
       const resProjects = await fixture.projectService.getProjects()
 
@@ -194,7 +194,7 @@ describe.sequential('projectService', async () => {
     it('should delete tasks associated with the project', async () => {
       const randomProject = await fixture.getRandomExistingProjectWithTasks()
 
-      await fixture.projectService.deleteProject(randomProject.id)
+      await fixture.projectService.softDeleteProject(randomProject.id)
 
       const tasks = await fixture.getExistingTasksForProject(randomProject.id)
 
@@ -203,14 +203,14 @@ describe.sequential('projectService', async () => {
 
     it('should throw if project with id is not found', async () => {
       await expect(() =>
-        fixture.projectService.deleteProject('non-existent-id'),
+        fixture.projectService.softDeleteProject('non-existent-id'),
       ).rejects.toThrowError('Project with id "non-existent-id" not found.')
     })
 
     it('should notify subscribers of the change', async () => {
       const randomProject = await fixture.getRandomExistingProject()
 
-      await fixture.projectService.deleteProject(randomProject.id)
+      await fixture.projectService.softDeleteProject(randomProject.id)
 
       expect(subscriber).toHaveBeenCalledWith(
         {

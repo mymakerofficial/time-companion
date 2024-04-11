@@ -20,9 +20,8 @@ export interface ProjectPersistence {
   ): Promise<Readonly<ProjectEntityDto>>
   patchProjectById(
     id: string,
-    partialProject: Partial<Readonly<ProjectDto>>,
+    partialProject: Partial<Readonly<ProjectEntityDto>>,
   ): Promise<Readonly<ProjectEntityDto>>
-  deleteProject(id: string): Promise<void>
 }
 
 class ProjectPersistenceImpl implements ProjectPersistence {
@@ -106,21 +105,11 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     const patchedProject: ProjectEntityDto = {
       ...originalProject,
       ...partialProject,
-      modifiedAt: new Date().toISOString(),
     }
 
     return await this.database.table<ProjectEntityDto>('projects').update({
       where: { id: { equals: id } },
       data: patchedProject,
-    })
-  }
-
-  async deleteProject(id: string): Promise<void> {
-    await this.getProjectById(id) // ensure project exists
-
-    await this.database.table<ProjectEntityDto>('projects').update({
-      where: { id: { equals: id } },
-      data: { deletedAt: new Date().toISOString() },
     })
   }
 }

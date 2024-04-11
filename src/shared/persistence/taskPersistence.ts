@@ -22,9 +22,8 @@ export interface TaskPersistence {
   createTask: (task: Readonly<TaskDto>) => Promise<Readonly<TaskEntityDto>>
   patchTaskById: (
     id: string,
-    partialTask: Partial<Readonly<TaskDto>>,
+    partialTask: Partial<Readonly<TaskEntityDto>>,
   ) => Promise<Readonly<TaskEntityDto>>
-  deleteTask: (id: string) => Promise<void>
 }
 
 export class TaskPersistenceImpl implements TaskPersistence {
@@ -130,21 +129,11 @@ export class TaskPersistenceImpl implements TaskPersistence {
     const patchedTask: TaskEntityDto = {
       ...originalProject,
       ...partialTask,
-      modifiedAt: new Date().toISOString(),
     }
 
     return await this.database.table<TaskEntityDto>('tasks').update({
       where: { id: { equals: id } },
       data: patchedTask,
-    })
-  }
-
-  async deleteTask(id: string): Promise<void> {
-    await this.getTaskById(id) // ensure task exists
-
-    await this.database.table<TaskEntityDto>('tasks').update({
-      where: { id: { equals: id } },
-      data: { deletedAt: new Date().toISOString() },
     })
   }
 }
