@@ -13,7 +13,10 @@ import {
 } from '@shared/service/taskService'
 import { createProjectPersistence } from '@shared/persistence/projectPersistence'
 import { createTaskPersistence } from '@shared/persistence/taskPersistence'
-import { randomElement, RandomElementOptions } from '@shared/lib/utils/random'
+import {
+  randomElement,
+  type RandomElementOptions,
+} from '@shared/lib/utils/random'
 
 export class ProjectsAndTasksTestFixture {
   public database: Database
