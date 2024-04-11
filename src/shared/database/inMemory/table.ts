@@ -15,16 +15,24 @@ export class InMemoryDatabaseTable<TData extends object>
   extends InMemoryDatabaseQueryable<TData>
   implements Table<TData>
 {
-  async create(args: CreateArgs<TData>): Promise<TData> {
+  private syncCreate(args: CreateArgs<TData>): TData {
     this.tableData.push(args.data)
     return args.data
   }
 
-  async createMany(args: CreateManyArgs<TData>): Promise<Array<TData>> {
-    return await Promise.all(args.data.map((data) => this.create({ data })))
+  async create(args: CreateArgs<TData>): Promise<TData> {
+    return new Promise((resolve) => {
+      resolve(this.syncCreate(args))
+    })
   }
 
-  async update(args: UpdateArgs<TData>): Promise<TData> {
+  async createMany(args: CreateManyArgs<TData>): Promise<Array<TData>> {
+    return new Promise(async (resolve) => {
+      resolve(await Promise.all(args.data.map((data) => this.create({ data }))))
+    })
+  }
+
+  private syncUpdate(args: UpdateArgs<TData>): TData {
     const { where, data } = args
 
     const index = this.tableData.findIndex((item) =>
@@ -38,7 +46,13 @@ export class InMemoryDatabaseTable<TData extends object>
     return this.tableData[index]
   }
 
-  async updateMany(args: UpdateManyArgs<TData>): Promise<Array<TData>> {
+  async update(args: UpdateArgs<TData>): Promise<TData> {
+    return new Promise((resolve) => {
+      resolve(this.syncUpdate(args))
+    })
+  }
+
+  private syncUpdateMany(args: UpdateManyArgs<TData>): Array<TData> {
     const { where, data } = args
 
     const indexes = this.tableData
@@ -54,7 +68,17 @@ export class InMemoryDatabaseTable<TData extends object>
     return indexes.map((index) => this.tableData[index])
   }
 
-  async delete(args: DeleteArgs<TData>): Promise<void> {
+  async updateMany(args: UpdateManyArgs<TData>): Promise<Array<TData>> {
+    return new Promise((resolve, reject) => {
+      try {
+        resolve(this.syncUpdateMany(args))
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  private syncDelete(args: DeleteArgs<TData>): void {
     const { where } = args
 
     const index = this.tableData.findIndex((item) =>
@@ -66,7 +90,18 @@ export class InMemoryDatabaseTable<TData extends object>
     this.tableData.splice(index, 1)
   }
 
-  async deleteMany(args: DeleteManyArgs<TData>): Promise<void> {
+  async delete(args: DeleteArgs<TData>): Promise<void> {
+    return new Promise((resolve, reject) => {
+      try {
+        this.syncDelete(args)
+        resolve()
+      } catch (error) {
+        reject(error)
+      }
+    })
+  }
+
+  private syncDeleteMany(args: DeleteManyArgs<TData>): void {
     const { where } = args
 
     const indexes = this.tableData
@@ -77,6 +112,17 @@ export class InMemoryDatabaseTable<TData extends object>
 
     indexes.forEach((index) => {
       this.tableData.splice(index, 1)
+    })
+  }
+
+  async deleteMany(args: DeleteManyArgs<TData>): Promise<void> {
+    return new Promise((resolve, reject) => {
+      try {
+        this.syncDeleteMany(args)
+        resolve()
+      } catch (error) {
+        reject(error)
+      }
     })
   }
 }

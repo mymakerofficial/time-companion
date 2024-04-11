@@ -17,14 +17,22 @@ export class InMemoryDatabaseQueryable<TData extends object>
   }
 
   async findFirst(args?: FindArgs<TData>): Promise<TData> {
-    return firstOf(await this.findMany(args))
+    return new Promise(async (resolve) => {
+      resolve(firstOf(await this.findMany(args)))
+    })
   }
 
-  async findMany(args: FindManyArgs<TData> = {}): Promise<Array<TData>> {
+  private syncFindMany(args: FindManyArgs<TData> = {}): Array<TData> {
     const { where, orderBy } = args
 
     return [
       ...this.tableData.filter((data) => wherePredicateFn(data, where)),
     ].sort((a, b) => orderByCompareFn(a, b, orderBy))
+  }
+
+  async findMany(args?: FindManyArgs<TData>): Promise<Array<TData>> {
+    return new Promise((resolve) => {
+      resolve(this.syncFindMany(args))
+    })
   }
 }
