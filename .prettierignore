@@ -4,3 +4,5 @@ dev-dist
 dist-electron
 
 vercel.json
+
+README.md
