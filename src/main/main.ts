@@ -1,12 +1,21 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'path'
+import { database } from '@main/factory/database/database'
+import { projectService } from '@main/factory/service/projectService'
+import { registerIpcHandler } from '@main/ipc/handler'
+import { taskService } from '@main/factory/service/taskService'
+import { registerIpcPublisher } from '@main/ipc/publisher'
+import {
+  serviceInvokeChannel,
+  servicePublishChannel,
+} from '@shared/ipc/helpers/channels'
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
   app.quit()
 }
 
-function createWindow() {
+function createMainWindow() {
   const isWindows = process.platform === 'win32'
 
   // Create the browser window.
@@ -29,7 +38,7 @@ function createWindow() {
     },
   })
 
-  // and load the splashWindow.html of the app.
+  // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL)
   } else {
@@ -41,6 +50,40 @@ function createWindow() {
   // only show the main window after it has been loaded
   mainWindow.once('ready-to-show', () => {
     mainWindow.show()
+  })
+
+  registerIpcPublishers(mainWindow)
+
+  return mainWindow
+}
+
+function initialize() {
+  // TODO this is a hack to create the tables
+
+  database.createTable({
+    name: 'projects',
+    schema: {
+      id: 'string',
+      displayName: 'string',
+      color: 'string',
+      isBillable: 'boolean',
+      createdAt: 'string',
+      modifiedAt: 'string',
+      deletedAt: 'string',
+    },
+  })
+
+  database.createTable({
+    name: 'tasks',
+    schema: {
+      id: 'string',
+      projectId: 'string',
+      displayName: 'string',
+      color: 'string',
+      createdAt: 'string',
+      modifiedAt: 'string',
+      deletedAt: 'string',
+    },
   })
 }
 
@@ -60,15 +103,29 @@ function handleSetTitleBarColors(event: Electron.IpcMainEvent, colors: any) {
 }
 
 function registerIpcHandlers() {
-  ipcMain.on('set-title-bar-colors', handleSetTitleBarColors)
+  ipcMain.on('window:setTitleBarColors', handleSetTitleBarColors)
+  ipcMain.on('window:createNewWindow', () => {
+    // TODO this is just for testing and should be removed
+    const mainWindow = createMainWindow()
+    registerIpcPublishers(mainWindow)
+  })
+
+  registerIpcHandler(serviceInvokeChannel('project'), projectService)
+  registerIpcHandler(serviceInvokeChannel('task'), taskService)
+}
+
+function registerIpcPublishers(window: BrowserWindow) {
+  registerIpcPublisher(servicePublishChannel('project'), projectService, window)
+  registerIpcPublisher(servicePublishChannel('task'), taskService, window)
 }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
+  initialize()
   registerIpcHandlers()
-  createWindow()
+  createMainWindow()
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -84,6 +141,6 @@ app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow()
+    createMainWindow()
   }
 })

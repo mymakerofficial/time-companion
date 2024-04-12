@@ -2,19 +2,7 @@ import { createService } from '@renderer/composables/createService'
 
 export interface ElectronService {
   readonly isElectron: boolean
-  readonly platform:
-    | null
-    | 'aix'
-    | 'android'
-    | 'darwin'
-    | 'freebsd'
-    | 'haiku'
-    | 'linux'
-    | 'openbsd'
-    | 'sunos'
-    | 'win32'
-    | 'cygwin'
-    | 'netbsd'
+  getPlatform: () => null | string
   setTitleBarColors: (colors: {
     backgroundColor: string
     symbolColor: string
@@ -26,10 +14,11 @@ export const useElectronService = createService<ElectronService>(() => {
 
   return {
     isElectron,
-    platform: isElectron ? window.electronAPI!.platform : null,
+    getPlatform: () =>
+      isElectron ? window.electronAPI!.electron.getPlatform() : null,
     setTitleBarColors: (colors) => {
       if (isElectron) {
-        window.electronAPI!.setTitleBarColors(colors)
+        window.electronAPI!.electron.setTitleBarColors(colors)
       }
     },
   }

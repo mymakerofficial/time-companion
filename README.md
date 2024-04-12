@@ -4,7 +4,8 @@ A time tracking app.
 
 > [!CAUTION]
 > This project is currently in early development and should not be used for daily time tracking.
-> Data may be lost at any point.
+> Data may be lost at any point!
+
 
 ## Project Setup
 
@@ -12,26 +13,48 @@ A time tracking app.
 npm install
 ```
 
-### Start Development Application and Webserver with Hot-Reload
+### **Start Development Application and Webserver with Hot-Reload**
 
 ```sh
 npm run start
 ```
+The application will automatically startup and the standalone webpage can be accessed at [http://localhost:5173](http://localhost:5173/).
+You can run the webserver standalone (without Electron) using `npm run dev`
 
-### Start Development Webserver with Hot-Reload
+### Building for Production
 
+##### Web
 ```sh
-npm run dev
+npm run build
 ```
 
-### Type-Check, Compile and Minify for Production (Electron)
-
+##### Electron
 ```sh
 npm run make
 ```
 
-### Type-Check, Compile and Minify for Production (Web)
+
+## Testing
+
+We use Vitest for testing.
+
+### **Run Tests and Rerun on Changes**
 
 ```sh
-npm run build
+npm run test
+```
+Vitest results can be viewed in the browser at [http://localhost:51204/__vitest__/](http://localhost:51204/__vitest__/).
+We recommend letting the tests run while you work ;)
+
+### Run Tests, Check Formatting and Type-Check
+
+```sh
+npm run check
+```
+Please run `npm run check` before commiting to make sure your changes can be build.
+
+### Format all files using prettier
+
+```sh
+npm run format
 ```

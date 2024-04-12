@@ -13,7 +13,7 @@ defineProps<{
 
 const electronService = useElectronService()
 
-const customTitleBar = electronService.platform === 'win32'
+const customTitleBar = electronService.getPlatform() === 'win32'
 
 const [expandSidebar, toggleExpandSidebar] = useToggle(true)
 </script>
