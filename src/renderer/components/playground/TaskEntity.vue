@@ -9,6 +9,7 @@ import ColorSelect from '@renderer/components/common/inputs/colorSelect/ColorSel
 import { taskService } from '@renderer/factory/service/taskService'
 import { useTaskById } from '@renderer/composables/project/useTaskById'
 import { Trash } from 'lucide-vue-next'
+import { isNotNull } from '@renderer/lib/utils'
 
 const props = defineProps<{
   taskId: Maybe<string>
@@ -31,7 +32,7 @@ function handleDelete() {
     <div class="mx-4 text-xs text-muted-foreground">
       {{ taskId ?? 'n/a' }}
     </div>
-    <div class="ml-4 flex items-center gap-4">
+    <div v-if="isNotNull(task.projectId)" class="ml-4 flex items-center gap-4">
       <Label class="text-right">ProjectId</Label>
       <Input v-model="task.projectId" />
     </div>
