@@ -18,17 +18,25 @@ export interface TaskServiceDependencies {
 }
 
 export interface TaskService extends EntityService<TaskEntityDto> {
+  // get all non-deleted tasks ordered by displayName
   getTasks: () => Promise<ReadonlyArray<Readonly<TaskEntityDto>>>
+  // get a task by its id. returns null if the task does not exist
   getTaskById: (id: string) => Promise<Nullable<Readonly<TaskEntityDto>>>
+  // get all tasks of a project by its id
   getTasksByProjectId: (
     projectId: string,
   ) => Promise<ReadonlyArray<TaskEntityDto>>
+  // create a new task and return the created task
   createTask: (task: Readonly<TaskDto>) => Promise<Readonly<TaskEntityDto>>
+  // patches a task by its id, updates the modifiedAt field and returns the updated task
   patchTaskById: (
     id: string,
     partialTask: Partial<Readonly<TaskDto>>,
   ) => Promise<Readonly<TaskEntityDto>>
+  // soft deletes a task by its id,
+  //  this does not delete the task from the database but sets the deletedAt field
   softDeleteTask: (id: string) => Promise<void>
+  // soft deletes all tasks of a project by its id
   softDeleteTasksByProjectId: (projectId: string) => Promise<void>
 }
 
