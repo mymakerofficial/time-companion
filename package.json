@@ -15,7 +15,7 @@
     "test-run": "vitest run",
     "test": "vitest watch --ui --open=false",
     "check-format": "npx prettier . --check",
-    "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false",
+    "type-check": "vue-tsc --noEmit -p tsconfig.json --composite false",
     "format": "npx prettier . --write"
   },
   "dependencies": {
