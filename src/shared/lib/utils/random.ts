@@ -23,3 +23,21 @@ export function randomElement<T>(
 
   return list[randomInt(safetyOffset, list.length - 1 - safetyOffset)]
 }
+
+export function randomElements<T>(
+  list: ReadonlyArray<T>,
+  count: number,
+  options: RandomElementOptions = {},
+): Array<T> {
+  const { safetyOffset = 0 } = options
+
+  check(count <= list.length, 'Cannot select more elements than the list has')
+
+  const result = new Set<T>()
+
+  while (result.size < count) {
+    result.add(randomElement(list, { safetyOffset }))
+  }
+
+  return Array.from(result)
+}

@@ -22,7 +22,7 @@ class InMemoryDatabase implements Database {
     return await upgrade(new InMemoryDatabaseUpgradeTransaction(this.data))
   }
 
-  async createTransaction<TResult>(
+  async withTransaction<TResult>(
     fn: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult> {
     return await fn(new InMemoryDatabaseTransaction(this.data))

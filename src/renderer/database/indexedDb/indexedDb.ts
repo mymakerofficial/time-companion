@@ -41,7 +41,7 @@ export class IndexedDbFacade implements Database {
     })
   }
 
-  async createTransaction<TResult>(
+  async withTransaction<TResult>(
     fn: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult> {
     check(isNotNull(this.database), 'Database is not open.')

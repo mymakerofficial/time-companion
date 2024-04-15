@@ -144,7 +144,7 @@ export interface Database {
     name: string,
     upgrade: (transaction: UpgradeTransaction) => Promise<void>,
   ): Promise<void>
-  createTransaction<TResult>(
+  withTransaction<TResult>(
     fn: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>
 }
