@@ -89,13 +89,16 @@ export interface Deletable<TData extends object> {
   deleteMany(args: DeleteManyArgs<TData>): Promise<void>
 }
 
-export interface Table<TData extends object>
-  extends Queryable<TData>,
-    Updatable<TData>,
-    Deletable<TData> {
+export interface Creatable<TData extends object> {
   create(args: CreateArgs<TData>): Promise<TData>
   createMany(args: CreateManyArgs<TData>): Promise<Array<TData>>
 }
+
+export interface Table<TData extends object>
+  extends Queryable<TData>,
+    Updatable<TData>,
+    Deletable<TData>,
+    Creatable<TData> {}
 
 export type LeftJoinArgs<
   TLeftData extends object,
@@ -121,6 +124,7 @@ export type CreateTableArgs = {
   schema: {
     [key: string]: ColumnType
   }
+  primaryKey?: string
 }
 
 export interface Transaction {
@@ -131,9 +135,16 @@ export interface Transaction {
   ): Join<TLeftData, TRightData>
 }
 
-export interface Database {
-  createTransaction<TData extends object>(
-    fn: (transaction: Transaction) => Promise<TData>,
-  ): Promise<TData>
+export interface UpgradeTransaction {
   createTable(args: CreateTableArgs): Promise<void>
+}
+
+export interface Database {
+  open(
+    name: string,
+    upgrade: (transaction: UpgradeTransaction) => Promise<void>,
+  ): Promise<void>
+  createTransaction<TResult>(
+    fn: (transaction: Transaction) => Promise<TResult>,
+  ): Promise<TResult>
 }

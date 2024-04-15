@@ -10,11 +10,7 @@ import { orderByCompareFn } from '@shared/database/inMemory/orderByCompareFn'
 export class InMemoryDatabaseQueryable<TData extends object>
   implements Queryable<TData>
 {
-  tableData: Array<TData> = []
-
-  constructor(tableData: Array<TData>) {
-    this.tableData = tableData
-  }
+  constructor(protected readonly tableData: Array<TData>) {}
 
   async findFirst(args?: FindArgs<TData>): Promise<TData> {
     return new Promise(async (resolve) => {

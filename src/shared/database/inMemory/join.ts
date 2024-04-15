@@ -14,16 +14,10 @@ export class InMemoryDatabaseJoin<
   TRightData extends object,
 > implements Join<TLeftData, TRightData>
 {
-  leftTableData: Array<TLeftData>
-  rightTableData: Array<TRightData>
-
   constructor(
-    leftTableData: Array<TLeftData>,
-    rightTableData: Array<TRightData>,
-  ) {
-    this.leftTableData = leftTableData
-    this.rightTableData = rightTableData
-  }
+    private readonly leftTableData: Array<TLeftData>,
+    private readonly rightTableData: Array<TRightData>,
+  ) {}
 
   left(args: LeftJoinArgs<TLeftData, TRightData>): LeftJoin<TLeftData> {
     const { on, where } = args

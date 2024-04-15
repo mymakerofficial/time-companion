@@ -5,11 +5,7 @@ import { InMemoryDatabaseTable } from '@shared/database/inMemory/table'
 import { InMemoryDatabaseJoin } from '@shared/database/inMemory/join'
 
 export class InMemoryDatabaseTransaction implements Transaction {
-  data: Map<string, Array<object>>
-
-  constructor(data: Map<string, Array<object>>) {
-    this.data = data
-  }
+  constructor(private data: Map<string, Array<object>>) {}
 
   table<TData extends object>(tableName: string): Table<TData> {
     const tableData = this.data.get(tableName) as Optional<Array<TData>>
