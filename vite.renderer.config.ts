@@ -1,4 +1,4 @@
-import { ConfigEnv, UserConfig, defineConfig } from 'vite'
+import { type ConfigEnv, type UserConfig, defineConfig } from 'vite'
 import { pluginExposeRenderer } from './vite.base.config'
 import viteConfig from './vite.config'
 

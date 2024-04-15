@@ -1,4 +1,4 @@
-import { Publisher } from '@shared/events/publisher'
+import type { Publisher } from '@shared/events/publisher'
 import { BrowserWindow } from 'electron'
 
 // subscribes to the publisher and forwards events to the window

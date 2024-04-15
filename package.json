@@ -15,7 +15,7 @@
     "test-run": "vitest run",
     "test": "vitest watch --ui --open=false",
     "check-format": "npx prettier . --check",
-    "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false",
+    "type-check": "vue-tsc --noEmit -p tsconfig.json --composite false",
     "format": "npx prettier . --write"
   },
   "dependencies": {
@@ -70,6 +70,7 @@
     "vite": "^4.4.11",
     "vite-plugin-pwa": "^0.19.2",
     "vite-plugin-vue-devtools": "^7.0.15",
+    "vite-tsconfig-paths": "^4.3.2",
     "vitest": "^1.4.0",
     "vue-tsc": "^1.8.19"
   }

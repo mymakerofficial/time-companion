@@ -1,15 +1,16 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import vueJsxPlugin from '@vitejs/plugin-vue-jsx'
+import vueJsx from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import { VitePWA as vitePwa } from 'vite-plugin-pwa'
-import path from 'path'
+import tsconfigPaths from 'vite-tsconfig-paths'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    tsconfigPaths(),
     vue(),
-    vueJsxPlugin(),
+    vueJsx(),
     vueDevTools(),
     vitePwa({
       registerType: 'prompt',
@@ -47,13 +48,4 @@ export default defineConfig({
       },
     }),
   ],
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, 'src'),
-      '@shared': path.resolve(__dirname, 'src', 'shared'),
-      '@main': path.resolve(__dirname, 'src', 'main'),
-      '@preload': path.resolve(__dirname, 'src', 'preload'),
-      '@renderer': path.resolve(__dirname, 'src', 'renderer'),
-    },
-  },
 })

@@ -7,7 +7,7 @@ import {
   pluginHotRestart,
 } from './vite.base.config'
 import path from 'path'
-import viteConfig from './vite.config'
+import tsconfigPaths from 'vite-tsconfig-paths'
 
 // https://vitejs.dev/config
 export default defineConfig((env) => {
@@ -25,12 +25,11 @@ export default defineConfig((env) => {
         external,
       },
     },
-    plugins: [pluginHotRestart('restart')],
+    plugins: [pluginHotRestart('restart'), tsconfigPaths()],
     define,
     resolve: {
       // Load the Node.js entry.
       mainFields: ['module', 'jsnext:main', 'jsnext'],
-      alias: viteConfig.resolve?.alias,
     },
   }
 
