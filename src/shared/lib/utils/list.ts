@@ -2,6 +2,12 @@ export function firstOf<T extends ReadonlyArray<unknown>>(values: T): T[0] {
   return values[0]
 }
 
+export function excludeFirst<T extends ReadonlyArray<unknown>>(
+  values: T,
+): T extends [unknown, ...infer U] ? U : never {
+  return values.slice(1) as any
+}
+
 export function secondOf<T extends ReadonlyArray<unknown>>(values: T): T[1] {
   return values[1]
 }
