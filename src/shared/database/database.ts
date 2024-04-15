@@ -123,11 +123,17 @@ export type CreateTableArgs = {
   }
 }
 
-export interface Database {
+export interface Transaction {
   table<TData extends object>(tableName: string): Table<TData>
   join<TLeftData extends object, TRightData extends object>(
     leftTable: string,
     rightTable: string,
   ): Join<TLeftData, TRightData>
+}
+
+export interface Database {
+  createTransaction<TData extends object>(
+    fn: (transaction: Transaction) => Promise<TData>,
+  ): Promise<TData>
   createTable(args: CreateTableArgs): Promise<void>
 }

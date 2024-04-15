@@ -1,7 +1,8 @@
 import type { ProjectEntityDto } from '@shared/model/project'
-import type { Database } from '@shared/database/database'
+import type { Database, Transaction } from '@shared/database/database'
 import type { TaskEntityDto } from '@shared/model/task'
 import { asyncGetOrThrow } from '@shared/lib/utils/result'
+import { check, isDefined } from '@shared/lib/utils/checks'
 
 export interface ProjectPersistenceDependencies {
   database: Database
@@ -30,61 +31,111 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     this.database = deps.database
   }
 
-  async getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>> {
-    return await this.database.table<ProjectEntityDto>('projects').findMany({
+  private async getProjectsQuery(transaction: Transaction) {
+    return await transaction.table<ProjectEntityDto>('projects').findMany({
       where: { deletedAt: { equals: null } },
       orderBy: { displayName: 'asc' },
     })
   }
 
+  async getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>> {
+    return await this.database.createTransaction(async (transaction) => {
+      return await this.getProjectsQuery(transaction)
+    })
+  }
+
+  private async getProjectByIdQuery(transaction: Transaction, id: string) {
+    return await transaction.table<ProjectEntityDto>('projects').findFirst({
+      where: {
+        AND: [{ id: { equals: id } }, { deletedAt: { equals: null } }],
+      },
+    })
+  }
+
   async getProjectById(id: string): Promise<Readonly<ProjectEntityDto>> {
     return await asyncGetOrThrow(
-      this.database.table<ProjectEntityDto>('projects').findFirst({
-        where: {
-          AND: [{ id: { equals: id } }, { deletedAt: { equals: null } }],
-        },
+      this.database.createTransaction(async (transaction) => {
+        return await this.getProjectByIdQuery(transaction, id)
       }),
       `Project with id "${id}" not found.`,
     )
+  }
+
+  private async getProjectByDisplayNameQuery(
+    transaction: Transaction,
+    displayName: string,
+  ) {
+    return await transaction.table<ProjectEntityDto>('projects').findFirst({
+      where: {
+        AND: [
+          { displayName: { equals: displayName } },
+          { deletedAt: { equals: null } },
+        ],
+      },
+    })
   }
 
   async getProjectByDisplayName(
     displayName: string,
   ): Promise<Readonly<ProjectEntityDto>> {
     return await asyncGetOrThrow(
-      this.database.table<ProjectEntityDto>('projects').findFirst({
-        where: {
-          AND: [
-            { displayName: { equals: displayName } },
-            { deletedAt: { equals: null } },
-          ],
-        },
+      this.database.createTransaction(async (transaction) => {
+        return await this.getProjectByDisplayNameQuery(transaction, displayName)
       }),
       `Project with displayName "${displayName}" not found.`,
     )
+  }
+
+  private async getProjectByTaskIdQuery(
+    transaction: Transaction,
+    taskId: string,
+  ) {
+    return await transaction
+      .join<ProjectEntityDto, TaskEntityDto>('projects', 'tasks')
+      .left({
+        on: { id: 'projectId' },
+        where: { id: { equals: taskId } },
+      })
+      .findFirst({
+        where: { deletedAt: { equals: null } },
+      })
   }
 
   async getProjectByTaskId(
     taskId: string,
   ): Promise<Readonly<ProjectEntityDto>> {
     return await asyncGetOrThrow(
-      this.database
-        .join<ProjectEntityDto, TaskEntityDto>('projects', 'tasks')
-        .left({
-          on: { id: 'projectId' },
-          where: { id: { equals: taskId } },
-        })
-        .findFirst({
-          where: { deletedAt: { equals: null } },
-        }),
+      this.database.createTransaction(async (transaction) => {
+        return await this.getProjectByTaskIdQuery(transaction, taskId)
+      }),
       `Project with taskId "${taskId}" not found.`,
     )
+  }
+
+  private async createProjectQuery(
+    transaction: Transaction,
+    project: Readonly<ProjectEntityDto>,
+  ) {
+    return await transaction.table<ProjectEntityDto>('projects').create({
+      data: project,
+    })
   }
 
   async createProject(
     project: Readonly<ProjectEntityDto>,
   ): Promise<Readonly<ProjectEntityDto>> {
-    return await this.database.table<ProjectEntityDto>('projects').create({
+    return await this.database.createTransaction(async (transaction) => {
+      return await this.createProjectQuery(transaction, project)
+    })
+  }
+
+  private async updateProjectQuery(
+    transaction: Transaction,
+    id: string,
+    project: Readonly<ProjectEntityDto>,
+  ) {
+    return await transaction.table<ProjectEntityDto>('projects').update({
+      where: { id: { equals: id } },
       data: project,
     })
   }
@@ -93,16 +144,17 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     id: string,
     partialProject: Partial<Readonly<ProjectEntityDto>>,
   ): Promise<Readonly<ProjectEntityDto>> {
-    const originalProject = await this.getProjectById(id)
+    return await this.database.createTransaction(async (transaction) => {
+      const originalProject = await this.getProjectByIdQuery(transaction, id)
 
-    const patchedProject: ProjectEntityDto = {
-      ...originalProject,
-      ...partialProject,
-    }
+      check(isDefined(originalProject), `Project with id "${id}" not found.`)
 
-    return await this.database.table<ProjectEntityDto>('projects').update({
-      where: { id: { equals: id } },
-      data: patchedProject,
+      const patchedProject: ProjectEntityDto = {
+        ...originalProject,
+        ...partialProject,
+      }
+
+      return await this.updateProjectQuery(transaction, id, patchedProject)
     })
   }
 }

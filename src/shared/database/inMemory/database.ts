@@ -1,13 +1,9 @@
 import type {
   CreateTableArgs,
   Database,
-  Join,
-  Table,
+  Transaction,
 } from '@shared/database/database'
-import { InMemoryDatabaseTable } from '@shared/database/inMemory/table'
-import type { Optional } from '@shared/lib/utils/types'
-import { check, isDefined } from '@shared/lib/utils/checks'
-import { InMemoryDatabaseJoin } from '@shared/database/inMemory/join'
+import { InMemoryDatabaseTransaction } from '@shared/database/inMemory/transaction'
 
 class InMemoryDatabase implements Database {
   data: Map<string, Array<object>>
@@ -16,35 +12,10 @@ class InMemoryDatabase implements Database {
     this.data = new Map()
   }
 
-  table<TData extends object>(tableName: string): Table<TData> {
-    const tableData = this.data.get(tableName) as Optional<Array<TData>>
-
-    check(isDefined(tableData), `Table "${tableName}" does not exist.`)
-
-    return new InMemoryDatabaseTable<TData>(tableData) as Table<TData>
-  }
-
-  join<TLeftData extends object, TRightData extends object>(
-    leftTableName: string,
-    rightTableName: string,
-  ): Join<TLeftData, TRightData> {
-    const leftTableData = this.data.get(leftTableName) as Optional<
-      Array<TLeftData>
-    >
-    const rightTableData = this.data.get(rightTableName) as Optional<
-      Array<TRightData>
-    >
-
-    check(isDefined(leftTableData), `Table "${leftTableName}" does not exist.`)
-    check(
-      isDefined(rightTableData),
-      `Table "${rightTableName}" does not exist.`,
-    )
-
-    return new InMemoryDatabaseJoin<TLeftData, TRightData>(
-      leftTableData,
-      rightTableData,
-    ) as Join<TLeftData, TRightData>
+  async createTransaction<T>(
+    fn: (transaction: Transaction) => Promise<T>,
+  ): Promise<T> {
+    return await fn(new InMemoryDatabaseTransaction(this.data))
   }
 
   async createTable(args: CreateTableArgs): Promise<void> {
