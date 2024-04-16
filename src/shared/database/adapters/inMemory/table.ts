@@ -16,7 +16,7 @@ export class InMemoryDatabaseTable<TData extends object>
   implements Table<TData>
 {
   private syncCreate(args: CreateArgs<TData>): TData {
-    this.tableData.push(args.data)
+    this.table.rows.push(args.data)
     return args.data
   }
 
@@ -35,15 +35,15 @@ export class InMemoryDatabaseTable<TData extends object>
   private syncUpdate(args: UpdateArgs<TData>): TData {
     const { where, data } = args
 
-    const index = this.tableData.findIndex((item) =>
+    const index = this.table.rows.findIndex((item) =>
       wherePredicateFn(item, where),
     )
 
     check(index !== -1, 'No item found to update.')
 
-    this.tableData[index] = { ...this.tableData[index], ...data }
+    this.table.rows[index] = { ...this.table.rows[index], ...data }
 
-    return this.tableData[index]
+    return this.table.rows[index]
   }
 
   async update(args: UpdateArgs<TData>): Promise<TData> {
@@ -55,17 +55,17 @@ export class InMemoryDatabaseTable<TData extends object>
   private syncUpdateMany(args: UpdateManyArgs<TData>): Array<TData> {
     const { where, data } = args
 
-    const indexes = this.tableData
+    const indexes = this.table.rows
       .map((item, index) => (wherePredicateFn(item, where) ? index : null))
       .filter((index) => isNotNull(index)) as Array<number>
 
     check(indexes.length > 0, 'No items found to update.')
 
     indexes.forEach((index) => {
-      this.tableData[index] = { ...this.tableData[index], ...data }
+      this.table.rows[index] = { ...this.table.rows[index], ...data }
     })
 
-    return indexes.map((index) => this.tableData[index])
+    return indexes.map((index) => this.table.rows[index])
   }
 
   async updateMany(args: UpdateManyArgs<TData>): Promise<Array<TData>> {
@@ -81,13 +81,13 @@ export class InMemoryDatabaseTable<TData extends object>
   private syncDelete(args: DeleteArgs<TData>): void {
     const { where } = args
 
-    const index = this.tableData.findIndex((item) =>
+    const index = this.table.rows.findIndex((item) =>
       wherePredicateFn(item, where),
     )
 
     check(index !== -1, 'No item found to delete.')
 
-    this.tableData.splice(index, 1)
+    this.table.rows.splice(index, 1)
   }
 
   async delete(args: DeleteArgs<TData>): Promise<void> {
@@ -104,14 +104,14 @@ export class InMemoryDatabaseTable<TData extends object>
   private syncDeleteMany(args: DeleteManyArgs<TData>): void {
     const { where } = args
 
-    const indexes = this.tableData
+    const indexes = this.table.rows
       .map((item, index) => (wherePredicateFn(item, where) ? index : null))
       .filter((index) => isNotNull(index)) as Array<number>
 
     check(indexes.length > 0, 'No items found to delete.')
 
     indexes.forEach((index) => {
-      this.tableData.splice(index, 1)
+      this.table.rows.splice(index, 1)
     })
   }
 

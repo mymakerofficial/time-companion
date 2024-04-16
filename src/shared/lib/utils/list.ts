@@ -45,6 +45,10 @@ export function mapOf<K, V>(entries: Array<[K, V]>): Map<K, V> {
   return new Map(entries)
 }
 
+export function emptyArray<T>(): Array<T> {
+  return []
+}
+
 export function emptySet<T>(): Set<T> {
   return new Set()
 }

@@ -124,7 +124,7 @@ export type CreateTableArgs<TData extends object> = {
   schema: {
     [K in keyof TData]: ColumnType
   }
-  primaryKey?: keyof TData
+  primaryKey: keyof TData
 }
 
 export type CreateIndexArgs<TData extends object> = {

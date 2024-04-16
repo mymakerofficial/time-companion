@@ -3,38 +3,41 @@ import type { Optional } from '@shared/lib/utils/types'
 import { check, isDefined } from '@shared/lib/utils/checks'
 import { InMemoryDatabaseTable } from '@shared/database/adapters/inMemory/table'
 import { InMemoryDatabaseJoin } from '@shared/database/adapters/inMemory/join'
+import type {
+  InMemoryDataTable,
+  InMemoryDataTables,
+} from '@shared/database/adapters/inMemory/dataTable'
 
 export class InMemoryDatabaseTransaction implements Transaction {
-  constructor(private data: Map<string, Array<object>>) {}
+  constructor(private tables: InMemoryDataTables) {}
 
   table<TData extends object>(tableName: string): Table<TData> {
-    const tableData = this.data.get(tableName) as Optional<Array<TData>>
+    const table = this.tables.get(tableName) as Optional<
+      InMemoryDataTable<TData>
+    >
 
-    check(isDefined(tableData), `Table "${tableName}" does not exist.`)
+    check(isDefined(table), `Table "${tableName}" does not exist.`)
 
-    return new InMemoryDatabaseTable<TData>(tableData) as Table<TData>
+    return new InMemoryDatabaseTable<TData>(table) as Table<TData>
   }
 
   join<TLeftData extends object, TRightData extends object>(
     leftTableName: string,
     rightTableName: string,
   ): Join<TLeftData, TRightData> {
-    const leftTableData = this.data.get(leftTableName) as Optional<
-      Array<TLeftData>
+    const leftTable = this.tables.get(leftTableName) as Optional<
+      InMemoryDataTable<TLeftData>
     >
-    const rightTableData = this.data.get(rightTableName) as Optional<
-      Array<TRightData>
+    const rightTable = this.tables.get(rightTableName) as Optional<
+      InMemoryDataTable<TRightData>
     >
 
-    check(isDefined(leftTableData), `Table "${leftTableName}" does not exist.`)
-    check(
-      isDefined(rightTableData),
-      `Table "${rightTableName}" does not exist.`,
-    )
+    check(isDefined(leftTable), `Table "${leftTableName}" does not exist.`)
+    check(isDefined(rightTable), `Table "${rightTableName}" does not exist.`)
 
     return new InMemoryDatabaseJoin<TLeftData, TRightData>(
-      leftTableData,
-      rightTableData,
+      leftTable,
+      rightTable,
     ) as Join<TLeftData, TRightData>
   }
 }

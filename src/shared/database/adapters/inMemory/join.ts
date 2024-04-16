@@ -4,6 +4,10 @@ import { wherePredicateFn } from '@shared/database/helpers/wherePredicateFn'
 import { firstOf } from '@shared/lib/utils/list'
 import { entriesOf } from '@shared/lib/utils/object'
 import { check, isDefined } from '@shared/lib/utils/checks'
+import {
+  type InMemoryDataTable,
+  InMemoryDataTableImpl,
+} from '@shared/database/adapters/inMemory/dataTable'
 
 export class InMemoryDatabaseLeftJoin<TData extends object>
   extends InMemoryDatabaseQueryable<TData>
@@ -15,14 +19,14 @@ export class InMemoryDatabaseJoin<
 > implements Join<TLeftData, TRightData>
 {
   constructor(
-    private readonly leftTableData: Array<TLeftData>,
-    private readonly rightTableData: Array<TRightData>,
+    private readonly leftTable: InMemoryDataTable<TLeftData>,
+    private readonly rightTable: InMemoryDataTable<TRightData>,
   ) {}
 
   left(args: LeftJoinArgs<TLeftData, TRightData>): LeftJoin<TLeftData> {
     const { on, where } = args
 
-    const filteredRightTableData = this.rightTableData.filter((rightData) =>
+    const filteredRightTableRows = this.rightTable.rows.filter((rightData) =>
       wherePredicateFn(rightData, where),
     )
 
@@ -30,15 +34,17 @@ export class InMemoryDatabaseJoin<
 
     check(isDefined(rightKey), 'Right key is not defined.')
 
-    const filteredLeftTableData = this.leftTableData.filter((leftData) =>
-      filteredRightTableData.some(
+    const filteredLeftTableRows = this.leftTable.rows.filter((leftData) =>
+      filteredRightTableRows.some(
         // @ts-expect-error
         (rightData) => rightData[rightKey] === leftData[leftKey],
       ),
     )
 
+    const filteredLeftTable = this.leftTable.copyWithRows(filteredLeftTableRows)
+
     return new InMemoryDatabaseLeftJoin<TLeftData>(
-      filteredLeftTableData,
+      filteredLeftTable,
     ) as LeftJoin<TLeftData>
   }
 }
