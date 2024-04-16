@@ -1,6 +1,6 @@
 import type {
-  CreateArgs,
-  CreateManyArgs,
+  InsertArgs,
+  InsertManyArgs,
   DeleteArgs,
   DeleteManyArgs,
   Table,
@@ -15,20 +15,20 @@ export class InMemoryDatabaseTable<TData extends object>
   extends InMemoryDatabaseQueryable<TData>
   implements Table<TData>
 {
-  private syncCreate(args: CreateArgs<TData>): TData {
+  private syncCreate(args: InsertArgs<TData>): TData {
     this.table.rows.push(args.data)
     return args.data
   }
 
-  async create(args: CreateArgs<TData>): Promise<TData> {
+  async insert(args: InsertArgs<TData>): Promise<TData> {
     return new Promise((resolve) => {
       resolve(this.syncCreate(args))
     })
   }
 
-  async createMany(args: CreateManyArgs<TData>): Promise<Array<TData>> {
+  async insertMany(args: InsertManyArgs<TData>): Promise<Array<TData>> {
     return new Promise(async (resolve) => {
-      resolve(await Promise.all(args.data.map((data) => this.create({ data }))))
+      resolve(await Promise.all(args.data.map((data) => this.insert({ data }))))
     })
   }
 

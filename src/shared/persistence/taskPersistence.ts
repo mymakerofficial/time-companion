@@ -143,7 +143,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
     transaction: Transaction,
     task: Readonly<TaskEntityDto>,
   ): Promise<Readonly<TaskEntityDto>> {
-    return await transaction.table<TaskEntityDto>('tasks').create({
+    return await transaction.table<TaskEntityDto>('tasks').insert({
       data: task,
     })
   }

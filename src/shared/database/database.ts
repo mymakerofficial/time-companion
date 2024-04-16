@@ -43,11 +43,11 @@ export type OrderByInput<TData extends object> = {
   [K in keyof TData]?: OrderByDirection
 }
 
-export type CreateArgs<TData extends object> = {
+export type InsertArgs<TData extends object> = {
   data: TData
 }
 
-export type CreateManyArgs<TData extends object> = {
+export type InsertManyArgs<TData extends object> = {
   data: Array<TData>
 }
 
@@ -89,16 +89,16 @@ export interface Deletable<TData extends object> {
   deleteMany(args: DeleteManyArgs<TData>): Promise<void>
 }
 
-export interface Creatable<TData extends object> {
-  create(args: CreateArgs<TData>): Promise<TData>
-  createMany(args: CreateManyArgs<TData>): Promise<Array<TData>>
+export interface Insertable<TData extends object> {
+  insert(args: InsertArgs<TData>): Promise<TData>
+  insertMany(args: InsertManyArgs<TData>): Promise<Array<TData>>
 }
 
 export interface Table<TData extends object>
   extends Queryable<TData>,
     Updatable<TData>,
     Deletable<TData>,
-    Creatable<TData> {}
+    Insertable<TData> {}
 
 export type LeftJoinArgs<
   TLeftData extends object,

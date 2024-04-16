@@ -57,17 +57,6 @@ describe.sequential.each([
     Array.from({ length: projectsPerUserLength }, () => randomProject(user.id)),
   )
 
-  async function getAllQuery(transaction: Transaction): Promise<{
-    resUsers: Array<User>
-    resProjects: Array<Project>
-  }> {
-    const resUsers = await transaction.table<User>('users').findMany()
-
-    const resProjects = await transaction.table<Project>('projects').findMany()
-
-    return { resUsers, resProjects }
-  }
-
   describe('createTable', () => {
     it('should create a table', async () => {
       const upgradeFn = vi.fn(async (transaction: UpgradeTransaction) => {
@@ -123,11 +112,11 @@ describe.sequential.each([
     })
   })
 
-  describe('create', () => {
+  describe('insert', () => {
     it('should insert data', async () => {
       const createdUser = await database.withTransaction(
         async (transaction) => {
-          return await transaction.table<User>('users').create({
+          return await transaction.table<User>('users').insert({
             data: firstOf(users),
           })
         },
@@ -137,19 +126,19 @@ describe.sequential.each([
     })
   })
 
-  describe('createMany', () => {
+  describe('insertMany', () => {
     it('should insert data', async () => {
       const { createdUsers, createdProjects } = await database.withTransaction(
         async (transaction) => {
           const createdUsers = await transaction
             .table<User>('users')
-            .createMany({
-              data: excludeFirst(users), // exclude the first user as it was already created
+            .insertMany({
+              data: excludeFirst(users), // exclude the first user as it was already inserted
             })
 
           const createdProjects = await transaction
             .table<Project>('projects')
-            .createMany({
+            .insertMany({
               data: projects,
             })
 

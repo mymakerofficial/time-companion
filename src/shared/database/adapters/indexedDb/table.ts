@@ -1,6 +1,6 @@
 import type {
-  CreateArgs,
-  CreateManyArgs,
+  InsertArgs,
+  InsertManyArgs,
   DeleteArgs,
   DeleteManyArgs,
   Table,
@@ -34,7 +34,7 @@ export class IDBAdapterTable<TData extends object>
     todo()
   }
 
-  async create(args: CreateArgs<TData>): Promise<TData> {
+  async insert(args: InsertArgs<TData>): Promise<TData> {
     return new Promise((resolve, reject) => {
       const request = this.objectStore.add(args.data)
 
@@ -43,7 +43,7 @@ export class IDBAdapterTable<TData extends object>
     })
   }
 
-  async createMany(args: CreateManyArgs<TData>): Promise<Array<TData>> {
-    return await Promise.all(args.data.map((data) => this.create({ data })))
+  async insertMany(args: InsertManyArgs<TData>): Promise<Array<TData>> {
+    return await Promise.all(args.data.map((data) => this.insert({ data })))
   }
 }

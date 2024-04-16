@@ -116,7 +116,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     transaction: Transaction,
     project: Readonly<ProjectEntityDto>,
   ) {
-    return await transaction.table<ProjectEntityDto>('projects').create({
+    return await transaction.table<ProjectEntityDto>('projects').insert({
       data: project,
     })
   }
