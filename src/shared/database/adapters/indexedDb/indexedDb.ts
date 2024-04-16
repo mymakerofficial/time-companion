@@ -8,25 +8,10 @@ import { IDBAdapterTransaction } from '@shared/database/adapters/indexedDb/trans
 import { check, isNotNull } from '@shared/lib/utils/checks'
 import { IDBAdapterUpgradeTransaction } from '@shared/database/adapters/indexedDb/upgradeTransaction'
 
-// make sure this file is only imported in a browser environment
-check(
-  typeof window !== 'undefined',
-  import.meta.env.DEV
-    ? 'AAAAAAAAAAA!!! IDBAdapter was imported in a non-browser environment! Please make sure its only imported by code inside the render module!'
-    : 'IDBAdapter was imported in a non-browser environment.',
-)
-
-// make sure IndexedDB is available
-//  yes this will crash the app if IndexedDB is not available
-check(
-  typeof window !== 'undefined' && typeof window.indexedDB !== 'undefined',
-  'IndexedDB is not available. Please try a different browser.',
-)
-
 export class IDBAdapter implements Database {
   database: Nullable<IDBDatabase>
 
-  constructor() {
+  constructor(private readonly indexedDB: IDBFactory = window.indexedDB) {
     this.database = null
   }
 
@@ -35,7 +20,7 @@ export class IDBAdapter implements Database {
     upgrade: (transaction: UpgradeTransaction) => Promise<void>,
   ): Promise<void> {
     return new Promise((resolve, reject) => {
-      const request = window.indexedDB.open(name, 1)
+      const request = this.indexedDB.open(name, 1)
 
       request.onerror = () => {
         reject(request.error)
@@ -62,6 +47,6 @@ export class IDBAdapter implements Database {
   }
 }
 
-export function createIndexedDbAdapter(): Database {
-  return new IDBAdapter()
+export function createIndexedDbAdapter(indexedDB?: IDBFactory): Database {
+  return new IDBAdapter(indexedDB)
 }

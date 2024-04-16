@@ -6,9 +6,7 @@ export default mergeConfig(
   defineConfig({
     test: {
       browser: {
-        enabled: true,
-        headless: true,
-        isolate: true,
+        enabled: false,
         name: 'chrome',
       },
     },

@@ -7,6 +7,7 @@ import { randomElement, randomElements } from '@shared/lib/utils/random'
 import type { Transaction, UpgradeTransaction } from '@shared/database/database'
 import { createIndexedDbAdapter } from '@shared/database/adapters/indexedDb/indexedDb'
 import { DatabaseTestFixture } from '@shared/database/tests/fixture'
+import { indexedDB } from 'fake-indexeddb'
 
 interface User {
   id: string
@@ -22,10 +23,10 @@ interface Project {
 }
 
 describe.sequential.each([
-  ['In memory database', createInMemoryDatabase],
-  ['IndexedDB Adapter', createIndexedDbAdapter],
-])('%s', (_, createDatabase) => {
-  const fixture = new DatabaseTestFixture(createDatabase())
+  ['In memory database', createInMemoryDatabase, []],
+  ['IndexedDB Adapter', createIndexedDbAdapter, [indexedDB]],
+])('%s', (_, createDatabase, args) => {
+  const fixture = new DatabaseTestFixture(createDatabase(...args))
   const database = fixture.database
 
   const usersLength = 7
@@ -150,6 +151,14 @@ describe.sequential.each([
   })
 
   describe('findFirst', () => {
+    it('should return a value that was inserted', async () => {
+      const resUser = await database.withTransaction(async (transaction) =>
+        transaction.table<User>('users').findFirst(),
+      )
+
+      expect(users).toContainEqual(resUser)
+    })
+
     it('should find unique entry in a table', async () => {
       const randomUser = randomElement(users, {
         safetyOffset: 1,
