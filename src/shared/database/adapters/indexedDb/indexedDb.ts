@@ -8,6 +8,21 @@ import { IDBAdapterTransaction } from '@shared/database/adapters/indexedDb/trans
 import { check, isNotNull } from '@shared/lib/utils/checks'
 import { IDBAdapterUpgradeTransaction } from '@shared/database/adapters/indexedDb/upgradeTransaction'
 
+// make sure this file is only imported in a browser environment
+check(
+  typeof window !== 'undefined',
+  import.meta.env.DEV
+    ? 'AAAAAAAAAAA!!! IDBAdapter was imported in a non-browser environment! Please make sure its only imported by code inside the render module!'
+    : 'IDBAdapter was imported in a non-browser environment.',
+)
+
+// make sure IndexedDB is available
+//  yes this will crash the app if IndexedDB is not available
+check(
+  typeof window !== 'undefined' && typeof window.indexedDB !== 'undefined',
+  'IndexedDB is not available. Please try a different browser.',
+)
+
 export class IDBAdapter implements Database {
   database: Nullable<IDBDatabase>
 
@@ -47,6 +62,6 @@ export class IDBAdapter implements Database {
   }
 }
 
-export function createIndexedDbFacade(): Database {
+export function createIndexedDbAdapter(): Database {
   return new IDBAdapter()
 }
