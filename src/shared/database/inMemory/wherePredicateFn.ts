@@ -76,6 +76,7 @@ function unwrappedWherePredicateFn<TData extends object>(
   return false
 }
 
+// checks if the data matches the where input
 export function wherePredicateFn<TData extends object>(
   data: TData,
   where?: WhereInput<TData>,

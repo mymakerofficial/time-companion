@@ -2,12 +2,18 @@ import type {
   CreateTableArgs,
   UpgradeTransaction,
 } from '@shared/database/database'
+import { IndexedDbFacadeBase } from '@renderer/database/indexedDb/base'
 
-export class IndexedDbFacadeUpgradeTransaction implements UpgradeTransaction {
+export class IndexedDbFacadeUpgradeTransaction
+  extends IndexedDbFacadeBase
+  implements UpgradeTransaction
+{
   constructor(
-    private readonly database: IDBDatabase,
+    database: IDBDatabase,
     private readonly event: IDBVersionChangeEvent,
-  ) {}
+  ) {
+    super(database)
+  }
 
   createTable(args: CreateTableArgs): Promise<void> {
     return new Promise((resolve, reject) => {

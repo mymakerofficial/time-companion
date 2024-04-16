@@ -1,6 +1,5 @@
 import type { Nullable } from '@shared/lib/utils/types'
 import type {
-  CreateTableArgs,
   Database,
   Transaction,
   UpgradeTransaction,

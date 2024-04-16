@@ -4,8 +4,8 @@ import type { Nullable } from '@shared/lib/utils/types'
 import { keysOf } from '@shared/lib/utils/object'
 import { assertOnlyValidFieldsChanged } from '@shared/service/helpers/assertOnlyValidFieldsChanged'
 import type { ProjectPersistence } from '@shared/persistence/projectPersistence'
-import { check, isAbsent, isPresent } from '@shared/lib/utils/checks'
-import { asyncGetOrNull, asyncGetOrThrow } from '@shared/lib/utils/result'
+import { isPresent } from '@shared/lib/utils/checks'
+import { asyncGetOrThrow } from '@shared/lib/utils/result'
 import {
   type EntityService,
   EntityServiceImpl,
@@ -68,18 +68,6 @@ class TaskServiceImpl
   }
 
   async createTask(task: Readonly<TaskDto>): Promise<Readonly<TaskEntityDto>> {
-    const existingTask = await asyncGetOrNull(
-      this.taskPersistence.getTaskByDisplayNameAndProjectId(
-        task.displayName,
-        task.projectId,
-      ),
-    )
-
-    check(
-      isAbsent(existingTask),
-      `Task with displayName "${task.displayName}" already exists in project "${task.projectId}".`,
-    )
-
     const newTask = await this.taskPersistence.createTask({
       id: uuid(),
       ...task,

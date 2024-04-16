@@ -2,11 +2,17 @@ import type { Join, Table, Transaction } from '@shared/database/database'
 import { check, isNotEmpty } from '@shared/lib/utils/checks'
 import { IndexedDbFacadeTable } from '@renderer/database/indexedDb/table'
 import { todo } from '@shared/lib/utils/todo'
+import { IndexedDbFacadeBase } from '@renderer/database/indexedDb/base'
 
-export class IndexedDbFacadeTransaction implements Transaction {
+export class IndexedDbFacadeTransaction
+  extends IndexedDbFacadeBase
+  implements Transaction
+{
   private readonly transaction: IDBTransaction
 
-  constructor(private readonly database: IDBDatabase) {
+  constructor(database: IDBDatabase) {
+    super(database)
+
     const objectStoreNames = Array.from(this.database.objectStoreNames)
 
     check(isNotEmpty(objectStoreNames), 'Database has no tables.')

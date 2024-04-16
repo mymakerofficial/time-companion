@@ -1,8 +1,8 @@
 import type { Database, Transaction } from '@shared/database/database'
 import type { TaskEntityDto } from '@shared/model/task'
-import { asyncGetOrThrow } from '@shared/lib/utils/result'
+import { asyncGetOrNull, asyncGetOrThrow } from '@shared/lib/utils/result'
 import type { ProjectEntityDto } from '@shared/model/project'
-import { check, isDefined } from '@shared/lib/utils/checks'
+import { check, isAbsent, isDefined } from '@shared/lib/utils/checks'
 
 export interface TaskPersistenceDependencies {
   database: Database
@@ -152,6 +152,19 @@ export class TaskPersistenceImpl implements TaskPersistence {
     task: Readonly<TaskEntityDto>,
   ): Promise<Readonly<TaskEntityDto>> {
     return await this.database.withTransaction(async (transaction) => {
+      const existingTask = await asyncGetOrNull(
+        this.getTaskByDisplayNameAndProjectIdQuery(
+          transaction,
+          task.displayName,
+          task.projectId,
+        ),
+      )
+
+      check(
+        isAbsent(existingTask),
+        `Task with displayName "${task.displayName}" already exists in project "${task.projectId}".`,
+      )
+
       const project = await this.getProjectByIdQuery(
         transaction,
         task.projectId,

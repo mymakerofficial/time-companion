@@ -3,30 +3,19 @@ import type {
   CreateManyArgs,
   DeleteArgs,
   DeleteManyArgs,
-  FindArgs,
-  FindManyArgs,
   Table,
   UpdateArgs,
   UpdateManyArgs,
 } from '@shared/database/database'
 import { todo } from '@shared/lib/utils/todo'
+import { IndexedDbFacadeQueryable } from '@renderer/database/indexedDb/queryable'
 
 export class IndexedDbFacadeTable<TData extends object>
+  extends IndexedDbFacadeQueryable<TData>
   implements Table<TData>
 {
-  constructor(private readonly objectStore: IDBObjectStore) {}
-
-  async findFirst(args?: FindArgs<TData>): Promise<TData> {
-    todo()
-  }
-
-  async findMany(args?: FindManyArgs<TData>): Promise<Array<TData>> {
-    return new Promise((resolve, reject) => {
-      const request = this.objectStore.getAll()
-
-      request.onsuccess = () => resolve(request.result)
-      request.onerror = () => reject(request.error)
-    })
+  constructor(objectStore: IDBObjectStore) {
+    super(objectStore)
   }
 
   async update(args: UpdateArgs<TData>): Promise<TData> {
