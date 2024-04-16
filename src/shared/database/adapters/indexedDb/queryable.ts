@@ -37,8 +37,6 @@ export class IDBAdapterQueryable<TData extends object>
     const orderBy = unwrappedOrderBy.key as string
     const direction = unwrappedOrderBy.direction === 'asc' ? 'next' : 'prev'
 
-    console.log(this.objectStore.indexNames, orderBy)
-
     check(
       isNull(orderBy) || this.objectStore.indexNames.contains(orderBy),
       `Column "${orderBy}" is not indexed. You can only order by indexed columns.`,
