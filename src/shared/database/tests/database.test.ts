@@ -5,6 +5,8 @@ import { faker } from '@faker-js/faker'
 import { excludeFirst, firstOf } from '@shared/lib/utils/list'
 import { randomElement, randomElements } from '@shared/lib/utils/random'
 import type { Transaction, UpgradeTransaction } from '@shared/database/database'
+import { createIndexedDbAdapter } from '@shared/database/adapters/indexedDb/indexedDb'
+import { DatabaseTestFixture } from '@shared/database/tests/fixture'
 
 interface User {
   id: string
@@ -19,10 +21,12 @@ interface Project {
   userId: string
 }
 
-describe.sequential('In memory database', () => {
-  const database = createInMemoryDatabase()
-
-  const databaseName = 'test'
+describe.sequential.each([
+  ['In memory database', createInMemoryDatabase],
+  ['IndexedDB Adapter', createIndexedDbAdapter],
+])('%s', (_, createDatabase) => {
+  const fixture = new DatabaseTestFixture(createDatabase())
+  const database = fixture.database
 
   const usersLength = 7
   const projectsPerUserLength = 6
@@ -84,7 +88,7 @@ describe.sequential('In memory database', () => {
         })
       })
 
-      await database.open(databaseName, upgradeFn)
+      await database.open(fixture.getDatabaseName(), upgradeFn)
 
       const { resUsers, resProjects } =
         await database.withTransaction(getAllQuery)
@@ -146,6 +150,22 @@ describe.sequential('In memory database', () => {
   })
 
   describe('findFirst', () => {
+    it('should find unique entry in a table', async () => {
+      const randomUser = randomElement(users, {
+        safetyOffset: 1,
+      })
+
+      const resUser = await database.withTransaction(async (transaction) =>
+        transaction.table<User>('users').findFirst({
+          where: {
+            id: { equals: randomUser.id },
+          },
+        }),
+      )
+
+      expect(resUser).toEqual(randomUser)
+    })
+
     it('should find a single entry in a table with order ascending', async () => {
       const resUser = await database.withTransaction(async (transaction) =>
         transaction.table<User>('users').findFirst({
@@ -294,7 +314,9 @@ describe.sequential('In memory database', () => {
 
       const resProjects = await database.withTransaction(async (transaction) =>
         transaction.table<Project>('projects').updateMany({
-          where: { id: { in: randomProjects.map((project) => project.id) } },
+          where: {
+            id: { in: randomProjects.map((project) => project.id) },
+          },
           data: { name: newName },
         }),
       )
