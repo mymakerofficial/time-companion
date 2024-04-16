@@ -8,7 +8,7 @@ import type {
   UpdateManyArgs,
 } from '@shared/database/database'
 import { InMemoryDatabaseQueryable } from '@shared/database/adapters/inMemory/queryable'
-import { wherePredicateFn } from '@shared/database/adapters/inMemory/wherePredicateFn'
+import { wherePredicateFn } from '@shared/database/helpers/wherePredicateFn'
 import { check, isNotNull } from '@shared/lib/utils/checks'
 
 export class InMemoryDatabaseTable<TData extends object>
