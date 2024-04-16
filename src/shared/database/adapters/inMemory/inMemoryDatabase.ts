@@ -27,6 +27,14 @@ class InMemoryDatabase implements Database {
   ): Promise<TResult> {
     return await fn(new InMemoryDatabaseTransaction(this.data))
   }
+
+  async getTableNames(): Promise<Array<string>> {
+    return Promise.resolve(Array.from(this.data.keys()))
+  }
+
+  async getIndexes(tableName: string): Promise<Array<string>> {
+    return Promise.resolve([])
+  }
 }
 
 export function createInMemoryDatabase(): Database {

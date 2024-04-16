@@ -46,6 +46,21 @@ export class IDBAdapter implements Database {
 
     return await fn(new IDBAdapterTransaction(this.database))
   }
+
+  async getTableNames(): Promise<Array<string>> {
+    check(isNotNull(this.database), 'Database is not open.')
+
+    return Promise.resolve(Array.from(this.database.objectStoreNames))
+  }
+
+  async getIndexes(tableName: string): Promise<Array<string>> {
+    check(isNotNull(this.database), 'Database is not open.')
+
+    const transaction = this.database.transaction(tableName)
+    const store = transaction.objectStore(tableName)
+
+    return Promise.resolve(Array.from(store.indexNames))
+  }
 }
 
 export function createIndexedDbAdapter(indexedDB?: IDBFactory): Database {

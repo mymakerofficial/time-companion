@@ -71,13 +71,18 @@ describe.sequential.each([
   describe('createTable', () => {
     it('should create a table', async () => {
       const upgradeFn = vi.fn(async (transaction: UpgradeTransaction) => {
-        await transaction.createTable({
+        const usersTable = await transaction.createTable({
           name: 'users',
           schema: { id: 'string', name: 'string', number: 'number' },
           primaryKey: 'id',
         })
 
-        await transaction.createTable({
+        await usersTable.createIndex({
+          keyPath: 'name',
+          unique: true,
+        })
+
+        const projectsTable = await transaction.createTable({
           name: 'projects',
           schema: {
             id: 'string',
@@ -87,17 +92,24 @@ describe.sequential.each([
           },
           primaryKey: 'id',
         })
+
+        await projectsTable.createIndex({
+          keyPath: 'name',
+          unique: true,
+        })
       })
 
       await database.open(fixture.getDatabaseName(), upgradeFn)
 
-      const { resUsers, resProjects } =
-        await database.withTransaction(getAllQuery)
+      const tableNames = await database.getTableNames()
+      const usersIndexes = await database.getIndexes('users')
+      const projectsIndexes = await database.getIndexes('projects')
 
       expect(upgradeFn).toHaveBeenCalled()
 
-      expect(resUsers).toEqual([])
-      expect(resProjects).toEqual([])
+      expect(tableNames.sort()).toEqual(['projects', 'users'])
+      expect(usersIndexes).toEqual(['name'])
+      expect(projectsIndexes).toEqual(['name'])
     })
   })
 

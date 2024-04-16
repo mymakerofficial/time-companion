@@ -119,12 +119,17 @@ export interface Join<TLeftData extends object, TRightData extends object> {
 export const columnTypes = ['string', 'number', 'boolean'] as const
 export type ColumnType = (typeof columnTypes)[number]
 
-export type CreateTableArgs = {
+export type CreateTableArgs<TData extends object> = {
   name: string
   schema: {
-    [key: string]: ColumnType
+    [K in keyof TData]: ColumnType
   }
-  primaryKey?: string
+  primaryKey?: keyof TData
+}
+
+export type CreateIndexArgs<TData extends object> = {
+  keyPath: keyof TData
+  unique?: boolean
 }
 
 export interface Transaction {
@@ -135,8 +140,14 @@ export interface Transaction {
   ): Join<TLeftData, TRightData>
 }
 
+export interface UpgradeTable<TData extends object> {
+  createIndex(args: CreateIndexArgs<TData>): Promise<void>
+}
+
 export interface UpgradeTransaction {
-  createTable(args: CreateTableArgs): Promise<void>
+  createTable<TData extends object>(
+    args: CreateTableArgs<TData>,
+  ): Promise<UpgradeTable<TData>>
 }
 
 export interface Database {
@@ -147,4 +158,6 @@ export interface Database {
   withTransaction<TResult>(
     fn: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>
+  getTableNames(): Promise<Array<string>>
+  getIndexes(tableName: string): Promise<Array<string>>
 }

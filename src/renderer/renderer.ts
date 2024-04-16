@@ -15,7 +15,7 @@ migrateApplication()
 // TODO this is a hack to create the tables
 
 await database.open('time-companion', async (transaction) => {
-  await transaction.createTable({
+  const projectsTable = await transaction.createTable({
     name: 'projects',
     schema: {
       id: 'string',
@@ -29,7 +29,12 @@ await database.open('time-companion', async (transaction) => {
     primaryKey: 'id',
   })
 
-  await transaction.createTable({
+  await projectsTable.createIndex({
+    keyPath: 'displayName',
+    unique: true,
+  })
+
+  const tasksTable = await transaction.createTable({
     name: 'tasks',
     schema: {
       id: 'string',
@@ -41,6 +46,11 @@ await database.open('time-companion', async (transaction) => {
       deletedAt: 'string',
     },
     primaryKey: 'id',
+  })
+
+  await tasksTable.createIndex({
+    keyPath: 'displayName',
+    unique: true,
   })
 })
 

@@ -61,7 +61,7 @@ function initialize() {
   // TODO this is a hack to create the tables
 
   database.open('time-companion', async (transaction) => {
-    transaction.createTable({
+    const projectsTable = await transaction.createTable({
       name: 'projects',
       schema: {
         id: 'string',
@@ -72,9 +72,15 @@ function initialize() {
         modifiedAt: 'string',
         deletedAt: 'string',
       },
+      primaryKey: 'id',
     })
 
-    transaction.createTable({
+    await projectsTable.createIndex({
+      keyPath: 'displayName',
+      unique: true,
+    })
+
+    const tasksTable = await transaction.createTable({
       name: 'tasks',
       schema: {
         id: 'string',
@@ -85,6 +91,12 @@ function initialize() {
         modifiedAt: 'string',
         deletedAt: 'string',
       },
+      primaryKey: 'id',
+    })
+
+    await tasksTable.createIndex({
+      keyPath: 'displayName',
+      unique: true,
     })
   })
 }
