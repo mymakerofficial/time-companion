@@ -5,7 +5,8 @@ import {
   type UnwrapWhereBooleanGroup,
   type UnwrapWhereCondition,
 } from '@shared/database/helpers/unwrapWhere'
-import { isUndefined } from '@shared/lib/utils/checks'
+import { isNull, isUndefined } from '@shared/lib/utils/checks'
+import type { Nullable } from '@shared/lib/utils/types'
 
 function resolveBooleanGroup<TData extends object>(
   data: TData,
@@ -63,10 +64,15 @@ function resolveCondition<TData extends object>(
   return false
 }
 
-function unwrappedWherePredicateFn<TData extends object>(
+// checks if the data matches the where input
+export function unwrappedWherePredicateFn<TData extends object>(
   data: TData,
-  unwrappedWhere: UnwrapWhere<TData>,
+  unwrappedWhere: Nullable<UnwrapWhere<TData>>,
 ): boolean {
+  if (isNull(unwrappedWhere)) {
+    return true
+  }
+
   if (unwrappedWhere.type === 'booleanGroup') {
     return resolveBooleanGroup(data, unwrappedWhere)
   } else if (unwrappedWhere.type === 'condition') {

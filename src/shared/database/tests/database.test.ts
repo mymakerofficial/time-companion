@@ -4,7 +4,7 @@ import { uuid } from '@shared/lib/utils/uuid'
 import { faker } from '@faker-js/faker'
 import { excludeFirst, firstOf } from '@shared/lib/utils/list'
 import { randomElement, randomElements } from '@shared/lib/utils/random'
-import type { Transaction, UpgradeTransaction } from '@shared/database/database'
+import type { UpgradeTransaction } from '@shared/database/database'
 import { createIndexedDbAdapter } from '@shared/database/adapters/indexedDb/indexedDb'
 import { DatabaseTestFixture } from '@shared/database/tests/fixture'
 import { indexedDB } from 'fake-indexeddb'
@@ -71,6 +71,11 @@ describe.sequential.each([
           unique: true,
         })
 
+        await usersTable.createIndex({
+          keyPath: 'number',
+          unique: false,
+        })
+
         const projectsTable = await transaction.createTable({
           name: 'projects',
           schema: {
@@ -97,7 +102,7 @@ describe.sequential.each([
       expect(upgradeFn).toHaveBeenCalled()
 
       expect(tableNames.sort()).toEqual(['projects', 'users'])
-      expect(usersIndexes).toEqual(['name'])
+      expect(usersIndexes).toEqual(['name', 'number'])
       expect(projectsIndexes).toEqual(['name'])
     })
   })
@@ -176,6 +181,19 @@ describe.sequential.each([
       expect(resUser).toEqual(randomUser)
     })
 
+    it('should throw an error when trying to order by non-indexed column', async () => {
+      expect(
+        async () =>
+          await database.withTransaction(async (transaction) =>
+            transaction.table<Project>('projects').findFirst({
+              orderBy: { color: 'desc' },
+            }),
+          ),
+      ).rejects.toThrowError(
+        `Column "color" is not indexed. You can only order by indexed columns.`,
+      )
+    })
+
     it('should find a single entry in a table with order ascending', async () => {
       const resUser = await database.withTransaction(async (transaction) =>
         transaction.table<User>('users').findFirst({
@@ -231,7 +249,9 @@ describe.sequential.each([
         transaction.table<Project>('projects').findMany(),
       )
 
-      expect(resProjects).toEqual(projects)
+      expect([...resProjects].sort((a, b) => a.id.localeCompare(b.id))).toEqual(
+        [...projects].sort((a, b) => a.id.localeCompare(b.id)),
+      )
     })
 
     it('should find all entries in a table with a filter', async () => {
@@ -245,8 +265,23 @@ describe.sequential.each([
         }),
       )
 
-      expect(resProjects).toEqual(
-        projects.filter((project) => project.color === randomProject.color),
+      expect([...resProjects].sort((a, b) => a.id.localeCompare(b.id))).toEqual(
+        [...projects]
+          .filter((project) => project.color === randomProject.color)
+          .sort((a, b) => a.id.localeCompare(b.id)),
+      )
+    })
+
+    it('should throw an error when trying to order by non-indexed column', async () => {
+      expect(
+        async () =>
+          await database.withTransaction(async (transaction) =>
+            transaction.table<Project>('projects').findMany({
+              orderBy: { color: 'desc' },
+            }),
+          ),
+      ).rejects.toThrowError(
+        `Column "color" is not indexed. You can only order by indexed columns.`,
       )
     })
 

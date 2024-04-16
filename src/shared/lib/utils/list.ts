@@ -1,3 +1,5 @@
+import { isArray } from '@shared/lib/utils/checks'
+
 export function firstOf<T extends ReadonlyArray<unknown>>(values: T): T[0] {
   return values[0]
 }
@@ -30,11 +32,15 @@ export function asArray(value: any): Array<any> {
     return []
   }
 
-  if (Array.isArray(value)) {
+  if (isArray(value)) {
     return value
   }
 
   return [value]
+}
+
+export function toArray<T>(value: Iterable<T> | ArrayLike<T>): Array<T> {
+  return Array.from(value)
 }
 
 export function setOf<T>(values: Array<T>): Set<T> {

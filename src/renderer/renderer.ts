@@ -34,6 +34,11 @@ await database.open('time-companion', async (transaction) => {
     unique: true,
   })
 
+  await projectsTable.createIndex({
+    keyPath: 'color',
+    unique: false,
+  })
+
   const tasksTable = await transaction.createTable({
     name: 'tasks',
     schema: {

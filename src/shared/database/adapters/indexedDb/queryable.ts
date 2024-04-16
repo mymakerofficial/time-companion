@@ -5,8 +5,8 @@ import type {
 } from '@shared/database/database'
 import { firstOf } from '@shared/lib/utils/list'
 import type { Nullable } from '@shared/lib/utils/types'
-import { isNull } from '@shared/lib/utils/checks'
-import { wherePredicateFn } from '@shared/database/helpers/wherePredicateFn'
+import { check, isDefined, isNotNull, isNull } from '@shared/lib/utils/checks'
+import { unwrappedWherePredicateFn } from '@shared/database/helpers/wherePredicateFn'
 import { unwrapWhere } from '@shared/database/helpers/unwrapWhere'
 import { unwrapOrderBy } from '@shared/database/helpers/unwrapOrderBy'
 
@@ -26,8 +26,30 @@ export class IDBAdapterQueryable<TData extends object>
   }
 
   async findMany(args?: FindManyArgs<TData>): Promise<Array<TData>> {
+    const unwrappedWhere = isDefined(args?.where)
+      ? unwrapWhere(args!.where)
+      : null
+
+    const unwrappedOrderBy = isDefined(args?.orderBy)
+      ? unwrapOrderBy(args!.orderBy)
+      : { key: null, direction: 'asc' }
+
+    const orderBy = unwrappedOrderBy.key as string
+    const direction = unwrappedOrderBy.direction === 'asc' ? 'next' : 'prev'
+
+    console.log(this.objectStore.indexNames, orderBy)
+
+    check(
+      isNull(orderBy) || this.objectStore.indexNames.contains(orderBy),
+      `Column "${orderBy}" is not indexed. You can only order by indexed columns.`,
+    )
+
+    const indexOrObjectStore = isNotNull(orderBy)
+      ? this.objectStore.index(orderBy)
+      : this.objectStore
+
     return new Promise((resolve, reject) => {
-      const request = this.objectStore.openCursor()
+      const request = indexOrObjectStore.openCursor(null, direction)
 
       const list: Array<TData> = []
 
@@ -45,7 +67,9 @@ export class IDBAdapterQueryable<TData extends object>
         }
 
         const value = cursor.value
-        const matches = wherePredicateFn(value, args?.where)
+        const matches = isNotNull(unwrappedWhere)
+          ? unwrappedWherePredicateFn(value, unwrappedWhere)
+          : true
 
         if (matches) {
           list.push(value)
