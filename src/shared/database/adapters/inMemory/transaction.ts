@@ -1,8 +1,8 @@
 import type { Join, Table, Transaction } from '@shared/database/database'
 import type { Optional } from '@shared/lib/utils/types'
 import { check, isDefined } from '@shared/lib/utils/checks'
-import { InMemoryDatabaseTable } from '@shared/database/inMemory/table'
-import { InMemoryDatabaseJoin } from '@shared/database/inMemory/join'
+import { InMemoryDatabaseTable } from '@shared/database/adapters/inMemory/table'
+import { InMemoryDatabaseJoin } from '@shared/database/adapters/inMemory/join'
 
 export class InMemoryDatabaseTransaction implements Transaction {
   constructor(private data: Map<string, Array<object>>) {}

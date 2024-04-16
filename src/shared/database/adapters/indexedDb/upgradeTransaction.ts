@@ -2,7 +2,7 @@ import type {
   CreateTableArgs,
   UpgradeTransaction,
 } from '@shared/database/database'
-import { IndexedDbFacadeBase } from '@renderer/database/indexedDb/base'
+import { IndexedDbFacadeBase } from '@shared/database/adapters/indexedDb/base'
 
 export class IndexedDbFacadeUpgradeTransaction
   extends IndexedDbFacadeBase

@@ -1,8 +1,8 @@
 import type { Join, Table, Transaction } from '@shared/database/database'
 import { check, isNotEmpty } from '@shared/lib/utils/checks'
-import { IndexedDbFacadeTable } from '@renderer/database/indexedDb/table'
+import { IndexedDbFacadeTable } from '@shared/database/adapters/indexedDb/table'
 import { todo } from '@shared/lib/utils/todo'
-import { IndexedDbFacadeBase } from '@renderer/database/indexedDb/base'
+import { IndexedDbFacadeBase } from '@shared/database/adapters/indexedDb/base'
 
 export class IndexedDbFacadeTransaction
   extends IndexedDbFacadeBase

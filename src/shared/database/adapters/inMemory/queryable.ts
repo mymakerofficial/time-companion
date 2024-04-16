@@ -4,8 +4,8 @@ import type {
   Queryable,
 } from '@shared/database/database'
 import { firstOf } from '@shared/lib/utils/list'
-import { wherePredicateFn } from '@shared/database/inMemory/wherePredicateFn'
-import { orderByCompareFn } from '@shared/database/inMemory/orderByCompareFn'
+import { wherePredicateFn } from '@shared/database/adapters/inMemory/wherePredicateFn'
+import { orderByCompareFn } from '@shared/database/adapters/inMemory/orderByCompareFn'
 
 export class InMemoryDatabaseQueryable<TData extends object>
   implements Queryable<TData>

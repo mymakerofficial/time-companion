@@ -1,6 +1,6 @@
 import type { Join, LeftJoin, LeftJoinArgs } from '@shared/database/database'
-import { InMemoryDatabaseQueryable } from '@shared/database/inMemory/queryable'
-import { wherePredicateFn } from '@shared/database/inMemory/wherePredicateFn'
+import { InMemoryDatabaseQueryable } from '@shared/database/adapters/inMemory/queryable'
+import { wherePredicateFn } from '@shared/database/helpers/wherePredicateFn'
 import { firstOf } from '@shared/lib/utils/list'
 import { entriesOf } from '@shared/lib/utils/object'
 import { check, isDefined } from '@shared/lib/utils/checks'

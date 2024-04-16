@@ -8,7 +8,7 @@ import type {
   UpdateManyArgs,
 } from '@shared/database/database'
 import { todo } from '@shared/lib/utils/todo'
-import { IndexedDbFacadeQueryable } from '@renderer/database/indexedDb/queryable'
+import { IndexedDbFacadeQueryable } from '@shared/database/adapters/indexedDb/queryable'
 
 export class IndexedDbFacadeTable<TData extends object>
   extends IndexedDbFacadeQueryable<TData>

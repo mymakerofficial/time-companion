@@ -1,5 +1,5 @@
 import type { Database } from '@shared/database/database'
-import { createInMemoryDatabase } from '@shared/database/inMemory/inMemoryDatabase'
+import { createInMemoryDatabase } from '@shared/database/adapters/inMemory/inMemoryDatabase'
 
 export function createTestDatabase(): Database {
   const database = createInMemoryDatabase()

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { createInMemoryDatabase } from '@shared/database/inMemory/inMemoryDatabase'
+import { createInMemoryDatabase } from '@shared/database/adapters/inMemory/inMemoryDatabase'
 import { uuid } from '@shared/lib/utils/uuid'
 import { faker } from '@faker-js/faker'
 import { excludeFirst, firstOf } from '@shared/lib/utils/list'

@@ -3,7 +3,7 @@ import type { WhereInput } from '@shared/database/database'
 import {
   type UnwrapWhere,
   unwrapWhere,
-} from '@shared/database/where/unwrapWhere'
+} from '@shared/database/helpers/unwrapWhere'
 
 interface Person {
   name: string

@@ -4,9 +4,9 @@ import type {
   Transaction,
   UpgradeTransaction,
 } from '@shared/database/database'
-import { IndexedDbFacadeTransaction } from '@renderer/database/indexedDb/transaction'
+import { IndexedDbFacadeTransaction } from '@shared/database/adapters/indexedDb/transaction'
 import { check, isNotNull } from '@shared/lib/utils/checks'
-import { IndexedDbFacadeUpgradeTransaction } from '@renderer/database/indexedDb/upgradeTransaction'
+import { IndexedDbFacadeUpgradeTransaction } from '@shared/database/adapters/indexedDb/upgradeTransaction'
 
 export class IndexedDbFacade implements Database {
   database: Nullable<IDBDatabase>

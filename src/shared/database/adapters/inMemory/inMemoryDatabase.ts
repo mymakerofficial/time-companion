@@ -4,9 +4,9 @@ import type {
   Transaction,
   UpgradeTransaction,
 } from '@shared/database/database'
-import { InMemoryDatabaseTransaction } from '@shared/database/inMemory/transaction'
+import { InMemoryDatabaseTransaction } from '@shared/database/adapters/inMemory/transaction'
 import { todo } from '@shared/lib/utils/todo'
-import { InMemoryDatabaseUpgradeTransaction } from '@shared/database/inMemory/upgradeTransaction'
+import { InMemoryDatabaseUpgradeTransaction } from '@shared/database/adapters/inMemory/upgradeTransaction'
 
 class InMemoryDatabase implements Database {
   private readonly data: Map<string, Array<object>>

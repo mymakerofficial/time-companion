@@ -4,7 +4,7 @@ import {
   unwrapWhere,
   type UnwrapWhereBooleanGroup,
   type UnwrapWhereCondition,
-} from '@shared/database/where/unwrapWhere'
+} from '@shared/database/helpers/unwrapWhere'
 import { isUndefined } from '@shared/lib/utils/checks'
 
 function resolveBooleanGroup<TData extends object>(
