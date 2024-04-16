@@ -53,7 +53,7 @@ export type CreateManyArgs<TData extends object> = {
 
 export type FindArgs<TData extends object> = {
   where?: WhereInput<TData>
-  orderBy?: OrderByInput<TData> | Array<OrderByInput<TData>>
+  orderBy?: OrderByInput<TData>
 }
 
 export type FindManyArgs<TData extends object> = FindArgs<TData> & {

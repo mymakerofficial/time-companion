@@ -7,6 +7,8 @@ import { firstOf } from '@shared/lib/utils/list'
 import type { Nullable } from '@shared/lib/utils/types'
 import { isNull } from '@shared/lib/utils/checks'
 import { wherePredicateFn } from '@shared/database/helpers/wherePredicateFn'
+import { unwrapWhere } from '@shared/database/helpers/unwrapWhere'
+import { unwrapOrderBy } from '@shared/database/helpers/unwrapOrderBy'
 
 export class IDBAdapterQueryable<TData extends object>
   implements Queryable<TData>
