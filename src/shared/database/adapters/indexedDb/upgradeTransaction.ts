@@ -11,13 +11,13 @@ export class IDBAdapterUpgradeTransaction implements UpgradeTransaction {
 
   createTable(args: CreateTableArgs): Promise<void> {
     return new Promise((resolve, reject) => {
-      const store = this.database.createObjectStore(args.name, {
+      this.database.createObjectStore(args.name, {
         keyPath: args.primaryKey,
         autoIncrement: false,
       })
 
-      store.transaction.oncomplete = () => resolve()
-      store.transaction.onerror = () => reject(store.transaction.error)
+      // the object store is created synchronously, so we can resolve immediately
+      resolve()
     })
   }
 }

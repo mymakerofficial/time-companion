@@ -18,6 +18,13 @@ export class IDBAdapterTransaction implements Transaction {
   }
 
   table<TData extends object>(tableName: string): Table<TData> {
+    const objectStoreNames = Array.from(this.database.objectStoreNames)
+
+    check(
+      objectStoreNames.includes(tableName),
+      `Table "${tableName}" does not exist.`,
+    )
+
     const objectStore = this.transaction.objectStore(tableName)
 
     return new IDBAdapterTable<TData>(objectStore)

@@ -33,7 +33,8 @@ export class IDBAdapter implements Database {
 
       request.onupgradeneeded = async (event) => {
         await upgrade(new IDBAdapterUpgradeTransaction(request.result, event))
-        resolve()
+
+        // don't resolve here, we only know the upgrade is done when onsuccess is called
       }
     })
   }

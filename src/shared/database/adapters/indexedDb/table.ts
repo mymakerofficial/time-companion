@@ -44,6 +44,6 @@ export class IDBAdapterTable<TData extends object>
   }
 
   async createMany(args: CreateManyArgs<TData>): Promise<Array<TData>> {
-    todo()
+    return await Promise.all(args.data.map((data) => this.create({ data })))
   }
 }
