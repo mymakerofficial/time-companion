@@ -3,7 +3,7 @@ import type {
   UpgradeTransaction,
 } from '@shared/database/database'
 
-export class IndexedDbFacadeUpgradeTransaction implements UpgradeTransaction {
+export class IDBAdapterUpgradeTransaction implements UpgradeTransaction {
   constructor(
     private readonly database: IDBDatabase,
     private readonly event: IDBVersionChangeEvent,

@@ -8,10 +8,10 @@ import type {
   UpdateManyArgs,
 } from '@shared/database/database'
 import { todo } from '@shared/lib/utils/todo'
-import { IndexedDbFacadeQueryable } from '@shared/database/adapters/indexedDb/queryable'
+import { IDBAdapterQueryable } from '@shared/database/adapters/indexedDb/queryable'
 
-export class IndexedDbFacadeTable<TData extends object>
-  extends IndexedDbFacadeQueryable<TData>
+export class IDBAdapterTable<TData extends object>
+  extends IDBAdapterQueryable<TData>
   implements Table<TData>
 {
   constructor(objectStore: IDBObjectStore) {

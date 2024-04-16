@@ -1,9 +1,9 @@
 import type { Join, Table, Transaction } from '@shared/database/database'
 import { check, isNotEmpty } from '@shared/lib/utils/checks'
-import { IndexedDbFacadeTable } from '@shared/database/adapters/indexedDb/table'
+import { IDBAdapterTable } from '@shared/database/adapters/indexedDb/table'
 import { todo } from '@shared/lib/utils/todo'
 
-export class IndexedDbFacadeTransaction implements Transaction {
+export class IDBAdapterTransaction implements Transaction {
   private readonly transaction: IDBTransaction
 
   constructor(private readonly database: IDBDatabase) {
@@ -20,7 +20,7 @@ export class IndexedDbFacadeTransaction implements Transaction {
   table<TData extends object>(tableName: string): Table<TData> {
     const objectStore = this.transaction.objectStore(tableName)
 
-    return new IndexedDbFacadeTable<TData>(objectStore)
+    return new IDBAdapterTable<TData>(objectStore)
   }
 
   join<TLeftData extends object, TRightData extends object>(

@@ -8,7 +8,7 @@ import type { Nullable } from '@shared/lib/utils/types'
 import { isNull } from '@shared/lib/utils/checks'
 import { wherePredicateFn } from '@shared/database/helpers/wherePredicateFn'
 
-export class IndexedDbFacadeQueryable<TData extends object>
+export class IDBAdapterQueryable<TData extends object>
   implements Queryable<TData>
 {
   constructor(protected readonly objectStore: IDBObjectStore) {}

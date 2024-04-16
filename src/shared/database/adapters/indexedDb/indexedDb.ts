@@ -4,11 +4,11 @@ import type {
   Transaction,
   UpgradeTransaction,
 } from '@shared/database/database'
-import { IndexedDbFacadeTransaction } from '@shared/database/adapters/indexedDb/transaction'
+import { IDBAdapterTransaction } from '@shared/database/adapters/indexedDb/transaction'
 import { check, isNotNull } from '@shared/lib/utils/checks'
-import { IndexedDbFacadeUpgradeTransaction } from '@shared/database/adapters/indexedDb/upgradeTransaction'
+import { IDBAdapterUpgradeTransaction } from '@shared/database/adapters/indexedDb/upgradeTransaction'
 
-export class IndexedDbFacade implements Database {
+export class IDBAdapter implements Database {
   database: Nullable<IDBDatabase>
 
   constructor() {
@@ -32,9 +32,7 @@ export class IndexedDbFacade implements Database {
       }
 
       request.onupgradeneeded = async (event) => {
-        await upgrade(
-          new IndexedDbFacadeUpgradeTransaction(request.result, event),
-        )
+        await upgrade(new IDBAdapterUpgradeTransaction(request.result, event))
         resolve()
       }
     })
@@ -45,10 +43,10 @@ export class IndexedDbFacade implements Database {
   ): Promise<TResult> {
     check(isNotNull(this.database), 'Database is not open.')
 
-    return await fn(new IndexedDbFacadeTransaction(this.database))
+    return await fn(new IDBAdapterTransaction(this.database))
   }
 }
 
 export function createIndexedDbFacade(): Database {
-  return new IndexedDbFacade()
+  return new IDBAdapter()
 }
