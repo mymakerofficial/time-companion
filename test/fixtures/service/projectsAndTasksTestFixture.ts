@@ -19,31 +19,11 @@ import {
 } from '@shared/lib/utils/random'
 
 export class ProjectsAndTasksTestFixture {
-  public database: Database
-
-  public projectService: ProjectService
-
-  public taskService: TaskService
-
-  constructor() {
-    this.database = createTestDatabase()
-
-    this.taskService = createTaskService({
-      taskPersistence: createTaskPersistence({
-        database: this.database,
-      }),
-      projectPersistence: createProjectPersistence({
-        database: this.database,
-      }),
-    })
-
-    this.projectService = createProjectService({
-      projectPersistence: createProjectPersistence({
-        database: this.database,
-      }),
-      taskService: this.taskService,
-    })
-  }
+  constructor(
+    public readonly database: Database,
+    public readonly taskService: TaskService,
+    public readonly projectService: ProjectService,
+  ) {}
 
   async getExistingProjects() {
     return await this.projectService.getProjects()

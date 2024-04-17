@@ -8,11 +8,9 @@ import {
   vi,
 } from 'vitest'
 import type { ProjectEntityDto } from '@shared/model/project'
-import { ProjectsAndTasksTestFixture } from '@shared/service/projectsAndTasksTestFixture'
+import { describeService } from '@test/fixtures/service/describeService'
 
-describe.sequential('projectService', async () => {
-  const fixture = new ProjectsAndTasksTestFixture()
-
+describeService.sequential('projectService', async ({ fixture }) => {
   const subscriber = vi.fn()
 
   beforeAll(() => {
