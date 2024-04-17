@@ -9,15 +9,17 @@ import {
   createProjectService,
   type ProjectService,
 } from '@shared/service/projectService'
-import { ProjectsAndTasksTestFixture } from '@test/fixtures/service/projectsAndTasksTestFixture'
 import type { Database } from '@shared/database/database'
 import { createFixtures } from '@test/helpers/createFixtures'
+import { ProjectTestHelpers } from '@test/fixtures/service/projectTestHelpers'
+import { TaskTestHelpers } from '@test/fixtures/service/taskTestHelpers'
 
 export interface ServiceFixtures {
   database: Database
   taskService: TaskService
   projectService: ProjectService
-  fixture: ProjectsAndTasksTestFixture
+  projectHelpers: ProjectTestHelpers
+  taskHelpers: TaskTestHelpers
 }
 
 export const useServiceFixtures = createFixtures<ServiceFixtures>({
@@ -42,11 +44,10 @@ export const useServiceFixtures = createFixtures<ServiceFixtures>({
       taskService: taskService,
     })
   },
-  fixture: ({ database, taskService, projectService }) => {
-    return new ProjectsAndTasksTestFixture(
-      database,
-      taskService,
-      projectService,
-    )
+  projectHelpers: ({ taskService, projectService }) => {
+    return new ProjectTestHelpers(taskService, projectService)
+  },
+  taskHelpers: ({ taskService, projectService }) => {
+    return new TaskTestHelpers(taskService, projectService)
   },
 })

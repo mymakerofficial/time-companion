@@ -11,7 +11,7 @@ import type { ProjectEntityDto } from '@shared/model/project'
 import { useServiceFixtures } from '@test/fixtures/service/serviceFixtures'
 
 describe('projectService', () => {
-  const { projectService, fixture } = useServiceFixtures()
+  const { projectService, projectHelpers, taskHelpers } = useServiceFixtures()
 
   const subscriber = vi.fn()
 
@@ -24,7 +24,7 @@ describe('projectService', () => {
   })
 
   describe('createProject', async () => {
-    it.each(await fixture.getSampleProjects())(
+    it.each(await projectHelpers.getSampleProjects())(
       'should create a project %o',
       async (project) => {
         const res = await projectService.createProject(project)
@@ -36,7 +36,7 @@ describe('projectService', () => {
     )
 
     it('should throw if project with displayName already exists', async () => {
-      const randomProject = await fixture.getRandomExistingProject()
+      const randomProject = await projectHelpers.getRandomExistingProject()
 
       await expect(() =>
         projectService.createProject({
@@ -54,13 +54,15 @@ describe('projectService', () => {
     it('should get all projects', async () => {
       const resProject = await projectService.getProjects()
 
-      expect(resProject).toHaveLength(fixture.getExpectedProjectsLength())
+      expect(resProject).toHaveLength(
+        projectHelpers.getExpectedProjectsLength(),
+      )
 
       // TODO actually test the values
     })
 
     it('should be ordered by displayName', async () => {
-      const expectedProjects = await fixture.getSortedSampleProjects()
+      const expectedProjects = await projectHelpers.getSortedSampleProjects()
 
       const resProjects = await projectService.getProjects()
 
@@ -75,7 +77,7 @@ describe('projectService', () => {
 
   describe('getProjectById', () => {
     it('should get a project by id', async (index) => {
-      const randomProject = await fixture.getRandomExistingProject({
+      const randomProject = await projectHelpers.getRandomExistingProject({
         safetyOffset: 1, // exclude first and last elements
       })
 
@@ -93,9 +95,9 @@ describe('projectService', () => {
 
   describe('getProjectByTaskId', () => {
     it('should get a project by task id', async () => {
-      await fixture.createSampleTasks()
+      await taskHelpers.createSampleTasks()
 
-      const randomTask = await fixture.getRandomExistingTaskWithProject({
+      const randomTask = await taskHelpers.getRandomExistingTaskWithProject({
         safetyOffset: 1, // exclude first and last elements
       })
 
@@ -115,7 +117,7 @@ describe('projectService', () => {
 
   describe('patchProjectById', () => {
     it('should patch a project by id', async () => {
-      const randomProject = await fixture.getRandomExistingProject()
+      const randomProject = await projectHelpers.getRandomExistingProject()
 
       const resPatched = await projectService.patchProjectById(
         randomProject.id,
@@ -138,7 +140,7 @@ describe('projectService', () => {
     })
 
     it('should throw if invalid fields are changed', async () => {
-      const randomProject = await fixture.getRandomExistingProject()
+      const randomProject = await projectHelpers.getRandomExistingProject()
 
       await expect(() =>
         projectService.patchProjectById(randomProject.id, {
@@ -153,7 +155,7 @@ describe('projectService', () => {
     })
 
     it('should notify subscribers of the change', async () => {
-      const randomProject = await fixture.getRandomExistingProject()
+      const randomProject = await projectHelpers.getRandomExistingProject()
 
       await projectService.patchProjectById(randomProject.id, {
         displayName: 'Other Patched Project',
@@ -178,7 +180,7 @@ describe('projectService', () => {
 
   describe('softDeleteProject', () => {
     it('should delete a project by id', async () => {
-      const randomProject = await fixture.getRandomExistingProject()
+      const randomProject = await projectHelpers.getRandomExistingProject()
 
       await projectService.softDeleteProject(randomProject.id)
 
@@ -188,11 +190,14 @@ describe('projectService', () => {
     })
 
     it('should delete tasks associated with the project', async () => {
-      const randomProject = await fixture.getRandomExistingProjectWithTasks()
+      const randomProject =
+        await projectHelpers.getRandomExistingProjectWithTasks()
 
       await projectService.softDeleteProject(randomProject.id)
 
-      const tasks = await fixture.getExistingTasksForProject(randomProject.id)
+      const tasks = await taskHelpers.getExistingTasksForProject(
+        randomProject.id,
+      )
 
       expect(tasks).toHaveLength(0)
     })
@@ -204,7 +209,7 @@ describe('projectService', () => {
     })
 
     it('should notify subscribers of the change', async () => {
-      const randomProject = await fixture.getRandomExistingProject()
+      const randomProject = await projectHelpers.getRandomExistingProject()
 
       await projectService.softDeleteProject(randomProject.id)
 
