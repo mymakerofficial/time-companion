@@ -29,5 +29,5 @@ test('createFixtures', () => {
   // don't actually test if the fixture function has been called with the correct values
   //  because we use a proxy to resolve the fixtures and the values won't be present
   //  until they are actually accessed
-  // expect(createBar).toHaveBeenCalledWith({ foo: 'foo' })
+  // expect(createFooBar).toHaveBeenCalledWith({ foo: 'foo', bar: 'bar' })
 })
