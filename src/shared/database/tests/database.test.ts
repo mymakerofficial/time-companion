@@ -4,7 +4,10 @@ import { uuid } from '@shared/lib/utils/uuid'
 import { faker } from '@faker-js/faker'
 import { excludeFirst, firstOf } from '@shared/lib/utils/list'
 import { randomElement, randomElements } from '@shared/lib/utils/random'
-import type { UpgradeTransaction } from '@shared/database/database'
+import type {
+  UpgradeFunction,
+  UpgradeTransaction,
+} from '@shared/database/database'
 import { createIndexedDbAdapter } from '@shared/database/adapters/indexedDb/indexedDb'
 import { DatabaseTestFixture } from '@shared/database/tests/fixture'
 import { indexedDB } from 'fake-indexeddb'
@@ -59,41 +62,43 @@ describe.sequential.each([
 
   describe('createTable', () => {
     it('should create a table', async () => {
-      const upgradeFn = vi.fn(async (transaction: UpgradeTransaction) => {
-        const usersTable = await transaction.createTable({
-          name: 'users',
-          schema: { id: 'string', name: 'string', number: 'number' },
-          primaryKey: 'id',
-        })
+      const upgradeFn: UpgradeFunction = vi.fn(
+        async (transaction: UpgradeTransaction) => {
+          const usersTable = await transaction.createTable({
+            name: 'users',
+            schema: { id: 'string', name: 'string', number: 'number' },
+            primaryKey: 'id',
+          })
 
-        await usersTable.createIndex({
-          keyPath: 'name',
-          unique: true,
-        })
+          await usersTable.createIndex({
+            keyPath: 'name',
+            unique: true,
+          })
 
-        await usersTable.createIndex({
-          keyPath: 'number',
-          unique: false,
-        })
+          await usersTable.createIndex({
+            keyPath: 'number',
+            unique: false,
+          })
 
-        const projectsTable = await transaction.createTable({
-          name: 'projects',
-          schema: {
-            id: 'string',
-            name: 'string',
-            color: 'string',
-            userId: 'string',
-          },
-          primaryKey: 'id',
-        })
+          const projectsTable = await transaction.createTable({
+            name: 'projects',
+            schema: {
+              id: 'string',
+              name: 'string',
+              color: 'string',
+              userId: 'string',
+            },
+            primaryKey: 'id',
+          })
 
-        await projectsTable.createIndex({
-          keyPath: 'name',
-          unique: true,
-        })
-      })
+          await projectsTable.createIndex({
+            keyPath: 'name',
+            unique: true,
+          })
+        },
+      )
 
-      await database.open(fixture.getDatabaseName(), upgradeFn)
+      await database.open(fixture.getDatabaseName(), 1, upgradeFn)
 
       const tableNames = await database.getTableNames()
       const usersIndexes = await database.getIndexes('users')

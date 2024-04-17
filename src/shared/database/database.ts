@@ -148,13 +148,17 @@ export interface UpgradeTransaction extends Transaction {
   createTable<TData extends object>(
     args: CreateTableArgs<TData>,
   ): Promise<UpgradeTable<TData>>
+  table<TData extends object>(tableName: string): UpgradeTable<TData>
 }
 
+export type UpgradeFunction = (
+  transaction: UpgradeTransaction,
+  newVersion: number,
+  oldVersion: number,
+) => Promise<void>
+
 export interface Database {
-  open(
-    name: string,
-    upgrade: (transaction: UpgradeTransaction) => Promise<void>,
-  ): Promise<void>
+  open(name: string, version: number, upgrade: UpgradeFunction): Promise<void>
   withTransaction<TResult>(
     fn: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>

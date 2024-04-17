@@ -9,6 +9,8 @@ import {
   serviceInvokeChannel,
   servicePublishChannel,
 } from '@shared/ipc/helpers/channels'
+import type { ProjectEntityDto } from '@shared/model/project'
+import type { TaskEntityDto } from '@shared/model/task'
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -60,8 +62,8 @@ function createMainWindow() {
 function initialize() {
   // TODO this is a hack to create the tables
 
-  database.open('time-companion', async (transaction) => {
-    const projectsTable = await transaction.createTable({
+  database.open('time-companion', 1, async (transaction) => {
+    const projectsTable = await transaction.createTable<ProjectEntityDto>({
       name: 'projects',
       schema: {
         id: 'string',
@@ -80,7 +82,19 @@ function initialize() {
       unique: true,
     })
 
-    const tasksTable = await transaction.createTable({
+    await projectsTable.insert({
+      data: {
+        id: '1',
+        displayName: 'Project 1',
+        color: 'green',
+        isBillable: true,
+        createdAt: new Date().toISOString(),
+        modifiedAt: null,
+        deletedAt: null,
+      },
+    })
+
+    const tasksTable = await transaction.createTable<TaskEntityDto>({
       name: 'tasks',
       schema: {
         id: 'string',
@@ -97,6 +111,18 @@ function initialize() {
     await tasksTable.createIndex({
       keyPath: 'displayName',
       unique: true,
+    })
+
+    await tasksTable.insert({
+      data: {
+        id: '1',
+        projectId: '1',
+        displayName: 'Task 1',
+        color: 'green',
+        createdAt: new Date().toISOString(),
+        modifiedAt: null,
+        deletedAt: null,
+      },
     })
   })
 }

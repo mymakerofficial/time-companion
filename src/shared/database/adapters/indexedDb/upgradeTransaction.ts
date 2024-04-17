@@ -1,13 +1,11 @@
 import type {
   CreateTableArgs,
   Join,
-  Table,
   UpgradeTable,
   UpgradeTransaction,
 } from '@shared/database/database'
 import { IDBAdapterUpgradeTable } from '@shared/database/adapters/indexedDb/upgradeTable'
 import { check } from '@shared/lib/utils/checks'
-import { IDBAdapterTable } from '@shared/database/adapters/indexedDb/table'
 import { todo } from '@shared/lib/utils/todo'
 import { toArray } from '@shared/lib/utils/list'
 
@@ -39,7 +37,7 @@ export class IDBAdapterUpgradeTransaction implements UpgradeTransaction {
     })
   }
 
-  table<TData extends object>(tableName: string): Table<TData> {
+  table<TData extends object>(tableName: string): UpgradeTable<TData> {
     const objectStoreNames = toArray(this.database.objectStoreNames)
 
     check(
@@ -50,7 +48,7 @@ export class IDBAdapterUpgradeTransaction implements UpgradeTransaction {
     // use the active transaction because we cant create one while the version change transaction is active
     const objectStore = this.transaction.objectStore(tableName)
 
-    return new IDBAdapterTable<TData>(objectStore)
+    return new IDBAdapterUpgradeTable<TData>(objectStore)
   }
 
   join<TLeftData extends object, TRightData extends object>(

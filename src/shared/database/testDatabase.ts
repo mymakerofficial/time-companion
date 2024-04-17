@@ -6,7 +6,7 @@ export function createTestDatabase(): Database {
 
   // TODO this is a hack to create the tables
 
-  database.open('test', async (transaction) => {
+  database.open('test', 1, async (transaction) => {
     const projectsTable = await transaction.createTable({
       name: 'projects',
       schema: {
