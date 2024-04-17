@@ -11,7 +11,7 @@ import {
 import type { TaskEntityDto } from '@shared/model/task'
 import { useServiceFixtures } from '@test/fixtures/service/serviceFixtures'
 
-describe.sequential('taskService', async () => {
+describe('taskService', async () => {
   const { fixture } = useServiceFixtures()
 
   await fixture.createSampleProjects()
