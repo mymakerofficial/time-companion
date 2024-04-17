@@ -140,11 +140,11 @@ export interface Transaction {
   ): Join<TLeftData, TRightData>
 }
 
-export interface UpgradeTable<TData extends object> {
+export interface UpgradeTable<TData extends object> extends Table<TData> {
   createIndex(args: CreateIndexArgs<TData>): Promise<void>
 }
 
-export interface UpgradeTransaction {
+export interface UpgradeTransaction extends Transaction {
   createTable<TData extends object>(
     args: CreateTableArgs<TData>,
   ): Promise<UpgradeTable<TData>>

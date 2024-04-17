@@ -9,7 +9,7 @@ import type {
 } from '@shared/database/adapters/inMemory/dataTable'
 
 export class InMemoryDatabaseTransaction implements Transaction {
-  constructor(private tables: InMemoryDataTables) {}
+  constructor(protected tables: InMemoryDataTables) {}
 
   table<TData extends object>(tableName: string): Table<TData> {
     const table = this.tables.get(tableName) as Optional<

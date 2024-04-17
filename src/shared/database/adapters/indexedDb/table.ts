@@ -1,8 +1,8 @@
 import type {
-  InsertArgs,
-  InsertManyArgs,
   DeleteArgs,
   DeleteManyArgs,
+  InsertArgs,
+  InsertManyArgs,
   Table,
   UpdateArgs,
   UpdateManyArgs,
@@ -14,10 +14,6 @@ export class IDBAdapterTable<TData extends object>
   extends IDBAdapterQueryable<TData>
   implements Table<TData>
 {
-  constructor(objectStore: IDBObjectStore) {
-    super(objectStore)
-  }
-
   async update(args: UpdateArgs<TData>): Promise<TData> {
     todo()
   }

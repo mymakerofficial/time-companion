@@ -4,14 +4,13 @@ import type {
   UpgradeTransaction,
 } from '@shared/database/database'
 import { InMemoryDatabaseUpgradeTable } from '@shared/database/adapters/inMemory/upgradeTable'
-import {
-  InMemoryDataTableImpl,
-  type InMemoryDataTables,
-} from '@shared/database/adapters/inMemory/dataTable'
+import { InMemoryDataTableImpl } from '@shared/database/adapters/inMemory/dataTable'
+import { InMemoryDatabaseTransaction } from '@shared/database/adapters/inMemory/transaction'
 
-export class InMemoryDatabaseUpgradeTransaction implements UpgradeTransaction {
-  constructor(private tables: InMemoryDataTables) {}
-
+export class InMemoryDatabaseUpgradeTransaction
+  extends InMemoryDatabaseTransaction
+  implements UpgradeTransaction
+{
   async createTable<TData extends object>(
     args: CreateTableArgs<TData>,
   ): Promise<UpgradeTable<TData>> {
