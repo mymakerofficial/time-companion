@@ -1,12 +1,9 @@
 import type {
-  ColumnType,
-  CreateTableArgs,
   Database,
   Transaction,
-  UpgradeTransaction,
+  UpgradeFunction,
 } from '@shared/database/database'
 import { InMemoryDatabaseTransaction } from '@shared/database/adapters/inMemory/transaction'
-import { todo } from '@shared/lib/utils/todo'
 import { InMemoryDatabaseUpgradeTransaction } from '@shared/database/adapters/inMemory/upgradeTransaction'
 import { emptyMap } from '@shared/lib/utils/list'
 import type { InMemoryDataTables } from '@shared/database/adapters/inMemory/dataTable'
@@ -21,9 +18,14 @@ class InMemoryDatabase implements Database {
 
   async open(
     _: string,
-    upgrade: (transaction: UpgradeTransaction) => Promise<void>,
+    version: number,
+    upgrade: UpgradeFunction,
   ): Promise<void> {
-    return await upgrade(new InMemoryDatabaseUpgradeTransaction(this.tables))
+    return await upgrade(
+      new InMemoryDatabaseUpgradeTransaction(this.tables),
+      version,
+      version,
+    )
   }
 
   async withTransaction<TResult>(
