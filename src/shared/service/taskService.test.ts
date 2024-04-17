@@ -9,9 +9,11 @@ import {
   vi,
 } from 'vitest'
 import type { TaskEntityDto } from '@shared/model/task'
-import { describeService } from '@test/fixtures/service/describeService'
+import { useServiceFixtures } from '@test/fixtures/service/serviceFixtures'
 
-describeService.sequential('taskService', async ({ fixture }) => {
+describe.sequential('taskService', async () => {
+  const { fixture } = useServiceFixtures()
+
   await fixture.createSampleProjects()
 
   const subscriber = vi.fn()
