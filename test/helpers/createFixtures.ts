@@ -1,9 +1,10 @@
-import { isDefined, isUndefined } from '@shared/lib/utils/checks'
+import { isDefined, isSymbol, isUndefined } from '@shared/lib/utils/checks'
+import { getOrRun } from '@shared/lib/utils/result'
 
 type FixtureFn<T, K extends keyof T> = (context: Omit<T, K>) => T[K]
 
 type Fixtures<T extends Record<string, any>> = {
-  [K in keyof T]: FixtureFn<T, K>
+  [K in keyof T]: FixtureFn<T, K> | T[K]
 }
 
 // be sure to use the object destructuring syntax to make sure only used fixtures are instantiated
@@ -15,10 +16,14 @@ export function createFixtures<T extends Record<string, any> = {}>(
   const context = new Proxy(
     {},
     {
-      get: (_, key: keyof T) => {
+      get: (_, key) => {
+        if (isSymbol(key)) {
+          return undefined
+        }
+
         if (isDefined(fixtures[key])) {
           if (isUndefined(resolvedFixtures[key])) {
-            resolvedFixtures[key] = fixtures[key](context)
+            resolvedFixtures[key as keyof T] = getOrRun(fixtures[key], context)
           }
 
           return resolvedFixtures[key]
@@ -27,7 +32,7 @@ export function createFixtures<T extends Record<string, any> = {}>(
         return undefined
       },
     },
-  )
+  ) as T
 
-  return () => context as T
+  return () => context
 }

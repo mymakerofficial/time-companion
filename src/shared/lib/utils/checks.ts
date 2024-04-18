@@ -67,6 +67,10 @@ export function isString(value: unknown): value is string {
   return typeof value === 'string'
 }
 
+export function isSymbol(value: unknown): value is symbol {
+  return typeof value === 'symbol'
+}
+
 export function isEmpty(value: unknown): value is null | undefined | '' | [] {
   if (isString(value)) {
     return value.length === 0

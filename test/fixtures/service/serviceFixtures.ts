@@ -23,9 +23,7 @@ export interface ServiceFixtures {
 }
 
 export const useServiceFixtures = createFixtures<ServiceFixtures>({
-  database: () => {
-    return createTestDatabase()
-  },
+  database: createTestDatabase(),
   taskService: ({ database }) => {
     return createTaskService({
       taskPersistence: createTaskPersistence({

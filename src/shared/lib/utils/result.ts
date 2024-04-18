@@ -17,6 +17,16 @@ export function toError(errorOrMessage: Error | string): Error {
   return isString(errorOrMessage) ? new Error(errorOrMessage) : errorOrMessage
 }
 
+// Runs the function with the arguments and returns the result or the value.
+export function getOrRun<T>(
+  valueOrFunction: T | ((...args: any[]) => T),
+  ...args: any[]
+): T {
+  return isFunction(valueOrFunction)
+    ? valueOrFunction(...args)
+    : valueOrFunction
+}
+
 // Returns the value if present and doesn't throw, otherwise returns the value returned by the getter.
 export function getOrElse<T>(
   valueOrGetter: ValueOrGetter<Maybe<T>>,
