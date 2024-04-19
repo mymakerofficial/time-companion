@@ -554,7 +554,7 @@ describe.each([
         })
 
         await database.withTransaction(async (transaction) => {
-          return await transaction
+          await transaction
             .table<Person>(helpers.personsTableName)
             .delete({ where: { id: { equals: randomPerson.id } } })
         })
@@ -574,7 +574,7 @@ describe.each([
         const ids = randomPersons.map((person) => person.id)
 
         await database.withTransaction(async (transaction) => {
-          return await transaction
+          await transaction
             .table<Person>(helpers.personsTableName)
             .deleteMany({ where: { id: { in: ids } } })
         })
@@ -582,6 +582,20 @@ describe.each([
         const personsInDatabase = await helpers.getAllPersonsInDatabase()
 
         expect(personsInDatabase).not.toContain(randomPersons)
+      })
+    })
+
+    describe('deleteAll', () => {
+      it('should delete all entries in a table', async () => {
+        await helpers.insertSamplePersons(6)
+
+        await database.withTransaction(async (transaction) => {
+          await transaction.table<Person>(helpers.personsTableName).deleteAll()
+        })
+
+        const personsInDatabase = await helpers.getAllPersonsInDatabase()
+
+        expect(personsInDatabase).toHaveLength(0)
       })
     })
   })
