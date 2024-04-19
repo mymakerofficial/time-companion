@@ -30,6 +30,15 @@ export class IDBAdapterTable<TData extends object>
     todo()
   }
 
+  async deleteAll(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const request = this.objectStore.clear()
+
+      request.onsuccess = () => resolve()
+      request.onerror = () => reject(request.error)
+    })
+  }
+
   async insert(args: InsertArgs<TData>): Promise<TData> {
     return new Promise((resolve, reject) => {
       const request = this.objectStore.add(args.data)

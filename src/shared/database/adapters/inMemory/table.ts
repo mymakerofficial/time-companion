@@ -1,8 +1,8 @@
 import type {
-  InsertArgs,
-  InsertManyArgs,
   DeleteArgs,
   DeleteManyArgs,
+  InsertArgs,
+  InsertManyArgs,
   Table,
   UpdateArgs,
   UpdateManyArgs,
@@ -123,6 +123,13 @@ export class InMemoryDatabaseTable<TData extends object>
       } catch (error) {
         reject(error)
       }
+    })
+  }
+
+  async deleteAll(): Promise<void> {
+    return new Promise((resolve) => {
+      this.table.rows = []
+      resolve()
     })
   }
 }

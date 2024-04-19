@@ -35,7 +35,7 @@ class InMemoryDatabase implements Database {
   }
 
   async getTableNames(): Promise<Array<string>> {
-    return Promise.resolve(Array.from(this.tables.keys()))
+    return Promise.resolve(Array.from(this.tables.keys()).sort())
   }
 
   async getIndexes(tableName: string): Promise<Array<string>> {
@@ -44,7 +44,7 @@ class InMemoryDatabase implements Database {
 
       check(isDefined(table), `Table "${tableName}" does not exist.`)
 
-      resolve(Array.from(table.getIndexes()))
+      resolve(Array.from(table.getIndexes()).sort())
     })
   }
 }

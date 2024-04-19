@@ -87,6 +87,7 @@ export interface Updatable<TData extends object> {
 export interface Deletable<TData extends object> {
   delete(args: DeleteArgs<TData>): Promise<void>
   deleteMany(args: DeleteManyArgs<TData>): Promise<void>
+  deleteAll(): Promise<void>
 }
 
 export interface Insertable<TData extends object> {

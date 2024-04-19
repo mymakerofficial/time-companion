@@ -1,8 +1,11 @@
-import { TaskService } from '@shared/service/taskService'
-import { randomElement, RandomElementOptions } from '@shared/lib/utils/random'
+import type { TaskService } from '@shared/service/taskService'
+import {
+  randomElement,
+  type RandomElementOptions,
+} from '@shared/lib/utils/random'
 import { check, isDefined } from '@shared/lib/utils/checks'
-import { TaskDto } from '@shared/model/task'
-import { ProjectService } from '@shared/service/projectService'
+import type { TaskDto } from '@shared/model/task'
+import type { ProjectService } from '@shared/service/projectService'
 
 export class TaskTestHelpers {
   constructor(

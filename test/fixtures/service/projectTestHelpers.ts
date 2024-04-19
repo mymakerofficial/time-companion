@@ -1,7 +1,10 @@
 import type { ProjectService } from '@shared/service/projectService'
-import { randomElement, RandomElementOptions } from '@shared/lib/utils/random'
+import {
+  randomElement,
+  type RandomElementOptions,
+} from '@shared/lib/utils/random'
 import type { TaskService } from '@shared/service/taskService'
-import { ProjectDto } from '@shared/model/project'
+import type { ProjectDto } from '@shared/model/project'
 
 export class ProjectTestHelpers {
   constructor(
