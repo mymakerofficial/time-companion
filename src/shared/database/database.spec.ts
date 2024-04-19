@@ -246,7 +246,17 @@ describe.each([
         expect(res).toEqual(randomPerson)
       })
 
-      it.todo('should find the first entry sorted by primary key')
+      it('should return first entry sorted on primary key by default', async () => {
+        const samplePersons = await helpers.insertSamplePersons(6)
+
+        const res = await database.withTransaction(async (transaction) => {
+          return await transaction
+            .table<Person>(helpers.personsTableName)
+            .findFirst()
+        })
+
+        expect(res).toEqual(firstOf(samplePersons.sort(byId)))
+      })
 
       it('should find a single entry in a table with order ascending', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
@@ -338,7 +348,17 @@ describe.each([
         )
       })
 
-      it.todo('should find all entries in a table sorted by primary key')
+      it('should return values sorted on primary key by default', async () => {
+        const samplePersons = await helpers.insertSamplePersons(6)
+
+        const res = await database.withTransaction(async (transaction) => {
+          return await transaction
+            .table<Person>(helpers.personsTableName)
+            .findMany()
+        })
+
+        expect(res).toEqual(samplePersons.sort(byId))
+      })
 
       it('should find all entries in a table ordered by number ascending', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
@@ -496,7 +516,34 @@ describe.each([
         expect(personsInDatabase.sort(byId)).toEqual(expected.sort(byId))
       })
 
-      it.todo('should return the updated entities sorted by primary key')
+      it('should return the updated entities sorted by primary key', async () => {
+        const samplePersons = await helpers.insertSamplePersons(6)
+        const randomPersons = randomElements(samplePersons, 2, {
+          safetyOffset: 1,
+        })
+
+        const newLastName = faker.person.lastName()
+
+        const res = await database.withTransaction(async (transaction) => {
+          return await transaction
+            .table<Person>(helpers.personsTableName)
+            .updateMany({
+              where: { id: { in: randomPersons.map((person) => person.id) } },
+              data: {
+                lastName: newLastName,
+              },
+            })
+        })
+
+        const expected: Array<Person> = randomPersons
+          .map((person) => ({
+            ...person,
+            lastName: newLastName,
+          }))
+          .sort(byId)
+
+        expect(res).toEqual(expected)
+      })
     })
 
     describe('delete', () => {
