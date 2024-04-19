@@ -6,6 +6,8 @@ import {
 } from '@shared/database/database'
 import { firstOf } from '@shared/lib/utils/list'
 import { entriesOf } from '@shared/lib/utils/object'
+import { isAbsent } from '@shared/lib/utils/checks'
+import type { Maybe, Nullable } from '@shared/lib/utils/types'
 
 export type UnwrapWhereCondition<TData extends object> = {
   key: keyof TData
@@ -43,4 +45,14 @@ export function unwrapWhere<TData extends object>(
       value: value as any,
     }
   }
+}
+
+export function maybeUnwrapWhere<TData extends object>(
+  where: Maybe<WhereInput<TData>>,
+): Nullable<UnwrapWhere<TData>> {
+  if (isAbsent(where)) {
+    return null
+  }
+
+  return unwrapWhere(where)
 }

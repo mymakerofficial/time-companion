@@ -6,7 +6,7 @@ import type {
 import { InMemoryDatabaseTransaction } from '@shared/database/adapters/inMemory/transaction'
 import { InMemoryDatabaseUpgradeTransaction } from '@shared/database/adapters/inMemory/upgradeTransaction'
 import { emptyMap } from '@shared/lib/utils/list'
-import type { InMemoryDataTables } from '@shared/database/adapters/inMemory/dataTable'
+import type { InMemoryDataTables } from '@shared/database/adapters/inMemory/helpers/dataTable'
 import { check, isDefined } from '@shared/lib/utils/checks'
 
 class InMemoryDatabase implements Database {

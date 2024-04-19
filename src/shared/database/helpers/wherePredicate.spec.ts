@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest'
-import { wherePredicateFn } from '@shared/database/helpers/wherePredicateFn'
+import { wherePredicate } from '@shared/database/helpers/wherePredicate'
 import type { WhereInput } from '@shared/database/database'
 
 interface Person {
@@ -129,6 +129,6 @@ const mappedCases: Array<[string, Omit<Case, 'name'>]> = cases.map(
 
 describe('wherePredicateFn', () => {
   test.each(mappedCases)('%s', (_, { data, where, expected }) => {
-    expect(wherePredicateFn(data, where)).toBe(expected)
+    expect(wherePredicate(where)(data)).toBe(expected)
   })
 })

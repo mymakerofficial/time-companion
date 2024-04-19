@@ -6,7 +6,7 @@ import { InMemoryDatabaseJoin } from '@shared/database/adapters/inMemory/join'
 import type {
   InMemoryDataTable,
   InMemoryDataTables,
-} from '@shared/database/adapters/inMemory/dataTable'
+} from '@shared/database/adapters/inMemory/helpers/dataTable'
 
 export class InMemoryDatabaseTransaction implements Transaction {
   constructor(protected tables: InMemoryDataTables) {}

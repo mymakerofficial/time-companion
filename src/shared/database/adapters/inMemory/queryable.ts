@@ -4,9 +4,9 @@ import type {
   Queryable,
 } from '@shared/database/database'
 import { firstOf } from '@shared/lib/utils/list'
-import { wherePredicateFn } from '@shared/database/helpers/wherePredicateFn'
-import { orderByCompareFn } from '@shared/database/helpers/orderByCompareFn'
-import type { InMemoryDataTable } from '@shared/database/adapters/inMemory/dataTable'
+import type { InMemoryDataTable } from '@shared/database/adapters/inMemory/helpers/dataTable'
+import { wherePredicate } from '@shared/database/helpers/wherePredicate'
+import { orderByCompare } from '@shared/database/helpers/orderByCompare'
 
 export class InMemoryDatabaseQueryable<TData extends object>
   implements Queryable<TData>
@@ -22,9 +22,9 @@ export class InMemoryDatabaseQueryable<TData extends object>
   private syncFindMany(args: FindManyArgs<TData> = {}): Array<TData> {
     const { where, orderBy } = args
 
-    return [
-      ...this.table.rows.filter((data) => wherePredicateFn(data, where)),
-    ].sort((a, b) => orderByCompareFn(a, b, orderBy))
+    return [...this.table.rows.filter(wherePredicate(where))].sort(
+      orderByCompare(orderBy),
+    )
   }
 
   async findMany(args?: FindManyArgs<TData>): Promise<Array<TData>> {

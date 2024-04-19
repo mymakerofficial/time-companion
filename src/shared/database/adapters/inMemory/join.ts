@@ -1,13 +1,10 @@
 import type { Join, LeftJoin, LeftJoinArgs } from '@shared/database/database'
 import { InMemoryDatabaseQueryable } from '@shared/database/adapters/inMemory/queryable'
-import { wherePredicateFn } from '@shared/database/helpers/wherePredicateFn'
+import { wherePredicate } from '@shared/database/helpers/wherePredicate'
 import { firstOf } from '@shared/lib/utils/list'
 import { entriesOf } from '@shared/lib/utils/object'
 import { check, isDefined } from '@shared/lib/utils/checks'
-import {
-  type InMemoryDataTable,
-  InMemoryDataTableImpl,
-} from '@shared/database/adapters/inMemory/dataTable'
+import { type InMemoryDataTable } from '@shared/database/adapters/inMemory/helpers/dataTable'
 
 export class InMemoryDatabaseLeftJoin<TData extends object>
   extends InMemoryDatabaseQueryable<TData>
@@ -26,8 +23,8 @@ export class InMemoryDatabaseJoin<
   left(args: LeftJoinArgs<TLeftData, TRightData>): LeftJoin<TLeftData> {
     const { on, where } = args
 
-    const filteredRightTableRows = this.rightTable.rows.filter((rightData) =>
-      wherePredicateFn(rightData, where),
+    const filteredRightTableRows = this.rightTable.rows.filter(
+      wherePredicate(where),
     )
 
     const [leftKey, rightKey] = firstOf(entriesOf(on))

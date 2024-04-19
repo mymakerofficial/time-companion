@@ -7,37 +7,18 @@ import type {
   UpdateArgs,
   UpdateManyArgs,
 } from '@shared/database/database'
-import { InMemoryDatabaseQueryable } from '@shared/database/adapters/inMemory/queryable'
-import { wherePredicateFn } from '@shared/database/helpers/wherePredicateFn'
+import { wherePredicate } from '@shared/database/helpers/wherePredicate'
 import { check, isNotNull } from '@shared/lib/utils/checks'
+import { InMemoryDatabaseQueryable } from '@shared/database/adapters/inMemory/queryable'
 
 export class InMemoryDatabaseTable<TData extends object>
   extends InMemoryDatabaseQueryable<TData>
   implements Table<TData>
 {
-  private syncCreate(args: InsertArgs<TData>): TData {
-    this.table.rows.push(args.data)
-    return args.data
-  }
-
-  async insert(args: InsertArgs<TData>): Promise<TData> {
-    return new Promise((resolve) => {
-      resolve(this.syncCreate(args))
-    })
-  }
-
-  async insertMany(args: InsertManyArgs<TData>): Promise<Array<TData>> {
-    return new Promise(async (resolve) => {
-      resolve(await Promise.all(args.data.map((data) => this.insert({ data }))))
-    })
-  }
-
   private syncUpdate(args: UpdateArgs<TData>): TData {
     const { where, data } = args
 
-    const index = this.table.rows.findIndex((item) =>
-      wherePredicateFn(item, where),
-    )
+    const index = this.table.rows.findIndex(wherePredicate(where))
 
     check(index !== -1, 'No item found to update.')
 
@@ -56,7 +37,7 @@ export class InMemoryDatabaseTable<TData extends object>
     const { where, data } = args
 
     const indexes = this.table.rows
-      .map((item, index) => (wherePredicateFn(item, where) ? index : null))
+      .map((item, index) => (wherePredicate(where)(item) ? index : null))
       .filter((index) => isNotNull(index)) as Array<number>
 
     check(indexes.length > 0, 'No items found to update.')
@@ -81,9 +62,7 @@ export class InMemoryDatabaseTable<TData extends object>
   private syncDelete(args: DeleteArgs<TData>): void {
     const { where } = args
 
-    const index = this.table.rows.findIndex((item) =>
-      wherePredicateFn(item, where),
-    )
+    const index = this.table.rows.findIndex(wherePredicate(where))
 
     check(index !== -1, 'No item found to delete.')
 
@@ -105,7 +84,7 @@ export class InMemoryDatabaseTable<TData extends object>
     const { where } = args
 
     const indexes = this.table.rows
-      .map((item, index) => (wherePredicateFn(item, where) ? index : null))
+      .map((item, index) => (wherePredicate(where)(item) ? index : null))
       .filter((index) => isNotNull(index)) as Array<number>
 
     check(indexes.length > 0, 'No items found to delete.')
@@ -130,6 +109,23 @@ export class InMemoryDatabaseTable<TData extends object>
     return new Promise((resolve) => {
       this.table.rows = []
       resolve()
+    })
+  }
+
+  private syncInsert(args: InsertArgs<TData>): TData {
+    this.table.rows.push(args.data)
+    return args.data
+  }
+
+  async insert(args: InsertArgs<TData>): Promise<TData> {
+    return new Promise((resolve) => {
+      resolve(this.syncInsert(args))
+    })
+  }
+
+  async insertMany(args: InsertManyArgs<TData>): Promise<Array<TData>> {
+    return new Promise(async (resolve) => {
+      resolve(await Promise.all(args.data.map((data) => this.insert({ data }))))
     })
   }
 }

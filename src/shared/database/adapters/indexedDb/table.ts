@@ -1,13 +1,16 @@
 import type {
   DeleteArgs,
   DeleteManyArgs,
+  FindArgs,
+  FindManyArgs,
   InsertArgs,
   InsertManyArgs,
   Table,
   UpdateArgs,
   UpdateManyArgs,
 } from '@shared/database/database'
-import { todo } from '@shared/lib/utils/todo'
+import { emptyArray, firstOf } from '@shared/lib/utils/list'
+import { filteredCursorIterator } from '@shared/database/adapters/indexedDb/helpers/filteredCursorIterator'
 import { IDBAdapterQueryable } from '@shared/database/adapters/indexedDb/queryable'
 
 export class IDBAdapterTable<TData extends object>
@@ -15,19 +18,45 @@ export class IDBAdapterTable<TData extends object>
   implements Table<TData>
 {
   async update(args: UpdateArgs<TData>): Promise<TData> {
-    todo()
+    return firstOf(
+      await this.updateMany({
+        ...args,
+        limit: 1,
+      }),
+    )
   }
 
   async updateMany(args: UpdateManyArgs<TData>): Promise<Array<TData>> {
-    todo()
+    const iterable = filteredCursorIterator(this.objectStore, args)
+
+    const list: Array<TData> = emptyArray()
+
+    for await (const cursor of iterable) {
+      const patched = {
+        ...cursor.value,
+        ...args.data,
+      }
+
+      cursor.update(patched)
+      list.push(patched)
+    }
+
+    return list
   }
 
   async delete(args: DeleteArgs<TData>): Promise<void> {
-    todo()
+    await this.deleteMany({
+      ...args,
+      limit: 1,
+    })
   }
 
   async deleteMany(args: DeleteManyArgs<TData>): Promise<void> {
-    todo()
+    const iterable = filteredCursorIterator(this.objectStore, args)
+
+    for await (const cursor of iterable) {
+      cursor.delete()
+    }
   }
 
   async deleteAll(): Promise<void> {

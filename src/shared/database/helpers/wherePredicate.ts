@@ -1,12 +1,13 @@
 import type { WhereInput } from '@shared/database/database'
 import {
+  maybeUnwrapWhere,
   type UnwrapWhere,
   unwrapWhere,
   type UnwrapWhereBooleanGroup,
   type UnwrapWhereCondition,
 } from '@shared/database/helpers/unwrapWhere'
-import { isNull, isUndefined } from '@shared/lib/utils/checks'
-import type { Nullable } from '@shared/lib/utils/types'
+import { isAbsent } from '@shared/lib/utils/checks'
+import type { Maybe, Nullable } from '@shared/lib/utils/types'
 
 function resolveBooleanGroup<TData extends object>(
   data: TData,
@@ -63,13 +64,11 @@ function resolveCondition<TData extends object>(
 
   return false
 }
-
-// checks if the data matches the where input
 export function unwrappedWherePredicateFn<TData extends object>(
   data: TData,
-  unwrappedWhere: Nullable<UnwrapWhere<TData>>,
+  unwrappedWhere: Maybe<UnwrapWhere<TData>>,
 ): boolean {
-  if (isNull(unwrappedWhere)) {
+  if (isAbsent(unwrappedWhere)) {
     return true
   }
 
@@ -83,13 +82,30 @@ export function unwrappedWherePredicateFn<TData extends object>(
 }
 
 // checks if the data matches the where input
-export function wherePredicateFn<TData extends object>(
+export function unwrappedWherePredicate<TData extends object>(
+  unwrappedWhere: Nullable<UnwrapWhere<TData>>,
+): (data: TData) => boolean {
+  return (data) => unwrappedWherePredicateFn(data, unwrappedWhere)
+}
+
+function wherePredicateFn<TData extends object>(
   data: TData,
-  where?: WhereInput<TData>,
+  where: Maybe<WhereInput<TData>>,
 ): boolean {
-  if (isUndefined(where)) {
+  if (isAbsent(where)) {
     return true
   }
 
-  return unwrappedWherePredicateFn(data, unwrapWhere(where))
+  const unwrappedWhere = unwrapWhere(where)
+
+  return unwrappedWherePredicateFn(data, unwrappedWhere)
+}
+
+// checks if the data matches the where input
+export function wherePredicate<TData extends object>(
+  where?: WhereInput<TData>,
+): (data: TData) => boolean {
+  const unwrappedWhere = maybeUnwrapWhere(where)
+
+  return (data) => unwrappedWherePredicateFn(data, unwrappedWhere)
 }

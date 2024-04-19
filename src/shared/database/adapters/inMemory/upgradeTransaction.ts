@@ -7,7 +7,7 @@ import { InMemoryDatabaseUpgradeTable } from '@shared/database/adapters/inMemory
 import {
   type InMemoryDataTable,
   InMemoryDataTableImpl,
-} from '@shared/database/adapters/inMemory/dataTable'
+} from '@shared/database/adapters/inMemory/helpers/dataTable'
 import { InMemoryDatabaseTransaction } from '@shared/database/adapters/inMemory/transaction'
 import type { Optional } from '@shared/lib/utils/types'
 import { check, isDefined } from '@shared/lib/utils/checks'

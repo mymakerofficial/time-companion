@@ -66,13 +66,19 @@ export type UpdateArgs<TData extends object> = {
   data: Partial<TData>
 }
 
-export type UpdateManyArgs<TData extends object> = UpdateArgs<TData>
+export type UpdateManyArgs<TData extends object> = UpdateArgs<TData> & {
+  offset?: number
+  limit?: number
+}
 
 export type DeleteArgs<TData extends object> = {
   where: WhereInput<TData>
 }
 
-export type DeleteManyArgs<TData extends object> = DeleteArgs<TData>
+export type DeleteManyArgs<TData extends object> = DeleteArgs<TData> & {
+  offset?: number
+  limit?: number
+}
 
 export interface Queryable<TData extends object> {
   findFirst(args?: FindArgs<TData>): Promise<TData>

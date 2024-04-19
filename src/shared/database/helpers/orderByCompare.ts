@@ -1,9 +1,7 @@
 import type { OrderByInput } from '@shared/database/database'
-import { asArray, firstOf } from '@shared/lib/utils/list'
-import { entriesOf } from '@shared/lib/utils/object'
 import { unwrapOrderBy } from '@shared/database/helpers/unwrapOrderBy'
 
-export function orderByCompareFn<TData extends object>(
+function orderByCompareFn<TData extends object>(
   a: TData,
   b: TData,
   orderBy?: OrderByInput<TData>,
@@ -26,4 +24,10 @@ export function orderByCompareFn<TData extends object>(
   }
 
   return 0
+}
+
+export function orderByCompare<TData extends object>(
+  orderBy?: OrderByInput<TData>,
+): (a: TData, b: TData) => number {
+  return (a, b) => orderByCompareFn(a, b, orderBy)
 }

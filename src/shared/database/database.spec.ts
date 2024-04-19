@@ -22,6 +22,10 @@ function byFirstName(a: Person, b: Person) {
   return a.firstName.localeCompare(b.firstName)
 }
 
+function byLastName(a: Person, b: Person) {
+  return a.lastName.localeCompare(b.lastName)
+}
+
 describe.each([
   ['In memory database', createInMemoryDatabase, []],
   ['IndexedDB Adapter', createIndexedDbAdapter, [fakeIndexedDB]],
@@ -360,7 +364,7 @@ describe.each([
         expect(res).toEqual(samplePersons.sort(byId))
       })
 
-      it('should find all entries in a table ordered by number ascending', async () => {
+      it('should find all entries in a table ordered by indexed key ascending', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
 
         const res = await database.withTransaction(async (transaction) => {
@@ -374,7 +378,7 @@ describe.each([
         expect(res).toEqual(samplePersons.sort(byFirstName))
       })
 
-      it('should find all entries in a table ordered by number descending', async () => {
+      it('should find all entries in a table ordered by indexed key descending', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
 
         const res = await database.withTransaction(async (transaction) => {
@@ -386,6 +390,34 @@ describe.each([
         })
 
         expect(res).toEqual(samplePersons.sort(byFirstName).reverse())
+      })
+
+      it('should find all entries in a table ordered by un-indexed key ascending', async () => {
+        const samplePersons = await helpers.insertSamplePersons(6)
+
+        const res = await database.withTransaction(async (transaction) => {
+          return await transaction
+            .table<Person>(helpers.personsTableName)
+            .findMany({
+              orderBy: { lastName: 'asc' },
+            })
+        })
+
+        expect(res).toEqual(samplePersons.sort(byLastName))
+      })
+
+      it('should find all entries in a table ordered by un-indexed key descending', async () => {
+        const samplePersons = await helpers.insertSamplePersons(6)
+
+        const res = await database.withTransaction(async (transaction) => {
+          return await transaction
+            .table<Person>(helpers.personsTableName)
+            .findMany({
+              orderBy: { lastName: 'desc' },
+            })
+        })
+
+        expect(res).toEqual(samplePersons.sort(byLastName).reverse())
       })
     })
 
