@@ -392,32 +392,20 @@ describe.each([
         expect(res).toEqual(samplePersons.sort(byFirstName).reverse())
       })
 
-      it('should find all entries in a table ordered by un-indexed key ascending', async () => {
+      it('should fail when ordering by un-indexed key', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .findMany({
-              orderBy: { lastName: 'asc' },
-            })
-        })
-
-        expect(res).toEqual(samplePersons.sort(byLastName))
-      })
-
-      it('should find all entries in a table ordered by un-indexed key descending', async () => {
-        const samplePersons = await helpers.insertSamplePersons(6)
-
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .findMany({
-              orderBy: { lastName: 'desc' },
-            })
-        })
-
-        expect(res).toEqual(samplePersons.sort(byLastName).reverse())
+        expect(async () => {
+          await database.withTransaction(async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .findMany({
+                orderBy: { lastName: 'asc' },
+              })
+          })
+        }).rejects.toThrow(
+          'The index "lastName" does not exist. You can only order by existing indexes or primary key.',
+        )
       })
 
       it('should limit the number of results returned', async () => {

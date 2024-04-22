@@ -1,6 +1,6 @@
 import type { FindManyArgs } from '@shared/database/database'
 import { cursorIterator } from '@shared/database/adapters/indexedDb/helpers/cursorIterator'
-import { isNotNull } from '@shared/lib/utils/checks'
+import { check, isNotNull, isNull } from '@shared/lib/utils/checks'
 import { maybeUnwrapWhere } from '@shared/database/helpers/unwrapWhere'
 import { maybeUnwrapOrderBy } from '@shared/database/helpers/unwrapOrderBy'
 import {
@@ -27,6 +27,11 @@ export async function* filteredCursorIterator<TData extends object>(
 
   const limit = getOrNull(args?.limit)
   const offset = getOrDefault(args?.offset, 0)
+
+  check(
+    isNull(orderBy) || objectStore.indexNames.contains(orderBy),
+    `The index "${orderBy}" does not exist. You can only order by existing indexes or primary key.`,
+  )
 
   const orderIsIndexed =
     isNotNull(orderBy) && objectStore.indexNames.contains(orderBy)
