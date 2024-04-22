@@ -419,6 +419,49 @@ describe.each([
 
         expect(res).toEqual(samplePersons.sort(byLastName).reverse())
       })
+
+      it('should limit the number of results returned', async () => {
+        const samplePersons = await helpers.insertSamplePersons(6)
+
+        const res = await database.withTransaction(async (transaction) => {
+          return await transaction
+            .table<Person>(helpers.personsTableName)
+            .findMany({
+              limit: 3,
+            })
+        })
+
+        expect(res).toEqual(samplePersons.sort(byId).slice(0, 3))
+      })
+
+      it('should skip the first n results', async () => {
+        const samplePersons = await helpers.insertSamplePersons(6)
+
+        const res = await database.withTransaction(async (transaction) => {
+          return await transaction
+            .table<Person>(helpers.personsTableName)
+            .findMany({
+              offset: 3,
+            })
+        })
+
+        expect(res).toEqual(samplePersons.sort(byId).slice(3))
+      })
+
+      it('should limit the number of results returned and skip the first n results', async () => {
+        const samplePersons = await helpers.insertSamplePersons(6)
+
+        const res = await database.withTransaction(async (transaction) => {
+          return await transaction
+            .table<Person>(helpers.personsTableName)
+            .findMany({
+              offset: 2,
+              limit: 2,
+            })
+        })
+
+        expect(res).toEqual(samplePersons.sort(byId).slice(2, 4))
+      })
     })
 
     describe('join', () => {
