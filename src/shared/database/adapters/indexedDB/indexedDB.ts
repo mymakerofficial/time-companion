@@ -5,9 +5,9 @@ import type {
   UpgradeFunction,
   UpgradeTransaction,
 } from '@shared/database/database'
-import { IDBAdapterTransaction } from '@shared/database/adapters/indexedDb/transaction'
+import { IDBAdapterTransaction } from '@shared/database/adapters/indexedDB/transaction'
 import { check, isNotNull } from '@shared/lib/utils/checks'
-import { IDBAdapterUpgradeTransaction } from '@shared/database/adapters/indexedDb/upgradeTransaction'
+import { IDBAdapterUpgradeTransaction } from '@shared/database/adapters/indexedDB/upgradeTransaction'
 
 export class IDBAdapter implements Database {
   database: Nullable<IDBDatabase>
@@ -131,6 +131,6 @@ export class IDBAdapter implements Database {
   }
 }
 
-export function createIndexedDbAdapter(indexedDB?: IDBFactory): Database {
+export function createIndexedDBAdapter(indexedDB?: IDBFactory): Database {
   return new IDBAdapter(indexedDB)
 }

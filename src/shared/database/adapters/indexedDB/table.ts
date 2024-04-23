@@ -1,8 +1,6 @@
 import type {
   DeleteArgs,
   DeleteManyArgs,
-  FindArgs,
-  FindManyArgs,
   InsertArgs,
   InsertManyArgs,
   Table,
@@ -10,8 +8,8 @@ import type {
   UpdateManyArgs,
 } from '@shared/database/database'
 import { emptyArray, firstOf } from '@shared/lib/utils/list'
-import { filteredCursorIterator } from '@shared/database/adapters/indexedDb/helpers/filteredCursorIterator'
-import { IDBAdapterQueryable } from '@shared/database/adapters/indexedDb/queryable'
+import { filteredCursorIterator } from '@shared/database/adapters/indexedDB/helpers/filteredCursorIterator'
+import { IDBAdapterQueryable } from '@shared/database/adapters/indexedDB/queryable'
 
 export class IDBAdapterTable<TData extends object>
   extends IDBAdapterQueryable<TData>

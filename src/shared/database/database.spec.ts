@@ -7,7 +7,7 @@ import type {
   UpgradeFunction,
   UpgradeTransaction,
 } from '@shared/database/database'
-import { createIndexedDbAdapter } from '@shared/database/adapters/indexedDb/indexedDb'
+import { createIndexedDBAdapter } from '@shared/database/adapters/indexedDB/indexedDB'
 import { indexedDB as fakeIndexedDB } from 'fake-indexeddb'
 import { useDatabaseFixtures } from '@test/fixtures/database/databaseFixtures'
 import type { Person, Pet } from '@test/fixtures/database/types'
@@ -28,7 +28,7 @@ function byLastName(a: Person, b: Person) {
 
 describe.each([
   ['In memory database', createInMemoryDatabase, []],
-  ['IndexedDB Adapter', createIndexedDbAdapter, [fakeIndexedDB]],
+  ['IndexedDB Adapter', createIndexedDBAdapter, [fakeIndexedDB]],
 ])('%s', (_, createDatabase, args) => {
   const { database, helpers } = useDatabaseFixtures(createDatabase(...args))
 

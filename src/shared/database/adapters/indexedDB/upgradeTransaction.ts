@@ -4,7 +4,7 @@ import type {
   UpgradeTable,
   UpgradeTransaction,
 } from '@shared/database/database'
-import { IDBAdapterUpgradeTable } from '@shared/database/adapters/indexedDb/upgradeTable'
+import { IDBAdapterUpgradeTable } from '@shared/database/adapters/indexedDB/upgradeTable'
 import { check } from '@shared/lib/utils/checks'
 import { todo } from '@shared/lib/utils/todo'
 import { toArray } from '@shared/lib/utils/list'

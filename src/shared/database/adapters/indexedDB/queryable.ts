@@ -4,7 +4,7 @@ import type {
   FindManyArgs,
 } from '@shared/database/database'
 import { emptyArray, firstOf } from '@shared/lib/utils/list'
-import { filteredCursorIterator } from '@shared/database/adapters/indexedDb/helpers/filteredCursorIterator'
+import { filteredCursorIterator } from '@shared/database/adapters/indexedDB/helpers/filteredCursorIterator'
 
 export class IDBAdapterQueryable<TData extends object>
   implements Queryable<TData>

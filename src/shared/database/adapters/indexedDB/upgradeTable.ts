@@ -1,5 +1,5 @@
 import type { CreateIndexArgs, UpgradeTable } from '@shared/database/database'
-import { IDBAdapterTable } from '@shared/database/adapters/indexedDb/table'
+import { IDBAdapterTable } from '@shared/database/adapters/indexedDB/table'
 
 export class IDBAdapterUpgradeTable<TData extends object>
   extends IDBAdapterTable<TData>

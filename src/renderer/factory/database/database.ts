@@ -1,6 +1,6 @@
 import type { Database } from '@shared/database/database'
-import { createIndexedDbAdapter } from '@shared/database/adapters/indexedDb/indexedDb'
+import { createIndexedDBAdapter } from '@shared/database/adapters/indexedDB/indexedDB'
 
 export const database: Database = (() => {
-  return createIndexedDbAdapter()
+  return createIndexedDBAdapter()
 })()

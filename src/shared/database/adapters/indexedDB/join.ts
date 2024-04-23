@@ -1,4 +1,4 @@
-import { IDBAdapterQueryable } from '@shared/database/adapters/indexedDb/queryable'
+import { IDBAdapterQueryable } from '@shared/database/adapters/indexedDB/queryable'
 import type {
   FindArgs,
   FindManyArgs,

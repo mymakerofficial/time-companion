@@ -1,5 +1,5 @@
 import type { FindManyArgs } from '@shared/database/database'
-import { cursorIterator } from '@shared/database/adapters/indexedDb/helpers/cursorIterator'
+import { cursorIterator } from '@shared/database/adapters/indexedDB/helpers/cursorIterator'
 import { check, isNotNull, isNull } from '@shared/lib/utils/checks'
 import { maybeUnwrapOrderBy } from '@shared/database/helpers/unwrapOrderBy'
 import { wherePredicate } from '@shared/database/helpers/wherePredicate'
