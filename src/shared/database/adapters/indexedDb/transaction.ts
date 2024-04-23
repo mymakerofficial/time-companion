@@ -1,8 +1,8 @@
 import type { Join, Table, Transaction } from '@shared/database/database'
 import { check, isNotEmpty } from '@shared/lib/utils/checks'
 import { IDBAdapterTable } from '@shared/database/adapters/indexedDb/table'
-import { todo } from '@shared/lib/utils/todo'
 import { toArray } from '@shared/lib/utils/list'
+import { IDBAdapterJoin } from '@shared/database/adapters/indexedDb/join'
 
 export class IDBAdapterTransaction implements Transaction {
   private readonly transaction: IDBTransaction
@@ -32,9 +32,26 @@ export class IDBAdapterTransaction implements Transaction {
   }
 
   join<TLeftData extends object, TRightData extends object>(
-    leftTable: string,
-    rightTable: string,
+    leftTableName: string,
+    rightTableName: string,
   ): Join<TLeftData, TRightData> {
-    todo()
+    const objectStoreNames = toArray(this.database.objectStoreNames)
+
+    check(
+      objectStoreNames.includes(leftTableName),
+      `Table "${leftTableName}" does not exist.`,
+    )
+    check(
+      objectStoreNames.includes(rightTableName),
+      `Table "${rightTableName}" does not exist.`,
+    )
+
+    const leftStore = this.transaction.objectStore(leftTableName)
+    const rightStore = this.transaction.objectStore(rightTableName)
+
+    return new IDBAdapterJoin<TLeftData, TRightData>(
+      leftStore,
+      rightStore,
+    ) as Join<TLeftData, TRightData>
   }
 }

@@ -9,7 +9,10 @@ import { filteredCursorIterator } from '@shared/database/adapters/indexedDb/help
 export class IDBAdapterQueryable<TData extends object>
   implements Queryable<TData>
 {
-  constructor(protected readonly objectStore: IDBObjectStore) {}
+  constructor(
+    protected readonly objectStore: IDBObjectStore,
+    protected readonly predicate?: (value: TData) => boolean,
+  ) {}
 
   async findFirst(args?: FindArgs<TData>): Promise<TData> {
     return firstOf(
@@ -22,7 +25,11 @@ export class IDBAdapterQueryable<TData extends object>
   }
 
   async findMany(args?: FindManyArgs<TData>): Promise<Array<TData>> {
-    const iterable = filteredCursorIterator(this.objectStore, args)
+    const iterable = filteredCursorIterator(
+      this.objectStore,
+      args,
+      this.predicate,
+    )
 
     const list: Array<TData> = emptyArray()
 

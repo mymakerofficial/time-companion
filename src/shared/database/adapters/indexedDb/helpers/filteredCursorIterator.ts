@@ -1,19 +1,16 @@
 import type { FindManyArgs } from '@shared/database/database'
 import { cursorIterator } from '@shared/database/adapters/indexedDb/helpers/cursorIterator'
 import { check, isNotNull, isNull } from '@shared/lib/utils/checks'
-import { maybeUnwrapWhere } from '@shared/database/helpers/unwrapWhere'
 import { maybeUnwrapOrderBy } from '@shared/database/helpers/unwrapOrderBy'
-import {
-  unwrappedWherePredicate,
-  wherePredicate,
-} from '@shared/database/helpers/wherePredicate'
+import { wherePredicate } from '@shared/database/helpers/wherePredicate'
 import type { Nullable } from '@shared/lib/utils/types'
-import { todo } from '@shared/lib/utils/todo'
 import { getOrDefault, getOrNull } from '@shared/lib/utils/result'
 
 export async function* filteredCursorIterator<TData extends object>(
   objectStore: IDBObjectStore,
   args?: FindManyArgs<TData>,
+  // an optional predicate to filter the results
+  predicate?: (value: TData) => boolean,
 ) {
   const matches = wherePredicate(args?.where)
 
@@ -50,6 +47,10 @@ export async function* filteredCursorIterator<TData extends object>(
     }
 
     if (isNotNull(limit) && count >= limit + offset) {
+      continue
+    }
+
+    if (predicate && !predicate(cursor.value)) {
       continue
     }
 
