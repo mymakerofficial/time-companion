@@ -8,6 +8,7 @@ import type {
 import { IDBAdapterTransaction } from '@shared/database/adapters/indexedDB/transaction'
 import { check, isNotNull } from '@shared/lib/utils/checks'
 import { IDBAdapterUpgradeTransaction } from '@shared/database/adapters/indexedDB/upgradeTransaction'
+import { todo } from '@shared/lib/utils/todo'
 
 export class IDBAdapter implements Database {
   database: Nullable<IDBDatabase>
@@ -105,6 +106,14 @@ export class IDBAdapter implements Database {
       version,
       upgrade,
     )
+  }
+
+  async close(): Promise<void> {
+    todo()
+  }
+
+  async delete(name: string): Promise<void> {
+    todo()
   }
 
   async withTransaction<TResult>(

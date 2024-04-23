@@ -15,6 +15,7 @@ dist-electron
 dist-ssr
 coverage
 *.local
+.data
 
 /cypress/videos/
 /cypress/screenshots/

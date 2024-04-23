@@ -1,4 +1,8 @@
-import type { Database } from '@shared/database/database'
+import type {
+  Database,
+  UpgradeFunction,
+  UpgradeTransaction,
+} from '@shared/database/database'
 import type { Person, Pet } from '@test/fixtures/database/types'
 import { faker } from '@faker-js/faker'
 import { firstOf } from '@shared/lib/utils/list'
@@ -7,11 +11,10 @@ import { randomElements } from '@shared/lib/utils/random'
 import { check } from '@renderer/lib/utils'
 
 export class DatabaseTestHelpers {
-  constructor(private readonly database: Database) {}
-
-  get databaseName(): string {
-    return 'test-database'
-  }
+  constructor(
+    private readonly database: Database,
+    public readonly databaseName: string = 'test-database',
+  ) {}
 
   get personsTableName(): string {
     return 'persons'
@@ -19,6 +22,54 @@ export class DatabaseTestHelpers {
 
   get petsTableName(): string {
     return 'pets'
+  }
+
+  get upgradeFunction(): UpgradeFunction {
+    return async (transaction: UpgradeTransaction) => {
+      const personsTable = await transaction.createTable({
+        name: this.personsTableName,
+        schema: {
+          id: 'string',
+          firstName: 'string',
+          lastName: 'string',
+          username: 'string',
+          gender: 'string',
+          age: 'number',
+        },
+        primaryKey: 'id',
+      })
+
+      await personsTable.createIndex({
+        keyPath: 'firstName',
+        unique: false,
+      })
+
+      await personsTable.createIndex({
+        keyPath: 'username',
+        unique: true,
+      })
+
+      await personsTable.createIndex({
+        keyPath: 'age',
+        unique: false,
+      })
+
+      const petsTable = await transaction.createTable({
+        name: this.petsTableName,
+        schema: {
+          id: 'string',
+          name: 'string',
+          age: 'number',
+          ownerId: 'string',
+        },
+        primaryKey: 'id',
+      })
+
+      await petsTable.createIndex({
+        keyPath: 'name',
+        unique: true,
+      })
+    }
   }
 
   samplePersons(amount: number): Array<Person> {
@@ -70,16 +121,26 @@ export class DatabaseTestHelpers {
     }
   }
 
-  async insertSamplePersons(amount: number): Promise<Array<Person>> {
-    const persons = this.samplePersons(amount)
-
-    await this.database.withTransaction(async (transaction) => {
+  async insertPersons(persons: Array<Person>): Promise<Array<Person>> {
+    return await this.database.withTransaction(async (transaction) => {
       return await transaction.table<Person>(this.personsTableName).insertMany({
         data: persons,
       })
     })
+  }
 
-    return persons
+  async insertPets(pets: Array<Pet>): Promise<Array<Pet>> {
+    return await this.database.withTransaction(async (transaction) => {
+      return await transaction.table<Pet>(this.petsTableName).insertMany({
+        data: pets,
+      })
+    })
+  }
+
+  async insertSamplePersons(amount: number): Promise<Array<Person>> {
+    const persons = this.samplePersons(amount)
+
+    return await this.insertPersons(persons)
   }
 
   async insertSamplePets(
@@ -88,13 +149,7 @@ export class DatabaseTestHelpers {
   ): Promise<Array<Pet>> {
     const pets = await this.samplePets(personsAmount, amountPerPerson)
 
-    await this.database.withTransaction(async (transaction) => {
-      return await transaction.table<Pet>(this.petsTableName).insertMany({
-        data: pets,
-      })
-    })
-
-    return pets
+    return await this.insertPets(pets)
   }
 
   async getAllPersonsInDatabase(): Promise<Array<Person>> {
@@ -124,5 +179,12 @@ export class DatabaseTestHelpers {
       await transaction.table(this.personsTableName).deleteAll()
       await transaction.table(this.petsTableName).deleteAll()
     })
+  }
+
+  async cleanup(): Promise<void> {
+    try {
+      await this.database.close()
+      await this.database.delete(this.databaseName)
+    } catch (_) {}
   }
 }

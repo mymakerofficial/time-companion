@@ -171,6 +171,8 @@ export type UpgradeFunction = (
 
 export interface Database {
   open(name: string, version: number, upgrade: UpgradeFunction): Promise<void>
+  close(): Promise<void>
+  delete(name: string): Promise<void>
   withTransaction<TResult>(
     fn: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>

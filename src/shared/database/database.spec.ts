@@ -1,13 +1,10 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import { createInMemoryDatabase } from '@shared/database/adapters/inMemory/inMemoryDatabase'
+import { afterAll, afterEach, describe, expect, it, vi } from 'vitest'
+import { createInMemoryDBAdapter } from '@shared/database/adapters/inMemory/database'
 import { faker } from '@faker-js/faker'
 import { asArray, firstOf, lastOf } from '@shared/lib/utils/list'
 import { randomElement, randomElements } from '@shared/lib/utils/random'
-import type {
-  UpgradeFunction,
-  UpgradeTransaction,
-} from '@shared/database/database'
-import { createIndexedDBAdapter } from '@shared/database/adapters/indexedDB/indexedDB'
+import type { UpgradeFunction } from '@shared/database/database'
+import { createIndexedDBAdapter } from '@shared/database/adapters/indexedDB/database'
 import { indexedDB as fakeIndexedDB } from 'fake-indexeddb'
 import { useDatabaseFixtures } from '@test/fixtures/database/databaseFixtures'
 import type { Person, Pet } from '@test/fixtures/database/types'
@@ -27,61 +24,21 @@ function byLastName(a: Person, b: Person) {
 }
 
 describe.each([
-  ['In memory database', createInMemoryDatabase, []],
+  ['In Memory Database Adapter', createInMemoryDBAdapter, []],
   ['IndexedDB Adapter', createIndexedDBAdapter, [fakeIndexedDB]],
 ])('%s', (_, createDatabase, args) => {
-  const { database, helpers } = useDatabaseFixtures(createDatabase(...args))
+  const { database, helpers } = useDatabaseFixtures({
+    database: createDatabase(...args),
+  })
+
+  afterAll(async () => {
+    await helpers.cleanup()
+  })
 
   describe('upgrade', () => {
     describe('createTable', () => {
       it('should create a table', async () => {
-        const upgradeFn: UpgradeFunction = vi.fn(
-          async (transaction: UpgradeTransaction) => {
-            const personsTable = await transaction.createTable({
-              name: helpers.personsTableName,
-              schema: {
-                id: 'string',
-                firstName: 'string',
-                lastName: 'string',
-                username: 'string',
-                gender: 'string',
-                age: 'number',
-              },
-              primaryKey: 'id',
-            })
-
-            await personsTable.createIndex({
-              keyPath: 'firstName',
-              unique: false,
-            })
-
-            await personsTable.createIndex({
-              keyPath: 'username',
-              unique: true,
-            })
-
-            await personsTable.createIndex({
-              keyPath: 'age',
-              unique: false,
-            })
-
-            const petsTable = await transaction.createTable({
-              name: helpers.petsTableName,
-              schema: {
-                id: 'string',
-                name: 'string',
-                age: 'number',
-                ownerId: 'string',
-              },
-              primaryKey: 'id',
-            })
-
-            await petsTable.createIndex({
-              keyPath: 'name',
-              unique: true,
-            })
-          },
-        )
+        const upgradeFn: UpgradeFunction = vi.fn(helpers.upgradeFunction)
 
         await database.open(helpers.databaseName, 1, upgradeFn)
 
