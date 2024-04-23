@@ -39,6 +39,18 @@ export type WhereInput<TData extends object> = {
 const orderDirections = ['asc', 'desc'] as const
 export type OrderByDirection = (typeof orderDirections)[number]
 
+type HasOrder<TData extends object> = {
+  orderBy?: OrderByInput<TData>
+}
+
+type HasOffset<TData extends object> = HasOrder<TData> & {
+  offset?: number
+}
+
+type HasLimit<TData extends object> = HasOrder<TData> & {
+  limit?: number
+}
+
 export type OrderByInput<TData extends object> = {
   [K in keyof TData]?: OrderByDirection
 }
@@ -51,34 +63,27 @@ export type InsertManyArgs<TData extends object> = {
   data: Array<TData>
 }
 
-export type FindArgs<TData extends object> = {
+export type FindArgs<TData extends object> = HasOffset<TData> & {
   where?: WhereInput<TData>
-  orderBy?: OrderByInput<TData>
 }
 
-export type FindManyArgs<TData extends object> = FindArgs<TData> & {
-  offset?: number
-  limit?: number
-}
+export type FindManyArgs<TData extends object> = FindArgs<TData> &
+  HasLimit<TData>
 
-export type UpdateArgs<TData extends object> = {
-  where: WhereInput<TData>
+export type UpdateArgs<TData extends object> = HasOffset<TData> & {
+  where?: WhereInput<TData>
   data: Partial<TData>
 }
 
-export type UpdateManyArgs<TData extends object> = UpdateArgs<TData> & {
-  offset?: number
-  limit?: number
+export type UpdateManyArgs<TData extends object> = UpdateArgs<TData> &
+  HasLimit<TData>
+
+export type DeleteArgs<TData extends object> = HasOffset<TData> & {
+  where?: WhereInput<TData>
 }
 
-export type DeleteArgs<TData extends object> = {
-  where: WhereInput<TData>
-}
-
-export type DeleteManyArgs<TData extends object> = DeleteArgs<TData> & {
-  offset?: number
-  limit?: number
-}
+export type DeleteManyArgs<TData extends object> = DeleteArgs<TData> &
+  HasLimit<TData>
 
 export interface Queryable<TData extends object> {
   findFirst(args?: FindArgs<TData>): Promise<TData>

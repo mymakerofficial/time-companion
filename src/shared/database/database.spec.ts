@@ -408,7 +408,7 @@ describe.each([
         )
       })
 
-      it('should limit the number of results returned', async () => {
+      it('should only return the first n entries in a table', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
 
         const res = await database.withTransaction(async (transaction) => {
@@ -422,7 +422,7 @@ describe.each([
         expect(res).toEqual(samplePersons.sort(byId).slice(0, 3))
       })
 
-      it('should skip the first n results', async () => {
+      it('should return all entries except the first n entries in a table', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
 
         const res = await database.withTransaction(async (transaction) => {
@@ -436,7 +436,7 @@ describe.each([
         expect(res).toEqual(samplePersons.sort(byId).slice(3))
       })
 
-      it('should limit the number of results returned and skip the first n results', async () => {
+      it('should only return the first n after skipping the first m entries in a table', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
 
         const res = await database.withTransaction(async (transaction) => {
@@ -481,6 +481,35 @@ describe.each([
 
           expect(res.sort(byId)).toEqual(expected.sort(byId))
         })
+
+        it.todo(
+          'should fail when trying to join on incompatible keys',
+          async () => {
+            await helpers.insertSamplePersons(6)
+            const samplePets = await helpers.insertSamplePets(3, 1)
+
+            const randomPet = randomElement(samplePets, {
+              safetyOffset: 1,
+            })
+
+            expect(async () => {
+              await database.withTransaction(async (transaction) => {
+                return await transaction
+                  .join<Person, Pet>(
+                    helpers.personsTableName,
+                    helpers.petsTableName,
+                  )
+                  .left({
+                    on: { id: 'age' },
+                    where: { id: { equals: randomPet.id } },
+                  })
+                  .findMany()
+              })
+            }).rejects.toThrowError(
+              `The keys "id" and "age" are not compatible.`,
+            )
+          },
+        )
       })
     })
 
@@ -607,6 +636,67 @@ describe.each([
 
         expect(res).toEqual(expected)
       })
+
+      it('should only update the first n entries in a table', async () => {
+        const samplePersons = await helpers.insertSamplePersons(6)
+
+        await database.withTransaction(async (transaction) => {
+          await transaction.table<Person>(helpers.personsTableName).updateMany({
+            data: { firstName: 'Jeff' },
+            limit: 3,
+          })
+        })
+
+        const personsInDatabase = await helpers.getAllPersonsInDatabase()
+
+        const expected = samplePersons.sort(byId).map((person, index) => ({
+          ...person,
+          firstName: index < 3 ? 'Jeff' : person.firstName,
+        }))
+
+        expect(personsInDatabase).toEqual(expected)
+      })
+
+      it('should update all entries except the first n entries in a table', async () => {
+        const samplePersons = await helpers.insertSamplePersons(6)
+
+        await database.withTransaction(async (transaction) => {
+          await transaction.table<Person>(helpers.personsTableName).updateMany({
+            data: { firstName: 'Jeff' },
+            offset: 3,
+          })
+        })
+
+        const personsInDatabase = await helpers.getAllPersonsInDatabase()
+
+        const expected = samplePersons.sort(byId).map((person, index) => ({
+          ...person,
+          firstName: index < 3 ? person.firstName : 'Jeff',
+        }))
+
+        expect(personsInDatabase).toEqual(expected)
+      })
+
+      it('should only update the first n after skipping the first m entries in a table', async () => {
+        const samplePersons = await helpers.insertSamplePersons(12)
+
+        await database.withTransaction(async (transaction) => {
+          await transaction.table<Person>(helpers.personsTableName).updateMany({
+            data: { firstName: 'Jeff' },
+            offset: 3,
+            limit: 5,
+          })
+        })
+
+        const personsInDatabase = await helpers.getAllPersonsInDatabase()
+
+        const expected = samplePersons.sort(byId).map((person, index) => ({
+          ...person,
+          firstName: index >= 3 && index < 8 ? 'Jeff' : person.firstName,
+        }))
+
+        expect(personsInDatabase).toEqual(expected)
+      })
     })
 
     describe('delete', () => {
@@ -645,6 +735,54 @@ describe.each([
         const personsInDatabase = await helpers.getAllPersonsInDatabase()
 
         expect(personsInDatabase).not.toContain(randomPersons)
+      })
+
+      it('should only delete the first n entries in a table', async () => {
+        const samplePersons = await helpers.insertSamplePersons(6)
+
+        await database.withTransaction(async (transaction) => {
+          await transaction
+            .table<Person>(helpers.personsTableName)
+            .deleteMany({ limit: 3 })
+        })
+
+        const personsInDatabase = await helpers.getAllPersonsInDatabase()
+
+        expect(personsInDatabase).toEqual(samplePersons.sort(byId).slice(3))
+      })
+
+      it('should delete all entries except the first n entries in a table', async () => {
+        const samplePersons = await helpers.insertSamplePersons(6)
+
+        await database.withTransaction(async (transaction) => {
+          await transaction
+            .table<Person>(helpers.personsTableName)
+            .deleteMany({ offset: 3 })
+        })
+
+        const personsInDatabase = await helpers.getAllPersonsInDatabase()
+
+        expect(personsInDatabase).toEqual(samplePersons.sort(byId).slice(0, 3))
+      })
+
+      it('should only delete the first n after skipping the first m entries in a table', async () => {
+        const samplePersons = await helpers.insertSamplePersons(12)
+
+        await database.withTransaction(async (transaction) => {
+          await transaction
+            .table<Person>(helpers.personsTableName)
+            .deleteMany({ offset: 3, limit: 5 })
+        })
+
+        const personsInDatabase = await helpers.getAllPersonsInDatabase()
+
+        const expectedDeleted = samplePersons.sort(byId).slice(3, 8)
+
+        expect(personsInDatabase).toEqual(
+          samplePersons
+            .sort(byId)
+            .filter((person) => !expectedDeleted.includes(person)),
+        )
       })
     })
 
