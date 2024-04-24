@@ -7,7 +7,7 @@ import { InMemoryDatabaseTransaction } from '@shared/database/adapters/inMemory/
 import { InMemoryDatabaseUpgradeTransaction } from '@shared/database/adapters/inMemory/upgradeTransaction'
 import { emptyMap } from '@shared/lib/utils/list'
 import type { InMemoryDataTables } from '@shared/database/adapters/inMemory/helpers/dataTable'
-import { check, isDefined, isNull } from '@shared/lib/utils/checks'
+import { check, isDefined, isNotNull, isNull } from '@shared/lib/utils/checks'
 import type { Nullable } from '@shared/lib/utils/types'
 
 export class InMemoryDatabase implements Database {
@@ -46,7 +46,7 @@ export class InMemoryDatabase implements Database {
 
   async close(): Promise<void> {
     this.name = null
-    this.version = 0
+    this.version = null
     this.tables.clear()
   }
 
@@ -59,6 +59,8 @@ export class InMemoryDatabase implements Database {
   async withTransaction<TResult>(
     fn: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult> {
+    check(isNotNull(this.name), 'Database is not open.')
+
     return await fn(new InMemoryDatabaseTransaction(this.tables))
   }
 

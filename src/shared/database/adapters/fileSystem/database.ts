@@ -13,6 +13,7 @@ import {
   type InMemoryDataTable,
   InMemoryDataTableImpl,
 } from '@shared/database/adapters/inMemory/helpers/dataTable'
+import { asyncGetOrDefault } from '@shared/lib/utils/result'
 
 type TableMeta = CreateTableArgs<any> & {
   indexes: string[]
@@ -114,22 +115,49 @@ export class FileSystemDatabase extends InMemoryDatabase implements Database {
       return
     }
 
-    const metaContent = await fs.readFile(this.getMetaPath(dbName), 'utf-8')
+    const metaContent = await fs.readFile(this.getMetaPath(dbName), {
+      encoding: 'utf-8',
+    })
     const meta = this.parseDatabaseMeta(metaContent)
 
     this.name = meta.name
     this.version = meta.version
 
     for (const table of meta.tables) {
-      const tableRowsContent = await fs.readFile(
-        this.getTablePath(dbName, table.name),
-        'utf-8',
+      const tableRowsContent = await asyncGetOrDefault(
+        fs.readFile(this.getTablePath(dbName, table.name), {
+          encoding: 'utf-8',
+        }),
+        '[]',
       )
       const tableRows = this.parseTableRows(tableRowsContent)
 
       const dataTable = this.createDataTable(table, tableRows)
 
       this.tables.set(table.name, dataTable)
+    }
+  }
+
+  protected async restoreTableRows() {
+    check(isNotNull(this.name), 'Database is not open.')
+
+    if (!(await this.dbExists(this.name))) {
+      return
+    }
+
+    const tableNames = await this.getTableNames()
+
+    for (const tableName of tableNames) {
+      const table = this.tables.get(tableName)
+
+      check(isDefined(table), 'How did we get here?')
+
+      const tableRowsContent = await fs.readFile(
+        this.getTablePath(this.name, tableName),
+        'utf-8',
+      )
+
+      table.rows = this.parseTableRows(tableRowsContent)
     }
   }
 
@@ -171,9 +199,17 @@ export class FileSystemDatabase extends InMemoryDatabase implements Database {
     upgrade: UpgradeFunction,
   ): Promise<void> {
     await this.initialize(name)
-    await super.open(name, version, upgrade)
-    await this.commitDatabaseMeta()
-    await this.commitTableRows()
+
+    await super
+      .open(name, version, upgrade)
+      .then(async () => {
+        await this.commitDatabaseMeta()
+        await this.commitTableRows()
+      })
+      .catch(async (error) => {
+        await this.close()
+        throw error
+      })
   }
 
   async close(): Promise<void> {
@@ -192,9 +228,16 @@ export class FileSystemDatabase extends InMemoryDatabase implements Database {
   async withTransaction<TResult>(
     fn: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult> {
-    const res = await super.withTransaction(fn)
-    await this.commitTableRows()
-    return res
+    return await super
+      .withTransaction(fn)
+      .then(async (res) => {
+        await this.commitTableRows()
+        return res
+      })
+      .catch(async (error) => {
+        await this.restoreTableRows()
+        throw error
+      })
   }
 }
 
