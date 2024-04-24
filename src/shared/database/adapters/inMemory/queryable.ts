@@ -13,6 +13,7 @@ import {
   type UnwrapOrderBy,
 } from '@shared/database/helpers/unwrapOrderBy'
 import { getOrDefault } from '@shared/lib/utils/result'
+import { todo } from '@shared/lib/utils/todo'
 
 export class InMemoryDatabaseQueryable<TData extends object>
   implements Queryable<TData>
@@ -26,14 +27,17 @@ export class InMemoryDatabaseQueryable<TData extends object>
   }
 
   private syncFindMany(args: FindManyArgs<TData> = {}): Array<TData> {
+    todo()
+
     const unwrappedOrderBy = getOrDefault(maybeUnwrapOrderBy(args?.orderBy), {
-      key: this.table.primaryKey,
+      key: this.table.getPrimaryKey(),
       direction: 'asc',
     } as UnwrapOrderBy<TData>)
 
     check(
-      unwrappedOrderBy.key.toString() === this.table.primaryKey.toString() ||
-        this.table.getIndexes().has(unwrappedOrderBy.key.toString()),
+      unwrappedOrderBy.key.toString() ===
+        this.table.getPrimaryKey().toString() ||
+        this.table.getIndexes().has(unwrappedOrderBy.key),
       `The index "${unwrappedOrderBy.key.toString()}" does not exist. You can only order by existing indexes or primary key.`,
     )
 

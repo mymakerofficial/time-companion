@@ -10,12 +10,15 @@ import type {
 import { wherePredicate } from '@shared/database/helpers/wherePredicate'
 import { check, isNotNull } from '@shared/lib/utils/checks'
 import { InMemoryDatabaseQueryable } from '@shared/database/adapters/inMemory/queryable'
+import { todo } from '@shared/lib/utils/todo'
 
 export class InMemoryDatabaseTable<TData extends object>
   extends InMemoryDatabaseQueryable<TData>
   implements Table<TData>
 {
   private syncUpdate(args: UpdateArgs<TData>): TData {
+    todo()
+
     const { where, data } = args
 
     const index = this.table.rows.findIndex(wherePredicate(where))
@@ -34,6 +37,8 @@ export class InMemoryDatabaseTable<TData extends object>
   }
 
   private syncUpdateMany(args: UpdateManyArgs<TData>): Array<TData> {
+    todo()
+
     const { where, data } = args
 
     const indexes = this.table.rows
@@ -60,6 +65,8 @@ export class InMemoryDatabaseTable<TData extends object>
   }
 
   private syncDelete(args: DeleteArgs<TData>): void {
+    todo()
+
     const { where } = args
 
     const index = this.table.rows.findIndex(wherePredicate(where))
@@ -81,6 +88,8 @@ export class InMemoryDatabaseTable<TData extends object>
   }
 
   private syncDeleteMany(args: DeleteManyArgs<TData>): void {
+    todo()
+
     const { where } = args
 
     const indexes = this.table.rows
@@ -106,6 +115,8 @@ export class InMemoryDatabaseTable<TData extends object>
   }
 
   async deleteAll(): Promise<void> {
+    todo()
+
     return new Promise((resolve) => {
       this.table.rows = []
       resolve()
@@ -113,6 +124,8 @@ export class InMemoryDatabaseTable<TData extends object>
   }
 
   private syncInsert(args: InsertArgs<TData>): TData {
+    todo()
+
     this.table.rows.push(args.data)
     return args.data
   }

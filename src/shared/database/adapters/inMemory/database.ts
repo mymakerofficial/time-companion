@@ -5,10 +5,11 @@ import type {
 } from '@shared/database/database'
 import { InMemoryDatabaseTransaction } from '@shared/database/adapters/inMemory/transaction'
 import { InMemoryDatabaseUpgradeTransaction } from '@shared/database/adapters/inMemory/upgradeTransaction'
-import { emptyMap } from '@shared/lib/utils/list'
-import type { InMemoryDataTables } from '@shared/database/adapters/inMemory/helpers/dataTable'
+import { emptyMap, toArray } from '@shared/lib/utils/list'
+import { type InMemoryDataTables } from '@shared/database/adapters/inMemory/helpers/dataTable'
 import { check, isDefined, isNotNull, isNull } from '@shared/lib/utils/checks'
 import type { Nullable } from '@shared/lib/utils/types'
+import { todo } from '@shared/lib/utils/todo'
 
 export class InMemoryDatabase implements Database {
   protected name: Nullable<string> = null
@@ -22,6 +23,8 @@ export class InMemoryDatabase implements Database {
     version: number,
     upgrade: UpgradeFunction,
   ): Promise<void> {
+    todo()
+
     const oldVersion = this.version ?? 0
 
     if (isNull(this.name)) {
@@ -65,7 +68,7 @@ export class InMemoryDatabase implements Database {
   }
 
   async getTableNames(): Promise<Array<string>> {
-    return Promise.resolve(Array.from(this.tables.keys()).sort())
+    return Promise.resolve(toArray(this.tables.keys()).sort())
   }
 
   async getIndexes(tableName: string): Promise<Array<string>> {
@@ -74,7 +77,7 @@ export class InMemoryDatabase implements Database {
 
       check(isDefined(table), `Table "${tableName}" does not exist.`)
 
-      resolve(Array.from(table.getIndexes()).sort())
+      resolve(table.getIndexNames())
     })
   }
 }
