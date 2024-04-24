@@ -1,5 +1,6 @@
 import { InMemoryDatabase } from '@shared/database/adapters/inMemory/database'
 import type {
+  CreateTableArgs,
   Database,
   Transaction,
   UpgradeFunction,
@@ -8,90 +9,147 @@ import fs from 'node:fs/promises'
 import path from 'path'
 import { check, isDefined, isNotNull } from '@shared/lib/utils/checks'
 import { toArray } from '@shared/lib/utils/list'
-import { InMemoryDataTableImpl } from '@shared/database/adapters/inMemory/helpers/dataTable'
+import {
+  type InMemoryDataTable,
+  InMemoryDataTableImpl,
+} from '@shared/database/adapters/inMemory/helpers/dataTable'
+
+type TableMeta = CreateTableArgs<any> & {
+  indexes: string[]
+}
+
+type DatabaseMeta = {
+  name: string
+  version: number
+  tables: Array<TableMeta>
+}
 
 export class FileSystemDatabase extends InMemoryDatabase implements Database {
-  constructor() {
+  constructor(protected readonly basePath: string) {
     super()
   }
 
-  protected async read(name: string) {
-    const metaPath = path.join(process.cwd(), '.data', 'db', name, 'meta.json')
+  private getDBPath(dbName: string) {
+    return path.join(this.basePath, 'databases', dbName)
+  }
 
-    const metaExists = !!(await fs.stat(metaPath).catch(() => null))
+  private getMetaPath(dbName: string) {
+    return path.join(this.getDBPath(dbName), 'meta.json')
+  }
 
-    if (!metaExists) {
-      return Promise.resolve()
+  private getTablePath(dbName: string, tableName: string) {
+    return path.join(this.getDBPath(dbName), `${tableName}.json`)
+  }
+
+  private async dbExists(dbName: string) {
+    return !!(await fs.stat(this.getDBPath(dbName)).catch(() => null))
+  }
+
+  private async ensureDBExists(dbName: string) {
+    await fs.mkdir(this.getDBPath(dbName), {
+      recursive: true,
+    })
+  }
+
+  private formatTableRows(rows: InMemoryDataTable<any>['rows']) {
+    return JSON.stringify(rows)
+  }
+
+  private parseTableRows(content: string): InMemoryDataTable<any>['rows'] {
+    return JSON.parse(content)
+  }
+
+  private formatDatabaseMeta(meta: DatabaseMeta) {
+    return JSON.stringify(meta)
+  }
+
+  private parseDatabaseMeta(content: string): DatabaseMeta {
+    return JSON.parse(content)
+  }
+
+  private createTableMeta(table: InMemoryDataTable<any>): TableMeta {
+    return {
+      name: table.name,
+      primaryKey: table.primaryKey,
+      schema: table.schema,
+      indexes: toArray(table.getIndexes()),
+    }
+  }
+
+  private createDataTable(
+    tableMeta: TableMeta,
+    rows: InMemoryDataTable<any>['rows'],
+  ) {
+    const dataTable = new InMemoryDataTableImpl(
+      tableMeta.name,
+      tableMeta.schema,
+      // @ts-expect-error
+      tableMeta.primaryKey,
+    )
+
+    tableMeta.indexes.forEach((keyPath: string) =>
+      dataTable.createIndex({ keyPath }),
+    )
+
+    dataTable.rows.push(...rows)
+
+    return dataTable
+  }
+
+  private createDatabaseMeta(): DatabaseMeta {
+    check(isNotNull(this.name), 'Database is not open.')
+    check(isNotNull(this.version), 'No Database version is set.')
+
+    return {
+      name: this.name,
+      version: this.version,
+      tables: toArray(this.tables).map(([_, table]) =>
+        this.createTableMeta(table),
+      ),
+    }
+  }
+
+  protected async initialize(dbName: string) {
+    if (!(await this.dbExists(dbName))) {
+      return
     }
 
-    const meta = JSON.parse(await fs.readFile(metaPath, 'utf-8'))
+    const metaContent = await fs.readFile(this.getMetaPath(dbName), 'utf-8')
+    const meta = this.parseDatabaseMeta(metaContent)
 
     this.name = meta.name
     this.version = meta.version
 
     for (const table of meta.tables) {
-      const dataTable = new InMemoryDataTableImpl(
-        table.name,
-        table.schema,
-        // @ts-ignore
-        table.primaryKey,
+      const tableRowsContent = await fs.readFile(
+        this.getTablePath(dbName, table.name),
+        'utf-8',
       )
+      const tableRows = this.parseTableRows(tableRowsContent)
 
-      table.indexes.forEach((keyPath: string) =>
-        // @ts-ignore
-        dataTable.createIndex({ keyPath }),
-      )
+      const dataTable = this.createDataTable(table, tableRows)
 
-      this.tables.set(
-        table.name,
-        // @ts-ignore
-        dataTable,
-      )
-
-      const tablePath = path.join(
-        process.cwd(),
-        '.data',
-        'db',
-        name,
-        `${table.name}.json`,
-      )
-
-      const data = JSON.parse(await fs.readFile(tablePath, 'utf-8'))
-
-      this.tables.get(table.name)?.rows.push(...data)
+      this.tables.set(table.name, dataTable)
     }
   }
 
-  protected async commitMeta() {
+  protected async commitDatabaseMeta() {
     check(isNotNull(this.name), 'Database is not open.')
 
-    await fs.mkdir(path.join(process.cwd(), '.data', 'db', this.name), {
-      recursive: true,
-    })
+    await this.ensureDBExists(this.name)
 
-    const meta = {
-      name: this.name,
-      version: this.version,
-      tables: toArray(this.tables).map(([_, table]) => ({
-        name: table.name,
-        primaryKey: table.primaryKey,
-        schema: table.schema,
-        indexes: toArray(table.getIndexes()),
-      })),
-    }
+    const meta = this.createDatabaseMeta()
 
     await fs.writeFile(
-      path.join(process.cwd(), '.data', 'db', this.name, 'meta.json'),
-      JSON.stringify(meta),
+      this.getMetaPath(this.name),
+      this.formatDatabaseMeta(meta),
     )
   }
 
-  protected async commitTables() {
+  protected async commitTableRows() {
     check(isNotNull(this.name), 'Database is not open.')
 
-    await fs.mkdir(path.join(process.cwd(), '.data', 'db', this.name), {
-      recursive: true,
-    })
+    await this.ensureDBExists(this.name)
 
     const tableNames = await this.getTableNames()
 
@@ -100,11 +158,9 @@ export class FileSystemDatabase extends InMemoryDatabase implements Database {
 
       check(isDefined(table), 'How did we get here?')
 
-      const data = JSON.stringify(table.rows)
-
       await fs.writeFile(
-        path.join(process.cwd(), '.data', 'db', this.name, `${tableName}.json`),
-        data,
+        this.getTablePath(this.name, tableName),
+        this.formatTableRows(table.rows),
       )
     }
   }
@@ -114,19 +170,21 @@ export class FileSystemDatabase extends InMemoryDatabase implements Database {
     version: number,
     upgrade: UpgradeFunction,
   ): Promise<void> {
-    await this.read(name)
+    await this.initialize(name)
     await super.open(name, version, upgrade)
-    await this.commitMeta()
-    await this.commitTables()
+    await this.commitDatabaseMeta()
+    await this.commitTableRows()
   }
 
   async close(): Promise<void> {
     await super.close()
   }
 
-  async delete(name: string): Promise<void> {
-    await super.delete(name)
-    await fs.rm(path.join(process.cwd(), '.data', 'db', name), {
+  async delete(dbName: string): Promise<void> {
+    await super.delete(dbName)
+
+    // scary o.o
+    await fs.rm(this.getDBPath(dbName), {
       recursive: true,
     })
   }
@@ -135,11 +193,11 @@ export class FileSystemDatabase extends InMemoryDatabase implements Database {
     fn: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult> {
     const res = await super.withTransaction(fn)
-    await this.commitTables()
+    await this.commitTableRows()
     return res
   }
 }
 
-export function createFileSystemDBAdapter(): Database {
-  return new FileSystemDatabase()
+export function createFileSystemDBAdapter(basePath: string): Database {
+  return new FileSystemDatabase(basePath)
 }

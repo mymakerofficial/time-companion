@@ -2,6 +2,7 @@ import { afterAll, describe, expect, it, vi } from 'vitest'
 import { useDatabaseFixtures } from '@test/fixtures/database/databaseFixtures'
 import { createFileSystemDBAdapter } from '@shared/database/adapters/fileSystem/database'
 import type { HasId } from '@shared/model/helpers/hasId'
+import path from 'path'
 
 function byId(a: HasId, b: HasId) {
   return a.id.localeCompare(b.id)
@@ -9,7 +10,9 @@ function byId(a: HasId, b: HasId) {
 
 describe.sequential('File System Database', () => {
   const { database, helpers } = useDatabaseFixtures({
-    database: createFileSystemDBAdapter(),
+    database: createFileSystemDBAdapter(
+      path.join(process.cwd(), '.data', 'test'),
+    ),
     databaseName: 'file-system-test-db',
   })
 
