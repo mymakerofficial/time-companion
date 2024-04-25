@@ -25,6 +25,14 @@ export interface InMemoryDataTable<TData extends object> {
   getIndexNames(): Array<string>
   createIndex(keyPath: keyof TData, unique: boolean): void
   removeIndex(keyPath: keyof TData): void
+  // updates the given index with the new value.
+  //  **beware: this method does not perform any checks!**
+  updateRowColumnIndexing(
+    primaryKeyValue: TData[keyof TData],
+    keyPath: keyof TData,
+    oldValue: TData[typeof keyPath],
+    newValue: TData[typeof keyPath],
+  ): void
   insert(data: TData): void
   createCursor(
     keyPath: keyof TData,
@@ -95,7 +103,7 @@ export class InMemoryDataTableImpl<TData extends object>
     this.indexes.delete(keyPath)
   }
 
-  private insertIndexSorted(
+  private insertRowColumnIndexing(
     keyPath: keyof TData,
     index: Index<TData, typeof this.primaryKey>,
     indexedValue: TData[keyof TData],
@@ -131,20 +139,46 @@ export class InMemoryDataTableImpl<TData extends object>
     }
   }
 
-  private addRowToIndex(keyPath: keyof TData, row: TData) {
+  updateRowColumnIndexing(
+    primaryKeyValue: TData[typeof this.primaryKey],
+    keyPath: keyof TData,
+    oldValue: TData[typeof keyPath],
+    newValue: TData[typeof keyPath],
+  ) {
+    const index = this.indexes.get(keyPath)!
+
+    const oldPosition = index.values.findIndex(
+      (it) => it.indexedValue === oldValue,
+    )
+
+    const oldSubPosition = index.values[oldPosition].primaryKeys.findIndex(
+      (it) => it === primaryKeyValue,
+    )
+
+    index.values[oldPosition].primaryKeys.splice(oldSubPosition, 1)
+
+    this.insertRowColumnIndexing(keyPath, index, newValue, primaryKeyValue)
+  }
+
+  private insertRowIndexing(keyPath: keyof TData, row: TData) {
     const index = this.indexes.get(keyPath)
 
     check(isDefined(index), `Index "${keyPath.toString()}" does not exist.`)
 
     const indexedValue = row[keyPath as keyof TData]
 
-    this.insertIndexSorted(keyPath, index, indexedValue, row[this.primaryKey])
+    this.insertRowColumnIndexing(
+      keyPath,
+      index,
+      indexedValue,
+      row[this.primaryKey],
+    )
   }
 
   insert(data: TData) {
     // add indexes first to ensure unique constraints are enforced
     for (const keyPath of this.indexes.keys()) {
-      this.addRowToIndex(keyPath, data)
+      this.insertRowIndexing(keyPath, data)
     }
 
     // TODO: revert indexes if insert fails

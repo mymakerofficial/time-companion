@@ -43,6 +43,10 @@ export function toArray<T>(value: Iterable<T> | ArrayLike<T>): Array<T> {
   return Array.from(value)
 }
 
+export function asSet<T>(value: Iterable<T>): Set<T> {
+  return new Set(value)
+}
+
 export function setOf<T>(values: Array<T>): Set<T> {
   return new Set(values)
 }
