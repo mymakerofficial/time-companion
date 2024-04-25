@@ -1,9 +1,8 @@
 import type { InMemoryDataTable } from '@shared/database/adapters/inMemory/helpers/dataTable'
 import { getOrNull, getOrThrow } from '@shared/lib/utils/result'
 import type { Nullable } from '@shared/lib/utils/types'
-import { check, isDefined, isNotNull, isNull } from '@shared/lib/utils/checks'
+import { check, isNull } from '@shared/lib/utils/checks'
 import type { OrderByDirection } from '@shared/database/database'
-import { todo } from '@shared/lib/utils/todo'
 import { keysOf } from '@shared/lib/utils/object'
 import { asSet, toArray } from '@shared/lib/utils/list'
 
@@ -11,7 +10,7 @@ export interface InMemoryCursor<TData extends object> {
   value(): Nullable<TData>
   update(data: Partial<TData>): void
   delete(): void
-  next(): void
+  continue(): void
   close(): void
 }
 
@@ -126,7 +125,7 @@ export class InMemoryCursorImpl<TData extends object>
     this.deleteQueue.push(primaryKey)
   }
 
-  next(): void {
+  continue(): void {
     this.subPosition += 1
 
     if (this.subPosition >= this.getCurrentIndexValue()!.primaryKeys.length) {

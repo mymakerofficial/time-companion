@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { InMemoryDataTableImpl } from '@shared/database/adapters/inMemory/helpers/dataTable'
 import { uuid } from '@shared/lib/utils/uuid'
+import { cursorIterator } from '@shared/database/adapters/inMemory/helpers/cursorIterator'
 
 type Entity = {
   id: string
@@ -24,12 +25,11 @@ describe('In Memory Data Table', () => {
 
     data.forEach((item) => table.insert(item))
 
-    const cursor = table.createCursor('name', 'desc')
+    const iterator = cursorIterator(table.createCursor('name', 'desc'))
 
     const results: Array<Entity> = []
-    while (cursor.value()) {
-      results.push(cursor.value()!)
-      cursor.next()
+    for (const cursor of iterator) {
+      results.push(cursor.value())
     }
 
     expect(results.map((it) => it.name)).toEqual(
@@ -52,24 +52,20 @@ describe('In Memory Data Table', () => {
 
     data.forEach((item) => table.insert(item))
 
-    const cursor = table.createCursor('name', 'asc')
+    const iterator = cursorIterator(table.createCursor('name', 'asc'))
 
-    while (cursor.value()) {
-      if (cursor.value()!.name === 'Alice') {
+    for (const cursor of iterator) {
+      if (cursor.value().name === 'Alice') {
         cursor.update({ name: 'Zelda' })
       }
-      cursor.next()
     }
-    cursor.close()
 
-    const resultCursor = table.createCursor('name', 'asc')
+    const resultIterator = cursorIterator(table.createCursor('name', 'asc'))
 
     const results: Array<Entity> = []
-    while (resultCursor.value()) {
-      results.push(resultCursor.value()!)
-      resultCursor.next()
+    for (const cursor of resultIterator) {
+      results.push(cursor.value())
     }
-    resultCursor.close()
 
     expect(results.map((it) => it.name)).toEqual(
       data
@@ -91,24 +87,20 @@ describe('In Memory Data Table', () => {
 
     data.forEach((item) => table.insert(item))
 
-    const cursor = table.createCursor('name', 'asc')
+    const iterator = cursorIterator(table.createCursor('name', 'asc'))
 
-    while (cursor.value()) {
-      if (cursor.value()!.name === 'Bob') {
+    for (const cursor of iterator) {
+      if (cursor.value().name === 'Bob') {
         cursor.delete()
       }
-      cursor.next()
     }
-    cursor.close()
 
-    const resultCursor = table.createCursor('name', 'asc')
+    const resultIterator = cursorIterator(table.createCursor('name', 'asc'))
 
     const results: Array<Entity> = []
-    while (resultCursor.value()) {
-      results.push(resultCursor.value()!)
-      resultCursor.next()
+    for (const cursor of resultIterator) {
+      results.push(cursor.value())
     }
-    resultCursor.close()
 
     expect(results.map((it) => it.name)).toEqual(
       data
