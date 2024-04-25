@@ -33,6 +33,13 @@ export interface InMemoryDataTable<TData extends object> {
     oldValue: TData[typeof keyPath],
     newValue: TData[typeof keyPath],
   ): void
+  // removes the given index with the old value.
+  //  **beware: this method does not perform any checks!**
+  removeRowIndexing(
+    primaryKeyValue: TData[keyof TData],
+    keyPath: keyof TData,
+    oldValue: TData[typeof keyPath],
+  ): void
   insert(data: TData): void
   createCursor(
     keyPath: keyof TData,
@@ -159,12 +166,35 @@ export class InMemoryDataTableImpl<TData extends object>
 
     index.values[oldPosition].primaryKeys.splice(oldSubPosition, 1)
 
-    // we dont want to keep indexed values that no longer exist
+    // we don't want to keep indexed values that no longer exist
     if (index.values[oldPosition].primaryKeys.length === 0) {
       index.values.splice(oldPosition, 1)
     }
 
     this.insertRowColumnIndexing(keyPath, index, newValue, primaryKeyValue)
+  }
+
+  removeRowIndexing(
+    primaryKeyValue: TData[keyof TData],
+    keyPath: keyof TData,
+    oldValue: TData[typeof keyPath],
+  ) {
+    const index = this.indexes.get(keyPath)!
+
+    const oldPosition = index.values.findIndex(
+      (it) => it.indexedValue === oldValue,
+    )
+
+    const oldSubPosition = index.values[oldPosition].primaryKeys.findIndex(
+      (it) => it === primaryKeyValue,
+    )
+
+    index.values[oldPosition].primaryKeys.splice(oldSubPosition, 1)
+
+    // we don't want to keep indexed values that no longer exist
+    if (index.values[oldPosition].primaryKeys.length === 0) {
+      index.values.splice(oldPosition, 1)
+    }
   }
 
   private insertRowIndexing(keyPath: keyof TData, row: TData) {

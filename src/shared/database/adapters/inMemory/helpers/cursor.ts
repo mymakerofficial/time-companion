@@ -36,6 +36,7 @@ export class InMemoryCursorImpl<TData extends object>
 
   // remember all updates to be applied when cursor is closed
   private readonly indexUpdateQueue: Array<IndexUpdate<TData>> = []
+  private readonly deleteQueue: Array<TData[keyof TData]> = []
 
   constructor(
     private table: InMemoryDataTable<TData>,
@@ -115,7 +116,14 @@ export class InMemoryCursorImpl<TData extends object>
   }
 
   delete(): void {
-    todo()
+    const primaryKey = getOrThrow(
+      this.getCurrentPrimaryKey(),
+      'Failed to get primary key.',
+    )
+
+    // don't delete the row now, because it would mess up the cursor
+    //  instead, remember the primary key to delete it later
+    this.deleteQueue.push(primaryKey)
   }
 
   next(): void {
@@ -138,6 +146,18 @@ export class InMemoryCursorImpl<TData extends object>
         )
       },
     )
+
+    this.deleteQueue.forEach((primaryKey) => {
+      const oldRow = getOrThrow(
+        this.table.getRows().get(primaryKey),
+        'Failed to get row.',
+      )
+      this.indexesSet.forEach((keyPath) => {
+        this.table.removeRowIndexing(primaryKey, keyPath, oldRow[keyPath])
+      })
+      this.table.getRows().delete(primaryKey)
+    })
+
     this.unlockTable()
   }
 }

@@ -78,4 +78,43 @@ describe('In Memory Data Table', () => {
         .map((it) => it.name),
     )
   })
+
+  it('should delete a value and maintain index sorting', () => {
+    const table = new InMemoryDataTableImpl<Entity>('id')
+
+    table.createIndex('name', false)
+
+    const data = Array.from({ length: 10 }, (_, i) => ({
+      id: uuid(),
+      name: ['Charlie', 'David', 'Bob', 'Alice', 'Eve'][i % 5],
+    }))
+
+    data.forEach((item) => table.insert(item))
+
+    const cursor = table.createCursor('name', 'asc')
+
+    while (cursor.value()) {
+      if (cursor.value()!.name === 'Bob') {
+        cursor.delete()
+      }
+      cursor.next()
+    }
+    cursor.close()
+
+    const resultCursor = table.createCursor('name', 'asc')
+
+    const results: Array<Entity> = []
+    while (resultCursor.value()) {
+      results.push(resultCursor.value()!)
+      resultCursor.next()
+    }
+    resultCursor.close()
+
+    expect(results.map((it) => it.name)).toEqual(
+      data
+        .sort(byName)
+        .map((it) => it.name)
+        .filter((it) => it !== 'Bob'),
+    )
+  })
 })
