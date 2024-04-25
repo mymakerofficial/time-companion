@@ -60,6 +60,7 @@ describe('In Memory Data Table', () => {
       }
       cursor.next()
     }
+    cursor.close()
 
     const resultCursor = table.createCursor('name', 'asc')
 
@@ -68,6 +69,7 @@ describe('In Memory Data Table', () => {
       results.push(resultCursor.value()!)
       resultCursor.next()
     }
+    resultCursor.close()
 
     expect(results.map((it) => it.name)).toEqual(
       data

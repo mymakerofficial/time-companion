@@ -52,6 +52,8 @@ export class InMemoryDataTableImpl<TData extends object>
     Index<TData, typeof this.primaryKey>
   >
 
+  protected locked = false
+
   constructor(primaryKey: keyof TData) {
     this.primaryKey = primaryKey
     this.rows = emptyMap()
@@ -157,6 +159,11 @@ export class InMemoryDataTableImpl<TData extends object>
 
     index.values[oldPosition].primaryKeys.splice(oldSubPosition, 1)
 
+    // we dont want to keep indexed values that no longer exist
+    if (index.values[oldPosition].primaryKeys.length === 0) {
+      index.values.splice(oldPosition, 1)
+    }
+
     this.insertRowColumnIndexing(keyPath, index, newValue, primaryKeyValue)
   }
 
@@ -194,6 +201,10 @@ export class InMemoryDataTableImpl<TData extends object>
     keyPath: keyof TData,
     direction: OrderByDirection = 'asc',
   ): InMemoryCursor<TData> {
-    return new InMemoryCursorImpl(this, keyPath, direction)
+    check(!this.locked, 'Table is locked.')
+    this.locked = true
+    return new InMemoryCursorImpl(this, keyPath, direction, () => {
+      this.locked = false
+    })
   }
 }

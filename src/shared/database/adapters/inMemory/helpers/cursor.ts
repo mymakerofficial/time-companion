@@ -12,6 +12,14 @@ export interface InMemoryCursor<TData extends object> {
   update(data: Partial<TData>): void
   delete(): void
   next(): void
+  close(): void
+}
+
+type IndexUpdate<TData extends object> = {
+  primaryKey: TData[keyof TData]
+  keyPath: keyof TData
+  oldValue: TData[keyof TData]
+  newValue: TData[keyof TData]
 }
 
 export class InMemoryCursorImpl<TData extends object>
@@ -21,15 +29,19 @@ export class InMemoryCursorImpl<TData extends object>
   // subPosition is the index of the primary key in the current index value
   private subPosition = 0
 
-  // number to increment the index by
+  // number to increment the position by
   private readonly increment: number
 
   private readonly indexesSet: Set<keyof TData>
+
+  // remember all updates to be applied when cursor is closed
+  private readonly indexUpdateQueue: Array<IndexUpdate<TData>> = []
 
   constructor(
     private table: InMemoryDataTable<TData>,
     private keyPath: keyof TData,
     direction: OrderByDirection,
+    private unlockTable: () => void,
   ) {
     // TODO: check if index actually exists
 
@@ -63,12 +75,12 @@ export class InMemoryCursorImpl<TData extends object>
   }
 
   update(data: Partial<TData>): void {
-    const key = getOrThrow(
+    const primaryKey = getOrThrow(
       this.getCurrentPrimaryKey(),
       'Failed to get primary key.',
     )
     const current = getOrThrow(
-      this.table.getRows().get(key),
+      this.table.getRows().get(primaryKey),
       'Failed to get row.',
     )
 
@@ -80,20 +92,25 @@ export class InMemoryCursorImpl<TData extends object>
     )
 
     // update row
-    this.table.getRows().set(key, { ...current, ...data })
+    this.table.getRows().set(primaryKey, { ...current, ...data })
 
-    // update indexes
     this.indexesSet.forEach((keyPath) => {
       if (!changedColumns.has(keyPath)) {
         return
       }
 
-      this.table.updateRowColumnIndexing(
-        key,
+      // store updates to the index for later,
+      //  because it is literally impossible to update the index while iterating over it.
+      //  The order of rows would be changed and the cursor would get lost.
+
+      // so this is why everybody tells you to not make your own database
+
+      this.indexUpdateQueue.push({
+        primaryKey,
         keyPath,
-        current[keyPath],
-        data[keyPath] as TData[keyof TData],
-      )
+        oldValue: current[keyPath],
+        newValue: data[keyPath] as TData[keyof TData],
+      })
     })
   }
 
@@ -108,5 +125,19 @@ export class InMemoryCursorImpl<TData extends object>
       this.position += this.increment
       this.subPosition = 0
     }
+  }
+
+  close(): void {
+    this.indexUpdateQueue.forEach(
+      ({ primaryKey, keyPath, oldValue, newValue }) => {
+        this.table.updateRowColumnIndexing(
+          primaryKey,
+          keyPath,
+          oldValue,
+          newValue,
+        )
+      },
+    )
+    this.unlockTable()
   }
 }
