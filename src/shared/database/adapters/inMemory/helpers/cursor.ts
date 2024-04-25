@@ -15,8 +15,9 @@ export interface InMemoryCursor<TData extends object> {
 export class InMemoryCursorImpl<TData extends object>
   implements InMemoryCursor<TData>
 {
-  private index: number
-  private subIndex = 0
+  private position: number
+  // subPosition is the index of the primary key in the current index value
+  private subPosition = 0
 
   // number to increment the index by
   private readonly increment: number
@@ -27,17 +28,20 @@ export class InMemoryCursorImpl<TData extends object>
     direction: OrderByDirection,
   ) {
     this.increment = direction === 'asc' ? 1 : -1
-    this.index = direction === 'asc' ? 0 : -1
+    this.position =
+      direction === 'asc'
+        ? 0
+        : this.table.getIndexes().get(this.keyPath)?.values.length - 1
+  }
+
+  private getCurrentIndexValue() {
+    return getOrNull(
+      this.table.getIndexes().get(this.keyPath)?.values[this.position],
+    )
   }
 
   private getCurrentPrimaryKey(): Nullable<TData[keyof TData]> {
-    return getOrNull(
-      this.table
-        .getIndexes()
-        .get(this.keyPath)
-        ?.values.at(this.index)
-        ?.keys.at(this.subIndex),
-    )
+    return getOrNull(this.getCurrentIndexValue()?.primaryKeys[this.subPosition])
   }
 
   value(): Nullable<TData> {
@@ -59,15 +63,11 @@ export class InMemoryCursorImpl<TData extends object>
   }
 
   next(): void {
-    this.subIndex += 1
+    this.subPosition += 1
 
-    if (
-      this.subIndex >=
-      this.table.getIndexes().get(this.keyPath)!.values.at(this.index)!.keys
-        .length
-    ) {
-      this.index += this.increment
-      this.subIndex = 0
+    if (this.subPosition >= this.getCurrentIndexValue()?.primaryKeys.length) {
+      this.position += this.increment
+      this.subPosition = 0
     }
   }
 }

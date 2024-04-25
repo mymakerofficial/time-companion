@@ -13,8 +13,8 @@ type Index<
 > = {
   unique: boolean
   values: Array<{
-    value: TData[TIndexKey]
-    keys: Array<TData[TPrimaryKey]>
+    indexedValue: TData[TIndexKey]
+    primaryKeys: Array<TData[TPrimaryKey]>
   }>
 }
 
@@ -98,30 +98,36 @@ export class InMemoryDataTableImpl<TData extends object>
   private insertIndexSorted(
     keyPath: keyof TData,
     index: Index<TData, typeof this.primaryKey>,
-    value: TData[keyof TData],
+    indexedValue: TData[keyof TData],
     primaryKeyValue: TData[typeof this.primaryKey],
   ) {
     let i = 0
 
-    while (i < index.values.length && index.values[i].value < value) {
+    while (
+      i < index.values.length &&
+      index.values[i].indexedValue < indexedValue
+    ) {
       i++
     }
 
-    if (i === index.values.length || index.values[i].value !== value) {
+    if (
+      i === index.values.length ||
+      index.values[i].indexedValue !== indexedValue
+    ) {
       // If the value is not found, insert it
       index.values.splice(i, 0, {
-        value,
-        keys: [primaryKeyValue],
+        indexedValue,
+        primaryKeys: [primaryKeyValue],
       })
     } else {
       if (index.unique) {
         throw new Error(
-          `Unique constraint violation on index ${keyPath.toString()}. Value ${value} already exists.`,
+          `Unique constraint violation on index ${keyPath.toString()}. Value ${indexedValue} already exists.`,
         )
       }
 
       // If the value is found, add the primary key to the list
-      index.values[i].keys.push(primaryKeyValue)
+      index.values[i].primaryKeys.push(primaryKeyValue)
     }
   }
 

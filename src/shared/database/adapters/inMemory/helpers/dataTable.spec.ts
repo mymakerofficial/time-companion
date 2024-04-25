@@ -19,7 +19,7 @@ describe('In Memory Data Table', () => {
 
     const data = Array.from({ length: 10 }, (_, i) => ({
       id: uuid(),
-      name: ['Charlie', 'David', 'Bob', 'Alice', 'Eve'][i % 2],
+      name: ['Charlie', 'David', 'Bob', 'Alice', 'Eve'][i % 5],
     }))
 
     data.forEach((item) => table.insert(item))
