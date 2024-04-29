@@ -1,8 +1,9 @@
 import type { Database } from '@shared/database/database'
-import { createInMemoryDBAdapter } from '@shared/database/adapters/inMemory/database'
+import { createDatabase } from '@shared/database/impl/database'
+import { inMemoryDBAdapter } from '@shared/database/adapters/inMemory/database'
 
 export function createTestDatabase(): Database {
-  const database = createInMemoryDBAdapter()
+  const database = createDatabase(inMemoryDBAdapter())
 
   // TODO this is a hack to create the tables
 

@@ -42,6 +42,7 @@ export interface InMemoryDataTable<TData extends object> {
     oldValue: TData[typeof keyPath],
   ): void
   insert(data: TData): void
+  insertAll(data: Array<TData>): void
   // deletes all rows, keeping the indexes
   deleteAll(): void
   createCursor(
@@ -224,6 +225,11 @@ export class InMemoryDataTableImpl<TData extends object>
     // TODO: revert indexes if insert fails
 
     this.rows.set(data[this.primaryKey], data)
+  }
+
+  insertAll(data: Array<TData>) {
+    // TODO optimize this
+    data.forEach((it) => this.insert(it))
   }
 
   deleteAll() {

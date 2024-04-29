@@ -10,7 +10,7 @@ import type { Person, Pet } from '@test/fixtures/database/types'
 import type { HasId } from '@shared/model/helpers/hasId'
 import { uuid } from '@shared/lib/utils/uuid'
 import { createDatabase } from '@shared/database/impl/database'
-import { inMemoryDBAdapter } from '@shared/database/adapters/inMemory/adapter/database'
+import { inMemoryDBAdapter } from '@shared/database/adapters/inMemory/database'
 
 function byId(a: HasId, b: HasId) {
   return a.id.localeCompare(b.id)

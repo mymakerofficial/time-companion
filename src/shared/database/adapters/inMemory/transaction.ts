@@ -1,43 +1,61 @@
-import type { Join, Table, Transaction } from '@shared/database/database'
-import type { Optional } from '@shared/lib/utils/types'
-import { check, isDefined } from '@shared/lib/utils/checks'
-import { InMemoryDatabaseTable } from '@shared/database/adapters/inMemory/table'
-import { InMemoryDatabaseJoin } from '@shared/database/adapters/inMemory/join'
 import type {
-  InMemoryDataTable,
-  InMemoryDataTables,
+  DatabaseTableAdapter,
+  DatabaseTransactionAdapter,
+  DatabaseTransactionMode,
+} from '@shared/database/adapter'
+import { todo } from '@shared/lib/utils/todo'
+import {
+  InMemoryDataTableImpl,
+  type InMemoryDataTables,
 } from '@shared/database/adapters/inMemory/helpers/dataTable'
+import { check, isDefined } from '@shared/lib/utils/checks'
+import { InMemoryDatabaseTableAdapterImpl } from '@shared/database/adapters/inMemory/table'
+import { noop } from '@shared/lib/utils/noop'
 
-export class InMemoryDatabaseTransaction implements Transaction {
-  constructor(protected tables: InMemoryDataTables) {}
+export class InMemoryDatabaseTransactionAdapterImpl
+  implements DatabaseTransactionAdapter
+{
+  constructor(
+    protected readonly tables: InMemoryDataTables,
+    protected readonly tableNames: Array<string>,
+    protected readonly mode: DatabaseTransactionMode,
+    protected readonly onCommit: () => void = noop,
+    protected readonly onRollback: () => void = noop,
+  ) {}
 
-  table<TData extends object>(tableName: string): Table<TData> {
-    const table = this.tables.get(tableName) as Optional<
-      InMemoryDataTable<TData>
-    >
+  getTable<TData extends object>(
+    tableName: string,
+  ): DatabaseTableAdapter<TData> {
+    check(
+      this.mode === 'versionchange' || // allow all tables to be accessed in a version change transaction
+        this.tableNames.includes(tableName),
+      `Table "${tableName}" is not in the transaction.`,
+    )
 
-    check(isDefined(table), `Table "${tableName}" does not exist.`)
+    const dataTable = this.tables.get(tableName)
 
-    return new InMemoryDatabaseTable<TData>(table) as Table<TData>
+    check(isDefined(dataTable), `Table "${tableName}" does not exist.`)
+
+    return new InMemoryDatabaseTableAdapterImpl<TData>(dataTable)
   }
 
-  join<TLeftData extends object, TRightData extends object>(
-    leftTableName: string,
-    rightTableName: string,
-  ): Join<TLeftData, TRightData> {
-    const leftTable = this.tables.get(leftTableName) as Optional<
-      InMemoryDataTable<TLeftData>
-    >
-    const rightTable = this.tables.get(rightTableName) as Optional<
-      InMemoryDataTable<TRightData>
-    >
+  async createTable(tableName: string, primaryKey: string): Promise<void> {
+    return new Promise((resolve) => {
+      const table = new InMemoryDataTableImpl(primaryKey)
+      this.tables.set(tableName, table)
+      resolve()
+    })
+  }
 
-    check(isDefined(leftTable), `Table "${leftTableName}" does not exist.`)
-    check(isDefined(rightTable), `Table "${rightTableName}" does not exist.`)
+  async deleteTable(tableName: string): Promise<void> {
+    todo()
+  }
 
-    return new InMemoryDatabaseJoin<TLeftData, TRightData>(
-      leftTable,
-      rightTable,
-    ) as Join<TLeftData, TRightData>
+  async commit(): Promise<void> {
+    // TODO
+  }
+
+  async rollback(): Promise<void> {
+    // TODO
   }
 }

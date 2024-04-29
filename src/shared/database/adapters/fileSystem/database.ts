@@ -1,7 +1,6 @@
-import { InMemoryDatabase } from '@shared/database/adapters/inMemory/database'
+import { InMemoryDatabaseAdapterImpl } from '@shared/database/adapters/inMemory/database'
 import type {
   CreateTableArgs,
-  Database,
   Transaction,
   UpgradeFunction,
 } from '@shared/database/database'
@@ -14,9 +13,23 @@ import {
   InMemoryDataTableImpl,
 } from '@shared/database/adapters/inMemory/helpers/dataTable'
 import { asyncGetOrDefault } from '@shared/lib/utils/result'
+import type {
+  DatabaseAdapter,
+  DatabaseTransactionAdapter,
+  DatabaseTransactionMode,
+} from '@shared/database/adapter'
+import { asArray } from '@renderer/lib/listUtils'
+import type { Nullable } from '@shared/lib/utils/types'
 
-type TableMeta = CreateTableArgs<any> & {
-  indexes: string[]
+type IndexMeta = {
+  keyPath: string
+  unique: boolean
+}
+
+type TableMeta = {
+  name: string
+  primaryKey: string
+  indexes: Array<IndexMeta>
 }
 
 type DatabaseMeta = {
@@ -25,7 +38,14 @@ type DatabaseMeta = {
   tables: Array<TableMeta>
 }
 
-export class FileSystemDatabase extends InMemoryDatabase implements Database {
+export function fileSystemDBAdapter(basePath: string): DatabaseAdapter {
+  return new FileSystemDatabaseAdapterImpl(basePath)
+}
+
+export class FileSystemDatabaseAdapterImpl
+  extends InMemoryDatabaseAdapterImpl
+  implements DatabaseAdapter
+{
   constructor(protected readonly basePath: string) {
     super()
   }
@@ -42,7 +62,7 @@ export class FileSystemDatabase extends InMemoryDatabase implements Database {
     return path.join(this.getDBPath(dbName), `${tableName}.json`)
   }
 
-  private async dbExists(dbName: string) {
+  private async dbPathExists(dbName: string) {
     return !!(await fs.stat(this.getDBPath(dbName)).catch(() => null))
   }
 
@@ -52,11 +72,11 @@ export class FileSystemDatabase extends InMemoryDatabase implements Database {
     })
   }
 
-  private formatTableRows(rows: InMemoryDataTable<any>['rows']) {
+  private formatTableRows(rows: Array<any>) {
     return JSON.stringify(rows)
   }
 
-  private parseTableRows(content: string): InMemoryDataTable<any>['rows'] {
+  private parseTableRows(content: string): Array<any> {
     return JSON.parse(content)
   }
 
@@ -68,50 +88,47 @@ export class FileSystemDatabase extends InMemoryDatabase implements Database {
     return JSON.parse(content)
   }
 
-  private createTableMeta(table: InMemoryDataTable<any>): TableMeta {
+  private createTableMeta(
+    tableName: string,
+    table: InMemoryDataTable<any>,
+  ): TableMeta {
     return {
-      name: table.name,
-      primaryKey: table.primaryKey,
-      schema: table.schema,
-      indexes: toArray(table.getIndexes()),
+      name: tableName,
+      primaryKey: table.getPrimaryKey().toString(),
+      indexes: toArray(table.getIndexes()).map(([keyPath, index]) => ({
+        keyPath: keyPath.toString(),
+        unique: index.unique,
+      })),
     }
   }
 
-  private createDataTable(
-    tableMeta: TableMeta,
-    rows: InMemoryDataTable<any>['rows'],
-  ) {
-    const dataTable = new InMemoryDataTableImpl(
-      tableMeta.name,
-      tableMeta.schema,
-      // @ts-expect-error
-      tableMeta.primaryKey,
-    )
+  private createDataTable(tableMeta: TableMeta, rows: Array<any>) {
+    const dataTable = new InMemoryDataTableImpl(tableMeta.primaryKey)
 
-    tableMeta.indexes.forEach((keyPath: string) =>
-      dataTable.createIndex({ keyPath }),
-    )
+    dataTable.insertAll(rows)
 
-    dataTable.rows.push(...rows)
+    tableMeta.indexes.forEach(({ keyPath, unique }) =>
+      dataTable.createIndex(keyPath, unique),
+    )
 
     return dataTable
   }
 
   private createDatabaseMeta(): DatabaseMeta {
-    check(isNotNull(this.name), 'Database is not open.')
+    check(isNotNull(this.databaseName), 'Database is not open.')
     check(isNotNull(this.version), 'No Database version is set.')
 
     return {
-      name: this.name,
+      name: this.databaseName,
       version: this.version,
-      tables: toArray(this.tables).map(([_, table]) =>
-        this.createTableMeta(table),
+      tables: toArray(this.tables).map(([tableName, table]) =>
+        this.createTableMeta(tableName, table),
       ),
     }
   }
 
   protected async initialize(dbName: string) {
-    if (!(await this.dbExists(dbName))) {
+    if (!(await this.dbPathExists(dbName))) {
       return
     }
 
@@ -120,7 +137,7 @@ export class FileSystemDatabase extends InMemoryDatabase implements Database {
     })
     const meta = this.parseDatabaseMeta(metaContent)
 
-    this.name = meta.name
+    this.databaseName = meta.name
     this.version = meta.version
 
     for (const table of meta.tables) {
@@ -139,9 +156,9 @@ export class FileSystemDatabase extends InMemoryDatabase implements Database {
   }
 
   protected async restoreTableRows() {
-    check(isNotNull(this.name), 'Database is not open.')
+    check(isNotNull(this.databaseName), 'Database is not open.')
 
-    if (!(await this.dbExists(this.name))) {
+    if (!(await this.dbPathExists(this.databaseName))) {
       return
     }
 
@@ -153,31 +170,32 @@ export class FileSystemDatabase extends InMemoryDatabase implements Database {
       check(isDefined(table), 'How did we get here?')
 
       const tableRowsContent = await fs.readFile(
-        this.getTablePath(this.name, tableName),
+        this.getTablePath(this.databaseName, tableName),
         'utf-8',
       )
 
-      table.rows = this.parseTableRows(tableRowsContent)
+      table.deleteAll()
+      table.insertAll(this.parseTableRows(tableRowsContent))
     }
   }
 
   protected async commitDatabaseMeta() {
-    check(isNotNull(this.name), 'Database is not open.')
+    check(isNotNull(this.databaseName), 'Database is not open.')
 
-    await this.ensureDBExists(this.name)
+    await this.ensureDBExists(this.databaseName)
 
     const meta = this.createDatabaseMeta()
 
     await fs.writeFile(
-      this.getMetaPath(this.name),
+      this.getMetaPath(this.databaseName),
       this.formatDatabaseMeta(meta),
     )
   }
 
   protected async commitTableRows() {
-    check(isNotNull(this.name), 'Database is not open.')
+    check(isNotNull(this.databaseName), 'Database is not open.')
 
-    await this.ensureDBExists(this.name)
+    await this.ensureDBExists(this.databaseName)
 
     const tableNames = await this.getTableNames()
 
@@ -187,60 +205,59 @@ export class FileSystemDatabase extends InMemoryDatabase implements Database {
       check(isDefined(table), 'How did we get here?')
 
       await fs.writeFile(
-        this.getTablePath(this.name, tableName),
-        this.formatTableRows(table.rows),
+        this.getTablePath(this.databaseName, tableName),
+        this.formatTableRows(asArray(table.getRows().values())),
       )
     }
   }
 
-  async open(
-    name: string,
+  async openDatabase(
+    databaseName: string,
     version: number,
-    upgrade: UpgradeFunction,
-  ): Promise<void> {
-    await this.initialize(name)
+  ): Promise<Nullable<DatabaseTransactionAdapter>> {
+    return super.openDatabase(databaseName, version)
 
-    await super
-      .open(name, version, upgrade)
-      .then(async () => {
-        await this.commitDatabaseMeta()
-        await this.commitTableRows()
-      })
-      .catch(async (error) => {
-        await this.close()
-        throw error
-      })
+    // TODO
+    // await this.initialize(databaseName)
+    //
+    // await super
+    //   .openDatabase(databaseName, version, upgrade)
+    //   .then(async () => {
+    //     await this.commitDatabaseMeta()
+    //     await this.commitTableRows()
+    //   })
+    //   .catch(async (error) => {
+    //     await this.closeDatabase()
+    //     throw error
+    //   })
   }
 
-  async close(): Promise<void> {
-    await super.close()
+  async closeDatabase(): Promise<void> {
+    await super.closeDatabase()
   }
 
-  async delete(dbName: string): Promise<void> {
-    await super.delete(dbName)
+  async deleteDatabase(databaseName: string): Promise<void> {
+    await super.deleteDatabase(databaseName)
 
     // scary o.o
-    await fs.rm(this.getDBPath(dbName), {
+    await fs.rm(this.getDBPath(databaseName), {
       recursive: true,
     })
   }
 
-  async withTransaction<TResult>(
-    fn: (transaction: Transaction) => Promise<TResult>,
-  ): Promise<TResult> {
-    return await super
-      .withTransaction(fn)
-      .then(async (res) => {
-        await this.commitTableRows()
-        return res
-      })
-      .catch(async (error) => {
-        await this.restoreTableRows()
-        throw error
-      })
+  async openTransaction<TResult>(
+    tableNames: Array<string>,
+    mode: DatabaseTransactionMode,
+  ): Promise<DatabaseTransactionAdapter> {
+    return await super.openTransaction(tableNames, mode)
+    // TODO
+    // .then(async (res) => {
+    //   await this.commitTableRows()
+    //   return res
+    // })
+    // .catch(async (error) => {
+    //   await this.restoreTableRows()
+    //   throw error
+    // })
   }
-}
-
-export function createFileSystemDBAdapter(basePath: string): Database {
-  return new FileSystemDatabase(basePath)
 }
