@@ -1,5 +1,4 @@
 import { afterAll, afterEach, describe, expect, it, vi } from 'vitest'
-import { createInMemoryDBAdapter } from '@shared/database/adapters/inMemory/database'
 import { faker } from '@faker-js/faker'
 import { asArray, firstOf, lastOf } from '@shared/lib/utils/list'
 import { randomElement, randomElements } from '@shared/lib/utils/random'
@@ -10,6 +9,8 @@ import { useDatabaseFixtures } from '@test/fixtures/database/databaseFixtures'
 import type { Person, Pet } from '@test/fixtures/database/types'
 import type { HasId } from '@shared/model/helpers/hasId'
 import { uuid } from '@shared/lib/utils/uuid'
+import { createDatabase } from '@shared/database/impl/database'
+import { inMemoryDBAdapter } from '@shared/database/adapters/inMemory/adapter/database'
 
 function byId(a: HasId, b: HasId) {
   return a.id.localeCompare(b.id)
@@ -24,11 +25,11 @@ function byLastName(a: Person, b: Person) {
 }
 
 describe.each([
-  ['In Memory Database Adapter', createInMemoryDBAdapter, []],
-  ['IndexedDB Adapter', createIndexedDBAdapter, [fakeIndexedDB]],
-])('%s', (_, createDatabase, args) => {
+  ['In Memory Database Adapter', () => createDatabase(inMemoryDBAdapter())],
+  ['IndexedDB Adapter', () => createIndexedDBAdapter(fakeIndexedDB)],
+])('%s', (_, createDatabase) => {
   const { database, helpers } = useDatabaseFixtures({
-    database: createDatabase(...args),
+    database: createDatabase(),
   })
 
   afterAll(async () => {
@@ -43,14 +44,14 @@ describe.each([
         await database.open(helpers.databaseName, 1, upgradeFn)
 
         const tableNames = await database.getTableNames()
-        const personsIndexes = await database.getIndexes('persons')
-        const petsIndexes = await database.getIndexes('pets')
+        const personsIndexes = await database.getTableIndexNames('persons')
+        const petsIndexes = await database.getTableIndexNames('pets')
 
         expect(upgradeFn).toHaveBeenCalled()
 
         expect(tableNames.sort()).toEqual(['persons', 'pets'])
-        expect(personsIndexes).toEqual(['age', 'firstName', 'username'])
-        expect(petsIndexes).toEqual(['name'])
+        expect(personsIndexes.sort()).toEqual(['age', 'firstName', 'username'])
+        expect(petsIndexes.sort()).toEqual(['name'])
       })
     })
   })

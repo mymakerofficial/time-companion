@@ -130,7 +130,7 @@ export class IDBAdapter implements Database {
     return Promise.resolve(Array.from(this.database.objectStoreNames))
   }
 
-  async getIndexes(tableName: string): Promise<Array<string>> {
+  async getTableIndexNames(tableName: string): Promise<Array<string>> {
     check(isNotNull(this.database), 'Database is not open.')
 
     const transaction = this.database.transaction(tableName)

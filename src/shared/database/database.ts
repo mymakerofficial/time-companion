@@ -170,12 +170,16 @@ export type UpgradeFunction = (
 ) => Promise<void>
 
 export interface Database {
-  open(name: string, version: number, upgrade: UpgradeFunction): Promise<void>
+  open(
+    databaseName: string,
+    version: number,
+    upgrade: UpgradeFunction,
+  ): Promise<void>
   close(): Promise<void>
-  delete(name: string): Promise<void>
+  delete(databaseName: string): Promise<void>
   withTransaction<TResult>(
     fn: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>
   getTableNames(): Promise<Array<string>>
-  getIndexes(tableName: string): Promise<Array<string>>
+  getTableIndexNames(tableName: string): Promise<Array<string>>
 }

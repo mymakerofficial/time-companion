@@ -1,10 +1,11 @@
 import { emptyMap, toArray } from '@shared/lib/utils/list'
 import { check, isDefined } from '@shared/lib/utils/checks'
-import {
-  type InMemoryCursor,
-  InMemoryCursorImpl,
-} from '@shared/database/adapters/inMemory/helpers/cursor'
+import { InMemoryCursorImpl } from '@shared/database/adapters/inMemory/helpers/cursor'
 import type { OrderByDirection } from '@shared/database/database'
+import type {
+  DatabaseCursor,
+  DatabaseCursorDirection,
+} from '@shared/database/adapter'
 
 type Index<
   TData extends object,
@@ -41,10 +42,12 @@ export interface InMemoryDataTable<TData extends object> {
     oldValue: TData[typeof keyPath],
   ): void
   insert(data: TData): void
+  // deletes all rows, keeping the indexes
+  deleteAll(): void
   createCursor(
     keyPath: keyof TData,
-    direction?: OrderByDirection,
-  ): InMemoryCursor<TData>
+    direction?: DatabaseCursorDirection,
+  ): DatabaseCursor<TData>
 }
 
 export type InMemoryDataTables = Map<string, InMemoryDataTable<any>>
@@ -223,14 +226,22 @@ export class InMemoryDataTableImpl<TData extends object>
     this.rows.set(data[this.primaryKey], data)
   }
 
+  deleteAll() {
+    this.rows.clear()
+
+    this.indexes.forEach((index) => {
+      index.values = []
+    })
+  }
+
   get(primaryKeyValue: TData[typeof this.primaryKey]) {
     return this.rows.get(primaryKeyValue)
   }
 
   createCursor(
     keyPath: keyof TData,
-    direction: OrderByDirection = 'asc',
-  ): InMemoryCursor<TData> {
+    direction: DatabaseCursorDirection = 'next',
+  ): DatabaseCursor<TData> {
     check(!this.locked, 'Table is locked.')
     this.locked = true
     return new InMemoryCursorImpl(this, keyPath, direction, () => {

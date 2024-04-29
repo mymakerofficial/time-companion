@@ -2,17 +2,12 @@ import type { InMemoryDataTable } from '@shared/database/adapters/inMemory/helpe
 import { getOrNull, getOrThrow } from '@shared/lib/utils/result'
 import type { Nullable } from '@shared/lib/utils/types'
 import { check, isNull } from '@shared/lib/utils/checks'
-import type { OrderByDirection } from '@shared/database/database'
 import { keysOf } from '@shared/lib/utils/object'
 import { asSet, toArray } from '@shared/lib/utils/list'
-
-export interface InMemoryCursor<TData extends object> {
-  value(): Nullable<TData>
-  update(data: Partial<TData>): void
-  delete(): void
-  continue(): void
-  close(): void
-}
+import type {
+  DatabaseCursor,
+  DatabaseCursorDirection,
+} from '@shared/database/adapter'
 
 type IndexUpdate<TData extends object> = {
   primaryKey: TData[keyof TData]
@@ -22,7 +17,7 @@ type IndexUpdate<TData extends object> = {
 }
 
 export class InMemoryCursorImpl<TData extends object>
-  implements InMemoryCursor<TData>
+  implements DatabaseCursor<TData>
 {
   private position: number
   // subPosition is the index of the primary key in the current index value
@@ -40,14 +35,14 @@ export class InMemoryCursorImpl<TData extends object>
   constructor(
     private table: InMemoryDataTable<TData>,
     private keyPath: keyof TData,
-    direction: OrderByDirection,
+    direction: DatabaseCursorDirection,
     private unlockTable: () => void,
   ) {
     // TODO: check if index actually exists
 
-    this.increment = direction === 'asc' ? 1 : -1
+    this.increment = direction === 'next' ? 1 : -1
     this.position =
-      direction === 'asc'
+      direction === 'next'
         ? 0
         : this.table.getIndexes().get(this.keyPath)!.values.length - 1
 
@@ -125,13 +120,15 @@ export class InMemoryCursorImpl<TData extends object>
     this.deleteQueue.push(primaryKey)
   }
 
-  continue(): void {
+  continue(): Promise<void> {
     this.subPosition += 1
 
     if (this.subPosition >= this.getCurrentIndexValue()!.primaryKeys.length) {
       this.position += this.increment
       this.subPosition = 0
     }
+
+    return Promise.resolve()
   }
 
   close(): void {

@@ -29,12 +29,12 @@ describe('File System Database', () => {
     expect(upgradeSpy).toHaveBeenCalledTimes(1)
 
     expect(await database.getTableNames()).toEqual(['persons', 'pets'])
-    expect(await database.getIndexes('persons')).toEqual([
+    expect(await database.getTableIndexNames('persons')).toEqual([
       'age',
       'firstName',
       'username',
     ])
-    expect(await database.getIndexes('pets')).toEqual(['name'])
+    expect(await database.getTableIndexNames('pets')).toEqual(['name'])
   })
 
   it('should insert data', async () => {
@@ -74,12 +74,12 @@ describe('File System Database', () => {
     expect(upgradeSpy).toHaveBeenCalledTimes(1)
 
     expect(await database.getTableNames()).toEqual(['persons', 'pets'])
-    expect(await database.getIndexes('persons')).toEqual([
+    expect(await database.getTableIndexNames('persons')).toEqual([
       'age',
       'firstName',
       'username',
     ])
-    expect(await database.getIndexes('pets')).toEqual(['name'])
+    expect(await database.getTableIndexNames('pets')).toEqual(['name'])
     expect((await helpers.getAllPersonsInDatabase()).sort(byId)).toEqual(
       samplePersons.sort(byId),
     )

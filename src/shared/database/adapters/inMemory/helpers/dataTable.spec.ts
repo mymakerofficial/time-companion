@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { InMemoryDataTableImpl } from '@shared/database/adapters/inMemory/helpers/dataTable'
 import { uuid } from '@shared/lib/utils/uuid'
-import { cursorIterator } from '@shared/database/adapters/inMemory/helpers/cursorIterator'
+import { cursorIterator } from '@shared/database/impl/helpers/cursorIterator'
 
 type Entity = {
   id: string
@@ -13,7 +13,7 @@ function byName(a: Entity, b: Entity) {
 }
 
 describe('In Memory Data Table', () => {
-  it('should sort an indexed key', () => {
+  it('should sort an indexed key', async () => {
     const table = new InMemoryDataTableImpl<Entity>('id')
 
     table.createIndex('name', false)
@@ -25,10 +25,10 @@ describe('In Memory Data Table', () => {
 
     data.forEach((item) => table.insert(item))
 
-    const iterator = cursorIterator(table.createCursor('name', 'desc'))
+    const iterator = cursorIterator<Entity>(table.createCursor('name', 'prev'))
 
     const results: Array<Entity> = []
-    for (const cursor of iterator) {
+    for await (const cursor of iterator) {
       results.push(cursor.value())
     }
 
@@ -40,7 +40,7 @@ describe('In Memory Data Table', () => {
     )
   })
 
-  it('should update a value and maintain index sorting', () => {
+  it('should update a value and maintain index sorting', async () => {
     const table = new InMemoryDataTableImpl<Entity>('id')
 
     table.createIndex('name', false)
@@ -52,18 +52,20 @@ describe('In Memory Data Table', () => {
 
     data.forEach((item) => table.insert(item))
 
-    const iterator = cursorIterator(table.createCursor('name', 'asc'))
+    const iterator = cursorIterator<Entity>(table.createCursor('name', 'next'))
 
-    for (const cursor of iterator) {
+    for await (const cursor of iterator) {
       if (cursor.value().name === 'Alice') {
         cursor.update({ name: 'Zelda' })
       }
     }
 
-    const resultIterator = cursorIterator(table.createCursor('name', 'asc'))
+    const resultIterator = cursorIterator<Entity>(
+      table.createCursor('name', 'next'),
+    )
 
     const results: Array<Entity> = []
-    for (const cursor of resultIterator) {
+    for await (const cursor of resultIterator) {
       results.push(cursor.value())
     }
 
@@ -75,7 +77,7 @@ describe('In Memory Data Table', () => {
     )
   })
 
-  it('should delete a value and maintain index sorting', () => {
+  it('should delete a value and maintain index sorting', async () => {
     const table = new InMemoryDataTableImpl<Entity>('id')
 
     table.createIndex('name', false)
@@ -87,18 +89,20 @@ describe('In Memory Data Table', () => {
 
     data.forEach((item) => table.insert(item))
 
-    const iterator = cursorIterator(table.createCursor('name', 'asc'))
+    const iterator = cursorIterator<Entity>(table.createCursor('name', 'next'))
 
-    for (const cursor of iterator) {
+    for await (const cursor of iterator) {
       if (cursor.value().name === 'Bob') {
         cursor.delete()
       }
     }
 
-    const resultIterator = cursorIterator(table.createCursor('name', 'asc'))
+    const resultIterator = cursorIterator<Entity>(
+      table.createCursor('name', 'next'),
+    )
 
     const results: Array<Entity> = []
-    for (const cursor of resultIterator) {
+    for await (const cursor of resultIterator) {
       results.push(cursor.value())
     }
 

@@ -11,6 +11,9 @@ import { check, isDefined, isNotNull, isNull } from '@shared/lib/utils/checks'
 import type { Nullable } from '@shared/lib/utils/types'
 import { todo } from '@shared/lib/utils/todo'
 
+/**
+ * @depricated
+**/
 export class InMemoryDatabase implements Database {
   protected name: Nullable<string> = null
   protected version: Nullable<number> = null
@@ -71,7 +74,7 @@ export class InMemoryDatabase implements Database {
     return Promise.resolve(toArray(this.tables.keys()).sort())
   }
 
-  async getIndexes(tableName: string): Promise<Array<string>> {
+  async getTableIndexNames(tableName: string): Promise<Array<string>> {
     return new Promise((resolve) => {
       const table = this.tables.get(tableName)
 
@@ -82,6 +85,10 @@ export class InMemoryDatabase implements Database {
   }
 }
 
+/**
+ * @depricated
+ **/
+@deprecated
 export function createInMemoryDBAdapter(): Database {
   return new InMemoryDatabase()
 }
