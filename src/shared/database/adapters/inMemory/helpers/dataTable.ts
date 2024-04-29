@@ -242,7 +242,7 @@ export class InMemoryDataTableImpl<TData extends object>
     keyPath: keyof TData,
     direction: DatabaseCursorDirection = 'next',
   ): DatabaseCursor<TData> {
-    check(!this.locked, 'Table is locked.')
+    check(!this.locked, 'Tried to open a cursor on a locked table.')
     this.locked = true
     return new InMemoryCursorImpl(this, keyPath, direction, () => {
       this.locked = false

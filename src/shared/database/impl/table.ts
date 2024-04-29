@@ -12,17 +12,42 @@ import type {
 import type { DatabaseTableAdapter } from '@shared/database/adapter'
 import { todo } from '@shared/lib/utils/todo'
 import { cursorIterator } from '@shared/database/impl/helpers/cursorIterator'
+import { firstOf } from '@shared/lib/utils/list'
+import { filteredIterator } from '@shared/database/impl/helpers/filteredIterator'
+import { getOrDefault } from '@shared/lib/utils/result'
+import { maybeUnwrapOrderBy } from '@shared/database/helpers/unwrapOrderBy'
+import type { Nullable } from '@shared/lib/utils/types'
 
 export class DatabaseTableImpl<TData extends object> implements Table<TData> {
   constructor(protected readonly tableAdapter: DatabaseTableAdapter<TData>) {}
 
+  protected async openIterator(args?: FindManyArgs<TData>) {
+    const unwrappedOrderBy = getOrDefault(maybeUnwrapOrderBy(args?.orderBy), {
+      key: null,
+      direction: 'asc',
+    })
+
+    const orderBy = unwrappedOrderBy.key as Nullable<string>
+    const direction = unwrappedOrderBy.direction === 'desc' ? 'prev' : 'next'
+
+    // TODO check if index exists
+
+    const cursor = await this.tableAdapter.openCursor(orderBy, direction)
+    return filteredIterator(cursorIterator(cursor), args)
+  }
+
   async findFirst(args?: FindArgs<TData>): Promise<TData> {
-    todo()
+    return firstOf(
+      await this.findMany({
+        ...args,
+        limit: 1,
+        offset: 0,
+      }),
+    )
   }
 
   async findMany(args?: FindManyArgs<TData>): Promise<Array<TData>> {
-    const cursor = await this.tableAdapter.openCursor(null, 'next')
-    const iterator = cursorIterator(cursor)
+    const iterator = await this.openIterator(args)
 
     const results = []
     for await (const cursor of iterator) {
@@ -32,20 +57,42 @@ export class DatabaseTableImpl<TData extends object> implements Table<TData> {
     return results
   }
 
-  update(args: UpdateArgs<TData>): Promise<TData> {
-    todo()
+  async update(args: UpdateArgs<TData>): Promise<TData> {
+    return firstOf(
+      await this.updateMany({
+        ...args,
+        limit: 1,
+        offset: 0,
+      }),
+    )
   }
 
-  updateMany(args: UpdateManyArgs<TData>): Promise<Array<TData>> {
-    todo()
+  async updateMany(args: UpdateManyArgs<TData>): Promise<Array<TData>> {
+    const iterator = await this.openIterator(args)
+
+    const results = []
+    for await (const cursor of iterator) {
+      cursor.update(args.data)
+      results.push(cursor.value())
+    }
+
+    return results
   }
 
-  delete(args: DeleteArgs<TData>): Promise<void> {
-    todo()
+  async delete(args: DeleteArgs<TData>): Promise<void> {
+    await this.deleteMany({
+      ...args,
+      limit: 1,
+      offset: 0,
+    })
   }
 
-  deleteMany(args: DeleteManyArgs<TData>): Promise<void> {
-    todo()
+  async deleteMany(args: DeleteManyArgs<TData>): Promise<void> {
+    const iterator = await this.openIterator(args)
+
+    for await (const cursor of iterator) {
+      cursor.delete()
+    }
   }
 
   async deleteAll(): Promise<void> {
