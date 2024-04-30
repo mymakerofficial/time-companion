@@ -9,6 +9,7 @@ import { IDBAdapterTransaction } from '@shared/database/adapters/indexedDB/trans
 import { check, isNotNull } from '@shared/lib/utils/checks'
 import { IDBAdapterUpgradeTransaction } from '@shared/database/adapters/indexedDB/upgradeTransaction'
 import { todo } from '@shared/lib/utils/todo'
+import type { DatabaseInfo } from '@shared/database/adapter'
 
 export class IDBAdapter implements Database {
   database: Nullable<IDBDatabase>
@@ -65,20 +66,18 @@ export class IDBAdapter implements Database {
       upgrade,
     )
 
-    if (openVersion !== targetVersion) {
-      // if we are not at the target version, close, open next version and run upgrade
-      database.close()
-      const nextVersion = openVersion + 1
-      return await this.openDatabaseVersionsIncrementally(
-        name,
-        nextVersion,
-        targetVersion,
-        upgrade,
-      )
-    } else {
-      // we have reached the target version!
+    if (openVersion <= targetVersion) {
       return database
     }
+
+    // if we are not at the target version, close, open next version and run upgrade
+    database.close()
+    return await this.openDatabaseVersionsIncrementally(
+      name,
+      openVersion + 1,
+      targetVersion,
+      upgrade,
+    )
   }
 
   async open(
@@ -98,7 +97,16 @@ export class IDBAdapter implements Database {
       `Cannot open database with version "${version}" which is lower than the current version "${currentVersion}".`,
     )
 
-    let openVersion = Math.max(currentVersion, 1)
+    let openVersion = 0
+
+    if (currentVersion === 0) {
+      // the database doesn't exist yet so lets open it at version 1
+      openVersion = 1
+    }
+
+    if (version > openVersion) {
+      openVersion += 1
+    }
 
     this.database = await this.openDatabaseVersionsIncrementally(
       name,
@@ -109,11 +117,19 @@ export class IDBAdapter implements Database {
   }
 
   async close(): Promise<void> {
-    todo()
+    return new Promise((resolve) => {
+      check(isNotNull(this.database), 'Database is not open.')
+      this.database.close()
+      this.database = null
+      resolve()
+    })
   }
 
   async delete(name: string): Promise<void> {
-    todo()
+    return new Promise((resolve) => {
+      this.indexedDB.deleteDatabase(name)
+      resolve()
+    })
   }
 
   async withTransaction<TResult>(
@@ -122,6 +138,17 @@ export class IDBAdapter implements Database {
     check(isNotNull(this.database), 'Database is not open.')
 
     return await fn(new IDBAdapterTransaction(this.database))
+  }
+
+  async getDatabases(): Promise<Array<DatabaseInfo>> {
+    const databases = await this.indexedDB.databases()
+
+    return databases
+      .map((it) => ({
+        name: it.name!,
+        version: it.version!,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name))
   }
 
   async getTableNames(): Promise<Array<string>> {

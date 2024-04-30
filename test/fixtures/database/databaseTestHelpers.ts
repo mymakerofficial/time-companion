@@ -25,50 +25,60 @@ export class DatabaseTestHelpers {
   }
 
   get upgradeFunction(): UpgradeFunction {
-    return async (transaction: UpgradeTransaction) => {
-      const personsTable = await transaction.createTable({
-        name: this.personsTableName,
-        schema: {
-          id: 'string',
-          firstName: 'string',
-          lastName: 'string',
-          username: 'string',
-          gender: 'string',
-          age: 'number',
-        },
-        primaryKey: 'id',
-      })
+    return async (transaction: UpgradeTransaction, newVersion, oldVersion) => {
+      if (newVersion === 1) {
+        // do nothing
+      }
 
-      await personsTable.createIndex({
-        keyPath: 'firstName',
-        unique: false,
-      })
+      if (newVersion === 2) {
+        const personsTable = await transaction.createTable({
+          name: this.personsTableName,
+          schema: {
+            id: 'string',
+            firstName: 'string',
+            lastName: 'string',
+            username: 'string',
+            gender: 'string',
+            age: 'number',
+          },
+          primaryKey: 'id',
+        })
 
-      await personsTable.createIndex({
-        keyPath: 'username',
-        unique: true,
-      })
+        await personsTable.createIndex({
+          keyPath: 'firstName',
+          unique: false,
+        })
 
-      await personsTable.createIndex({
-        keyPath: 'age',
-        unique: false,
-      })
+        const petsTable = await transaction.createTable({
+          name: this.petsTableName,
+          schema: {
+            id: 'string',
+            name: 'string',
+            age: 'number',
+            ownerId: 'string',
+          },
+          primaryKey: 'id',
+        })
 
-      const petsTable = await transaction.createTable({
-        name: this.petsTableName,
-        schema: {
-          id: 'string',
-          name: 'string',
-          age: 'number',
-          ownerId: 'string',
-        },
-        primaryKey: 'id',
-      })
+        await petsTable.createIndex({
+          keyPath: 'name',
+          unique: true,
+        })
+      }
 
-      await petsTable.createIndex({
-        keyPath: 'name',
-        unique: true,
-      })
+      if (newVersion === 3) {
+        const personsTable = transaction.table<Person>(this.personsTableName)
+
+        await personsTable.createIndex({
+          keyPath: 'username',
+          unique: true,
+        })
+
+        await personsTable.createIndex({
+          keyPath: 'age',
+          unique: false,
+        })
+      }
     }
   }
 
@@ -174,17 +184,51 @@ export class DatabaseTestHelpers {
     })
   }
 
+  // deletes all data from all tables, but keeps the tables
   async clearDatabase(): Promise<void> {
+    const tableNames = await this.database.getTableNames()
+
     await this.database.withTransaction(async (transaction) => {
-      await transaction.table(this.personsTableName).deleteAll()
-      await transaction.table(this.petsTableName).deleteAll()
+      for (const table of tableNames) {
+        await transaction.table(table).deleteAll()
+      }
     })
   }
 
+  // opens the database and creates the tables at the specified version
+  async openDatabaseAndCreateTablesAtVersion(version: number): Promise<void> {
+    await this.database.open(this.databaseName, version, this.upgradeFunction)
+  }
+
+  // opens the database and creates the tables at the latest version
+  async openDatabaseAndCreateTables(): Promise<void> {
+    await this.openDatabaseAndCreateTablesAtVersion(3)
+  }
+
+  // opens and closes the database at the specified version
+  async ensureDatabaseExistsAtVersion(version: number): Promise<void> {
+    await this.openDatabaseAndCreateTablesAtVersion(version)
+    await this.database.close()
+  }
+
+  // closes the open database and deletes all databases
   async cleanup(): Promise<void> {
     try {
       await this.database.close()
+    } catch (_) {}
+
+    try {
       await this.database.delete(this.databaseName)
+    } catch (_) {}
+
+    try {
+      const databases = await this.database.getDatabases()
+
+      for (const database of databases) {
+        try {
+          await this.database.delete(database.name)
+        } catch (_) {}
+      }
     } catch (_) {}
   }
 }

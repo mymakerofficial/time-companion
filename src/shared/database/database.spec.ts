@@ -1,8 +1,17 @@
-import { afterAll, afterEach, describe, expect, it, vi } from 'vitest'
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  vi,
+  expectTypeOf,
+} from 'vitest'
 import { faker } from '@faker-js/faker'
 import { asArray, firstOf, lastOf } from '@shared/lib/utils/list'
 import { randomElement, randomElements } from '@shared/lib/utils/random'
-import type { UpgradeFunction } from '@shared/database/database'
+import type { Database, UpgradeFunction } from '@shared/database/database'
 import { createIndexedDBAdapter } from '@shared/database/adapters/indexedDB/database'
 import { indexedDB as fakeIndexedDB } from 'fake-indexeddb'
 import { useDatabaseFixtures } from '@test/fixtures/database/databaseFixtures'
@@ -36,27 +45,129 @@ describe.each([
     await helpers.cleanup()
   })
 
-  describe('upgrade', () => {
-    describe('createTable', () => {
-      it('should create a table', async () => {
-        const upgradeFn: UpgradeFunction = vi.fn(helpers.upgradeFunction)
+  describe('database', () => {
+    it('should match the database type', () => {
+      expectTypeOf(database).toMatchTypeOf<Database>()
+    })
+  })
 
-        await database.open(helpers.databaseName, 1, upgradeFn)
+  describe('getDatabases', async () => {
+    afterEach(async () => {
+      await helpers.cleanup()
+    })
 
-        const tableNames = await database.getTableNames()
-        const personsIndexes = await database.getTableIndexNames('persons')
-        const petsIndexes = await database.getTableIndexNames('pets')
+    it('should return all databases', async () => {
+      await database.open('foo', 1, async () => {})
+      await database.close()
+      await database.open('bar', 2, async () => {})
+      await database.close()
 
-        expect(upgradeFn).toHaveBeenCalled()
+      const databases = await database.getDatabases()
 
-        expect(tableNames.sort()).toEqual(['persons', 'pets'])
-        expect(personsIndexes.sort()).toEqual(['age', 'firstName', 'username'])
-        expect(petsIndexes.sort()).toEqual(['name'])
-      })
+      expect(databases).toEqual([
+        { name: 'bar', version: 2 },
+        { name: 'foo', version: 1 },
+      ])
+    })
+  })
+
+  describe('getTableNames', async () => {
+    afterEach(async () => {
+      await helpers.cleanup()
+    })
+
+    it('should return all table names', async () => {
+      await helpers.openDatabaseAndCreateTables()
+
+      const tableNames = await database.getTableNames()
+
+      expect(tableNames).toEqual(['persons', 'pets'])
+    })
+  })
+
+  describe('getTableIndexNames', async () => {
+    it.todo('should return all index names for a table')
+  })
+
+  describe('open', () => {
+    afterEach(async () => {
+      await helpers.cleanup()
+    })
+
+    it('should call the upgrade function with when opening for the first time', async () => {
+      const upgradeFn: UpgradeFunction = vi.fn(async () => {})
+
+      await database.open(helpers.databaseName, 1, upgradeFn)
+
+      expect(upgradeFn).toHaveBeenCalledWith(expect.anything(), 1, 0)
+    })
+
+    it('should fail when trying to open a database with a lower version than the current one', async () => {
+      await database.open(helpers.databaseName, 2, async () => {})
+
+      await database.close()
+
+      await expect(
+        database.open(helpers.databaseName, 1, async () => {}),
+      ).rejects.toThrowError(
+        `Cannot open database at lower version. Current version is "2", requested version is "1".`,
+      )
+    })
+
+    it('should call the upgrade function incrementing the version', async () => {
+      await helpers.ensureDatabaseExistsAtVersion(1)
+
+      const upgradeFn: UpgradeFunction = vi.fn(async () => {})
+
+      await database.open(helpers.databaseName, 4, upgradeFn)
+
+      expect(upgradeFn).toHaveBeenNthCalledWith(1, expect.anything(), 2, 1)
+      expect(upgradeFn).toHaveBeenNthCalledWith(2, expect.anything(), 3, 2)
+      expect(upgradeFn).toHaveBeenNthCalledWith(3, expect.anything(), 4, 3)
+    })
+  })
+
+  describe('close', () => {
+    afterEach(async () => {
+      await helpers.cleanup()
+    })
+
+    it('should close the database', async () => {
+      await helpers.openDatabaseAndCreateTablesAtVersion(1)
+
+      expect(async () => database.getTableNames()).not.toThrowError()
+
+      await database.close()
+
+      expect(async () => database.getTableNames()).rejects.toThrowError()
+    })
+  })
+
+  describe('delete', () => {
+    afterEach(async () => {
+      await helpers.cleanup()
+    })
+
+    it('should delete the database', async () => {
+      await database.open('foo', 1, async () => {})
+      await database.close()
+      await database.open('bar', 2, async () => {})
+      await database.close()
+
+      await database.delete('foo')
+
+      const databases = await database.getDatabases()
+
+      expect(databases).toEqual([{ name: 'bar', version: 2 }])
     })
   })
 
   describe('table', () => {
+    beforeAll(async () => {
+      await helpers.cleanup()
+      await helpers.openDatabaseAndCreateTables()
+    })
+
     afterEach(async () => {
       await helpers.clearDatabase()
     })
@@ -505,6 +616,30 @@ describe.each([
 
         expect(res).toEqual(expected)
         expect(personInDatabase).toEqual(expected)
+      })
+
+      it('should fail when trying to update a primary key', async () => {
+        const samplePersons = await helpers.insertSamplePersons(6)
+        const randomPerson = randomElement(samplePersons, {
+          safetyOffset: 1,
+        })
+
+        const newId = uuid()
+
+        await expect(
+          database.withTransaction(async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .update({
+                where: { id: { equals: randomPerson.id } },
+                data: {
+                  id: newId,
+                },
+              })
+          }),
+        ).rejects.toThrowError(
+          `Primary key cannot be changed. Tried to change columns: id.`,
+        )
       })
 
       it.todo(

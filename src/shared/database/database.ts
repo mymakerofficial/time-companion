@@ -1,3 +1,5 @@
+import type { DatabaseInfo } from '@shared/database/adapter'
+
 export const whereBooleanOperators = ['AND', 'OR'] as const
 export type WhereBooleanOperator = (typeof whereBooleanOperators)[number]
 
@@ -180,6 +182,7 @@ export interface Database {
   withTransaction<TResult>(
     fn: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>
+  getDatabases(): Promise<Array<DatabaseInfo>>
   getTableNames(): Promise<Array<string>>
   getTableIndexNames(tableName: string): Promise<Array<string>>
 }

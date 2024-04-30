@@ -115,11 +115,11 @@ export class FileSystemDatabaseAdapterImpl
   }
 
   private createDatabaseMeta(): DatabaseMeta {
-    check(isNotNull(this.databaseName), 'Database is not open.')
+    check(isNotNull(this.openDatabaseName), 'Database is not open.')
     check(isNotNull(this.version), 'No Database version is set.')
 
     return {
-      name: this.databaseName,
+      name: this.openDatabaseName,
       version: this.version,
       tables: toArray(this.tables).map(([tableName, table]) =>
         this.createTableMeta(tableName, table),
@@ -137,7 +137,7 @@ export class FileSystemDatabaseAdapterImpl
     })
     const meta = this.parseDatabaseMeta(metaContent)
 
-    this.databaseName = meta.name
+    this.openDatabaseName = meta.name
     this.version = meta.version
 
     for (const table of meta.tables) {
@@ -156,9 +156,9 @@ export class FileSystemDatabaseAdapterImpl
   }
 
   protected async restoreTableRows() {
-    check(isNotNull(this.databaseName), 'Database is not open.')
+    check(isNotNull(this.openDatabaseName), 'Database is not open.')
 
-    if (!(await this.dbPathExists(this.databaseName))) {
+    if (!(await this.dbPathExists(this.openDatabaseName))) {
       return
     }
 
@@ -170,7 +170,7 @@ export class FileSystemDatabaseAdapterImpl
       check(isDefined(table), 'How did we get here?')
 
       const tableRowsContent = await fs.readFile(
-        this.getTablePath(this.databaseName, tableName),
+        this.getTablePath(this.openDatabaseName, tableName),
         'utf-8',
       )
 
@@ -180,22 +180,22 @@ export class FileSystemDatabaseAdapterImpl
   }
 
   protected async commitDatabaseMeta() {
-    check(isNotNull(this.databaseName), 'Database is not open.')
+    check(isNotNull(this.openDatabaseName), 'Database is not open.')
 
-    await this.ensureDBExists(this.databaseName)
+    await this.ensureDBExists(this.openDatabaseName)
 
     const meta = this.createDatabaseMeta()
 
     await fs.writeFile(
-      this.getMetaPath(this.databaseName),
+      this.getMetaPath(this.openDatabaseName),
       this.formatDatabaseMeta(meta),
     )
   }
 
   protected async commitTableRows() {
-    check(isNotNull(this.databaseName), 'Database is not open.')
+    check(isNotNull(this.openDatabaseName), 'Database is not open.')
 
-    await this.ensureDBExists(this.databaseName)
+    await this.ensureDBExists(this.openDatabaseName)
 
     const tableNames = await this.getTableNames()
 
@@ -205,7 +205,7 @@ export class FileSystemDatabaseAdapterImpl
       check(isDefined(table), 'How did we get here?')
 
       await fs.writeFile(
-        this.getTablePath(this.databaseName, tableName),
+        this.getTablePath(this.openDatabaseName, tableName),
         this.formatTableRows(asArray(table.getRows().values())),
       )
     }

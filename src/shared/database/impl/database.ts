@@ -3,7 +3,7 @@ import type {
   Transaction,
   UpgradeFunction,
 } from '@shared/database/database'
-import type { DatabaseAdapter } from '@shared/database/adapter'
+import type { DatabaseAdapter, DatabaseInfo } from '@shared/database/adapter'
 import { check, isNotNull, isNull } from '@shared/lib/utils/checks'
 import { DatabaseTransactionImpl } from '@shared/database/impl/transaction'
 import { DatabaseUpgradeTransactionImpl } from '@shared/database/impl/upgradeTransaction'
@@ -24,11 +24,10 @@ export class DatabaseImpl implements Database {
     const transaction = await this.adapter.openDatabase(name, openVersion)
 
     if (isNotNull(transaction)) {
-      // TODO: this is repeated
       await upgrade(
         new DatabaseUpgradeTransactionImpl(transaction),
         openVersion,
-        targetVersion - 1,
+        openVersion - 1,
       )
         .catch(async (error) => {
           await transaction.rollback()
@@ -59,36 +58,14 @@ export class DatabaseImpl implements Database {
 
     const databaseInfo = await this.adapter.getDatabaseInfo(name)
 
-    if (isNull(databaseInfo)) {
-      const transaction = await this.adapter.openDatabase(name, version)
-
-      if (isNotNull(transaction)) {
-        // TODO: this is repeated
-        await upgrade(
-          new DatabaseUpgradeTransactionImpl(transaction),
-          version,
-          0,
-        )
-          .catch(async (error) => {
-            await transaction.rollback()
-            throw error
-          })
-          .then(async () => {
-            await transaction.commit()
-          })
-      }
-
-      return
-    }
-
     check(
-      version >= databaseInfo.version,
-      `Cannot open database at lower version. Current version is ${databaseInfo.version}, requested version is ${version}.`,
+      isNull(databaseInfo) || version >= databaseInfo.version,
+      `Cannot open database at lower version. Current version is "${databaseInfo?.version}", requested version is "${version}".`,
     )
 
     return await this.openVersionsIncrementally(
       name,
-      databaseInfo.version,
+      databaseInfo?.version ?? 0,
       version,
       upgrade,
     )
@@ -119,6 +96,10 @@ export class DatabaseImpl implements Database {
         await transaction.commit()
         return result
       })
+  }
+
+  async getDatabases(): Promise<Array<DatabaseInfo>> {
+    return await this.adapter.getDatabases()
   }
 
   async getTableNames(): Promise<Array<string>> {
