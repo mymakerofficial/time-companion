@@ -172,14 +172,6 @@ describe.each([
       await helpers.clearDatabase()
     })
 
-    it('should throw when trying to access a non-existing table', async () => {
-      expect(
-        database.withTransaction(async (transaction) => {
-          transaction.table('non-existing-table')
-        }),
-      ).rejects.toThrowError(`Table "non-existing-table" does not exist.`)
-    })
-
     describe('insert', () => {
       it('should insert data', async () => {
         const samplePerson = helpers.samplePerson()

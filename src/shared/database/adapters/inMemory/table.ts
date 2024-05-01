@@ -35,6 +35,12 @@ export class InMemoryDatabaseTableAdapterImpl<TData extends object>
     })
   }
 
+  async getIndexNames(): Promise<Array<string>> {
+    return new Promise((resolve) => {
+      resolve(this.dataTable.getIndexNames())
+    })
+  }
+
   openCursor(
     indexName: Nullable<string>,
     direction: DatabaseCursorDirection,

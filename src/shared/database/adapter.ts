@@ -26,6 +26,7 @@ export interface DatabaseTableAdapter<TData extends object> {
   ): Promise<DatabaseCursor<TData>>
 
   createIndex(keyPath: string, unique: boolean): Promise<void>
+  getIndexNames(): Promise<Array<string>>
 }
 
 export type DatabaseTransactionMode = 'readwrite' | 'readonly' | 'versionchange'

@@ -129,8 +129,10 @@ export class InMemoryDatabaseAdapterImpl implements DatabaseAdapter {
   }
 
   getTableIndexNames(tableName: string): Promise<Array<string>> {
-    const dataTable = this.getOpenDatabase().tables.get(tableName)
-    check(isDefined(dataTable), `Table "${tableName}" does not exist.`)
-    return Promise.resolve(dataTable.getIndexNames())
+    return new Promise((resolve) => {
+      const dataTable = this.getOpenDatabase().tables.get(tableName)
+      check(isDefined(dataTable), `Table "${tableName}" does not exist.`)
+      resolve(dataTable.getIndexNames())
+    })
   }
 }

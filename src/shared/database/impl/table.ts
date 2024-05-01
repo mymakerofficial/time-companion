@@ -10,13 +10,13 @@ import type {
   UpdateManyArgs,
 } from '@shared/database/database'
 import type { DatabaseTableAdapter } from '@shared/database/adapter'
-import { todo } from '@shared/lib/utils/todo'
 import { cursorIterator } from '@shared/database/impl/helpers/cursorIterator'
 import { firstOf } from '@shared/lib/utils/list'
 import { filteredIterator } from '@shared/database/impl/helpers/filteredIterator'
 import { getOrDefault } from '@shared/lib/utils/result'
 import { maybeUnwrapOrderBy } from '@shared/database/helpers/unwrapOrderBy'
 import type { Nullable } from '@shared/lib/utils/types'
+import { check, isNull } from '@shared/lib/utils/checks'
 
 export class DatabaseTableImpl<TData extends object> implements Table<TData> {
   constructor(protected readonly tableAdapter: DatabaseTableAdapter<TData>) {}
@@ -30,7 +30,12 @@ export class DatabaseTableImpl<TData extends object> implements Table<TData> {
     const orderBy = unwrappedOrderBy.key as Nullable<string>
     const direction = unwrappedOrderBy.direction === 'desc' ? 'prev' : 'next'
 
-    // TODO check if index exists
+    const indexes = await this.tableAdapter.getIndexNames()
+
+    check(
+      isNull(orderBy) || indexes.includes(orderBy),
+      `The index "${orderBy}" does not exist. You can only order by existing indexes or primary key.`,
+    )
 
     const cursor = await this.tableAdapter.openCursor(orderBy, direction)
     return filteredIterator(cursorIterator(cursor), args)
