@@ -1,8 +1,8 @@
 import type { Database } from '@shared/database/types/database'
-import { fileSystemDBAdapter } from '@shared/database/adapters/fileSystem/database'
-import { app } from 'electron'
-import path from 'path'
+import { createDatabase } from '@shared/database/factory/database'
+import { inMemoryDBAdapter } from '@shared/database/adapters/inMemory/database'
 
 export const database: Database = (() => {
-  return fileSystemDBAdapter(path.join(app.getPath('userData'), 'userdata'))
+  return createDatabase(inMemoryDBAdapter())
+  // return fileSystemDBAdapter(path.join(app.getPath('userData'), 'userdata'))
 })()

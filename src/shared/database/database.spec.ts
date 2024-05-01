@@ -20,7 +20,7 @@ import { createDatabase } from '@shared/database/factory/database'
 import { inMemoryDBAdapter } from '@shared/database/adapters/inMemory/database'
 import { asyncNoop } from '@shared/lib/utils/noop'
 import fakeIndexedDB from 'fake-indexeddb'
-import { indexedDBAdapter } from '@shared/database/adapters/indexedDB/adapter/database'
+import { indexedDBAdapter } from '@shared/database/adapters/indexedDB/database'
 
 function byId(a: HasId, b: HasId) {
   return a.id.localeCompare(b.id)

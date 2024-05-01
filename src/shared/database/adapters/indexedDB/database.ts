@@ -1,28 +1,37 @@
 import type { Nullable } from '@shared/lib/utils/types'
 import type {
-  Database,
-  Transaction,
-  UpgradeFunction,
-  UpgradeTransaction,
-} from '@shared/database/types/database'
-import { IDBAdapterTransaction } from '@shared/database/adapters/indexedDB/transaction'
-import { check, isNotNull } from '@shared/lib/utils/checks'
-import { IDBAdapterUpgradeTransaction } from '@shared/database/adapters/indexedDB/upgradeTransaction'
+  AdapterUpgradeFunction,
+  DatabaseAdapter,
+  DatabaseInfo,
+  DatabaseTransactionAdapter,
+  DatabaseTransactionMode,
+} from '@shared/database/types/adapter'
+import { IndexedDBDatabaseTransactionAdapterImpl } from '@shared/database/adapters/indexedDB/transaction'
+import {
+  check,
+  isNotEmpty,
+  isNotNull,
+  isUndefined,
+} from '@shared/lib/utils/checks'
+import { toArray } from '@shared/lib/utils/list'
 import { todo } from '@shared/lib/utils/todo'
-import type { DatabaseInfo } from '@shared/database/types/adapter'
 
-export class IDBAdapter implements Database {
-  database: Nullable<IDBDatabase>
+export function indexedDBAdapter(indexedDB?: IDBFactory): DatabaseAdapter {
+  return new IndexedDBDatabaseAdapterImpl(indexedDB)
+}
+
+export class IndexedDBDatabaseAdapterImpl implements DatabaseAdapter {
+  protected database: Nullable<IDBDatabase>
 
   constructor(private readonly indexedDB: IDBFactory = window.indexedDB) {
     this.database = null
   }
 
-  private async openDatabaseAtVersion(
+  async openDatabase(
     name: string,
     version: number,
-    upgrade: UpgradeFunction,
-  ): Promise<IDBDatabase> {
+    upgrade: AdapterUpgradeFunction,
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
       const request = this.indexedDB.open(name, version)
 
@@ -31,113 +40,93 @@ export class IDBAdapter implements Database {
       }
 
       request.onsuccess = () => {
-        resolve(request.result)
+        this.database = request.result
+        resolve()
       }
 
       request.onupgradeneeded = async (event) => {
-        const upgradeTransaction: UpgradeTransaction =
-          new IDBAdapterUpgradeTransaction(request.result, event)
+        // get the current transaction... i don't think this is even documented anywhere
+        // thanks https://stackoverflow.com/a/21078740
 
-        await upgrade(
-          upgradeTransaction,
-          event.newVersion ?? 0,
-          event.oldVersion,
-        )
+        // @ts-expect-error
+        const transaction = event.target.transaction
+
+        const transactionAdapter: DatabaseTransactionAdapter =
+          new IndexedDBDatabaseTransactionAdapterImpl(
+            request.result,
+            transaction,
+            [],
+            'versionchange',
+          )
+
+        await upgrade(transactionAdapter)
 
         // don't resolve here, we only know the upgrade is done when onsuccess is called
       }
     })
   }
 
-  // recursively opens the database at each version from openVersion to targetVersion,
-  //  and returns the database when done.
-  private async openDatabaseVersionsIncrementally(
-    name: string,
-    openVersion: number,
-    targetVersion: number,
-    upgrade: UpgradeFunction,
-  ): Promise<IDBDatabase> {
-    // we need to open the database at each version incrementally
-    //  to ensure that the upgrade function is called at each version
-
-    const database = await this.openDatabaseAtVersion(
-      name,
-      openVersion,
-      upgrade,
-    )
-
-    if (openVersion <= targetVersion) {
-      return database
-    }
-
-    // if we are not at the target version, close, open next version and run upgrade
-    database.close()
-    return await this.openDatabaseVersionsIncrementally(
-      name,
-      openVersion + 1,
-      targetVersion,
-      upgrade,
-    )
-  }
-
-  async open(
-    name: string,
-    version: number,
-    upgrade: UpgradeFunction,
-  ): Promise<void> {
-    const databases = await this.indexedDB.databases()
-
-    const currentVersion =
-      databases.find((db) => db.name === name)?.version ?? 0
-
-    check(version >= 1, 'Version must be greater than or equal to 1.')
-
-    check(
-      version >= currentVersion,
-      `Cannot open database with version "${version}" which is lower than the current version "${currentVersion}".`,
-    )
-
-    let openVersion = 0
-
-    if (currentVersion === 0) {
-      // the database doesn't exist yet so lets open it at version 1
-      openVersion = 1
-    }
-
-    if (version > openVersion) {
-      openVersion += 1
-    }
-
-    this.database = await this.openDatabaseVersionsIncrementally(
-      name,
-      openVersion,
-      version,
-      upgrade,
-    )
-  }
-
-  async close(): Promise<void> {
+  closeDatabase(): Promise<void> {
     return new Promise((resolve) => {
-      check(isNotNull(this.database), 'Database is not open.')
+      check(isNotNull(this.database), 'No database is open.')
+
       this.database.close()
       this.database = null
       resolve()
     })
   }
 
-  async delete(name: string): Promise<void> {
-    return new Promise((resolve) => {
-      this.indexedDB.deleteDatabase(name)
-      resolve()
+  deleteDatabase(databaseName: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const request = this.indexedDB.deleteDatabase(databaseName)
+
+      request.onerror = () => {
+        reject(request.error)
+      }
+
+      request.onsuccess = () => {
+        resolve()
+      }
     })
   }
 
-  async withTransaction<TResult>(
-    fn: (transaction: Transaction) => Promise<TResult>,
-  ): Promise<TResult> {
-    check(isNotNull(this.database), 'Database is not open.')
+  openTransaction(
+    tableNames: Array<string>,
+    mode: DatabaseTransactionMode,
+  ): Promise<DatabaseTransactionAdapter> {
+    return new Promise((resolve) => {
+      check(isNotNull(this.database), 'Database is not open.')
 
-    return await fn(new IDBAdapterTransaction(this.database))
+      check(
+        mode !== 'versionchange',
+        'Cannot open transaction with mode "versionchange".',
+      )
+
+      check(isNotEmpty(tableNames), 'Table names must not be empty.')
+
+      const transaction = this.database.transaction(tableNames, mode)
+
+      resolve(
+        new IndexedDBDatabaseTransactionAdapterImpl(
+          this.database,
+          transaction,
+          tableNames,
+          mode,
+        ),
+      )
+    })
+  }
+
+  async getDatabaseInfo(databaseName: string): Promise<Nullable<DatabaseInfo>> {
+    const databases = await this.indexedDB.databases()
+
+    const database = databases.find((it) => it.name === databaseName)
+
+    if (isUndefined(database)) {
+      return null
+    }
+
+    return { name: databaseName, version: database.version ?? 0 }
   }
 
   async getDatabases(): Promise<Array<DatabaseInfo>> {
@@ -151,22 +140,15 @@ export class IDBAdapter implements Database {
       .sort((a, b) => a.name.localeCompare(b.name))
   }
 
-  async getTableNames(): Promise<Array<string>> {
-    check(isNotNull(this.database), 'Database is not open.')
+  getTableNames(): Promise<Array<string>> {
+    return new Promise((resolve) => {
+      check(isNotNull(this.database), 'Database is not open.')
 
-    return Promise.resolve(Array.from(this.database.objectStoreNames))
+      resolve(toArray(this.database.objectStoreNames))
+    })
   }
 
-  async getTableIndexNames(tableName: string): Promise<Array<string>> {
-    check(isNotNull(this.database), 'Database is not open.')
-
-    const transaction = this.database.transaction(tableName)
-    const store = transaction.objectStore(tableName)
-
-    return Promise.resolve(Array.from(store.indexNames))
+  getTableIndexNames(tableName: string): Promise<Array<string>> {
+    todo()
   }
-}
-
-export function createIndexedDBAdapter(indexedDB?: IDBFactory): Database {
-  return new IDBAdapter(indexedDB)
 }

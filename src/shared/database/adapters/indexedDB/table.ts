@@ -1,81 +1,68 @@
 import type {
-  DeleteArgs,
-  DeleteManyArgs,
-  InsertArgs,
-  InsertManyArgs,
-  Table,
-  UpdateArgs,
-  UpdateManyArgs,
-} from '@shared/database/types/database'
-import { emptyArray, firstOf } from '@shared/lib/utils/list'
-import { filteredCursorIterator } from '@shared/database/adapters/indexedDB/helpers/filteredCursorIterator'
-import { IDBAdapterQueryable } from '@shared/database/adapters/indexedDB/queryable'
+  DatabaseCursor,
+  DatabaseCursorDirection,
+  DatabaseTableAdapter,
+} from '@shared/database/types/adapter'
+import type { Nullable } from '@shared/lib/utils/types'
+import { toArray } from '@shared/lib/utils/list'
+import { IndexedDBCursorImpl } from '@shared/database/adapters/indexedDB/helpers/cursor'
+import { isNotNull } from '@shared/lib/utils/checks'
 
-export class IDBAdapterTable<TData extends object>
-  extends IDBAdapterQueryable<TData>
-  implements Table<TData>
+export class IndexedDBDatabaseTableAdapterImpl<TData extends object>
+  implements DatabaseTableAdapter<TData>
 {
-  async update(args: UpdateArgs<TData>): Promise<TData> {
-    return firstOf(
-      await this.updateMany({
-        ...args,
-        limit: 1,
-      }),
-    )
+  constructor(protected readonly objectStore: IDBObjectStore) {}
+
+  insert(data: TData): Promise<void> {
+    return new Promise((resolve) => {
+      this.objectStore.add(data)
+      resolve()
+    })
   }
 
-  async updateMany(args: UpdateManyArgs<TData>): Promise<Array<TData>> {
-    const iterable = filteredCursorIterator(this.objectStore, args)
+  deleteAll(): Promise<void> {
+    return new Promise((resolve) => {
+      this.objectStore.clear()
+      resolve()
+    })
+  }
 
-    const list: Array<TData> = emptyArray()
+  openCursor(
+    indexName: Nullable<string>,
+    direction: DatabaseCursorDirection,
+  ): Promise<DatabaseCursor<TData>> {
+    return new Promise((resolve, reject) => {
+      const indexOrObjectStore = isNotNull(indexName)
+        ? this.objectStore.index(indexName)
+        : this.objectStore
 
-    for await (const cursor of iterable) {
-      const patched = {
-        ...cursor.value,
-        ...args.data,
+      const request = indexOrObjectStore.openCursor(null, direction)
+
+      request.onsuccess = () => {
+        const cursor = new IndexedDBCursorImpl<TData>(
+          request,
+          this.objectStore.keyPath as keyof TData,
+        )
+
+        resolve(cursor)
       }
 
-      cursor.update(patched)
-      list.push(patched)
-    }
-
-    return list
-  }
-
-  async delete(args: DeleteArgs<TData>): Promise<void> {
-    await this.deleteMany({
-      ...args,
-      limit: 1,
+      request.onerror = () => {
+        reject(request.error)
+      }
     })
   }
 
-  async deleteMany(args: DeleteManyArgs<TData>): Promise<void> {
-    const iterable = filteredCursorIterator(this.objectStore, args)
-
-    for await (const cursor of iterable) {
-      cursor.delete()
-    }
-  }
-
-  async deleteAll(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const request = this.objectStore.clear()
-
-      request.onsuccess = () => resolve()
-      request.onerror = () => reject(request.error)
+  createIndex(keyPath: string, unique: boolean): Promise<void> {
+    return new Promise((resolve) => {
+      this.objectStore.createIndex(keyPath, keyPath, { unique })
+      resolve()
     })
   }
 
-  async insert(args: InsertArgs<TData>): Promise<TData> {
-    return new Promise((resolve, reject) => {
-      const request = this.objectStore.add(args.data)
-
-      request.onsuccess = () => resolve(args.data)
-      request.onerror = () => reject(request.error)
+  getIndexNames(): Promise<Array<string>> {
+    return new Promise((resolve) => {
+      resolve(toArray(this.objectStore.indexNames))
     })
-  }
-
-  async insertMany(args: InsertManyArgs<TData>): Promise<Array<TData>> {
-    return await Promise.all(args.data.map((data) => this.insert({ data })))
   }
 }

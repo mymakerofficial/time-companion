@@ -1,61 +1,71 @@
 import type {
-  JoinedTable,
-  Table,
-  Transaction,
-} from '@shared/database/types/database'
-import { check, isNotEmpty } from '@shared/lib/utils/checks'
-import { IDBAdapterTable } from '@shared/database/adapters/indexedDB/table'
-import { toArray } from '@shared/lib/utils/list'
-import { IDBAdapterJoin } from '@shared/database/adapters/indexedDB/join'
+  DatabaseTableAdapter,
+  DatabaseTransactionAdapter,
+  DatabaseTransactionMode,
+} from '@shared/database/types/adapter'
+import { todo } from '@shared/lib/utils/todo'
+import { check } from '@shared/lib/utils/checks'
+import { IndexedDBDatabaseTableAdapterImpl } from '@shared/database/adapters/indexedDB/table'
 
-export class IDBAdapterTransaction implements Transaction {
-  private readonly transaction: IDBTransaction
+export class IndexedDBDatabaseTransactionAdapterImpl
+  implements DatabaseTransactionAdapter
+{
+  constructor(
+    protected readonly database: IDBDatabase,
+    protected readonly transaction: IDBTransaction,
+    protected readonly tableNames: Array<string>,
+    protected readonly mode: DatabaseTransactionMode,
+  ) {}
 
-  constructor(protected readonly database: IDBDatabase) {
-    const objectStoreNames = Array.from(this.database.objectStoreNames)
-
-    check(isNotEmpty(objectStoreNames), 'Database has no tables.')
-
-    this.transaction = this.database.transaction(
-      Array.from(this.database.objectStoreNames),
-      'readwrite',
-    )
-  }
-
-  table<TData extends object>(tableName: string): Table<TData> {
-    const objectStoreNames = toArray(this.database.objectStoreNames)
-
-    check(
-      objectStoreNames.includes(tableName),
-      `Table "${tableName}" does not exist.`,
-    )
-
+  getTable<TData extends object>(
+    tableName: string,
+  ): DatabaseTableAdapter<TData> {
     const objectStore = this.transaction.objectStore(tableName)
-
-    return new IDBAdapterTable<TData>(objectStore)
+    return new IndexedDBDatabaseTableAdapterImpl<TData>(objectStore)
   }
 
-  join<TLeftData extends object, TRightData extends object>(
-    leftTableName: string,
-    rightTableName: string,
-  ): JoinedTable<TLeftData, TRightData> {
-    const objectStoreNames = toArray(this.database.objectStoreNames)
+  createTable(tableName: string, primaryKey: string): Promise<void> {
+    return new Promise((resolve) => {
+      check(
+        this.mode === 'versionchange',
+        'Transaction is not a versionchange transaction.',
+      )
 
-    check(
-      objectStoreNames.includes(leftTableName),
-      `Table "${leftTableName}" does not exist.`,
-    )
-    check(
-      objectStoreNames.includes(rightTableName),
-      `Table "${rightTableName}" does not exist.`,
-    )
+      this.database.createObjectStore(tableName, {
+        keyPath: primaryKey,
+        autoIncrement: false,
+      })
 
-    const leftStore = this.transaction.objectStore(leftTableName)
-    const rightStore = this.transaction.objectStore(rightTableName)
+      // the object store is created synchronously, so we can resolve immediately
+      resolve()
+    })
+  }
 
-    return new IDBAdapterJoin<TLeftData, TRightData>(
-      leftStore,
-      rightStore,
-    ) as JoinedTable<TLeftData, TRightData>
+  deleteTable(tableName: string): Promise<void> {
+    return new Promise((resolve) => {
+      check(
+        this.mode === 'versionchange',
+        'Transaction is not a versionchange transaction.',
+      )
+
+      this.database.deleteObjectStore(tableName)
+
+      // the object store is deleted synchronously, so we can resolve immediately
+      resolve()
+    })
+  }
+
+  commit(): Promise<void> {
+    return new Promise((resolve) => {
+      this.transaction.commit()
+      resolve()
+    })
+  }
+
+  rollback(): Promise<void> {
+    return new Promise((resolve) => {
+      this.transaction.abort()
+      resolve()
+    })
   }
 }
