@@ -4,20 +4,18 @@ import type {
   JoinedTable,
   LeftJoinArgs,
 } from '@shared/database/database'
-import type {
-  DatabaseTableAdapter,
-  DatabaseTransactionAdapter,
-} from '@shared/database/adapter'
+import type { DatabaseTableAdapter } from '@shared/database/adapter'
 import { firstOf } from '@shared/lib/utils/list'
 import { check, isDefined } from '@shared/lib/utils/checks'
 import { DatabaseQueryableImpl } from '@shared/database/impl/queryable'
 import { entriesOf } from '@shared/lib/utils/object'
+import { DatabaseTableBaseImpl } from '@shared/database/impl/tableBase'
 
 export class DatabaseJoinedTableImpl<
     TLeftData extends object,
     TRightData extends object,
   >
-  extends DatabaseQueryableImpl<TLeftData>
+  extends DatabaseTableBaseImpl<TLeftData>
   implements JoinedTable<TLeftData, TRightData>
 {
   constructor(
@@ -28,17 +26,10 @@ export class DatabaseJoinedTableImpl<
     super(leftTableAdapter)
   }
 
-  async findFirst(args?: FindArgs<TLeftData>): Promise<TLeftData> {
-    return firstOf(
-      await this.findMany({
-        ...args,
-        limit: 1,
-        offset: 0,
-      }),
-    )
-  }
-
-  async findMany(args?: FindManyArgs<TLeftData>): Promise<Array<TLeftData>> {
+  override async openIterator(
+    args?: FindManyArgs<TLeftData>,
+    predicate?: (value: TLeftData) => boolean,
+  ) {
     const rightQueryable = new DatabaseQueryableImpl(this.rightTableAdapter)
 
     const rightRows = await rightQueryable.findMany({
@@ -52,17 +43,18 @@ export class DatabaseJoinedTableImpl<
       (rightData) => rightData[rightJoinKey as keyof TRightData],
     )
 
-    const predicate = (value: any) => {
+    const rightPredicate = (value: any) => {
       return rightJoinValues.includes(value[leftJoinKey])
     }
 
-    const iterator = await this.openIterator(args, predicate)
+    return await super.openIterator(args, rightPredicate)
+  }
 
-    const results = []
+  override async deleteAll(): Promise<void> {
+    const iterator = await this.openIterator()
+
     for await (const cursor of iterator) {
-      results.push(cursor.value())
+      cursor.delete()
     }
-
-    return results
   }
 }

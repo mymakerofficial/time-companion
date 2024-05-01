@@ -514,7 +514,7 @@ describe.each([
     })
 
     describe('leftJoin', () => {
-      it('should find a entity by joined entity id', async () => {
+      it('should find an entity by joined entity id', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
         const samplePets = await helpers.insertSamplePets(3, 1)
 
@@ -540,6 +540,40 @@ describe.each([
         )
 
         expect(owner).toEqual(expectedOwner)
+      })
+
+      it('should delete an entity by joined entity id', async () => {
+        const samplePersons = await helpers.insertSamplePersons(6)
+        const samplePets = await helpers.insertSamplePets(3, 1)
+
+        const randomPet = randomElement(samplePets, {
+          safetyOffset: 1,
+        })
+
+        const petId = randomPet.id
+
+        // delete the owner of the pet with the random id
+        await database.withTransaction(async (transaction) => {
+          return await transaction
+            .table<Person>(helpers.personsTableName)
+            .leftJoin<Pet>(helpers.petsTableName, {
+              on: { id: 'ownerId' },
+              where: { id: { equals: petId } },
+            })
+            .deleteAll()
+        })
+
+        const owner = samplePersons.find(
+          (person) => person.id === randomPet.ownerId,
+        )!
+
+        const expectedPersons = samplePersons
+          .filter((person) => person.id !== owner.id)
+          .sort(byId)
+
+        const personsInDatabase = await helpers.getAllPersonsInDatabase()
+
+        expect(personsInDatabase).toEqual(expectedPersons)
       })
 
       it.todo(

@@ -125,17 +125,20 @@ export interface Joinable<TLeftData extends object> {
   ): JoinedTable<TLeftData, TRightData>
 }
 
-export interface Table<TData extends object>
+export interface TableBase<TData extends object>
   extends Queryable<TData>,
     Updatable<TData>,
     Deletable<TData>,
-    Insertable<TData>,
+    Insertable<TData> {}
+
+export interface Table<TData extends object>
+  extends TableBase<TData>,
     Joinable<TData> {}
 
 export interface JoinedTable<
   TLeftData extends object,
   TRightData extends object,
-> extends Queryable<TLeftData> {}
+> extends TableBase<TLeftData> {}
 
 export const columnTypes = ['string', 'number', 'boolean'] as const
 export type ColumnType = (typeof columnTypes)[number]
