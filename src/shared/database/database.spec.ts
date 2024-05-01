@@ -19,8 +19,8 @@ import { uuid } from '@shared/lib/utils/uuid'
 import { createDatabase } from '@shared/database/factory/database'
 import { inMemoryDBAdapter } from '@shared/database/adapters/inMemory/database'
 import { asyncNoop } from '@shared/lib/utils/noop'
-import { createIndexedDBAdapter } from '@shared/database/adapters/indexedDB/database'
 import fakeIndexedDB from 'fake-indexeddb'
+import { indexedDBAdapter } from '@shared/database/adapters/indexedDB/adapter/database'
 
 function byId(a: HasId, b: HasId) {
   return a.id.localeCompare(b.id)
@@ -36,7 +36,7 @@ function byLastName(a: Person, b: Person) {
 
 describe.each([
   ['In Memory Database', () => createDatabase(inMemoryDBAdapter()), false],
-  ['IndexedDB', () => createIndexedDBAdapter(fakeIndexedDB), true],
+  ['IndexedDB', () => createDatabase(indexedDBAdapter(fakeIndexedDB)), true],
 ])('Adapter "%s"', (_, databaseFactory, persistent) => {
   const { database, helpers } = useDatabaseFixtures({
     database: databaseFactory(),

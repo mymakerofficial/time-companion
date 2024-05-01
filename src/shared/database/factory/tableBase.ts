@@ -28,7 +28,7 @@ export class DatabaseTableBaseImpl<
 
     const results = []
     for await (const cursor of iterator) {
-      cursor.update(args.data)
+      await cursor.update(args.data)
       results.push(cursor.value())
     }
 
@@ -47,7 +47,7 @@ export class DatabaseTableBaseImpl<
     const iterator = await this.openIterator(args)
 
     for await (const cursor of iterator) {
-      cursor.delete()
+      await cursor.delete()
     }
   }
 

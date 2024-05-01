@@ -232,14 +232,14 @@ export class DatabaseTestHelpers {
       await this.database.delete(this.databaseName)
     } catch (_) {}
 
-    try {
-      const databases = await this.database.getDatabases()
-
-      for (const database of databases) {
-        try {
-          await this.database.delete(database.name)
-        } catch (_) {}
-      }
-    } catch (_) {}
+    // try {
+    //   const databases = await this.database.getDatabases()
+    //
+    //   await Promise.all(
+    //     databases.map((it) => {
+    //       return this.database.delete(it.name)
+    //     }),
+    //   )
+    // } catch (_) {}
   }
 }

@@ -69,55 +69,63 @@ export class InMemoryCursorImpl<TData extends object>
     return getOrNull(this.table.getRows().get(key))
   }
 
-  update(data: Partial<TData>): void {
-    const primaryKey = getOrThrow(
-      this.getCurrentPrimaryKey(),
-      'Failed to get primary key.',
-    )
-    const current = getOrThrow(
-      this.table.getRows().get(primaryKey),
-      'Failed to get row.',
-    )
+  update(data: Partial<TData>): Promise<void> {
+    return new Promise((resolve) => {
+      const primaryKey = getOrThrow(
+        this.getCurrentPrimaryKey(),
+        'Failed to get primary key.',
+      )
+      const current = getOrThrow(
+        this.table.getRows().get(primaryKey),
+        'Failed to get row.',
+      )
 
-    const changedColumns = asSet(keysOf(data))
+      const changedColumns = asSet(keysOf(data))
 
-    check(
-      !changedColumns.has(this.table.getPrimaryKey()),
-      `Primary key cannot be changed. Tried to change columns: ${toArray(changedColumns)}.`,
-    )
+      check(
+        !changedColumns.has(this.table.getPrimaryKey()),
+        `Primary key cannot be changed. Tried to change columns: ${toArray(changedColumns)}.`,
+      )
 
-    // update row
-    this.table.getRows().set(primaryKey, { ...current, ...data })
+      // update row
+      this.table.getRows().set(primaryKey, { ...current, ...data })
 
-    this.indexesSet.forEach((keyPath) => {
-      if (!changedColumns.has(keyPath)) {
-        return
-      }
+      this.indexesSet.forEach((keyPath) => {
+        if (!changedColumns.has(keyPath)) {
+          return
+        }
 
-      // store updates to the index for later,
-      //  because it is literally impossible to update the index while iterating over it.
-      //  The order of rows would be changed and the cursor would get lost.
+        // store updates to the index for later,
+        //  because it is literally impossible to update the index while iterating over it.
+        //  The order of rows would be changed and the cursor would get lost.
 
-      // so this is why everybody tells you to not make your own database
+        // so this is why everybody tells you to not make your own database
 
-      this.indexUpdateQueue.push({
-        primaryKey,
-        keyPath,
-        oldValue: current[keyPath],
-        newValue: data[keyPath] as TData[keyof TData],
+        this.indexUpdateQueue.push({
+          primaryKey,
+          keyPath,
+          oldValue: current[keyPath],
+          newValue: data[keyPath] as TData[keyof TData],
+        })
       })
+
+      resolve()
     })
   }
 
-  delete(): void {
-    const primaryKey = getOrThrow(
-      this.getCurrentPrimaryKey(),
-      'Failed to get primary key.',
-    )
+  delete(): Promise<void> {
+    return new Promise((resolve) => {
+      const primaryKey = getOrThrow(
+        this.getCurrentPrimaryKey(),
+        'Failed to get primary key.',
+      )
 
-    // don't delete the row now, because it would mess up the cursor
-    //  instead, remember the primary key to delete it later
-    this.deleteQueue.push(primaryKey)
+      // don't delete the row now, because it would mess up the cursor
+      //  instead, remember the primary key to delete it later
+      this.deleteQueue.push(primaryKey)
+
+      resolve()
+    })
   }
 
   continue(): Promise<void> {

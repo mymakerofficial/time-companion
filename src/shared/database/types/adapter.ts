@@ -1,8 +1,4 @@
 import type { Nullable } from '@shared/lib/utils/types'
-import type {
-  UpgradeFunction,
-  UpgradeTransaction,
-} from '@shared/database/types/database'
 
 export type DatabaseInfo = {
   name: string
@@ -11,8 +7,8 @@ export type DatabaseInfo = {
 
 export interface DatabaseCursor<TData extends object> {
   value(): Nullable<TData>
-  update(data: Partial<TData>): void
-  delete(): void
+  update(data: Partial<TData>): Promise<void>
+  delete(): Promise<void>
   continue(): Promise<void>
   close(): void
 }
