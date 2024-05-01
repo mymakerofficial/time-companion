@@ -513,65 +513,58 @@ describe.each([
       })
     })
 
-    describe('join', () => {
-      describe('left', () => {
-        it('should find a entity by joined entity id', async () => {
-          const samplePersons = await helpers.insertSamplePersons(6)
+    describe('leftJoin', () => {
+      it('should find a entity by joined entity id', async () => {
+        const samplePersons = await helpers.insertSamplePersons(6)
+        const samplePets = await helpers.insertSamplePets(3, 1)
+
+        const randomPet = randomElement(samplePets, {
+          safetyOffset: 1,
+        })
+
+        const petId = randomPet.id
+
+        // find the owner of the pet with the random id
+        const owner = await database.withTransaction(async (transaction) => {
+          return await transaction
+            .table<Person>(helpers.personsTableName)
+            .leftJoin<Pet>(helpers.petsTableName, {
+              on: { id: 'ownerId' },
+              where: { id: { equals: petId } },
+            })
+            .findFirst()
+        })
+
+        const expectedOwner = samplePersons.find(
+          (person) => person.id === randomPet.ownerId,
+        )
+
+        expect(owner).toEqual(expectedOwner)
+      })
+
+      it.todo(
+        'should fail when trying to join on incompatible keys',
+        async () => {
+          await helpers.insertSamplePersons(6)
           const samplePets = await helpers.insertSamplePets(3, 1)
 
           const randomPet = randomElement(samplePets, {
             safetyOffset: 1,
           })
 
-          const res = await database.withTransaction(async (transaction) => {
-            return await transaction
-              .join<Person, Pet>(
-                helpers.personsTableName,
-                helpers.petsTableName,
-              )
-              .left({
-                on: { id: 'ownerId' },
-                where: { id: { equals: randomPet.id } },
-              })
-              .findMany()
-          })
-
-          const expected = samplePersons.filter(
-            (person) => person.id === randomPet.ownerId,
-          )
-
-          expect(res.sort(byId)).toEqual(expected.sort(byId))
-        })
-
-        it.todo(
-          'should fail when trying to join on incompatible keys',
-          async () => {
-            await helpers.insertSamplePersons(6)
-            const samplePets = await helpers.insertSamplePets(3, 1)
-
-            const randomPet = randomElement(samplePets, {
-              safetyOffset: 1,
+          expect(async () => {
+            await database.withTransaction(async (transaction) => {
+              return await transaction
+                .table<Person>(helpers.personsTableName)
+                .leftJoin<Pet>(helpers.petsTableName, {
+                  on: { id: 'age' },
+                  where: { id: { equals: randomPet.id } },
+                })
+                .findMany()
             })
-
-            expect(async () => {
-              await database.withTransaction(async (transaction) => {
-                return await transaction
-                  .join<Person, Pet>(
-                    helpers.personsTableName,
-                    helpers.petsTableName,
-                  )
-                  .left({
-                    on: { id: 'age' },
-                    where: { id: { equals: randomPet.id } },
-                  })
-                  .findMany()
-              })
-            }).rejects.toThrowError(
-              `The keys "id" and "age" are not compatible.`,
-            )
-          },
-        )
-      })
+          }).rejects.toThrowError(`The keys "id" and "age" are not compatible.`)
+        },
+      )
     })
 
     describe('update', () => {

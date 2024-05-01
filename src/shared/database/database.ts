@@ -108,12 +108,6 @@ export interface Insertable<TData extends object> {
   insertMany(args: InsertManyArgs<TData>): Promise<Array<TData>>
 }
 
-export interface Table<TData extends object>
-  extends Queryable<TData>,
-    Updatable<TData>,
-    Deletable<TData>,
-    Insertable<TData> {}
-
 export type LeftJoinArgs<
   TLeftData extends object,
   TRightData extends object,
@@ -124,11 +118,24 @@ export type LeftJoinArgs<
   where?: WhereInput<TRightData>
 }
 
-export interface LeftJoin<TData extends object> extends Queryable<TData> {}
-
-export interface Join<TLeftData extends object, TRightData extends object> {
-  left(args: LeftJoinArgs<TLeftData, TRightData>): LeftJoin<TLeftData>
+export interface Joinable<TLeftData extends object> {
+  leftJoin<TRightData extends object>(
+    rightTableName: string,
+    args: LeftJoinArgs<TLeftData, TRightData>,
+  ): JoinedTable<TLeftData, TRightData>
 }
+
+export interface Table<TData extends object>
+  extends Queryable<TData>,
+    Updatable<TData>,
+    Deletable<TData>,
+    Insertable<TData>,
+    Joinable<TData> {}
+
+export interface JoinedTable<
+  TLeftData extends object,
+  TRightData extends object,
+> extends Queryable<TLeftData> {}
 
 export const columnTypes = ['string', 'number', 'boolean'] as const
 export type ColumnType = (typeof columnTypes)[number]
@@ -148,10 +155,6 @@ export type CreateIndexArgs<TData extends object> = {
 
 export interface Transaction {
   table<TData extends object>(tableName: string): Table<TData>
-  join<TLeftData extends object, TRightData extends object>(
-    leftTable: string,
-    rightTable: string,
-  ): Join<TLeftData, TRightData>
 }
 
 export interface UpgradeTable<TData extends object> extends Table<TData> {

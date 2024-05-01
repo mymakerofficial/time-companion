@@ -91,8 +91,8 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     taskId: string,
   ) {
     return await transaction
-      .join<ProjectEntityDto, TaskEntityDto>('projects', 'tasks')
-      .left({
+      .table<ProjectEntityDto>('projects')
+      .leftJoin<TaskEntityDto>('tasks', {
         on: { id: 'projectId' },
         where: { id: { equals: taskId } },
       })

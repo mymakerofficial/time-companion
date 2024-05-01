@@ -6,6 +6,7 @@ import { wherePredicate } from '@shared/database/helpers/wherePredicate'
 export async function* filteredIterator<TData extends object>(
   iterator: AsyncGenerator<DatabaseIteratedCursor<TData>>,
   args?: FindManyArgs<TData>,
+  predicate?: (value: TData) => boolean,
 ) {
   const limit = getOrDefault(args?.limit, Infinity)
   const offset = getOrDefault(args?.offset, 0)
@@ -21,6 +22,10 @@ export async function* filteredIterator<TData extends object>(
 
     if (count >= limit + offset) {
       break
+    }
+
+    if (predicate && !predicate(cursor.value())) {
+      continue
     }
 
     if (!matches(cursor.value())) {

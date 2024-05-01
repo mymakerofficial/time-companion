@@ -1,6 +1,6 @@
 import type {
   CreateTableArgs,
-  Join,
+  JoinedTable,
   UpgradeTable,
   UpgradeTransaction,
 } from '@shared/database/database'
@@ -54,7 +54,7 @@ export class IDBAdapterUpgradeTransaction implements UpgradeTransaction {
   join<TLeftData extends object, TRightData extends object>(
     leftTable: string,
     rightTable: string,
-  ): Join<TLeftData, TRightData> {
+  ): JoinedTable<TLeftData, TRightData> {
     todo()
   }
 }

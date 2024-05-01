@@ -2,7 +2,7 @@ import { IDBAdapterQueryable } from '@shared/database/adapters/indexedDB/queryab
 import type {
   FindArgs,
   FindManyArgs,
-  Join,
+  JoinedTable,
   LeftJoin,
   LeftJoinArgs,
 } from '@shared/database/database'
@@ -59,7 +59,7 @@ export class IDBAdapterLeftJoin<
 }
 
 export class IDBAdapterJoin<TLeftData extends object, TRightData extends object>
-  implements Join<TLeftData, TRightData>
+  implements JoinedTable<TLeftData, TRightData>
 {
   constructor(
     private readonly leftStore: IDBObjectStore,

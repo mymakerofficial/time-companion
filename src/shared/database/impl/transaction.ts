@@ -1,4 +1,4 @@
-import type { Join, Table, Transaction } from '@shared/database/database'
+import type { JoinedTable, Table, Transaction } from '@shared/database/database'
 import type { DatabaseTransactionAdapter } from '@shared/database/adapter'
 import { todo } from '@shared/lib/utils/todo'
 import { DatabaseTableImpl } from '@shared/database/impl/table'
@@ -10,13 +10,13 @@ export class DatabaseTransactionImpl implements Transaction {
 
   table<TData extends object>(tableName: string): Table<TData> {
     const table = this.transactionAdapter.getTable<TData>(tableName)
-    return new DatabaseTableImpl(table)
+    return new DatabaseTableImpl(this.transactionAdapter, table)
   }
 
   join<TLeftData extends object, TRightData extends object>(
     leftTable: string,
     rightTable: string,
-  ): Join<TLeftData, TRightData> {
+  ): JoinedTable<TLeftData, TRightData> {
     todo()
   }
 }

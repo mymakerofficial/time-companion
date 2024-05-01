@@ -22,6 +22,6 @@ export class DatabaseUpgradeTransactionImpl
 
   table<TData extends object>(tableName: string): UpgradeTable<TData> {
     const table = this.transactionAdapter.getTable<TData>(tableName)
-    return new DatabaseUpgradeTableImpl(table)
+    return new DatabaseUpgradeTableImpl(this.transactionAdapter, table)
   }
 }

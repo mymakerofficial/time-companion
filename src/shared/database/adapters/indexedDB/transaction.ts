@@ -1,4 +1,4 @@
-import type { Join, Table, Transaction } from '@shared/database/database'
+import type { JoinedTable, Table, Transaction } from '@shared/database/database'
 import { check, isNotEmpty } from '@shared/lib/utils/checks'
 import { IDBAdapterTable } from '@shared/database/adapters/indexedDB/table'
 import { toArray } from '@shared/lib/utils/list'
@@ -34,7 +34,7 @@ export class IDBAdapterTransaction implements Transaction {
   join<TLeftData extends object, TRightData extends object>(
     leftTableName: string,
     rightTableName: string,
-  ): Join<TLeftData, TRightData> {
+  ): JoinedTable<TLeftData, TRightData> {
     const objectStoreNames = toArray(this.database.objectStoreNames)
 
     check(
@@ -52,6 +52,6 @@ export class IDBAdapterTransaction implements Transaction {
     return new IDBAdapterJoin<TLeftData, TRightData>(
       leftStore,
       rightStore,
-    ) as Join<TLeftData, TRightData>
+    ) as JoinedTable<TLeftData, TRightData>
   }
 }
