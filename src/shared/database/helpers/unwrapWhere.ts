@@ -8,6 +8,7 @@ import { firstOf } from '@shared/lib/utils/list'
 import { entriesOf } from '@shared/lib/utils/object'
 import { isAbsent } from '@shared/lib/utils/checks'
 import type { Maybe, Nullable } from '@shared/lib/utils/types'
+import { getOrThrow } from '@shared/lib/utils/result'
 
 export type UnwrapWhereCondition<TData extends object> = {
   key: keyof TData
@@ -27,7 +28,10 @@ export type UnwrapWhere<TData extends object> =
 export function unwrapWhere<TData extends object>(
   where: WhereInput<TData>,
 ): UnwrapWhere<TData> {
-  const [groupKey, groupValue] = firstOf(entriesOf(where))
+  const [groupKey, groupValue] = getOrThrow(
+    firstOf(entriesOf(where)),
+    'Invalid where.',
+  )
 
   if (whereBooleanOperators.includes(groupKey as WhereBooleanOperator)) {
     return {
@@ -36,7 +40,10 @@ export function unwrapWhere<TData extends object>(
       conditions: (groupValue as Array<WhereInput<TData>>).map(unwrapWhere),
     }
   } else {
-    const [operator, value] = firstOf(entriesOf(groupValue))
+    const [operator, value] = getOrThrow(
+      firstOf(entriesOf(groupValue)),
+      'Invalid condition.',
+    )
 
     return {
       type: 'condition',

@@ -124,14 +124,14 @@ export class DatabaseTestHelpers {
 
   samplePerson(override: Partial<Person> = {}): Person {
     return {
-      ...firstOf(this.samplePersons(1)),
+      ...firstOf(this.samplePersons(1))!,
       ...override,
     }
   }
 
   async samplePet(override: Partial<Pet> = {}): Promise<Pet> {
     return {
-      ...firstOf(await this.samplePets(1, 1)),
+      ...firstOf(await this.samplePets(1, 1))!,
       ...override,
     }
   }

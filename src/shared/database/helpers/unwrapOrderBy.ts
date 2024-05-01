@@ -6,6 +6,7 @@ import { firstOf } from '@shared/lib/utils/list'
 import { entriesOf } from '@shared/lib/utils/object'
 import type { Maybe, Nullable } from '@shared/lib/utils/types'
 import { isAbsent } from '@shared/lib/utils/checks'
+import { getOrThrow } from '@shared/lib/utils/result'
 
 export type UnwrapOrderBy<TData extends object> = {
   key: keyof TData
@@ -15,7 +16,10 @@ export type UnwrapOrderBy<TData extends object> = {
 export function unwrapOrderBy<TData extends object>(
   orderBy: OrderByInput<TData>,
 ): UnwrapOrderBy<TData> {
-  const [key, direction] = firstOf(entriesOf(orderBy))
+  const [key, direction] = getOrThrow(
+    firstOf(entriesOf(orderBy)),
+    'Invalid order by.',
+  )
 
   return {
     key,
