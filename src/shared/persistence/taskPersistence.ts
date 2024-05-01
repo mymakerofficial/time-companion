@@ -1,8 +1,7 @@
 import type { Database, Transaction } from '@shared/database/database'
 import type { TaskEntityDto } from '@shared/model/task'
-import { asyncGetOrNull, asyncGetOrThrow } from '@shared/lib/utils/result'
 import type { ProjectEntityDto } from '@shared/model/project'
-import { check, isAbsent, isDefined } from '@shared/lib/utils/checks'
+import { check, isNotNull, isNull } from '@shared/lib/utils/checks'
 
 export interface TaskPersistenceDependencies {
   database: Database
@@ -49,10 +48,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
     })
   }
 
-  private async getTaskByIdQuery(
-    transaction: Transaction,
-    id: string,
-  ): Promise<Readonly<TaskEntityDto>> {
+  private async getTaskByIdQuery(transaction: Transaction, id: string) {
     return await transaction.table<TaskEntityDto>('tasks').findFirst({
       where: {
         AND: [{ id: { equals: id } }, { deletedAt: { equals: null } }],
@@ -61,19 +57,20 @@ export class TaskPersistenceImpl implements TaskPersistence {
   }
 
   async getTaskById(id: string): Promise<Readonly<TaskEntityDto>> {
-    return await asyncGetOrThrow(
-      this.database.withTransaction(async (transaction) => {
-        return await this.getTaskByIdQuery(transaction, id)
-      }),
-      `Task with id "${id}" not found.`,
-    )
+    const res = await this.database.withTransaction(async (transaction) => {
+      return await this.getTaskByIdQuery(transaction, id)
+    })
+
+    check(isNotNull(res), `Task with id "${id}" not found.`)
+
+    return res
   }
 
   private getTaskByDisplayNameAndProjectIdQuery(
     transaction: Transaction,
     displayName: string,
     projectId: string,
-  ): Promise<Readonly<TaskEntityDto>> {
+  ) {
     return transaction.table<TaskEntityDto>('tasks').findFirst({
       where: {
         AND: [
@@ -89,16 +86,20 @@ export class TaskPersistenceImpl implements TaskPersistence {
     displayName: string,
     projectId: string,
   ): Promise<Readonly<TaskEntityDto>> {
-    return await asyncGetOrThrow(
-      this.database.withTransaction(async (transaction) => {
-        return await this.getTaskByDisplayNameAndProjectIdQuery(
-          transaction,
-          displayName,
-          projectId,
-        )
-      }),
+    const res = await this.database.withTransaction(async (transaction) => {
+      return await this.getTaskByDisplayNameAndProjectIdQuery(
+        transaction,
+        displayName,
+        projectId,
+      )
+    })
+
+    check(
+      isNotNull(res),
       `Task with displayName "${displayName}" and projectId "${projectId}" not found.`,
     )
+
+    return res
   }
 
   private async getProjectByIdQuery(
@@ -133,7 +134,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
     return await this.database.withTransaction(async (transaction) => {
       const project = await this.getProjectByIdQuery(transaction, projectId)
 
-      check(isDefined(project), `Project with id "${projectId}" not found.`)
+      check(isNotNull(project), `Project with id "${projectId}" not found.`)
 
       return await this.getTasksByProjectIdQuery(transaction, projectId)
     })
@@ -152,16 +153,14 @@ export class TaskPersistenceImpl implements TaskPersistence {
     task: Readonly<TaskEntityDto>,
   ): Promise<Readonly<TaskEntityDto>> {
     return await this.database.withTransaction(async (transaction) => {
-      const existingTask = await asyncGetOrNull(
-        this.getTaskByDisplayNameAndProjectIdQuery(
-          transaction,
-          task.displayName,
-          task.projectId,
-        ),
+      const existingTask = await this.getTaskByDisplayNameAndProjectIdQuery(
+        transaction,
+        task.displayName,
+        task.projectId,
       )
 
       check(
-        isAbsent(existingTask),
+        isNull(existingTask),
         `Task with displayName "${task.displayName}" already exists in project "${task.projectId}".`,
       )
 
@@ -171,7 +170,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
       )
 
       check(
-        isDefined(project),
+        isNotNull(project),
         `Project with id "${task.projectId}" not found.`,
       )
 
@@ -182,11 +181,11 @@ export class TaskPersistenceImpl implements TaskPersistence {
   private async updateTaskQuery(
     transaction: Transaction,
     id: string,
-    task: Readonly<TaskEntityDto>,
-  ): Promise<Readonly<TaskEntityDto>> {
+    partialTask: Partial<Readonly<TaskEntityDto>>,
+  ) {
     return await transaction.table<TaskEntityDto>('tasks').update({
       where: { id: { equals: id } },
-      data: task,
+      data: partialTask,
     })
   }
 
@@ -194,18 +193,13 @@ export class TaskPersistenceImpl implements TaskPersistence {
     id: string,
     partialTask: Partial<Readonly<TaskEntityDto>>,
   ): Promise<Readonly<TaskEntityDto>> {
-    return await this.database.withTransaction(async (transaction) => {
-      const originalTask = await this.getTaskByIdQuery(transaction, id)
-
-      check(isDefined(originalTask), `Task with id "${id}" not found.`)
-
-      const patchedTask: TaskEntityDto = {
-        ...originalTask,
-        ...partialTask,
-      }
-
-      return await this.updateTaskQuery(transaction, id, patchedTask)
+    const res = await this.database.withTransaction(async (transaction) => {
+      return await this.updateTaskQuery(transaction, id, partialTask)
     })
+
+    check(isNotNull(res), `Task with id "${id}" not found.`)
+
+    return res
   }
 }
 

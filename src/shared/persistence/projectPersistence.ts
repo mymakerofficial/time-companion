@@ -1,8 +1,8 @@
 import type { ProjectEntityDto } from '@shared/model/project'
 import type { Database, Transaction } from '@shared/database/database'
 import type { TaskEntityDto } from '@shared/model/task'
-import { asyncGetOrNull, asyncGetOrThrow } from '@shared/lib/utils/result'
-import { check, isAbsent, isDefined } from '@shared/lib/utils/checks'
+import { asyncGetOrThrow } from '@shared/lib/utils/result'
+import { check, isNotNull } from '@shared/lib/utils/checks'
 
 export interface ProjectPersistenceDependencies {
   database: Database
@@ -53,12 +53,13 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   }
 
   async getProjectById(id: string): Promise<Readonly<ProjectEntityDto>> {
-    return await asyncGetOrThrow(
-      this.database.withTransaction(async (transaction) => {
-        return await this.getProjectByIdQuery(transaction, id)
-      }),
-      `Project with id "${id}" not found.`,
-    )
+    const res = await this.database.withTransaction(async (transaction) => {
+      return await this.getProjectByIdQuery(transaction, id)
+    })
+
+    check(isNotNull(res), `Project with id "${id}" not found.`)
+
+    return res
   }
 
   private async getProjectByDisplayNameQuery(
@@ -78,12 +79,16 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   async getProjectByDisplayName(
     displayName: string,
   ): Promise<Readonly<ProjectEntityDto>> {
-    return await asyncGetOrThrow(
-      this.database.withTransaction(async (transaction) => {
-        return await this.getProjectByDisplayNameQuery(transaction, displayName)
-      }),
+    const res = await this.database.withTransaction(async (transaction) => {
+      return await this.getProjectByDisplayNameQuery(transaction, displayName)
+    })
+
+    check(
+      isNotNull(res),
       `Project with displayName "${displayName}" not found.`,
     )
+
+    return res
   }
 
   private async getProjectByTaskIdQuery(
@@ -104,12 +109,13 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   async getProjectByTaskId(
     taskId: string,
   ): Promise<Readonly<ProjectEntityDto>> {
-    return await asyncGetOrThrow(
-      this.database.withTransaction(async (transaction) => {
-        return await this.getProjectByTaskIdQuery(transaction, taskId)
-      }),
-      `Project with taskId "${taskId}" not found.`,
-    )
+    const res = await this.database.withTransaction(async (transaction) => {
+      return await this.getProjectByTaskIdQuery(transaction, taskId)
+    })
+
+    check(isNotNull(res), `Project with taskId "${taskId}" not found.`)
+
+    return res
   }
 
   private async createProjectQuery(
@@ -125,27 +131,21 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     project: Readonly<ProjectEntityDto>,
   ): Promise<Readonly<ProjectEntityDto>> {
     return await this.database.withTransaction(async (transaction) => {
-      const existingProject = await asyncGetOrNull(
-        this.getProjectByDisplayNameQuery(transaction, project.displayName),
-      )
-
-      check(
-        isAbsent(existingProject),
+      return await asyncGetOrThrow(
+        this.createProjectQuery(transaction, project),
         `Project with displayName "${project.displayName}" already exists.`,
       )
-
-      return await this.createProjectQuery(transaction, project)
     })
   }
 
   private async updateProjectQuery(
     transaction: Transaction,
     id: string,
-    project: Readonly<ProjectEntityDto>,
+    partialProject: Partial<Readonly<ProjectEntityDto>>,
   ) {
     return await transaction.table<ProjectEntityDto>('projects').update({
       where: { id: { equals: id } },
-      data: project,
+      data: partialProject,
     })
   }
 
@@ -153,18 +153,13 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     id: string,
     partialProject: Partial<Readonly<ProjectEntityDto>>,
   ): Promise<Readonly<ProjectEntityDto>> {
-    return await this.database.withTransaction(async (transaction) => {
-      const originalProject = await this.getProjectByIdQuery(transaction, id)
-
-      check(isDefined(originalProject), `Project with id "${id}" not found.`)
-
-      const patchedProject: ProjectEntityDto = {
-        ...originalProject,
-        ...partialProject,
-      }
-
-      return await this.updateProjectQuery(transaction, id, patchedProject)
+    const res = await this.database.withTransaction(async (transaction) => {
+      return await this.updateProjectQuery(transaction, id, partialProject)
     })
+
+    check(isNotNull(res), `Project with id "${id}" not found.`)
+
+    return res
   }
 }
 
