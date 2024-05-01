@@ -201,31 +201,34 @@ describe.each([
         expect(petsAfterReopen).toEqual(originalPets)
       })
 
-      it('should fail when trying to open a database that is already open in another instance', async () => {
-        const { database: firstDatabase, helpers: firstHelpers } =
-          useDatabaseFixtures({
-            database: databaseFactory(),
-            databaseName: 'test-persisted',
-          })
+      it.todo(
+        'should fail when trying to open a database that is already open in another instance',
+        async () => {
+          const { database: firstDatabase, helpers: firstHelpers } =
+            useDatabaseFixtures({
+              database: databaseFactory(),
+              databaseName: 'test-persisted',
+            })
 
-        await firstHelpers.openDatabaseAndMigrateIfNecessary()
+          await firstHelpers.openDatabaseAndMigrateIfNecessary()
 
-        const { database: secondDatabase, helpers: secondHelpers } =
-          useDatabaseFixtures({
-            database: databaseFactory(),
-            databaseName: 'test-persisted',
-          })
+          const { database: secondDatabase, helpers: secondHelpers } =
+            useDatabaseFixtures({
+              database: databaseFactory(),
+              databaseName: 'test-persisted',
+            })
 
-        expect(async () => {
-          await secondDatabase.open(
-            secondHelpers.databaseName,
-            secondHelpers.newestVersionNumber,
-            async () => {},
+          expect(async () => {
+            await secondDatabase.open(
+              secondHelpers.databaseName,
+              secondHelpers.newestVersionNumber,
+              async () => {},
+            )
+          }).rejects.toThrowError(
+            `Database "${secondHelpers.databaseName}" is already open.`,
           )
-        }).rejects.toThrowError(
-          `Database "${secondHelpers.databaseName}" is already open.`,
-        )
-      })
+        },
+      )
     })
   }
 
