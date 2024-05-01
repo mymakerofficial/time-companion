@@ -7,6 +7,7 @@ import {
   it,
   vi,
   expectTypeOf,
+  onTestFailed,
 } from 'vitest'
 import { faker } from '@faker-js/faker'
 import { asArray, firstOf, lastOf } from '@shared/lib/utils/list'
@@ -20,6 +21,8 @@ import type { HasId } from '@shared/model/helpers/hasId'
 import { uuid } from '@shared/lib/utils/uuid'
 import { createDatabase } from '@shared/database/factory/database'
 import { inMemoryDBAdapter } from '@shared/database/adapters/inMemory/database'
+import { fileSystemDBAdapter } from '@shared/database/adapters/fileSystem/database'
+import path from 'path'
 
 function byId(a: HasId, b: HasId) {
   return a.id.localeCompare(b.id)
@@ -34,11 +37,23 @@ function byLastName(a: Person, b: Person) {
 }
 
 describe.each([
-  ['In Memory Database Adapter', () => createDatabase(inMemoryDBAdapter())],
-  ['IndexedDB Adapter', () => createIndexedDBAdapter(fakeIndexedDB)],
-])('%s', (_, createDatabase) => {
+  [
+    'In Memory Database Adapter',
+    () => createDatabase(inMemoryDBAdapter()),
+    false,
+  ],
+  [
+    'File System Database Adapter',
+    () =>
+      createDatabase(
+        fileSystemDBAdapter(path.join(process.cwd(), '.data', 'test')),
+      ),
+    true,
+  ],
+  ['IndexedDB Adapter', () => createIndexedDBAdapter(fakeIndexedDB), true],
+])('%s', (_, databaseFactory, persistent) => {
   const { database, helpers } = useDatabaseFixtures({
-    database: createDatabase(),
+    database: databaseFactory(),
   })
 
   afterAll(async () => {
@@ -77,7 +92,7 @@ describe.each([
     })
 
     it('should return all table names', async () => {
-      await helpers.openDatabaseAndCreateTables()
+      await helpers.openDatabaseAndMigrateIfNecessary()
 
       const tableNames = await database.getTableNames()
 
@@ -162,10 +177,78 @@ describe.each([
     })
   })
 
+  if (persistent) {
+    describe('persisted database', () => {
+      afterEach(async () => {
+        await helpers.cleanup()
+      })
+
+      it('should retain all data across instances', async () => {
+        const { database: firstDatabase, helpers: firstHelpers } =
+          useDatabaseFixtures({
+            database: databaseFactory(),
+            databaseName: 'test-persisted',
+          })
+
+        await firstHelpers.openDatabaseAndMigrateIfNecessary()
+
+        await firstHelpers.insertSamplePersons(12)
+        await firstHelpers.insertSamplePets(6, 2)
+
+        const originalPersons = await firstHelpers.getAllPersonsInDatabase()
+        const originalPets = await firstHelpers.getAllPetsInDatabase()
+
+        await firstDatabase.close()
+
+        const { database: secondDatabase, helpers: secondHelpers } =
+          useDatabaseFixtures({
+            database: databaseFactory(),
+            databaseName: 'test-persisted',
+          })
+
+        console.log(await secondDatabase.getDatabases())
+
+        await secondHelpers.openDatabaseAndMigrateIfNecessary()
+
+        const personsAfterReopen = await secondHelpers.getAllPersonsInDatabase()
+        const petsAfterReopen = await secondHelpers.getAllPetsInDatabase()
+
+        expect(personsAfterReopen).toEqual(originalPersons)
+        expect(petsAfterReopen).toEqual(originalPets)
+      })
+
+      it('should fail when trying to open a database that is already open in another instance', async () => {
+        const { database: firstDatabase, helpers: firstHelpers } =
+          useDatabaseFixtures({
+            database: databaseFactory(),
+            databaseName: 'test-persisted',
+          })
+
+        await firstHelpers.openDatabaseAndMigrateIfNecessary()
+
+        const { database: secondDatabase, helpers: secondHelpers } =
+          useDatabaseFixtures({
+            database: databaseFactory(),
+            databaseName: 'test-persisted',
+          })
+
+        expect(async () => {
+          await secondDatabase.open(
+            secondHelpers.databaseName,
+            secondHelpers.newestVersionNumber,
+            async () => {},
+          )
+        }).rejects.toThrowError(
+          `Database "${secondHelpers.databaseName}" is already open.`,
+        )
+      })
+    })
+  }
+
   describe('table', () => {
     beforeAll(async () => {
       await helpers.cleanup()
-      await helpers.openDatabaseAndCreateTables()
+      await helpers.openDatabaseAndMigrateIfNecessary()
     })
 
     afterEach(async () => {

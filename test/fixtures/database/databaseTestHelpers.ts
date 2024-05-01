@@ -9,12 +9,17 @@ import { firstOf } from '@shared/lib/utils/list'
 import { uuid } from '@shared/lib/utils/uuid'
 import { randomElements } from '@shared/lib/utils/random'
 import { check } from '@renderer/lib/utils'
+import type { Nullable } from '@shared/lib/utils/types'
 
 export class DatabaseTestHelpers {
   constructor(
     private readonly database: Database,
     public readonly databaseName: string = 'test-database',
   ) {}
+
+  get newestVersionNumber(): number {
+    return 3
+  }
 
   get personsTableName(): string {
     return 'persons'
@@ -176,11 +181,17 @@ export class DatabaseTestHelpers {
     })
   }
 
-  async getPersonInDatabaseById(id: string): Promise<Person> {
+  async getPersonInDatabaseById(id: string): Promise<Nullable<Person>> {
     return await this.database.withTransaction(async (transaction) => {
       return await transaction.table<Person>(this.personsTableName).findFirst({
         where: { id: { equals: id } },
       })
+    })
+  }
+
+  async getAllPetsInDatabase(): Promise<Array<Pet>> {
+    return await this.database.withTransaction(async (transaction) => {
+      return await transaction.table<Pet>(this.petsTableName).findMany()
     })
   }
 
@@ -201,8 +212,8 @@ export class DatabaseTestHelpers {
   }
 
   // opens the database and creates the tables at the latest version
-  async openDatabaseAndCreateTables(): Promise<void> {
-    await this.openDatabaseAndCreateTablesAtVersion(3)
+  async openDatabaseAndMigrateIfNecessary(): Promise<void> {
+    await this.openDatabaseAndCreateTablesAtVersion(this.newestVersionNumber)
   }
 
   // opens and closes the database at the specified version
