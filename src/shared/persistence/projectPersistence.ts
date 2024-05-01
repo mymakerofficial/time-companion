@@ -1,5 +1,5 @@
 import type { ProjectEntityDto } from '@shared/model/project'
-import type { Database, Transaction } from '@shared/database/database'
+import type { Database, Transaction } from '@shared/database/types/database'
 import type { TaskEntityDto } from '@shared/model/task'
 import { asyncGetOrThrow } from '@shared/lib/utils/result'
 import { check, isNotNull } from '@shared/lib/utils/checks'

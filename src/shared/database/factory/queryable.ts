@@ -2,14 +2,14 @@ import type {
   FindArgs,
   FindManyArgs,
   Queryable,
-} from '@shared/database/database'
-import type { DatabaseTableAdapter } from '@shared/database/adapter'
+} from '@shared/database/types/database'
+import type { DatabaseTableAdapter } from '@shared/database/types/adapter'
 import { getOrDefault, getOrNull } from '@shared/lib/utils/result'
 import { maybeUnwrapOrderBy } from '@shared/database/helpers/unwrapOrderBy'
 import type { Nullable } from '@shared/lib/utils/types'
 import { check, isNull } from '@shared/lib/utils/checks'
-import { filteredIterator } from '@shared/database/impl/helpers/filteredIterator'
-import { cursorIterator } from '@shared/database/impl/helpers/cursorIterator'
+import { filteredIterator } from '@shared/database/factory/helpers/filteredIterator'
+import { cursorIterator } from '@shared/database/factory/helpers/cursorIterator'
 import { firstOf, firstOfOrNull } from '@shared/lib/utils/list'
 
 export class DatabaseQueryableImpl<TData extends object>

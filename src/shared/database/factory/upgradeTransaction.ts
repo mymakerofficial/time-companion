@@ -2,9 +2,9 @@ import type {
   CreateTableArgs,
   UpgradeTable,
   UpgradeTransaction,
-} from '@shared/database/database'
-import { DatabaseTransactionImpl } from '@shared/database/impl/transaction'
-import { DatabaseUpgradeTableImpl } from '@shared/database/impl/upgradeTable'
+} from '@shared/database/types/database'
+import { DatabaseTransactionImpl } from '@shared/database/factory/transaction'
+import { DatabaseUpgradeTableImpl } from '@shared/database/factory/upgradeTable'
 
 export class DatabaseUpgradeTransactionImpl
   extends DatabaseTransactionImpl

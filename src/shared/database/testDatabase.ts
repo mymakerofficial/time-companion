@@ -1,5 +1,5 @@
-import type { Database } from '@shared/database/database'
-import { createDatabase } from '@shared/database/impl/database'
+import type { Database } from '@shared/database/types/database'
+import { createDatabase } from '@shared/database/factory/database'
 import { inMemoryDBAdapter } from '@shared/database/adapters/inMemory/database'
 
 export function createTestDatabase(): Database {

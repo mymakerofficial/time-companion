@@ -3,7 +3,7 @@ import type {
   JoinedTable,
   UpgradeTable,
   UpgradeTransaction,
-} from '@shared/database/database'
+} from '@shared/database/types/database'
 import { IDBAdapterUpgradeTable } from '@shared/database/adapters/indexedDB/upgradeTable'
 import { check } from '@shared/lib/utils/checks'
 import { todo } from '@shared/lib/utils/todo'

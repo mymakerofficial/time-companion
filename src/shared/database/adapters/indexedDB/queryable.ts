@@ -2,7 +2,7 @@ import type {
   Queryable,
   FindArgs,
   FindManyArgs,
-} from '@shared/database/database'
+} from '@shared/database/types/database'
 import { emptyArray, firstOf } from '@shared/lib/utils/list'
 import { filteredCursorIterator } from '@shared/database/adapters/indexedDB/helpers/filteredCursorIterator'
 

@@ -11,14 +11,14 @@ import {
 import { faker } from '@faker-js/faker'
 import { asArray, firstOf, lastOf } from '@shared/lib/utils/list'
 import { randomElement, randomElements } from '@shared/lib/utils/random'
-import type { Database, UpgradeFunction } from '@shared/database/database'
+import type { Database, UpgradeFunction } from '@shared/database/types/database'
 import { createIndexedDBAdapter } from '@shared/database/adapters/indexedDB/database'
 import { indexedDB as fakeIndexedDB } from 'fake-indexeddb'
 import { useDatabaseFixtures } from '@test/fixtures/database/databaseFixtures'
 import type { Person, Pet } from '@test/fixtures/database/types'
 import type { HasId } from '@shared/model/helpers/hasId'
 import { uuid } from '@shared/lib/utils/uuid'
-import { createDatabase } from '@shared/database/impl/database'
+import { createDatabase } from '@shared/database/factory/database'
 import { inMemoryDBAdapter } from '@shared/database/adapters/inMemory/database'
 
 function byId(a: HasId, b: HasId) {

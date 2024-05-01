@@ -1,5 +1,5 @@
 import { isNull } from '@shared/lib/utils/checks'
-import type { DatabaseCursor } from '@shared/database/adapter'
+import type { DatabaseCursor } from '@shared/database/types/adapter'
 
 export type DatabaseIteratedCursor<TData extends object> = Omit<
   DatabaseCursor<TData>,

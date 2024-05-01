@@ -1,4 +1,4 @@
-import type { Database } from '@shared/database/database'
+import type { Database } from '@shared/database/types/database'
 import { fileSystemDBAdapter } from '@shared/database/adapters/fileSystem/database'
 import { app } from 'electron'
 import path from 'path'

@@ -1,4 +1,4 @@
-import { DatabaseQueryableImpl } from '@shared/database/impl/queryable'
+import { DatabaseQueryableImpl } from '@shared/database/factory/queryable'
 import type {
   DeleteArgs,
   DeleteManyArgs,
@@ -6,7 +6,7 @@ import type {
   InsertManyArgs,
   UpdateArgs,
   UpdateManyArgs,
-} from '@shared/database/database'
+} from '@shared/database/types/database'
 import { firstOfOrNull } from '@shared/lib/utils/list'
 import type { Nullable } from '@shared/lib/utils/types'
 

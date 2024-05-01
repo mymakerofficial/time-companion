@@ -1,5 +1,5 @@
-import type { DatabaseIteratedCursor } from '@shared/database/impl/helpers/cursorIterator'
-import type { FindManyArgs } from '@shared/database/database'
+import type { DatabaseIteratedCursor } from '@shared/database/factory/helpers/cursorIterator'
+import type { FindManyArgs } from '@shared/database/types/database'
 import { getOrDefault } from '@shared/lib/utils/result'
 import { wherePredicate } from '@shared/database/helpers/wherePredicate'
 

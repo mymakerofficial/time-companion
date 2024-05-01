@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { InMemoryDataTableImpl } from '@shared/database/adapters/inMemory/helpers/dataTable'
 import { uuid } from '@shared/lib/utils/uuid'
-import { cursorIterator } from '@shared/database/impl/helpers/cursorIterator'
+import { cursorIterator } from '@shared/database/factory/helpers/cursorIterator'
 
 type Entity = {
   id: string

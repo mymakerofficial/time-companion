@@ -5,7 +5,7 @@ import type {
   JoinedTable,
   LeftJoin,
   LeftJoinArgs,
-} from '@shared/database/database'
+} from '@shared/database/types/database'
 import { firstOf } from '@shared/lib/utils/list'
 import { entriesOf } from '@shared/lib/utils/object'
 import { check, isDefined } from '@shared/lib/utils/checks'

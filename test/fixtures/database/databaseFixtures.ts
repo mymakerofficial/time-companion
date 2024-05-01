@@ -1,4 +1,4 @@
-import type { Database } from '@shared/database/database'
+import type { Database } from '@shared/database/types/database'
 import { createFixtures } from '@test/helpers/createFixtures'
 import { DatabaseTestHelpers } from '@test/fixtures/database/databaseTestHelpers'
 

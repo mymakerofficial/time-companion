@@ -1,4 +1,7 @@
-import type { OrderByDirection, OrderByInput } from '@shared/database/database'
+import type {
+  OrderByDirection,
+  OrderByInput,
+} from '@shared/database/types/database'
 import { firstOf } from '@shared/lib/utils/list'
 import { entriesOf } from '@shared/lib/utils/object'
 import type { Maybe, Nullable } from '@shared/lib/utils/types'

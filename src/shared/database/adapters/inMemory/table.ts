@@ -2,7 +2,7 @@ import type {
   DatabaseCursor,
   DatabaseCursorDirection,
   DatabaseTableAdapter,
-} from '@shared/database/adapter'
+} from '@shared/database/types/adapter'
 import type { Nullable } from '@shared/lib/utils/types'
 import type { InMemoryDataTable } from '@shared/database/adapters/inMemory/helpers/dataTable'
 

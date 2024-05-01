@@ -2,11 +2,14 @@ import type {
   Database,
   Transaction,
   UpgradeFunction,
-} from '@shared/database/database'
-import type { DatabaseAdapter, DatabaseInfo } from '@shared/database/adapter'
+} from '@shared/database/types/database'
+import type {
+  DatabaseAdapter,
+  DatabaseInfo,
+} from '@shared/database/types/adapter'
 import { check, isNotNull, isNull } from '@shared/lib/utils/checks'
-import { DatabaseTransactionImpl } from '@shared/database/impl/transaction'
-import { DatabaseUpgradeTransactionImpl } from '@shared/database/impl/upgradeTransaction'
+import { DatabaseTransactionImpl } from '@shared/database/factory/transaction'
+import { DatabaseUpgradeTransactionImpl } from '@shared/database/factory/upgradeTransaction'
 
 export function createDatabase(adapter: DatabaseAdapter): Database {
   return new DatabaseImpl(adapter)

@@ -1,4 +1,4 @@
-import type { Database, Transaction } from '@shared/database/database'
+import type { Database, Transaction } from '@shared/database/types/database'
 import type { TaskEntityDto } from '@shared/model/task'
 import type { ProjectEntityDto } from '@shared/model/project'
 import { check, isNotNull, isNull } from '@shared/lib/utils/checks'

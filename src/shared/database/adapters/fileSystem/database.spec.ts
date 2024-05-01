@@ -3,7 +3,7 @@ import { useDatabaseFixtures } from '@test/fixtures/database/databaseFixtures'
 import { fileSystemDBAdapter } from '@shared/database/adapters/fileSystem/database'
 import type { HasId } from '@shared/model/helpers/hasId'
 import path from 'path'
-import { createDatabase } from '@shared/database/impl/database'
+import { createDatabase } from '@shared/database/factory/database'
 
 function byId(a: HasId, b: HasId) {
   return a.id.localeCompare(b.id)

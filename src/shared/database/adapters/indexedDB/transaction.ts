@@ -1,4 +1,8 @@
-import type { JoinedTable, Table, Transaction } from '@shared/database/database'
+import type {
+  JoinedTable,
+  Table,
+  Transaction,
+} from '@shared/database/types/database'
 import { check, isNotEmpty } from '@shared/lib/utils/checks'
 import { IDBAdapterTable } from '@shared/database/adapters/indexedDB/table'
 import { toArray } from '@shared/lib/utils/list'

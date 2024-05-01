@@ -7,7 +7,7 @@ import { asSet, toArray } from '@shared/lib/utils/list'
 import type {
   DatabaseCursor,
   DatabaseCursorDirection,
-} from '@shared/database/adapter'
+} from '@shared/database/types/adapter'
 
 type IndexUpdate<TData extends object> = {
   primaryKey: TData[keyof TData]

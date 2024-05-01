@@ -1,4 +1,4 @@
-import type { DatabaseInfo } from '@shared/database/adapter'
+import type { DatabaseInfo } from '@shared/database/types/adapter'
 import type { Nullable } from '@shared/lib/utils/types'
 
 export const whereBooleanOperators = ['AND', 'OR'] as const

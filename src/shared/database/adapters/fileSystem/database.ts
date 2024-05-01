@@ -3,7 +3,7 @@ import type {
   CreateTableArgs,
   Transaction,
   UpgradeFunction,
-} from '@shared/database/database'
+} from '@shared/database/types/database'
 import fs from 'node:fs/promises'
 import path from 'path'
 import { check, isDefined, isNotNull } from '@shared/lib/utils/checks'
@@ -17,7 +17,7 @@ import type {
   DatabaseAdapter,
   DatabaseTransactionAdapter,
   DatabaseTransactionMode,
-} from '@shared/database/adapter'
+} from '@shared/database/types/adapter'
 import { asArray } from '@renderer/lib/listUtils'
 import type { Nullable } from '@shared/lib/utils/types'
 

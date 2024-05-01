@@ -1,4 +1,4 @@
-import type { OrderByInput } from '@shared/database/database'
+import type { OrderByInput } from '@shared/database/types/database'
 import {
   maybeUnwrapOrderBy,
   type UnwrapOrderBy,

@@ -2,7 +2,7 @@ import type {
   DatabaseTableAdapter,
   DatabaseTransactionAdapter,
   DatabaseTransactionMode,
-} from '@shared/database/adapter'
+} from '@shared/database/types/adapter'
 import { todo } from '@shared/lib/utils/todo'
 import {
   InMemoryDataTableImpl,

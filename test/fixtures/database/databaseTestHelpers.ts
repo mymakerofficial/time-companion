@@ -2,7 +2,7 @@ import type {
   Database,
   UpgradeFunction,
   UpgradeTransaction,
-} from '@shared/database/database'
+} from '@shared/database/types/database'
 import type { Person, Pet } from '@test/fixtures/database/types'
 import { faker } from '@faker-js/faker'
 import { firstOf } from '@shared/lib/utils/list'

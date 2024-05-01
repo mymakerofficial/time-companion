@@ -2,13 +2,13 @@ import type {
   JoinedTable,
   LeftJoinArgs,
   Table,
-} from '@shared/database/database'
-import { DatabaseJoinedTableImpl } from '@shared/database/impl/joinedTable'
+} from '@shared/database/types/database'
+import { DatabaseJoinedTableImpl } from '@shared/database/factory/joinedTable'
 import type {
   DatabaseTableAdapter,
   DatabaseTransactionAdapter,
-} from '@shared/database/adapter'
-import { DatabaseTableBaseImpl } from '@shared/database/impl/tableBase'
+} from '@shared/database/types/adapter'
+import { DatabaseTableBaseImpl } from '@shared/database/factory/tableBase'
 
 export class DatabaseTableImpl<TData extends object>
   extends DatabaseTableBaseImpl<TData>

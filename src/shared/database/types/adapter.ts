@@ -1,5 +1,5 @@
 import type { Nullable } from '@shared/lib/utils/types'
-import type { UpgradeFunction } from '@shared/database/database'
+import type { UpgradeFunction } from '@shared/database/types/database'
 
 export type DatabaseInfo = {
   name: string

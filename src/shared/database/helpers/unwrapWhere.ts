@@ -3,7 +3,7 @@ import {
   whereBooleanOperators,
   type WhereInput,
   type WhereOperator,
-} from '@shared/database/database'
+} from '@shared/database/types/database'
 import { firstOf } from '@shared/lib/utils/list'
 import { entriesOf } from '@shared/lib/utils/object'
 import { isAbsent } from '@shared/lib/utils/checks'

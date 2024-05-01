@@ -6,7 +6,7 @@ import type {
   Table,
   UpdateArgs,
   UpdateManyArgs,
-} from '@shared/database/database'
+} from '@shared/database/types/database'
 import { emptyArray, firstOf } from '@shared/lib/utils/list'
 import { filteredCursorIterator } from '@shared/database/adapters/indexedDB/helpers/filteredCursorIterator'
 import { IDBAdapterQueryable } from '@shared/database/adapters/indexedDB/queryable'

@@ -1,7 +1,11 @@
-import type { JoinedTable, Table, Transaction } from '@shared/database/database'
-import type { DatabaseTransactionAdapter } from '@shared/database/adapter'
+import type {
+  JoinedTable,
+  Table,
+  Transaction,
+} from '@shared/database/types/database'
+import type { DatabaseTransactionAdapter } from '@shared/database/types/adapter'
 import { todo } from '@shared/lib/utils/todo'
-import { DatabaseTableImpl } from '@shared/database/impl/table'
+import { DatabaseTableImpl } from '@shared/database/factory/table'
 
 export class DatabaseTransactionImpl implements Transaction {
   constructor(

@@ -1,15 +1,15 @@
 import type {
-  FindArgs,
   FindManyArgs,
   JoinedTable,
   LeftJoinArgs,
-} from '@shared/database/database'
-import type { DatabaseTableAdapter } from '@shared/database/adapter'
+} from '@shared/database/types/database'
+import type { DatabaseTableAdapter } from '@shared/database/types/adapter'
 import { firstOf } from '@shared/lib/utils/list'
 import { check, isDefined } from '@shared/lib/utils/checks'
-import { DatabaseQueryableImpl } from '@shared/database/impl/queryable'
+import { DatabaseQueryableImpl } from '@shared/database/factory/queryable'
 import { entriesOf } from '@shared/lib/utils/object'
-import { DatabaseTableBaseImpl } from '@shared/database/impl/tableBase'
+import { DatabaseTableBaseImpl } from '@shared/database/factory/tableBase'
+import { getOrThrow } from '@shared/lib/utils/result'
 
 export class DatabaseJoinedTableImpl<
     TLeftData extends object,
@@ -36,7 +36,10 @@ export class DatabaseJoinedTableImpl<
       where: this.rightArgs.where,
     })
 
-    const [leftJoinKey, rightJoinKey] = firstOf(entriesOf(this.rightArgs.on))
+    const [leftJoinKey, rightJoinKey] = getOrThrow(
+      firstOf(entriesOf(this.rightArgs.on)),
+      'Join keys are not defined.',
+    )
     check(isDefined(rightJoinKey), 'Right key is not defined.')
 
     const rightJoinValues = rightRows.map(

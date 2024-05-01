@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest'
-import type { WhereInput } from '@shared/database/database'
+import type { WhereInput } from '@shared/database/types/database'
 import {
   type UnwrapWhere,
   unwrapWhere,

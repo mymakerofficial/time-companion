@@ -1,5 +1,8 @@
-import type { CreateIndexArgs, UpgradeTable } from '@shared/database/database'
-import { DatabaseTableImpl } from '@shared/database/impl/table'
+import type {
+  CreateIndexArgs,
+  UpgradeTable,
+} from '@shared/database/types/database'
+import { DatabaseTableImpl } from '@shared/database/factory/table'
 
 export class DatabaseUpgradeTableImpl<TData extends object>
   extends DatabaseTableImpl<TData>

@@ -9,7 +9,7 @@ import {
   createProjectService,
   type ProjectService,
 } from '@shared/service/projectService'
-import type { Database } from '@shared/database/database'
+import type { Database } from '@shared/database/types/database'
 import { createFixtures } from '@test/helpers/createFixtures'
 import { ProjectTestHelpers } from '@test/fixtures/service/projectTestHelpers'
 import { TaskTestHelpers } from '@test/fixtures/service/taskTestHelpers'

@@ -1,6 +1,6 @@
 import { describe, test, expect } from 'vitest'
 import { wherePredicate } from '@shared/database/helpers/wherePredicate'
-import type { WhereInput } from '@shared/database/database'
+import type { WhereInput } from '@shared/database/types/database'
 
 interface Person {
   name: string

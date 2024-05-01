@@ -1,11 +1,11 @@
 import { emptyMap, toArray } from '@shared/lib/utils/list'
 import { check, isDefined } from '@shared/lib/utils/checks'
 import { InMemoryCursorImpl } from '@shared/database/adapters/inMemory/helpers/cursor'
-import type { OrderByDirection } from '@shared/database/database'
+import type { OrderByDirection } from '@shared/database/types/database'
 import type {
   DatabaseCursor,
   DatabaseCursorDirection,
-} from '@shared/database/adapter'
+} from '@shared/database/types/adapter'
 
 type Index<
   TData extends object,

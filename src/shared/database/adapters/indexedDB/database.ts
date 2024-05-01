@@ -4,12 +4,12 @@ import type {
   Transaction,
   UpgradeFunction,
   UpgradeTransaction,
-} from '@shared/database/database'
+} from '@shared/database/types/database'
 import { IDBAdapterTransaction } from '@shared/database/adapters/indexedDB/transaction'
 import { check, isNotNull } from '@shared/lib/utils/checks'
 import { IDBAdapterUpgradeTransaction } from '@shared/database/adapters/indexedDB/upgradeTransaction'
 import { todo } from '@shared/lib/utils/todo'
-import type { DatabaseInfo } from '@shared/database/adapter'
+import type { DatabaseInfo } from '@shared/database/types/adapter'
 
 export class IDBAdapter implements Database {
   database: Nullable<IDBDatabase>

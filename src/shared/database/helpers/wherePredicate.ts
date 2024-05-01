@@ -1,4 +1,4 @@
-import type { WhereInput } from '@shared/database/database'
+import type { WhereInput } from '@shared/database/types/database'
 import {
   maybeUnwrapWhere,
   type UnwrapWhere,

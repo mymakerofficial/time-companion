@@ -3,7 +3,7 @@ import type {
   DatabaseInfo,
   DatabaseTransactionAdapter,
   DatabaseTransactionMode,
-} from '@shared/database/adapter'
+} from '@shared/database/types/adapter'
 import type { InMemoryDataTables } from '@shared/database/adapters/inMemory/helpers/dataTable'
 import { emptyMap, toArray } from '@shared/lib/utils/list'
 import { todo } from '@shared/lib/utils/todo'
