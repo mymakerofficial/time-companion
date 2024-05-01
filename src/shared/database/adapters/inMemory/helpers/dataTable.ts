@@ -143,7 +143,7 @@ export class InMemoryDataTableImpl<TData extends object>
     } else {
       if (index.unique) {
         throw new Error(
-          `Unique constraint violation on index ${keyPath.toString()}. Value ${indexedValue} already exists.`,
+          `Unique constraint violation on index "${keyPath.toString()}". Value "${indexedValue}" already exists.`,
         )
       }
 

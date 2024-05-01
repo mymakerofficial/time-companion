@@ -1,4 +1,5 @@
 import type { DatabaseInfo } from '@shared/database/adapter'
+import type { Nullable } from '@shared/lib/utils/types'
 
 export const whereBooleanOperators = ['AND', 'OR'] as const
 export type WhereBooleanOperator = (typeof whereBooleanOperators)[number]
@@ -88,12 +89,12 @@ export type DeleteManyArgs<TData extends object> = DeleteArgs<TData> &
   HasLimit<TData>
 
 export interface Queryable<TData extends object> {
-  findFirst(args?: FindArgs<TData>): Promise<TData>
+  findFirst(args?: FindArgs<TData>): Promise<Nullable<TData>>
   findMany(args?: FindManyArgs<TData>): Promise<Array<TData>>
 }
 
 export interface Updatable<TData extends object> {
-  update(args: UpdateArgs<TData>): Promise<TData>
+  update(args: UpdateArgs<TData>): Promise<Nullable<TData>>
   updateMany(args: UpdateManyArgs<TData>): Promise<Array<TData>>
 }
 

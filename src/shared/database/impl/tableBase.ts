@@ -1,9 +1,5 @@
 import { DatabaseQueryableImpl } from '@shared/database/impl/queryable'
 import type {
-  DatabaseTableAdapter,
-  DatabaseTransactionAdapter,
-} from '@shared/database/adapter'
-import type {
   DeleteArgs,
   DeleteManyArgs,
   InsertArgs,
@@ -11,13 +7,14 @@ import type {
   UpdateArgs,
   UpdateManyArgs,
 } from '@shared/database/database'
-import { firstOf } from '@shared/lib/utils/list'
+import { firstOfOrNull } from '@shared/lib/utils/list'
+import type { Nullable } from '@shared/lib/utils/types'
 
 export class DatabaseTableBaseImpl<
   TData extends object,
 > extends DatabaseQueryableImpl<TData> {
-  async update(args: UpdateArgs<TData>): Promise<TData> {
-    return firstOf(
+  async update(args: UpdateArgs<TData>): Promise<Nullable<TData>> {
+    return firstOfOrNull(
       await this.updateMany({
         ...args,
         limit: 1,

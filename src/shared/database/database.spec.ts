@@ -377,6 +377,22 @@ describe.each([
 
         expect(res).toEqual(randomPerson)
       })
+
+      it('should return null when no entry is found', async () => {
+        await helpers.insertSamplePersons(6)
+
+        const res = await database.withTransaction(async (transaction) => {
+          return await transaction
+            .table<Person>(helpers.personsTableName)
+            .findFirst({
+              where: {
+                id: { equals: 'non-existent-id' },
+              },
+            })
+        })
+
+        expect(res).toBeNull()
+      })
     })
 
     describe('findMany', () => {
@@ -511,6 +527,22 @@ describe.each([
 
         expect(res).toEqual(samplePersons.sort(byId).slice(2, 4))
       })
+
+      it('should return empty array when no entry is found', async () => {
+        await helpers.insertSamplePersons(6)
+
+        const res = await database.withTransaction(async (transaction) => {
+          return await transaction
+            .table<Person>(helpers.personsTableName)
+            .findMany({
+              where: {
+                id: { equals: 'non-existent-id' },
+              },
+            })
+        })
+
+        expect(res).toHaveLength(0)
+      })
     })
 
     describe('leftJoin', () => {
@@ -635,6 +667,23 @@ describe.each([
 
         expect(res).toEqual(expected)
         expect(personInDatabase).toEqual(expected)
+      })
+
+      it('should return null when updating an entry that does not exist', async () => {
+        await helpers.insertSamplePersons(6)
+
+        const res = await database.withTransaction(async (transaction) => {
+          return await transaction
+            .table<Person>(helpers.personsTableName)
+            .update({
+              where: { id: { equals: 'non-existent-id' } },
+              data: {
+                firstName: 'Jeff',
+              },
+            })
+        })
+
+        expect(res).toBeNull()
       })
 
       it('should fail when trying to update a primary key', async () => {
@@ -808,6 +857,23 @@ describe.each([
         }))
 
         expect(personsInDatabase).toEqual(expected)
+      })
+
+      it('should return empty array when no entry is found', async () => {
+        await helpers.insertSamplePersons(6)
+
+        const res = await database.withTransaction(async (transaction) => {
+          return await transaction
+            .table<Person>(helpers.personsTableName)
+            .updateMany({
+              data: { firstName: 'Jeff' },
+              where: {
+                id: { equals: 'non-existent-id' },
+              },
+            })
+        })
+
+        expect(res).toHaveLength(0)
       })
     })
 

@@ -4,13 +4,13 @@ import type {
   Queryable,
 } from '@shared/database/database'
 import type { DatabaseTableAdapter } from '@shared/database/adapter'
-import { getOrDefault } from '@shared/lib/utils/result'
+import { getOrDefault, getOrNull } from '@shared/lib/utils/result'
 import { maybeUnwrapOrderBy } from '@shared/database/helpers/unwrapOrderBy'
 import type { Nullable } from '@shared/lib/utils/types'
 import { check, isNull } from '@shared/lib/utils/checks'
 import { filteredIterator } from '@shared/database/impl/helpers/filteredIterator'
 import { cursorIterator } from '@shared/database/impl/helpers/cursorIterator'
-import { firstOf } from '@shared/lib/utils/list'
+import { firstOf, firstOfOrNull } from '@shared/lib/utils/list'
 
 export class DatabaseQueryableImpl<TData extends object>
   implements Queryable<TData>
@@ -40,8 +40,8 @@ export class DatabaseQueryableImpl<TData extends object>
     return filteredIterator(cursorIterator(cursor), args, predicate)
   }
 
-  async findFirst(args?: FindArgs<TData>): Promise<TData> {
-    return firstOf(
+  async findFirst(args?: FindArgs<TData>): Promise<Nullable<TData>> {
+    return firstOfOrNull(
       await this.findMany({
         ...args,
         limit: 1,

@@ -1,7 +1,16 @@
 import { isArray } from '@shared/lib/utils/checks'
+import type { Nullable, Optional } from '@shared/lib/utils/types'
 
-export function firstOf<T extends ReadonlyArray<unknown>>(values: T): T[0] {
+export function firstOf<T extends ReadonlyArray<unknown>>(
+  values: T,
+): Optional<T[0]> {
   return values[0]
+}
+
+export function firstOfOrNull<T extends ReadonlyArray<unknown>>(
+  values: T,
+): Nullable<T[0]> {
+  return values[0] ?? null
 }
 
 export function excludeFirst<T extends ReadonlyArray<unknown>>(
