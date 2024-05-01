@@ -1,4 +1,5 @@
 import type {
+  AdapterUpgradeFunction,
   DatabaseAdapter,
   DatabaseInfo,
   DatabaseTransactionAdapter,
@@ -16,6 +17,7 @@ import {
   isUndefined,
 } from '@shared/lib/utils/checks'
 import { getOrDefault } from '@shared/lib/utils/result'
+import { ensurePromise } from '@shared/lib/utils/guards'
 
 export function inMemoryDBAdapter(): DatabaseAdapter {
   return new InMemoryDatabaseAdapterImpl()
@@ -46,26 +48,34 @@ export class InMemoryDatabaseAdapterImpl implements DatabaseAdapter {
   async openDatabase(
     databaseName: string,
     version: number,
-  ): Promise<Nullable<DatabaseTransactionAdapter>> {
-    const databaseRecord = this.databases.get(databaseName)
+    upgrade: AdapterUpgradeFunction,
+  ): Promise<void> {
+    return new Promise((resolve) => {
+      const databaseRecord = this.databases.get(databaseName)
+      const currentVersion = getOrDefault(databaseRecord?.info.version, 0)
 
-    const needsUpgrade = version > getOrDefault(databaseRecord?.info.version, 0)
+      const needsUpgrade = version > currentVersion
 
-    if (isUndefined(databaseRecord)) {
-      this.databases.set(databaseName, {
-        info: { name: databaseName, version },
-        tables: emptyMap(),
-      })
-    }
+      if (isUndefined(databaseRecord)) {
+        this.databases.set(databaseName, {
+          info: { name: databaseName, version },
+          tables: emptyMap(),
+        })
+      }
 
-    this.openDatabaseName = databaseName
-    this.getOpenDatabase().info.version = version
+      this.openDatabaseName = databaseName
+      this.getOpenDatabase().info.version = version
 
-    if (needsUpgrade) {
-      return await this.openTransaction([], 'versionchange')
-    } else {
-      return null
-    }
+      if (needsUpgrade) {
+        this.openTransaction([], 'versionchange').then((transactionAdapter) => {
+          upgrade(transactionAdapter).then(() => {
+            resolve()
+          })
+        })
+      } else {
+        resolve()
+      }
+    })
   }
 
   closeDatabase(): Promise<void> {
@@ -107,7 +117,7 @@ export class InMemoryDatabaseAdapterImpl implements DatabaseAdapter {
       const databaseRecord = this.databases.get(databaseName)
 
       if (isDefined(databaseRecord)) {
-        resolve(databaseRecord.info)
+        resolve({ ...databaseRecord.info })
       } else {
         resolve(null)
       }

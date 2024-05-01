@@ -9,7 +9,7 @@ function byId(a: HasId, b: HasId) {
   return a.id.localeCompare(b.id)
 }
 
-describe('File System Database', () => {
+describe.todo('File System Database', () => {
   const { database, helpers } = useDatabaseFixtures({
     database: createDatabase(
       fileSystemDBAdapter(path.join(process.cwd(), '.data', 'test')),

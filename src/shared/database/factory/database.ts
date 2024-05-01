@@ -10,6 +10,7 @@ import type {
 import { check, isNotNull, isNull } from '@shared/lib/utils/checks'
 import { DatabaseTransactionImpl } from '@shared/database/factory/transaction'
 import { DatabaseUpgradeTransactionImpl } from '@shared/database/factory/upgradeTransaction'
+import { getOrDefault } from '@shared/lib/utils/result'
 
 export function createDatabase(adapter: DatabaseAdapter): Database {
   return new DatabaseImpl(adapter)
@@ -17,40 +18,6 @@ export function createDatabase(adapter: DatabaseAdapter): Database {
 
 export class DatabaseImpl implements Database {
   constructor(protected readonly adapter: DatabaseAdapter) {}
-
-  protected async openVersionsIncrementally(
-    name: string,
-    openVersion: number,
-    targetVersion: number,
-    upgrade: UpgradeFunction,
-  ): Promise<void> {
-    const transaction = await this.adapter.openDatabase(name, openVersion)
-
-    if (isNotNull(transaction)) {
-      await upgrade(
-        new DatabaseUpgradeTransactionImpl(transaction),
-        openVersion,
-        openVersion - 1,
-      )
-        .catch(async (error) => {
-          await transaction.rollback()
-          throw error
-        })
-        .then(async () => {
-          await transaction.commit()
-        })
-    }
-
-    if (openVersion < targetVersion) {
-      await this.adapter.closeDatabase()
-      await this.openVersionsIncrementally(
-        name,
-        openVersion + 1,
-        targetVersion,
-        upgrade,
-      )
-    }
-  }
 
   async open(
     name: string,
@@ -66,11 +33,26 @@ export class DatabaseImpl implements Database {
       `Cannot open database at lower version. Current version is "${databaseInfo?.version}", requested version is "${version}".`,
     )
 
-    return await this.openVersionsIncrementally(
+    await this.adapter.openDatabase(
       name,
-      databaseInfo?.version ?? 0,
       version,
-      upgrade,
+      async (transactionAdapter) => {
+        const currentVersion = getOrDefault(databaseInfo?.version, 0)
+
+        // call upgrade function for each version between and including the current version and the target version
+
+        for (
+          let newVersion = currentVersion + 1;
+          newVersion <= version;
+          newVersion++
+        ) {
+          await upgrade(
+            new DatabaseUpgradeTransactionImpl(transactionAdapter),
+            newVersion,
+            newVersion - 1,
+          )
+        }
+      },
     )
   }
 

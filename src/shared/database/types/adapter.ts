@@ -1,5 +1,8 @@
 import type { Nullable } from '@shared/lib/utils/types'
-import type { UpgradeFunction } from '@shared/database/types/database'
+import type {
+  UpgradeFunction,
+  UpgradeTransaction,
+} from '@shared/database/types/database'
 
 export type DatabaseInfo = {
   name: string
@@ -44,12 +47,18 @@ export interface DatabaseTransactionAdapter {
   rollback(): Promise<void>
 }
 
+export type AdapterUpgradeFunction = (
+  transactionAdapter: DatabaseTransactionAdapter,
+) => Promise<void>
+
 export interface DatabaseAdapter {
   // returns a transaction when the database needs to be upgraded, otherwise returns null
   openDatabase(
     databaseName: string,
     version: number,
-  ): Promise<Nullable<DatabaseTransactionAdapter>>
+    // called when the database needs to be upgraded
+    upgrade: AdapterUpgradeFunction,
+  ): Promise<void>
   closeDatabase(): Promise<void>
   deleteDatabase(databaseName: string): Promise<void>
 

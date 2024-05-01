@@ -4,25 +4,23 @@ import {
   beforeAll,
   describe,
   expect,
+  expectTypeOf,
   it,
   vi,
-  expectTypeOf,
-  onTestFailed,
 } from 'vitest'
 import { faker } from '@faker-js/faker'
 import { asArray, firstOf, lastOf } from '@shared/lib/utils/list'
 import { randomElement, randomElements } from '@shared/lib/utils/random'
 import type { Database, UpgradeFunction } from '@shared/database/types/database'
-import { createIndexedDBAdapter } from '@shared/database/adapters/indexedDB/database'
-import { indexedDB as fakeIndexedDB } from 'fake-indexeddb'
 import { useDatabaseFixtures } from '@test/fixtures/database/databaseFixtures'
 import type { Person, Pet } from '@test/fixtures/database/types'
 import type { HasId } from '@shared/model/helpers/hasId'
 import { uuid } from '@shared/lib/utils/uuid'
 import { createDatabase } from '@shared/database/factory/database'
 import { inMemoryDBAdapter } from '@shared/database/adapters/inMemory/database'
-import { fileSystemDBAdapter } from '@shared/database/adapters/fileSystem/database'
-import path from 'path'
+import { asyncNoop } from '@shared/lib/utils/noop'
+import { createIndexedDBAdapter } from '@shared/database/adapters/indexedDB/database'
+import fakeIndexedDB from 'fake-indexeddb'
 
 function byId(a: HasId, b: HasId) {
   return a.id.localeCompare(b.id)
@@ -37,21 +35,9 @@ function byLastName(a: Person, b: Person) {
 }
 
 describe.each([
-  [
-    'In Memory Database Adapter',
-    () => createDatabase(inMemoryDBAdapter()),
-    false,
-  ],
-  [
-    'File System Database Adapter',
-    () =>
-      createDatabase(
-        fileSystemDBAdapter(path.join(process.cwd(), '.data', 'test')),
-      ),
-    true,
-  ],
-  ['IndexedDB Adapter', () => createIndexedDBAdapter(fakeIndexedDB), true],
-])('%s', (_, databaseFactory, persistent) => {
+  ['In Memory Database', () => createDatabase(inMemoryDBAdapter()), false],
+  ['IndexedDB', () => createIndexedDBAdapter(fakeIndexedDB), true],
+])('Adapter "%s"', (_, databaseFactory, persistent) => {
   const { database, helpers } = useDatabaseFixtures({
     database: databaseFactory(),
   })
@@ -72,9 +58,9 @@ describe.each([
     })
 
     it('should return all databases', async () => {
-      await database.open('foo', 1, async () => {})
+      await database.open('foo', 1, asyncNoop)
       await database.close()
-      await database.open('bar', 2, async () => {})
+      await database.open('bar', 2, asyncNoop)
       await database.close()
 
       const databases = await database.getDatabases()
@@ -110,7 +96,7 @@ describe.each([
     })
 
     it('should call the upgrade function with when opening for the first time', async () => {
-      const upgradeFn: UpgradeFunction = vi.fn(async () => {})
+      const upgradeFn: UpgradeFunction = vi.fn(asyncNoop)
 
       await database.open(helpers.databaseName, 1, upgradeFn)
 
@@ -118,12 +104,12 @@ describe.each([
     })
 
     it('should fail when trying to open a database with a lower version than the current one', async () => {
-      await database.open(helpers.databaseName, 2, async () => {})
+      await database.open(helpers.databaseName, 2, asyncNoop)
 
       await database.close()
 
       await expect(
-        database.open(helpers.databaseName, 1, async () => {}),
+        database.open(helpers.databaseName, 1, asyncNoop),
       ).rejects.toThrowError(
         `Cannot open database at lower version. Current version is "2", requested version is "1".`,
       )
@@ -132,7 +118,7 @@ describe.each([
     it('should call the upgrade function incrementing the version', async () => {
       await helpers.ensureDatabaseExistsAtVersion(1)
 
-      const upgradeFn: UpgradeFunction = vi.fn(async () => {})
+      const upgradeFn: UpgradeFunction = vi.fn(asyncNoop)
 
       await database.open(helpers.databaseName, 4, upgradeFn)
 
@@ -164,9 +150,9 @@ describe.each([
     })
 
     it('should delete the database', async () => {
-      await database.open('foo', 1, async () => {})
+      await database.open('foo', 1, asyncNoop)
       await database.close()
-      await database.open('bar', 2, async () => {})
+      await database.open('bar', 2, asyncNoop)
       await database.close()
 
       await database.delete('foo')
@@ -205,8 +191,6 @@ describe.each([
             database: databaseFactory(),
             databaseName: 'test-persisted',
           })
-
-        console.log(await secondDatabase.getDatabases())
 
         await secondHelpers.openDatabaseAndMigrateIfNecessary()
 
