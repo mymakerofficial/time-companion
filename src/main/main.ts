@@ -9,8 +9,8 @@ import {
   serviceInvokeChannel,
   servicePublishChannel,
 } from '@shared/ipc/helpers/channels'
-import type { ProjectEntityDto } from '@shared/model/project'
-import type { TaskEntityDto } from '@shared/model/task'
+import { projectsTable } from '@shared/model/project'
+import { tasksTable } from '@shared/model/task'
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -59,30 +59,18 @@ function createMainWindow() {
   return mainWindow
 }
 
-function initialize() {
+async function initialize() {
   // TODO this is a hack to create the tables
 
-  database.open('time-companion', 1, async (transaction) => {
-    const projectsTable = await transaction.createTable<ProjectEntityDto>({
-      name: 'projects',
-      schema: {
-        id: 'string',
-        displayName: 'string',
-        color: 'string',
-        isBillable: 'boolean',
-        createdAt: 'string',
-        modifiedAt: 'string',
-        deletedAt: 'string',
-      },
-      primaryKey: 'id',
-    })
+  await database.open('time-companion', 1, async (transaction) => {
+    await transaction.createTable(projectsTable)
 
-    await projectsTable.createIndex({
+    await transaction.table(projectsTable).createIndex({
       keyPath: 'displayName',
       unique: true,
     })
 
-    await projectsTable.insert({
+    await transaction.table(projectsTable).insert({
       data: {
         id: '1',
         displayName: 'Project 1',
@@ -94,26 +82,14 @@ function initialize() {
       },
     })
 
-    const tasksTable = await transaction.createTable<TaskEntityDto>({
-      name: 'tasks',
-      schema: {
-        id: 'string',
-        projectId: 'string',
-        displayName: 'string',
-        color: 'string',
-        createdAt: 'string',
-        modifiedAt: 'string',
-        deletedAt: 'string',
-      },
-      primaryKey: 'id',
-    })
+    await transaction.createTable(tasksTable)
 
-    await tasksTable.createIndex({
+    await transaction.table(tasksTable).createIndex({
       keyPath: 'displayName',
       unique: true,
     })
 
-    await tasksTable.insert({
+    await transaction.table(tasksTable).insert({
       data: {
         id: '1',
         projectId: '1',
@@ -162,8 +138,8 @@ function registerIpcPublishers(window: BrowserWindow) {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', () => {
-  initialize()
+app.on('ready', async () => {
+  await initialize()
   registerIpcHandlers()
   createMainWindow()
 })
