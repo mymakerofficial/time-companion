@@ -21,8 +21,6 @@ import { inMemoryDBAdapter } from '@shared/database/adapters/inMemory/database'
 import { asyncNoop } from '@shared/lib/utils/noop'
 import fakeIndexedDB from 'fake-indexeddb'
 import { indexedDBAdapter } from '@shared/database/adapters/indexedDB/database'
-import { fsPersistence } from '@shared/database/adapters/inMemory/persistence/persistence'
-import path from 'path'
 
 function byId(a: HasId, b: HasId) {
   return a.id.localeCompare(b.id)
@@ -32,14 +30,8 @@ function byFirstName(a: Person, b: Person) {
   return a.firstName.localeCompare(b.firstName)
 }
 
-const rootPath = path.join(process.cwd(), '.data', 'test', 'databases')
-
 describe.each([
-  [
-    'In Memory Database',
-    () => createDatabase(inMemoryDBAdapter(fsPersistence(rootPath))),
-    false,
-  ],
+  ['In Memory Database', () => createDatabase(inMemoryDBAdapter()), false],
   ['IndexedDB', () => createDatabase(indexedDBAdapter(fakeIndexedDB)), true],
 ])('Adapter "%s"', (_, databaseFactory, persistent) => {
   const { database, helpers, personsTable, petsTable } = useDatabaseFixtures({
