@@ -21,6 +21,8 @@ import { inMemoryDBAdapter } from '@shared/database/adapters/inMemory/database'
 import { asyncNoop } from '@shared/lib/utils/noop'
 import fakeIndexedDB from 'fake-indexeddb'
 import { indexedDBAdapter } from '@shared/database/adapters/indexedDB/database'
+import { fsPersistence } from '@shared/database/adapters/inMemory/persistence/persistence'
+import path from 'path'
 
 function byId(a: HasId, b: HasId) {
   return a.id.localeCompare(b.id)
@@ -34,8 +36,14 @@ function byLastName(a: Person, b: Person) {
   return a.lastName.localeCompare(b.lastName)
 }
 
+const rootPath = path.join(process.cwd(), '.data', 'test', 'databases')
+
 describe.each([
-  ['In Memory Database', () => createDatabase(inMemoryDBAdapter()), false],
+  [
+    'In Memory Database',
+    () => createDatabase(inMemoryDBAdapter(fsPersistence(rootPath))),
+    false,
+  ],
   ['IndexedDB', () => createDatabase(indexedDBAdapter(fakeIndexedDB)), true],
 ])('Adapter "%s"', (_, databaseFactory, persistent) => {
   const { database, helpers } = useDatabaseFixtures({
@@ -246,13 +254,16 @@ describe.each([
       it('should insert data', async () => {
         const samplePerson = helpers.samplePerson()
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .insert({
-              data: samplePerson,
-            })
-        })
+        const res = await database.withWriteTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .insert({
+                data: samplePerson,
+              })
+          },
+        )
 
         const personsInDatabase = await helpers.getAllPersonsInDatabase()
 
@@ -270,13 +281,16 @@ describe.each([
           }
 
           await expect(
-            database.withTransaction(async (transaction) => {
-              return await transaction
-                .table<Person>(helpers.personsTableName)
-                .insert({
-                  data: wrongPerson,
-                })
-            }),
+            database.withWriteTransaction(
+              [helpers.personsTableName],
+              async (transaction) => {
+                return await transaction
+                  .table<Person>(helpers.personsTableName)
+                  .insert({
+                    data: wrongPerson,
+                  })
+              },
+            ),
           ).rejects.toThrowError(
             `The key "wrongKey" is not part of the schema of table "persons".`,
           )
@@ -291,14 +305,17 @@ describe.each([
           }
 
           await expect(
-            database.withTransaction(async (transaction) => {
-              return await transaction
-                .table<Person>(helpers.personsTableName)
-                .insert({
-                  // @ts-expect-error
-                  data: missingPerson,
-                })
-            }),
+            database.withWriteTransaction(
+              [helpers.personsTableName],
+              async (transaction) => {
+                return await transaction
+                  .table<Person>(helpers.personsTableName)
+                  .insert({
+                    // @ts-expect-error
+                    data: missingPerson,
+                  })
+              },
+            ),
           ).rejects.toThrowError(
             `The key "firstName" is required but missing in the data.`,
           )
@@ -316,13 +333,16 @@ describe.each([
           })
 
           await expect(
-            database.withTransaction(async (transaction) => {
-              return await transaction
-                .table<Person>(helpers.personsTableName)
-                .insert({
-                  data: newPersonWithSameUsername,
-                })
-            }),
+            database.withWriteTransaction(
+              [helpers.personsTableName],
+              async (transaction) => {
+                return await transaction
+                  .table<Person>(helpers.personsTableName)
+                  .insert({
+                    data: newPersonWithSameUsername,
+                  })
+              },
+            ),
           ).rejects.toThrowError(
             `Unique constraint failed on column "username".`,
           )
@@ -334,13 +354,16 @@ describe.each([
       it('should insert data', async () => {
         const samplePersons = helpers.samplePersons(3)
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .insertMany({
-              data: samplePersons,
-            })
-        })
+        const res = await database.withWriteTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .insertMany({
+                data: samplePersons,
+              })
+          },
+        )
 
         const personsInDatabase = await helpers.getAllPersonsInDatabase()
 
@@ -353,11 +376,14 @@ describe.each([
       it('should return a value that was inserted', async () => {
         const samplePersons = await helpers.insertSamplePersons(3)
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .findFirst()
-        })
+        const res = await database.withReadTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .findFirst()
+          },
+        )
 
         expect(samplePersons).toContainEqual(res)
       })
@@ -368,15 +394,18 @@ describe.each([
           safetyOffset: 1,
         })
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .findFirst({
-              where: {
-                id: { equals: randomPerson.id },
-              },
-            })
-        })
+        const res = await database.withReadTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .findFirst({
+                where: {
+                  id: { equals: randomPerson.id },
+                },
+              })
+          },
+        )
 
         expect(res).toEqual(randomPerson)
       })
@@ -384,11 +413,14 @@ describe.each([
       it('should return first entry sorted on primary key by default', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .findFirst()
-        })
+        const res = await database.withReadTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .findFirst()
+          },
+        )
 
         expect(res).toEqual(firstOf(samplePersons.sort(byId)))
       })
@@ -396,13 +428,16 @@ describe.each([
       it('should find a single entry in a table with order ascending', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .findFirst({
-              orderBy: { firstName: 'asc' },
-            })
-        })
+        const res = await database.withReadTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .findFirst({
+                orderBy: { firstName: 'asc' },
+              })
+          },
+        )
 
         expect(res).toEqual(firstOf(samplePersons.sort(byFirstName)))
       })
@@ -410,13 +445,16 @@ describe.each([
       it('should find the first entry in a table sorted descending', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .findFirst({
-              orderBy: { firstName: 'desc' },
-            })
-        })
+        const res = await database.withReadTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .findFirst({
+                orderBy: { firstName: 'desc' },
+              })
+          },
+        )
 
         expect(res).toEqual(lastOf(samplePersons.sort(byFirstName)))
       })
@@ -427,23 +465,26 @@ describe.each([
           safetyOffset: 1,
         })
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .findFirst({
-              where: {
-                AND: [
-                  { firstName: { equals: randomPerson.firstName } },
-                  {
-                    AND: [
-                      { age: { equals: randomPerson.age } },
-                      { id: { notEquals: 'not-an-id' } },
-                    ],
-                  },
-                ],
-              },
-            })
-        })
+        const res = await database.withReadTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .findFirst({
+                where: {
+                  AND: [
+                    { firstName: { equals: randomPerson.firstName } },
+                    {
+                      AND: [
+                        { age: { equals: randomPerson.age } },
+                        { id: { notEquals: 'not-an-id' } },
+                      ],
+                    },
+                  ],
+                },
+              })
+          },
+        )
 
         expect(res).toEqual(randomPerson)
       })
@@ -451,15 +492,18 @@ describe.each([
       it('should return null when no entry is found', async () => {
         await helpers.insertSamplePersons(6)
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .findFirst({
-              where: {
-                id: { equals: 'non-existent-id' },
-              },
-            })
-        })
+        const res = await database.withReadTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .findFirst({
+                where: {
+                  id: { equals: 'non-existent-id' },
+                },
+              })
+          },
+        )
 
         expect(res).toBeNull()
       })
@@ -469,11 +513,14 @@ describe.each([
       it('should find all entries in a table', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .findMany()
-        })
+        const res = await database.withReadTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .findMany()
+          },
+        )
 
         expect(res.sort(byId)).toEqual(samplePersons.sort(byId))
       })
@@ -484,13 +531,16 @@ describe.each([
           safetyOffset: 1,
         })
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .findMany({
-              where: { firstName: { equals: randomPerson.firstName } },
-            })
-        })
+        const res = await database.withReadTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .findMany({
+                where: { firstName: { equals: randomPerson.firstName } },
+              })
+          },
+        )
 
         expect(res.sort(byId)).toEqual(
           samplePersons
@@ -502,11 +552,14 @@ describe.each([
       it('should return values sorted on primary key by default', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .findMany()
-        })
+        const res = await database.withReadTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .findMany()
+          },
+        )
 
         expect(res).toEqual(samplePersons.sort(byId))
       })
@@ -514,13 +567,16 @@ describe.each([
       it('should find all entries in a table ordered by indexed key ascending', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .findMany({
-              orderBy: { firstName: 'asc' },
-            })
-        })
+        const res = await database.withReadTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .findMany({
+                orderBy: { firstName: 'asc' },
+              })
+          },
+        )
 
         expect(res).toEqual(samplePersons.sort(byFirstName))
       })
@@ -528,13 +584,16 @@ describe.each([
       it('should find all entries in a table ordered by indexed key descending', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .findMany({
-              orderBy: { firstName: 'desc' },
-            })
-        })
+        const res = await database.withReadTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .findMany({
+                orderBy: { firstName: 'desc' },
+              })
+          },
+        )
 
         expect(res).toEqual(samplePersons.sort(byFirstName).reverse())
       })
@@ -543,13 +602,16 @@ describe.each([
         const samplePersons = await helpers.insertSamplePersons(6)
 
         expect(async () => {
-          await database.withTransaction(async (transaction) => {
-            return await transaction
-              .table<Person>(helpers.personsTableName)
-              .findMany({
-                orderBy: { lastName: 'asc' },
-              })
-          })
+          await database.withReadTransaction(
+            [helpers.personsTableName],
+            async (transaction) => {
+              return await transaction
+                .table<Person>(helpers.personsTableName)
+                .findMany({
+                  orderBy: { lastName: 'asc' },
+                })
+            },
+          )
         }).rejects.toThrow(
           'The index "lastName" does not exist. You can only order by existing indexes or primary key.',
         )
@@ -558,13 +620,16 @@ describe.each([
       it('should only return the first n entries in a table', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .findMany({
-              limit: 3,
-            })
-        })
+        const res = await database.withReadTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .findMany({
+                limit: 3,
+              })
+          },
+        )
 
         expect(res).toEqual(samplePersons.sort(byId).slice(0, 3))
       })
@@ -572,13 +637,16 @@ describe.each([
       it('should return all entries except the first n entries in a table', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .findMany({
-              offset: 3,
-            })
-        })
+        const res = await database.withReadTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .findMany({
+                offset: 3,
+              })
+          },
+        )
 
         expect(res).toEqual(samplePersons.sort(byId).slice(3))
       })
@@ -586,14 +654,17 @@ describe.each([
       it('should only return the first n after skipping the first m entries in a table', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .findMany({
-              offset: 2,
-              limit: 2,
-            })
-        })
+        const res = await database.withReadTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .findMany({
+                offset: 2,
+                limit: 2,
+              })
+          },
+        )
 
         expect(res).toEqual(samplePersons.sort(byId).slice(2, 4))
       })
@@ -601,15 +672,18 @@ describe.each([
       it('should return empty array when no entry is found', async () => {
         await helpers.insertSamplePersons(6)
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .findMany({
-              where: {
-                id: { equals: 'non-existent-id' },
-              },
-            })
-        })
+        const res = await database.withReadTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .findMany({
+                where: {
+                  id: { equals: 'non-existent-id' },
+                },
+              })
+          },
+        )
 
         expect(res).toHaveLength(0)
       })
@@ -627,15 +701,18 @@ describe.each([
         const petId = randomPet.id
 
         // find the owner of the pet with the random id
-        const owner = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .leftJoin<Pet>(helpers.petsTableName, {
-              on: { id: 'ownerId' },
-              where: { id: { equals: petId } },
-            })
-            .findFirst()
-        })
+        const owner = await database.withReadTransaction(
+          [helpers.personsTableName, helpers.petsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .leftJoin<Pet>(helpers.petsTableName, {
+                on: { id: 'ownerId' },
+                where: { id: { equals: petId } },
+              })
+              .findFirst()
+          },
+        )
 
         const expectedOwner = samplePersons.find(
           (person) => person.id === randomPet.ownerId,
@@ -655,15 +732,18 @@ describe.each([
         const petId = randomPet.id
 
         // delete the owner of the pet with the random id
-        await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .leftJoin<Pet>(helpers.petsTableName, {
-              on: { id: 'ownerId' },
-              where: { id: { equals: petId } },
-            })
-            .deleteAll()
-        })
+        await database.withWriteTransaction(
+          [helpers.personsTableName, helpers.petsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .leftJoin<Pet>(helpers.petsTableName, {
+                on: { id: 'ownerId' },
+                where: { id: { equals: petId } },
+              })
+              .deleteAll()
+          },
+        )
 
         const owner = samplePersons.find(
           (person) => person.id === randomPet.ownerId,
@@ -689,15 +769,18 @@ describe.each([
           })
 
           expect(async () => {
-            await database.withTransaction(async (transaction) => {
-              return await transaction
-                .table<Person>(helpers.personsTableName)
-                .leftJoin<Pet>(helpers.petsTableName, {
-                  on: { id: 'age' },
-                  where: { id: { equals: randomPet.id } },
-                })
-                .findMany()
-            })
+            await database.withReadTransaction(
+              [helpers.personsTableName],
+              async (transaction) => {
+                return await transaction
+                  .table<Person>(helpers.personsTableName)
+                  .leftJoin<Pet>(helpers.petsTableName, {
+                    on: { id: 'age' },
+                    where: { id: { equals: randomPet.id } },
+                  })
+                  .findMany()
+              },
+            )
           }).rejects.toThrowError(`The keys "id" and "age" are not compatible.`)
         },
       )
@@ -713,17 +796,20 @@ describe.each([
         const newFirstName = faker.person.firstName()
         const newGender = faker.person.gender()
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .update({
-              where: { id: { equals: randomPerson.id } },
-              data: {
-                firstName: newFirstName,
-                gender: newGender,
-              },
-            })
-        })
+        const res = await database.withWriteTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .update({
+                where: { id: { equals: randomPerson.id } },
+                data: {
+                  firstName: newFirstName,
+                  gender: newGender,
+                },
+              })
+          },
+        )
 
         const personInDatabase = await helpers.getPersonInDatabaseById(
           randomPerson.id,
@@ -742,16 +828,19 @@ describe.each([
       it('should return null when updating an entry that does not exist', async () => {
         await helpers.insertSamplePersons(6)
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .update({
-              where: { id: { equals: 'non-existent-id' } },
-              data: {
-                firstName: 'Jeff',
-              },
-            })
-        })
+        const res = await database.withWriteTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .update({
+                where: { id: { equals: 'non-existent-id' } },
+                data: {
+                  firstName: 'Jeff',
+                },
+              })
+          },
+        )
 
         expect(res).toBeNull()
       })
@@ -765,16 +854,19 @@ describe.each([
         const newId = uuid()
 
         await expect(
-          database.withTransaction(async (transaction) => {
-            return await transaction
-              .table<Person>(helpers.personsTableName)
-              .update({
-                where: { id: { equals: randomPerson.id } },
-                data: {
-                  id: newId,
-                },
-              })
-          }),
+          database.withWriteTransaction(
+            [helpers.personsTableName],
+            async (transaction) => {
+              return await transaction
+                .table<Person>(helpers.personsTableName)
+                .update({
+                  where: { id: { equals: randomPerson.id } },
+                  data: {
+                    id: newId,
+                  },
+                })
+            },
+          ),
         ).rejects.toThrowError(
           `Primary key cannot be changed. Tried to change columns: id.`,
         )
@@ -790,16 +882,19 @@ describe.each([
           )
 
           await expect(
-            database.withTransaction(async (transaction) => {
-              return await transaction
-                .table<Person>(helpers.personsTableName)
-                .update({
-                  where: { id: { equals: randomPerson.id } },
-                  data: {
-                    username: otherRandomPerson.username,
-                  },
-                })
-            }),
+            database.withWriteTransaction(
+              [helpers.personsTableName],
+              async (transaction) => {
+                return await transaction
+                  .table<Person>(helpers.personsTableName)
+                  .update({
+                    where: { id: { equals: randomPerson.id } },
+                    data: {
+                      username: otherRandomPerson.username,
+                    },
+                  })
+              },
+            ),
           ).rejects.toThrowError(
             `Unique constraint failed on column "username".`,
           )
@@ -817,16 +912,19 @@ describe.each([
 
         const newLastName = faker.person.lastName()
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .updateMany({
-              where: { id: { in: ids } },
-              data: {
-                lastName: newLastName,
-              },
-            })
-        })
+        const res = await database.withWriteTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .updateMany({
+                where: { id: { in: ids } },
+                data: {
+                  lastName: newLastName,
+                },
+              })
+          },
+        )
 
         const personsInDatabase = await helpers.getPersonsInDatabaseByIds(ids)
 
@@ -847,16 +945,19 @@ describe.each([
 
         const newLastName = faker.person.lastName()
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .updateMany({
-              where: { id: { in: randomPersons.map((person) => person.id) } },
-              data: {
-                lastName: newLastName,
-              },
-            })
-        })
+        const res = await database.withWriteTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .updateMany({
+                where: { id: { in: randomPersons.map((person) => person.id) } },
+                data: {
+                  lastName: newLastName,
+                },
+              })
+          },
+        )
 
         const expected: Array<Person> = randomPersons
           .map((person) => ({
@@ -871,12 +972,17 @@ describe.each([
       it('should only update the first n entries in a table', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
 
-        await database.withTransaction(async (transaction) => {
-          await transaction.table<Person>(helpers.personsTableName).updateMany({
-            data: { firstName: 'Jeff' },
-            limit: 3,
-          })
-        })
+        await database.withWriteTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            await transaction
+              .table<Person>(helpers.personsTableName)
+              .updateMany({
+                data: { firstName: 'Jeff' },
+                limit: 3,
+              })
+          },
+        )
 
         const personsInDatabase = await helpers.getAllPersonsInDatabase()
 
@@ -891,12 +997,17 @@ describe.each([
       it('should update all entries except the first n entries in a table', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
 
-        await database.withTransaction(async (transaction) => {
-          await transaction.table<Person>(helpers.personsTableName).updateMany({
-            data: { firstName: 'Jeff' },
-            offset: 3,
-          })
-        })
+        await database.withWriteTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            await transaction
+              .table<Person>(helpers.personsTableName)
+              .updateMany({
+                data: { firstName: 'Jeff' },
+                offset: 3,
+              })
+          },
+        )
 
         const personsInDatabase = await helpers.getAllPersonsInDatabase()
 
@@ -911,13 +1022,18 @@ describe.each([
       it('should only update the first n after skipping the first m entries in a table', async () => {
         const samplePersons = await helpers.insertSamplePersons(12)
 
-        await database.withTransaction(async (transaction) => {
-          await transaction.table<Person>(helpers.personsTableName).updateMany({
-            data: { firstName: 'Jeff' },
-            offset: 3,
-            limit: 5,
-          })
-        })
+        await database.withWriteTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            await transaction
+              .table<Person>(helpers.personsTableName)
+              .updateMany({
+                data: { firstName: 'Jeff' },
+                offset: 3,
+                limit: 5,
+              })
+          },
+        )
 
         const personsInDatabase = await helpers.getAllPersonsInDatabase()
 
@@ -932,16 +1048,19 @@ describe.each([
       it('should return empty array when no entry is found', async () => {
         await helpers.insertSamplePersons(6)
 
-        const res = await database.withTransaction(async (transaction) => {
-          return await transaction
-            .table<Person>(helpers.personsTableName)
-            .updateMany({
-              data: { firstName: 'Jeff' },
-              where: {
-                id: { equals: 'non-existent-id' },
-              },
-            })
-        })
+        const res = await database.withWriteTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            return await transaction
+              .table<Person>(helpers.personsTableName)
+              .updateMany({
+                data: { firstName: 'Jeff' },
+                where: {
+                  id: { equals: 'non-existent-id' },
+                },
+              })
+          },
+        )
 
         expect(res).toHaveLength(0)
       })
@@ -954,11 +1073,14 @@ describe.each([
           safetyOffset: 1,
         })
 
-        await database.withTransaction(async (transaction) => {
-          await transaction
-            .table<Person>(helpers.personsTableName)
-            .delete({ where: { id: { equals: randomPerson.id } } })
-        })
+        await database.withWriteTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            await transaction
+              .table<Person>(helpers.personsTableName)
+              .delete({ where: { id: { equals: randomPerson.id } } })
+          },
+        )
 
         const personsInDatabase = await helpers.getAllPersonsInDatabase()
 
@@ -974,11 +1096,14 @@ describe.each([
         })
         const ids = randomPersons.map((person) => person.id)
 
-        await database.withTransaction(async (transaction) => {
-          await transaction
-            .table<Person>(helpers.personsTableName)
-            .deleteMany({ where: { id: { in: ids } } })
-        })
+        await database.withWriteTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            await transaction
+              .table<Person>(helpers.personsTableName)
+              .deleteMany({ where: { id: { in: ids } } })
+          },
+        )
 
         const personsInDatabase = await helpers.getAllPersonsInDatabase()
 
@@ -988,11 +1113,14 @@ describe.each([
       it('should only delete the first n entries in a table', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
 
-        await database.withTransaction(async (transaction) => {
-          await transaction
-            .table<Person>(helpers.personsTableName)
-            .deleteMany({ limit: 3 })
-        })
+        await database.withWriteTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            await transaction
+              .table<Person>(helpers.personsTableName)
+              .deleteMany({ limit: 3 })
+          },
+        )
 
         const personsInDatabase = await helpers.getAllPersonsInDatabase()
 
@@ -1002,11 +1130,14 @@ describe.each([
       it('should delete all entries except the first n entries in a table', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
 
-        await database.withTransaction(async (transaction) => {
-          await transaction
-            .table<Person>(helpers.personsTableName)
-            .deleteMany({ offset: 3 })
-        })
+        await database.withWriteTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            await transaction
+              .table<Person>(helpers.personsTableName)
+              .deleteMany({ offset: 3 })
+          },
+        )
 
         const personsInDatabase = await helpers.getAllPersonsInDatabase()
 
@@ -1016,11 +1147,14 @@ describe.each([
       it('should only delete the first n after skipping the first m entries in a table', async () => {
         const samplePersons = await helpers.insertSamplePersons(12)
 
-        await database.withTransaction(async (transaction) => {
-          await transaction
-            .table<Person>(helpers.personsTableName)
-            .deleteMany({ offset: 3, limit: 5 })
-        })
+        await database.withWriteTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            await transaction
+              .table<Person>(helpers.personsTableName)
+              .deleteMany({ offset: 3, limit: 5 })
+          },
+        )
 
         const personsInDatabase = await helpers.getAllPersonsInDatabase()
 
@@ -1038,9 +1172,14 @@ describe.each([
       it('should delete all entries in a table', async () => {
         await helpers.insertSamplePersons(6)
 
-        await database.withTransaction(async (transaction) => {
-          await transaction.table<Person>(helpers.personsTableName).deleteAll()
-        })
+        await database.withWriteTransaction(
+          [helpers.personsTableName],
+          async (transaction) => {
+            await transaction
+              .table<Person>(helpers.personsTableName)
+              .deleteAll()
+          },
+        )
 
         const personsInDatabase = await helpers.getAllPersonsInDatabase()
 

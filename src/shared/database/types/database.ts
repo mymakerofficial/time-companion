@@ -186,8 +186,20 @@ export interface Database {
   ): Promise<void>
   close(): Promise<void>
   delete(databaseName: string): Promise<void>
+  // shorthand for withReadTransaction
   withTransaction<TResult>(
-    fn: (transaction: Transaction) => Promise<TResult>,
+    tableNames: Array<string>,
+    block: (transaction: Transaction) => Promise<TResult>,
+  ): Promise<TResult>
+  // runs the block with a readwrite transaction
+  withWriteTransaction<TResult>(
+    tableNames: Array<string>,
+    block: (transaction: Transaction) => Promise<TResult>,
+  ): Promise<TResult>
+  // runs the block with a readonly transaction
+  withReadTransaction<TResult>(
+    tableNames: Array<string>,
+    block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>
   getDatabases(): Promise<Array<DatabaseInfo>>
   getTableNames(): Promise<Array<string>>

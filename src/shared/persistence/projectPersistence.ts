@@ -39,9 +39,12 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   }
 
   async getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>> {
-    return await this.database.withTransaction(async (transaction) => {
-      return await this.getProjectsQuery(transaction)
-    })
+    return await this.database.withReadTransaction(
+      ['projects'],
+      async (transaction) => {
+        return await this.getProjectsQuery(transaction)
+      },
+    )
   }
 
   private async getProjectByIdQuery(transaction: Transaction, id: string) {
@@ -53,9 +56,12 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   }
 
   async getProjectById(id: string): Promise<Readonly<ProjectEntityDto>> {
-    const res = await this.database.withTransaction(async (transaction) => {
-      return await this.getProjectByIdQuery(transaction, id)
-    })
+    const res = await this.database.withReadTransaction(
+      ['projects'],
+      async (transaction) => {
+        return await this.getProjectByIdQuery(transaction, id)
+      },
+    )
 
     check(isNotNull(res), `Project with id "${id}" not found.`)
 
@@ -79,9 +85,12 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   async getProjectByDisplayName(
     displayName: string,
   ): Promise<Readonly<ProjectEntityDto>> {
-    const res = await this.database.withTransaction(async (transaction) => {
-      return await this.getProjectByDisplayNameQuery(transaction, displayName)
-    })
+    const res = await this.database.withReadTransaction(
+      ['projects'],
+      async (transaction) => {
+        return await this.getProjectByDisplayNameQuery(transaction, displayName)
+      },
+    )
 
     check(
       isNotNull(res),
@@ -109,9 +118,12 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   async getProjectByTaskId(
     taskId: string,
   ): Promise<Readonly<ProjectEntityDto>> {
-    const res = await this.database.withTransaction(async (transaction) => {
-      return await this.getProjectByTaskIdQuery(transaction, taskId)
-    })
+    const res = await this.database.withReadTransaction(
+      ['projects', 'tasks'],
+      async (transaction) => {
+        return await this.getProjectByTaskIdQuery(transaction, taskId)
+      },
+    )
 
     check(isNotNull(res), `Project with taskId "${taskId}" not found.`)
 
@@ -130,12 +142,15 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   async createProject(
     project: Readonly<ProjectEntityDto>,
   ): Promise<Readonly<ProjectEntityDto>> {
-    return await this.database.withTransaction(async (transaction) => {
-      return await asyncGetOrThrow(
-        this.createProjectQuery(transaction, project),
-        `Project with displayName "${project.displayName}" already exists.`,
-      )
-    })
+    return await this.database.withWriteTransaction(
+      ['projects'],
+      async (transaction) => {
+        return await asyncGetOrThrow(
+          this.createProjectQuery(transaction, project),
+          `Project with displayName "${project.displayName}" already exists.`,
+        )
+      },
+    )
   }
 
   private async updateProjectQuery(
@@ -153,9 +168,12 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     id: string,
     partialProject: Partial<Readonly<ProjectEntityDto>>,
   ): Promise<Readonly<ProjectEntityDto>> {
-    const res = await this.database.withTransaction(async (transaction) => {
-      return await this.updateProjectQuery(transaction, id, partialProject)
-    })
+    const res = await this.database.withWriteTransaction(
+      ['projects'],
+      async (transaction) => {
+        return await this.updateProjectQuery(transaction, id, partialProject)
+      },
+    )
 
     check(isNotNull(res), `Project with id "${id}" not found.`)
 

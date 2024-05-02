@@ -64,15 +64,14 @@ export class DatabaseImpl implements Database {
     return await this.adapter.deleteDatabase(databaseName)
   }
 
-  async withTransaction<TResult>(
-    fn: (transaction: Transaction) => Promise<TResult>,
+  protected async runTransaction<TResult>(
+    tableNames: Array<string>,
+    mode: 'readonly' | 'readwrite',
+    block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult> {
-    const transaction = await this.adapter.openTransaction(
-      await this.getTableNames(), // TODO this should be a parameter
-      'readwrite', // TODO this should be a parameter
-    )
+    const transaction = await this.adapter.openTransaction(tableNames, mode)
 
-    return await fn(new DatabaseTransactionImpl(transaction))
+    return await block(new DatabaseTransactionImpl(transaction))
       .catch(async (error) => {
         await transaction.rollback()
         throw error
@@ -81,6 +80,27 @@ export class DatabaseImpl implements Database {
         await transaction.commit()
         return result
       })
+  }
+
+  async withTransaction<TResult>(
+    tableNames: Array<string>,
+    block: (transaction: Transaction) => Promise<TResult>,
+  ): Promise<TResult> {
+    return await this.withReadTransaction(tableNames, block)
+  }
+
+  async withWriteTransaction<TResult>(
+    tableNames: Array<string>,
+    block: (transaction: Transaction) => Promise<TResult>,
+  ): Promise<TResult> {
+    return await this.runTransaction(tableNames, 'readwrite', block)
+  }
+
+  async withReadTransaction<TResult>(
+    tableNames: Array<string>,
+    block: (transaction: Transaction) => Promise<TResult>,
+  ): Promise<TResult> {
+    return await this.runTransaction(tableNames, 'readonly', block)
   }
 
   async getDatabases(): Promise<Array<DatabaseInfo>> {

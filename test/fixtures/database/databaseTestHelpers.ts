@@ -137,19 +137,27 @@ export class DatabaseTestHelpers {
   }
 
   async insertPersons(persons: Array<Person>): Promise<Array<Person>> {
-    return await this.database.withTransaction(async (transaction) => {
-      return await transaction.table<Person>(this.personsTableName).insertMany({
-        data: persons,
-      })
-    })
+    return await this.database.withWriteTransaction(
+      [this.personsTableName],
+      async (transaction) => {
+        return await transaction
+          .table<Person>(this.personsTableName)
+          .insertMany({
+            data: persons,
+          })
+      },
+    )
   }
 
   async insertPets(pets: Array<Pet>): Promise<Array<Pet>> {
-    return await this.database.withTransaction(async (transaction) => {
-      return await transaction.table<Pet>(this.petsTableName).insertMany({
-        data: pets,
-      })
-    })
+    return await this.database.withWriteTransaction(
+      [this.petsTableName],
+      async (transaction) => {
+        return await transaction.table<Pet>(this.petsTableName).insertMany({
+          data: pets,
+        })
+      },
+    )
   }
 
   async insertSamplePersons(amount: number): Promise<Array<Person>> {
@@ -168,42 +176,59 @@ export class DatabaseTestHelpers {
   }
 
   async getAllPersonsInDatabase(): Promise<Array<Person>> {
-    return await this.database.withTransaction(async (transaction) => {
-      return await transaction.table<Person>(this.personsTableName).findMany()
-    })
+    return await this.database.withReadTransaction(
+      [this.personsTableName],
+      async (transaction) => {
+        return await transaction.table<Person>(this.personsTableName).findMany()
+      },
+    )
   }
 
   async getPersonsInDatabaseByIds(ids: Array<string>): Promise<Array<Person>> {
-    return await this.database.withTransaction(async (transaction) => {
-      return await transaction.table<Person>(this.personsTableName).findMany({
-        where: { id: { in: ids } },
-      })
-    })
+    return await this.database.withReadTransaction(
+      [this.personsTableName],
+      async (transaction) => {
+        return await transaction.table<Person>(this.personsTableName).findMany({
+          where: { id: { in: ids } },
+        })
+      },
+    )
   }
 
   async getPersonInDatabaseById(id: string): Promise<Nullable<Person>> {
-    return await this.database.withTransaction(async (transaction) => {
-      return await transaction.table<Person>(this.personsTableName).findFirst({
-        where: { id: { equals: id } },
-      })
-    })
+    return await this.database.withReadTransaction(
+      [this.personsTableName],
+      async (transaction) => {
+        return await transaction
+          .table<Person>(this.personsTableName)
+          .findFirst({
+            where: { id: { equals: id } },
+          })
+      },
+    )
   }
 
   async getAllPetsInDatabase(): Promise<Array<Pet>> {
-    return await this.database.withTransaction(async (transaction) => {
-      return await transaction.table<Pet>(this.petsTableName).findMany()
-    })
+    return await this.database.withReadTransaction(
+      [this.petsTableName],
+      async (transaction) => {
+        return await transaction.table<Pet>(this.petsTableName).findMany()
+      },
+    )
   }
 
   // deletes all data from all tables, but keeps the tables
   async clearDatabase(): Promise<void> {
     const tableNames = await this.database.getTableNames()
 
-    await this.database.withTransaction(async (transaction) => {
-      for (const table of tableNames) {
-        await transaction.table(table).deleteAll()
-      }
-    })
+    await this.database.withWriteTransaction(
+      tableNames,
+      async (transaction) => {
+        for (const table of tableNames) {
+          await transaction.table(table).deleteAll()
+        }
+      },
+    )
   }
 
   // opens the database and creates the tables at the specified version
