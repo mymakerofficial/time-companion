@@ -6,15 +6,26 @@ import type {
 import type { DatabaseTransactionAdapter } from '@shared/database/types/adapter'
 import { todo } from '@shared/lib/utils/todo'
 import { DatabaseTableImpl } from '@shared/database/factory/table'
+import type {
+  DatabaseTableSchema,
+  InferTableType,
+} from '@shared/database/types/schema'
+import { isString } from '@shared/lib/utils/checks'
 
 export class DatabaseTransactionImpl implements Transaction {
   constructor(
     protected readonly transactionAdapter: DatabaseTransactionAdapter,
   ) {}
 
-  table<TData extends object>(tableName: string): Table<TData> {
-    const table = this.transactionAdapter.getTable<TData>(tableName)
-    return new DatabaseTableImpl(this.transactionAdapter, table)
+  table<
+    TData extends object = object,
+    TSchema extends DatabaseTableSchema<TData> = DatabaseTableSchema<TData>,
+  >(table: TSchema | string): Table<InferTableType<TSchema>> {
+    const tableName = isString(table) ? table : table._raw.tableName
+
+    const tableAdapter =
+      this.transactionAdapter.getTable<InferTableType<TSchema>>(tableName)
+    return new DatabaseTableImpl(this.transactionAdapter, tableAdapter)
   }
 
   join<TLeftData extends object, TRightData extends object>(

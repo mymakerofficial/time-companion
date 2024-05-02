@@ -5,23 +5,35 @@ import type {
 } from '@shared/database/types/database'
 import { DatabaseTransactionImpl } from '@shared/database/factory/transaction'
 import { DatabaseUpgradeTableImpl } from '@shared/database/factory/upgradeTable'
+import type {
+  DatabaseTableSchema,
+  InferTableType,
+} from '@shared/database/types/schema'
+import { isString } from '@shared/lib/utils/checks'
 
 export class DatabaseUpgradeTransactionImpl
   extends DatabaseTransactionImpl
   implements UpgradeTransaction
 {
-  async createTable<TData extends object>(
-    args: CreateTableArgs<TData>,
-  ): Promise<UpgradeTable<TData>> {
+  async createTable<
+    TData extends object = object,
+    TSchema extends DatabaseTableSchema<TData> = DatabaseTableSchema<TData>,
+  >(schema: TSchema): Promise<UpgradeTable<InferTableType<TSchema>>> {
     await this.transactionAdapter.createTable(
-      args.name,
-      args.primaryKey.toString(),
+      schema._raw.tableName,
+      schema._raw.primaryKey,
     )
-    return this.table(args.name)
+    return this.table(schema)
   }
 
-  table<TData extends object>(tableName: string): UpgradeTable<TData> {
-    const table = this.transactionAdapter.getTable<TData>(tableName)
-    return new DatabaseUpgradeTableImpl(this.transactionAdapter, table)
+  table<
+    TData extends object = object,
+    TSchema extends DatabaseTableSchema<TData> = DatabaseTableSchema<TData>,
+  >(table: TSchema | string): UpgradeTable<InferTableType<TSchema>> {
+    const tableName = isString(table) ? table : table._raw.tableName
+
+    const tableAdapter =
+      this.transactionAdapter.getTable<InferTableType<TSchema>>(tableName)
+    return new DatabaseUpgradeTableImpl(this.transactionAdapter, tableAdapter)
   }
 }

@@ -3,53 +3,65 @@
 ## Database Connection
 
 ### Creating an Adapter Instance
+
 ```ts
-const database = createIndexedDBAdapter()
+const database = createDatabase(indexedDBAdapter())
 // or
-const database = createInMemoryDBAdapter()
+const database = createDatabase(inMemoryDBAdapter())
 ```
 
 ### Opening a Database
+
 ```ts
-database.open('my-database', 1, async (transaction) => {
+await database.open('my-database', 1, async (transaction, newVersion) => {
   // lets ignore migrations for now...
   
   // the code inside this callback will be called when the database is out of date
   //  or when the database is created for the first time.
-  // the transaction we get here is called a upgrade transaction and is unique to this callback
+  // the transaction we get here is called a versionchange transaction and is unique to this callback
+})
+```
+
+## Tables
+
+```ts
+// define a table schema
+const usersTable = defineTable<UserEntityDto>('users', {
+  id: { type: 'string', primaryKey: true },
+  name: { type: 'string' },
+  age: { type: 'number' },
+  favouriteColor: { type: 'string' },
+})
+
+await database.open('my-database', 1, async (transaction, newVersion) => {
+  // we can create a table
+  //  this can only be done inside a versionchange transaction
+  await transaction.createTable(usersTable)
   
-
-  // we can only create tables inside a upgrade transaction
-  const usersTable = await transaction.createTable<UserEntityDto>({
-    name: 'users',
-    schema: {
-      id: 'string',
-      name: 'string',
-    },
-    primaryKey: 'id',
-  })
-
-  // we can create indexes on a table
-  //  this can only be done with the return value of createTable
-  //  inside a upgrade transaction
-  await usersTable.createIndex({
+  // we can create an index on a table
+  //  this can only be done inside a versionchange transaction
+  await transaction.table(usersTable).createIndex({
     keyPath: 'name',
     unique: true,
   })
-    
-  // we can use the return value of createTable to execute any crud operation
-  await usersTable.insert({
-    data: {
-      id: uuid(),
-      name: 'John Doe',
-    }
-  })
   
-  // we can also use `transaction.table()` like in any other transaction
+  // we can perform any other operation on the database just like a normal transaction
 })
 ```
 
 ## CRUD
+
+### Table Operations
+
+A table can be accessed using the `table` method on any transaction
+by either passing the table schema or the table name.
+
+```ts
+// passing the table schema will infer all types
+transaction.table(usersTable)
+// note: the generic type is optional and only for IDE autocompletion
+transaction.table<UserEntityDto>('users')
+```
 
 ### Transactions
 
@@ -58,8 +70,7 @@ All operations on the database are done inside a transaction.
 ```ts
 await database.withTransaction(async (transaction) => {
   // we can insert data into a table
-  // note: the generic type is optional and only for ide autocompletion
-  await transaction.table<UserEntityDto>('users').insert({
+  await transaction.table(usersTable).insert({
     data: {
       id: uuid(),
       name: 'John Doe',
@@ -67,7 +78,7 @@ await database.withTransaction(async (transaction) => {
   })
   
   // we can execute multiple operations in a single transaction
-  await transaction.table<UserEntityDto>('users').insert({
+  await transaction.table(usersTable).insert({
     data: {
       id: uuid(),
       name: 'Jane Doe',
@@ -77,7 +88,7 @@ await database.withTransaction(async (transaction) => {
 
 // transactions can return any value
 const res = await database.withTransaction(async (transaction) => {
-  return await transaction.table<UserEntityDto>('users').findMany({
+  return await transaction.table(usersTable).findMany({
     // we can use where to filter the results
     //  it is recommended to use this instead of filtering the result manually
     where: {
@@ -94,7 +105,7 @@ You can order, limit and offset the results of a query.
 
 ```ts
 const res = await database.withTransaction(async (transaction) => {
-  return await transaction.table<UserEntityDto>('users').findMany({
+  return await transaction.table(usersTable).findMany({
     // we can order the results
     orderBy: {
       name: 'asc'
@@ -199,5 +210,6 @@ table.deleteMany({
 })
 ```
 ```ts
+// the fastest way to lose all your data
 table.deleteAll()
 ```

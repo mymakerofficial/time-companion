@@ -7,10 +7,18 @@ import type {
   DatabaseAdapter,
   DatabaseInfo,
 } from '@shared/database/types/adapter'
-import { check, isNotNull, isNull } from '@shared/lib/utils/checks'
+import {
+  check,
+  isArray,
+  isNotEmpty,
+  isNotNull,
+  isNull,
+  isString,
+} from '@shared/lib/utils/checks'
 import { DatabaseTransactionImpl } from '@shared/database/factory/transaction'
 import { DatabaseUpgradeTransactionImpl } from '@shared/database/factory/upgradeTransaction'
 import { getOrDefault } from '@shared/lib/utils/result'
+import type { DatabaseTableSchema } from '@shared/database/types/schema'
 
 export function createDatabase(adapter: DatabaseAdapter): Database {
   return new DatabaseImpl(adapter)
@@ -65,10 +73,17 @@ export class DatabaseImpl implements Database {
   }
 
   protected async runTransaction<TResult>(
-    tableNames: Array<string>,
+    tables: Array<DatabaseTableSchema<object>> | Array<string>,
     mode: 'readonly' | 'readwrite',
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult> {
+    check(isArray(tables), 'Tables must be an array.')
+    check(isNotEmpty(tables), 'Cannot open transaction without tables.')
+
+    const tableNames = tables.map((table) =>
+      isString(table) ? table : table._raw.tableName,
+    )
+
     const transaction = await this.adapter.openTransaction(tableNames, mode)
 
     return await block(new DatabaseTransactionImpl(transaction))
@@ -83,24 +98,24 @@ export class DatabaseImpl implements Database {
   }
 
   async withTransaction<TResult>(
-    tableNames: Array<string>,
+    tables: Array<DatabaseTableSchema<object>> | Array<string>,
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult> {
-    return await this.withReadTransaction(tableNames, block)
+    return await this.withReadTransaction(tables, block)
   }
 
   async withWriteTransaction<TResult>(
-    tableNames: Array<string>,
+    tables: Array<DatabaseTableSchema<object>> | Array<string>,
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult> {
-    return await this.runTransaction(tableNames, 'readwrite', block)
+    return await this.runTransaction(tables, 'readwrite', block)
   }
 
   async withReadTransaction<TResult>(
-    tableNames: Array<string>,
+    tables: Array<DatabaseTableSchema<object>> | Array<string>,
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult> {
-    return await this.runTransaction(tableNames, 'readonly', block)
+    return await this.runTransaction(tables, 'readonly', block)
   }
 
   async getDatabases(): Promise<Array<DatabaseInfo>> {

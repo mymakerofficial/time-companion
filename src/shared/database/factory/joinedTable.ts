@@ -57,7 +57,7 @@ export class DatabaseJoinedTableImpl<
     const iterator = await this.openIterator()
 
     for await (const cursor of iterator) {
-      cursor.delete()
+      await cursor.delete()
     }
   }
 }

@@ -10,6 +10,8 @@ interface DatabaseTestFixturesOptions {
 interface DatabaseTestFixtures {
   database: Database
   helpers: DatabaseTestHelpers
+  personsTable: DatabaseTestHelpers['personsTable']
+  petsTable: DatabaseTestHelpers['petsTable']
 }
 
 export const useDatabaseFixtures = ({
@@ -21,4 +23,6 @@ export const useDatabaseFixtures = ({
     helpers: ({ database }) => {
       return new DatabaseTestHelpers(database, databaseName)
     },
+    personsTable: ({ helpers }) => helpers.personsTable,
+    petsTable: ({ helpers }) => helpers.petsTable,
   })()

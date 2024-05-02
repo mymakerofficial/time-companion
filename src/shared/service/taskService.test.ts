@@ -11,19 +11,27 @@ import {
 import type { TaskEntityDto } from '@shared/model/task'
 import { useServiceFixtures } from '@test/fixtures/service/serviceFixtures'
 
-describe('taskService', async () => {
-  const { taskService, projectService, taskHelpers, projectHelpers } =
-    useServiceFixtures()
+// TODO make this test not sequential
 
-  await projectHelpers.createSampleProjects()
+describe('taskService', () => {
+  const {
+    databaseHelpers,
+    taskService,
+    projectService,
+    taskHelpers,
+    projectHelpers,
+  } = useServiceFixtures()
 
   const subscriber = vi.fn()
 
-  beforeAll(() => {
+  beforeAll(async () => {
+    await databaseHelpers.setup()
+    await projectHelpers.createSampleProjects()
     taskService.subscribe({}, subscriber)
   })
 
-  afterAll(() => {
+  afterAll(async () => {
+    await databaseHelpers.teardown()
     taskService.unsubscribe({}, subscriber)
   })
 
@@ -31,17 +39,18 @@ describe('taskService', async () => {
     subscriber.mockClear()
   })
 
-  describe('createTask', async () => {
-    it.each(await taskHelpers.getSampleTasks())(
-      'should create a task %o',
-      async (task) => {
-        const resTask = await taskService.createTask(task)
+  describe('createTask', () => {
+    it('should create a task', async () => {
+      const sampleTasks = await taskHelpers.getSampleTasks()
+
+      for (const sampleTask of sampleTasks) {
+        const resTask = await taskService.createTask(sampleTask)
 
         expectTypeOf(resTask).toMatchTypeOf<TaskEntityDto>()
 
         // TODO actually test the values
-      },
-    )
+      }
+    })
 
     it('should throw if project does not exist', async () => {
       await expect(() =>

@@ -10,16 +10,21 @@ import {
 import type { ProjectEntityDto } from '@shared/model/project'
 import { useServiceFixtures } from '@test/fixtures/service/serviceFixtures'
 
+// TODO make this test not sequential
+
 describe('projectService', () => {
-  const { projectService, projectHelpers, taskHelpers } = useServiceFixtures()
+  const { databaseHelpers, projectService, projectHelpers, taskHelpers } =
+    useServiceFixtures()
 
   const subscriber = vi.fn()
 
-  beforeAll(() => {
+  beforeAll(async () => {
+    await databaseHelpers.setup()
     projectService.subscribe({}, subscriber)
   })
 
-  afterAll(() => {
+  afterAll(async () => {
+    await databaseHelpers.teardown()
     projectService.unsubscribe({}, subscriber)
   })
 

@@ -1,5 +1,12 @@
-import type { DatabaseInfo } from '@shared/database/types/adapter'
+import type {
+  DatabaseInfo,
+  DatabaseTransactionMode,
+} from '@shared/database/types/adapter'
 import type { Nullable } from '@shared/lib/utils/types'
+import type {
+  DatabaseTableSchema,
+  InferTableType,
+} from '@shared/database/types/schema'
 
 export const whereBooleanOperators = ['AND', 'OR'] as const
 export type WhereBooleanOperator = (typeof whereBooleanOperators)[number]
@@ -120,10 +127,14 @@ export type LeftJoinArgs<
 }
 
 export interface Joinable<TLeftData extends object> {
-  leftJoin<TRightData extends object>(
-    rightTableName: string,
-    args: LeftJoinArgs<TLeftData, TRightData>,
-  ): JoinedTable<TLeftData, TRightData>
+  leftJoin<
+    TRightData extends object = object,
+    TRightSchema extends
+      DatabaseTableSchema<TRightData> = DatabaseTableSchema<TRightData>,
+  >(
+    rightTable: TRightSchema | string,
+    args: LeftJoinArgs<TLeftData, InferTableType<TRightSchema>>,
+  ): JoinedTable<TLeftData, InferTableType<TRightSchema>>
 }
 
 export interface TableBase<TData extends object>
@@ -158,7 +169,12 @@ export type CreateIndexArgs<TData extends object> = {
 }
 
 export interface Transaction {
-  table<TData extends object>(tableName: string): Table<TData>
+  table<
+    TData extends object = object,
+    TSchema extends DatabaseTableSchema<TData> = DatabaseTableSchema<TData>,
+  >(
+    table: TSchema | string,
+  ): Table<InferTableType<TSchema>>
 }
 
 export interface UpgradeTable<TData extends object> extends Table<TData> {
@@ -166,10 +182,18 @@ export interface UpgradeTable<TData extends object> extends Table<TData> {
 }
 
 export interface UpgradeTransaction extends Transaction {
-  createTable<TData extends object>(
-    args: CreateTableArgs<TData>,
-  ): Promise<UpgradeTable<TData>>
-  table<TData extends object>(tableName: string): UpgradeTable<TData>
+  createTable<
+    TData extends object = object,
+    TSchema extends DatabaseTableSchema<TData> = DatabaseTableSchema<TData>,
+  >(
+    schema: TSchema,
+  ): Promise<UpgradeTable<InferTableType<TSchema>>>
+  table<
+    TData extends object = object,
+    TSchema extends DatabaseTableSchema<TData> = DatabaseTableSchema<TData>,
+  >(
+    table: TSchema | string,
+  ): UpgradeTable<InferTableType<TSchema>>
 }
 
 export type UpgradeFunction = (
@@ -188,17 +212,17 @@ export interface Database {
   delete(databaseName: string): Promise<void>
   // shorthand for withReadTransaction
   withTransaction<TResult>(
-    tableNames: Array<string>,
+    tables: Array<DatabaseTableSchema<object>> | Array<string>,
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>
   // runs the block with a readwrite transaction
   withWriteTransaction<TResult>(
-    tableNames: Array<string>,
+    tables: Array<DatabaseTableSchema<object>> | Array<string>,
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>
   // runs the block with a readonly transaction
   withReadTransaction<TResult>(
-    tableNames: Array<string>,
+    tables: Array<DatabaseTableSchema<object>> | Array<string>,
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>
   getDatabases(): Promise<Array<DatabaseInfo>>

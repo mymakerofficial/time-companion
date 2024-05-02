@@ -1,4 +1,3 @@
-import { createTestDatabase } from '@shared/database/testDatabase'
 import {
   createTaskService,
   type TaskService,
@@ -13,9 +12,17 @@ import type { Database } from '@shared/database/types/database'
 import { createFixtures } from '@test/helpers/createFixtures'
 import { ProjectTestHelpers } from '@test/fixtures/service/projectTestHelpers'
 import { TaskTestHelpers } from '@test/fixtures/service/taskTestHelpers'
+import { createDatabase } from '@shared/database/factory/database'
+import { inMemoryDBAdapter } from '@shared/database/adapters/inMemory/database'
+import { projectsTable } from '@shared/model/project'
+import { tasksTable } from '@shared/model/task'
 
 export interface ServiceFixtures {
   database: Database
+  databaseHelpers: {
+    setup: () => Promise<void>
+    teardown: () => Promise<void>
+  }
   taskService: TaskService
   projectService: ProjectService
   projectHelpers: ProjectTestHelpers
@@ -23,7 +30,31 @@ export interface ServiceFixtures {
 }
 
 export const useServiceFixtures = createFixtures<ServiceFixtures>({
-  database: createTestDatabase(),
+  database: () => {
+    return createDatabase(inMemoryDBAdapter())
+  },
+  databaseHelpers: ({ database }) => ({
+    setup: async () => {
+      return await database.open('services-test-db', 1, async (transaction) => {
+        const projects = await transaction.createTable(projectsTable)
+        const tasks = await transaction.createTable(tasksTable)
+
+        await transaction.table(projectsTable).createIndex({
+          keyPath: 'displayName',
+          unique: true,
+        })
+
+        await tasks.createIndex({
+          keyPath: 'displayName',
+          unique: true,
+        })
+      })
+    },
+    teardown: async () => {
+      await database.close()
+      await database.delete('services-test-db')
+    },
+  }),
   taskService: ({ database }) => {
     return createTaskService({
       taskPersistence: createTaskPersistence({

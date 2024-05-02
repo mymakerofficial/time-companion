@@ -10,6 +10,7 @@ import { uuid } from '@shared/lib/utils/uuid'
 import { randomElements } from '@shared/lib/utils/random'
 import { check } from '@renderer/lib/utils'
 import type { Nullable } from '@shared/lib/utils/types'
+import { defineTable } from '@shared/database/schema/defineTable'
 
 export class DatabaseTestHelpers {
   constructor(
@@ -29,6 +30,26 @@ export class DatabaseTestHelpers {
     return 'pets'
   }
 
+  get personsTable() {
+    return defineTable<Person>(this.personsTableName, {
+      id: { type: 'string', isPrimaryKey: true },
+      firstName: { type: 'string' },
+      lastName: { type: 'string' },
+      username: { type: 'string' },
+      gender: { type: 'string' },
+      age: { type: 'number' },
+    })
+  }
+
+  get petsTable() {
+    return defineTable<Pet>(this.petsTableName, {
+      id: { type: 'string', isPrimaryKey: true },
+      name: { type: 'string' },
+      age: { type: 'number' },
+      ownerId: { type: 'string' },
+    })
+  }
+
   get upgradeFunction(): UpgradeFunction {
     return async (transaction: UpgradeTransaction, newVersion, oldVersion) => {
       if (newVersion === 1) {
@@ -36,34 +57,14 @@ export class DatabaseTestHelpers {
       }
 
       if (newVersion === 2) {
-        const personsTable = await transaction.createTable({
-          name: this.personsTableName,
-          schema: {
-            id: 'string',
-            firstName: 'string',
-            lastName: 'string',
-            username: 'string',
-            gender: 'string',
-            age: 'number',
-          },
-          primaryKey: 'id',
-        })
+        const personsTable = await transaction.createTable(this.personsTable)
 
         await personsTable.createIndex({
           keyPath: 'firstName',
           unique: false,
         })
 
-        const petsTable = await transaction.createTable({
-          name: this.petsTableName,
-          schema: {
-            id: 'string',
-            name: 'string',
-            age: 'number',
-            ownerId: 'string',
-          },
-          primaryKey: 'id',
-        })
+        const petsTable = await transaction.createTable(this.petsTable)
 
         await petsTable.createIndex({
           keyPath: 'name',
@@ -72,7 +73,7 @@ export class DatabaseTestHelpers {
       }
 
       if (newVersion === 3) {
-        const personsTable = transaction.table<Person>(this.personsTableName)
+        const personsTable = transaction.table(this.personsTable)
 
         await personsTable.createIndex({
           keyPath: 'username',
@@ -138,22 +139,20 @@ export class DatabaseTestHelpers {
 
   async insertPersons(persons: Array<Person>): Promise<Array<Person>> {
     return await this.database.withWriteTransaction(
-      [this.personsTableName],
+      [this.personsTable],
       async (transaction) => {
-        return await transaction
-          .table<Person>(this.personsTableName)
-          .insertMany({
-            data: persons,
-          })
+        return await transaction.table(this.personsTable).insertMany({
+          data: persons,
+        })
       },
     )
   }
 
   async insertPets(pets: Array<Pet>): Promise<Array<Pet>> {
     return await this.database.withWriteTransaction(
-      [this.petsTableName],
+      [this.petsTable],
       async (transaction) => {
-        return await transaction.table<Pet>(this.petsTableName).insertMany({
+        return await transaction.table(this.petsTable).insertMany({
           data: pets,
         })
       },
@@ -177,18 +176,18 @@ export class DatabaseTestHelpers {
 
   async getAllPersonsInDatabase(): Promise<Array<Person>> {
     return await this.database.withReadTransaction(
-      [this.personsTableName],
+      [this.personsTable],
       async (transaction) => {
-        return await transaction.table<Person>(this.personsTableName).findMany()
+        return await transaction.table(this.personsTable).findMany()
       },
     )
   }
 
   async getPersonsInDatabaseByIds(ids: Array<string>): Promise<Array<Person>> {
     return await this.database.withReadTransaction(
-      [this.personsTableName],
+      [this.personsTable],
       async (transaction) => {
-        return await transaction.table<Person>(this.personsTableName).findMany({
+        return await transaction.table(this.personsTable).findMany({
           where: { id: { in: ids } },
         })
       },
@@ -197,22 +196,20 @@ export class DatabaseTestHelpers {
 
   async getPersonInDatabaseById(id: string): Promise<Nullable<Person>> {
     return await this.database.withReadTransaction(
-      [this.personsTableName],
+      [this.personsTable],
       async (transaction) => {
-        return await transaction
-          .table<Person>(this.personsTableName)
-          .findFirst({
-            where: { id: { equals: id } },
-          })
+        return await transaction.table(this.personsTable).findFirst({
+          where: { id: { equals: id } },
+        })
       },
     )
   }
 
   async getAllPetsInDatabase(): Promise<Array<Pet>> {
     return await this.database.withReadTransaction(
-      [this.petsTableName],
+      [this.petsTable],
       async (transaction) => {
-        return await transaction.table<Pet>(this.petsTableName).findMany()
+        return await transaction.table(this.petsTable).findMany()
       },
     )
   }

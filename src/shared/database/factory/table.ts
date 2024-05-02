@@ -9,27 +9,42 @@ import type {
   DatabaseTransactionAdapter,
 } from '@shared/database/types/adapter'
 import { DatabaseTableBaseImpl } from '@shared/database/factory/tableBase'
+import type {
+  DatabaseTableSchema,
+  InferTableType,
+} from '@shared/database/types/schema'
+import { isString } from '@shared/lib/utils/checks'
 
-export class DatabaseTableImpl<TData extends object>
-  extends DatabaseTableBaseImpl<TData>
-  implements Table<TData>
+export class DatabaseTableImpl<TLeftData extends object>
+  extends DatabaseTableBaseImpl<TLeftData>
+  implements Table<TLeftData>
 {
   constructor(
     protected readonly transactionAdapter: DatabaseTransactionAdapter,
-    protected readonly tableAdapter: DatabaseTableAdapter<TData>,
+    protected readonly leftTableAdapter: DatabaseTableAdapter<TLeftData>,
   ) {
-    super(tableAdapter)
+    super(leftTableAdapter)
   }
 
-  leftJoin<TRightData extends object>(
-    rightTableName: string,
-    args: LeftJoinArgs<TData, TRightData>,
-  ): JoinedTable<TData, TRightData> {
+  leftJoin<
+    TRightData extends object = object,
+    TRightSchema extends
+      DatabaseTableSchema<TRightData> = DatabaseTableSchema<TRightData>,
+  >(
+    rightTable: TRightSchema | string,
+    args: LeftJoinArgs<TLeftData, InferTableType<TRightSchema>>,
+  ): JoinedTable<TLeftData, InferTableType<TRightSchema>> {
+    const rightTableName = isString(rightTable)
+      ? rightTable
+      : rightTable._raw.tableName
+
     const rightTableAdapter =
-      this.transactionAdapter.getTable<TRightData>(rightTableName)
+      this.transactionAdapter.getTable<InferTableType<TRightSchema>>(
+        rightTableName,
+      )
 
     return new DatabaseJoinedTableImpl(
-      this.tableAdapter,
+      this.leftTableAdapter,
       rightTableAdapter,
       args,
     )

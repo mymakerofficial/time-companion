@@ -1,6 +1,6 @@
-import type { ProjectEntityDto } from '@shared/model/project'
+import { type ProjectEntityDto, projectsTable } from '@shared/model/project'
 import type { Database, Transaction } from '@shared/database/types/database'
-import type { TaskEntityDto } from '@shared/model/task'
+import { type TaskEntityDto, tasksTable } from '@shared/model/task'
 import { asyncGetOrThrow } from '@shared/lib/utils/result'
 import { check, isNotNull } from '@shared/lib/utils/checks'
 
@@ -32,7 +32,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   }
 
   private async getProjectsQuery(transaction: Transaction) {
-    return await transaction.table<ProjectEntityDto>('projects').findMany({
+    return await transaction.table(projectsTable).findMany({
       where: { deletedAt: { equals: null } },
       orderBy: { displayName: 'asc' },
     })
@@ -40,7 +40,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
 
   async getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>> {
     return await this.database.withReadTransaction(
-      ['projects'],
+      [projectsTable],
       async (transaction) => {
         return await this.getProjectsQuery(transaction)
       },
@@ -48,7 +48,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   }
 
   private async getProjectByIdQuery(transaction: Transaction, id: string) {
-    return await transaction.table<ProjectEntityDto>('projects').findFirst({
+    return await transaction.table(projectsTable).findFirst({
       where: {
         AND: [{ id: { equals: id } }, { deletedAt: { equals: null } }],
       },
@@ -57,7 +57,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
 
   async getProjectById(id: string): Promise<Readonly<ProjectEntityDto>> {
     const res = await this.database.withReadTransaction(
-      ['projects'],
+      [projectsTable],
       async (transaction) => {
         return await this.getProjectByIdQuery(transaction, id)
       },
@@ -72,7 +72,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     transaction: Transaction,
     displayName: string,
   ) {
-    return await transaction.table<ProjectEntityDto>('projects').findFirst({
+    return await transaction.table(projectsTable).findFirst({
       where: {
         AND: [
           { displayName: { equals: displayName } },
@@ -86,7 +86,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     displayName: string,
   ): Promise<Readonly<ProjectEntityDto>> {
     const res = await this.database.withReadTransaction(
-      ['projects'],
+      [projectsTable],
       async (transaction) => {
         return await this.getProjectByDisplayNameQuery(transaction, displayName)
       },
@@ -105,8 +105,8 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     taskId: string,
   ) {
     return await transaction
-      .table<ProjectEntityDto>('projects')
-      .leftJoin<TaskEntityDto>('tasks', {
+      .table(projectsTable)
+      .leftJoin(tasksTable, {
         on: { id: 'projectId' },
         where: { id: { equals: taskId } },
       })
@@ -119,7 +119,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     taskId: string,
   ): Promise<Readonly<ProjectEntityDto>> {
     const res = await this.database.withReadTransaction(
-      ['projects', 'tasks'],
+      [projectsTable, tasksTable],
       async (transaction) => {
         return await this.getProjectByTaskIdQuery(transaction, taskId)
       },
@@ -134,7 +134,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     transaction: Transaction,
     project: Readonly<ProjectEntityDto>,
   ) {
-    return await transaction.table<ProjectEntityDto>('projects').insert({
+    return await transaction.table(projectsTable).insert({
       data: project,
     })
   }
@@ -143,7 +143,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     project: Readonly<ProjectEntityDto>,
   ): Promise<Readonly<ProjectEntityDto>> {
     return await this.database.withWriteTransaction(
-      ['projects'],
+      [projectsTable],
       async (transaction) => {
         return await asyncGetOrThrow(
           this.createProjectQuery(transaction, project),
@@ -158,7 +158,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     id: string,
     partialProject: Partial<Readonly<ProjectEntityDto>>,
   ) {
-    return await transaction.table<ProjectEntityDto>('projects').update({
+    return await transaction.table(projectsTable).update({
       where: { id: { equals: id } },
       data: partialProject,
     })
@@ -169,7 +169,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     partialProject: Partial<Readonly<ProjectEntityDto>>,
   ): Promise<Readonly<ProjectEntityDto>> {
     const res = await this.database.withWriteTransaction(
-      ['projects'],
+      [projectsTable],
       async (transaction) => {
         return await this.updateProjectQuery(transaction, id, partialProject)
       },

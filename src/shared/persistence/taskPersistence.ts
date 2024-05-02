@@ -1,6 +1,6 @@
 import type { Database, Transaction } from '@shared/database/types/database'
-import type { TaskEntityDto } from '@shared/model/task'
-import type { ProjectEntityDto } from '@shared/model/project'
+import { type TaskEntityDto, tasksTable } from '@shared/model/task'
+import { type ProjectEntityDto, projectsTable } from '@shared/model/project'
 import { check, isNotNull, isNull } from '@shared/lib/utils/checks'
 
 export interface TaskPersistenceDependencies {
@@ -34,7 +34,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
   }
 
   private async getTasksQuery(transaction: Transaction) {
-    return await transaction.table<TaskEntityDto>('tasks').findMany({
+    return await transaction.table(tasksTable).findMany({
       where: {
         deletedAt: { equals: null },
       },
@@ -44,7 +44,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
 
   async getTasks(): Promise<ReadonlyArray<TaskEntityDto>> {
     return await this.database.withReadTransaction(
-      ['tasks'],
+      [tasksTable],
       async (transaction) => {
         return await this.getTasksQuery(transaction)
       },
@@ -52,7 +52,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
   }
 
   private async getTaskByIdQuery(transaction: Transaction, id: string) {
-    return await transaction.table<TaskEntityDto>('tasks').findFirst({
+    return await transaction.table(tasksTable).findFirst({
       where: {
         AND: [{ id: { equals: id } }, { deletedAt: { equals: null } }],
       },
@@ -61,7 +61,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
 
   async getTaskById(id: string): Promise<Readonly<TaskEntityDto>> {
     const res = await this.database.withReadTransaction(
-      ['tasks'],
+      [tasksTable],
       async (transaction) => {
         return await this.getTaskByIdQuery(transaction, id)
       },
@@ -77,7 +77,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
     displayName: string,
     projectId: string,
   ) {
-    return transaction.table<TaskEntityDto>('tasks').findFirst({
+    return transaction.table(tasksTable).findFirst({
       where: {
         AND: [
           { displayName: { equals: displayName } },
@@ -93,7 +93,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
     projectId: string,
   ): Promise<Readonly<TaskEntityDto>> {
     const res = await this.database.withReadTransaction(
-      ['tasks', 'projects'],
+      [tasksTable, projectsTable],
       async (transaction) => {
         return await this.getTaskByDisplayNameAndProjectIdQuery(
           transaction,
@@ -115,7 +115,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
     transaction: Transaction,
     projectId: string,
   ) {
-    return await transaction.table<ProjectEntityDto>('projects').findFirst({
+    return await transaction.table(projectsTable).findFirst({
       where: {
         AND: [{ id: { equals: projectId } }, { deletedAt: { equals: null } }],
       },
@@ -126,7 +126,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
     transaction: Transaction,
     projectId: string,
   ) {
-    return await transaction.table<TaskEntityDto>('tasks').findMany({
+    return await transaction.table(tasksTable).findMany({
       where: {
         AND: [
           { projectId: { equals: projectId } },
@@ -141,7 +141,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
     projectId: string,
   ): Promise<ReadonlyArray<TaskEntityDto>> {
     return await this.database.withReadTransaction(
-      ['tasks', 'projects'],
+      [tasksTable, projectsTable],
       async (transaction) => {
         const project = await this.getProjectByIdQuery(transaction, projectId)
 
@@ -156,7 +156,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
     transaction: Transaction,
     task: Readonly<TaskEntityDto>,
   ): Promise<Readonly<TaskEntityDto>> {
-    return await transaction.table<TaskEntityDto>('tasks').insert({
+    return await transaction.table(tasksTable).insert({
       data: task,
     })
   }
@@ -165,7 +165,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
     task: Readonly<TaskEntityDto>,
   ): Promise<Readonly<TaskEntityDto>> {
     return await this.database.withWriteTransaction(
-      ['tasks', 'projects'],
+      [tasksTable, projectsTable],
       async (transaction) => {
         const existingTask = await this.getTaskByDisplayNameAndProjectIdQuery(
           transaction,
@@ -198,7 +198,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
     id: string,
     partialTask: Partial<Readonly<TaskEntityDto>>,
   ) {
-    return await transaction.table<TaskEntityDto>('tasks').update({
+    return await transaction.table(tasksTable).update({
       where: { id: { equals: id } },
       data: partialTask,
     })
@@ -209,7 +209,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
     partialTask: Partial<Readonly<TaskEntityDto>>,
   ): Promise<Readonly<TaskEntityDto>> {
     const res = await this.database.withWriteTransaction(
-      ['tasks'],
+      [tasksTable],
       async (transaction) => {
         return await this.updateTaskQuery(transaction, id, partialTask)
       },
