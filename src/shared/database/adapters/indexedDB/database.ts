@@ -1,6 +1,5 @@
 import type { Nullable } from '@shared/lib/utils/types'
 import type {
-  AdapterUpgradeFunction,
   DatabaseAdapter,
   DatabaseInfo,
   DatabaseTransactionAdapter,
@@ -27,11 +26,10 @@ export class IndexedDBDatabaseAdapterImpl implements DatabaseAdapter {
     this.database = null
   }
 
-  async openDatabase(
+  openDatabase(
     name: string,
     version: number,
-    upgrade: AdapterUpgradeFunction,
-  ): Promise<void> {
+  ): Promise<Nullable<DatabaseTransactionAdapter>> {
     return new Promise((resolve, reject) => {
       const request = this.indexedDB.open(name, version)
 
@@ -41,12 +39,14 @@ export class IndexedDBDatabaseAdapterImpl implements DatabaseAdapter {
 
       request.onsuccess = () => {
         this.database = request.result
-        resolve()
+        resolve(null)
       }
 
       request.onupgradeneeded = async (event) => {
         // get the current transaction... i don't think this is even documented anywhere
         // thanks https://stackoverflow.com/a/21078740
+
+        this.database = request.result
 
         // @ts-expect-error
         const transaction = event.target.transaction
@@ -59,9 +59,7 @@ export class IndexedDBDatabaseAdapterImpl implements DatabaseAdapter {
             'versionchange',
           )
 
-        await upgrade(transactionAdapter)
-
-        // don't resolve here, we only know the upgrade is done when onsuccess is called
+        resolve(transactionAdapter)
       }
     })
   }

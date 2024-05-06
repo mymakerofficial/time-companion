@@ -41,27 +41,27 @@ export class DatabaseImpl implements Database {
       `Cannot open database at lower version. Current version is "${databaseInfo?.version}", requested version is "${version}".`,
     )
 
-    await this.adapter.openDatabase(
-      name,
-      version,
-      async (transactionAdapter) => {
-        const currentVersion = getOrDefault(databaseInfo?.version, 0)
+    const transactionAdapter = await this.adapter.openDatabase(name, version)
 
-        // call upgrade function for each version between and including the current version and the target version
+    if (isNotNull(transactionAdapter)) {
+      const currentVersion = getOrDefault(databaseInfo?.version, 0)
 
-        for (
-          let newVersion = currentVersion + 1;
-          newVersion <= version;
-          newVersion++
-        ) {
-          await upgrade(
-            new DatabaseUpgradeTransactionImpl(transactionAdapter),
-            newVersion,
-            newVersion - 1,
-          )
-        }
-      },
-    )
+      // call upgrade function for each version between and including the current version and the target version
+
+      for (
+        let newVersion = currentVersion + 1;
+        newVersion <= version;
+        newVersion++
+      ) {
+        await upgrade(
+          new DatabaseUpgradeTransactionImpl(transactionAdapter),
+          newVersion,
+          newVersion - 1,
+        )
+      }
+
+      await transactionAdapter.commit()
+    }
   }
 
   async close(): Promise<void> {

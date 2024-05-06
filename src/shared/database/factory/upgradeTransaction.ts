@@ -1,5 +1,4 @@
 import type {
-  CreateTableArgs,
   UpgradeTable,
   UpgradeTransaction,
 } from '@shared/database/types/database'
@@ -19,10 +18,15 @@ export class DatabaseUpgradeTransactionImpl
     TData extends object = object,
     TSchema extends DatabaseTableSchema<TData> = DatabaseTableSchema<TData>,
   >(schema: TSchema): Promise<UpgradeTable<InferTableType<TSchema>>> {
-    await this.transactionAdapter.createTable(
-      schema._raw.tableName,
-      schema._raw.primaryKey,
-    )
+    await this.transactionAdapter.createTable({
+      tableName: schema._raw.tableName,
+      primaryKey: schema._raw.primaryKey,
+      columns: schema._raw.columns.map((column) => ({
+        name: column.name,
+        type: column.type,
+        isNullable: column.isNullable ?? false,
+      })),
+    })
     return this.table(schema)
   }
 

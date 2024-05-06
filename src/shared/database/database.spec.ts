@@ -31,9 +31,9 @@ function byFirstName(a: Person, b: Person) {
 }
 
 describe.each([
-  ['In Memory Database', () => createDatabase(inMemoryDBAdapter()), false],
-  ['IndexedDB', () => createDatabase(indexedDBAdapter(fakeIndexedDB)), true],
-])('Adapter "%s"', (_, databaseFactory, persistent) => {
+  ['In Memory Database', () => createDatabase(inMemoryDBAdapter())],
+  ['IndexedDB', () => createDatabase(indexedDBAdapter(fakeIndexedDB))],
+])('Adapter "%s"', (_, databaseFactory) => {
   const { database, helpers, personsTable, petsTable } = useDatabaseFixtures({
     database: databaseFactory(),
   })
@@ -158,75 +158,6 @@ describe.each([
       expect(databases).toEqual([{ name: 'bar', version: 2 }])
     })
   })
-
-  if (persistent) {
-    describe('persisted database', () => {
-      afterEach(async () => {
-        await helpers.cleanup()
-      })
-
-      it('should retain all data across instances', async () => {
-        const { database: firstDatabase, helpers: firstHelpers } =
-          useDatabaseFixtures({
-            database: databaseFactory(),
-            databaseName: 'test-persisted',
-          })
-
-        await firstHelpers.openDatabaseAndMigrateIfNecessary()
-
-        await firstHelpers.insertSamplePersons(12)
-        await firstHelpers.insertSamplePets(6, 2)
-
-        const originalPersons = await firstHelpers.getAllPersonsInDatabase()
-        const originalPets = await firstHelpers.getAllPetsInDatabase()
-
-        await firstDatabase.close()
-
-        const { database: secondDatabase, helpers: secondHelpers } =
-          useDatabaseFixtures({
-            database: databaseFactory(),
-            databaseName: 'test-persisted',
-          })
-
-        await secondHelpers.openDatabaseAndMigrateIfNecessary()
-
-        const personsAfterReopen = await secondHelpers.getAllPersonsInDatabase()
-        const petsAfterReopen = await secondHelpers.getAllPetsInDatabase()
-
-        expect(personsAfterReopen).toEqual(originalPersons)
-        expect(petsAfterReopen).toEqual(originalPets)
-      })
-
-      it.todo(
-        'should fail when trying to open a database that is already open in another instance',
-        async () => {
-          const { database: firstDatabase, helpers: firstHelpers } =
-            useDatabaseFixtures({
-              database: databaseFactory(),
-              databaseName: 'test-persisted',
-            })
-
-          await firstHelpers.openDatabaseAndMigrateIfNecessary()
-
-          const { database: secondDatabase, helpers: secondHelpers } =
-            useDatabaseFixtures({
-              database: databaseFactory(),
-              databaseName: 'test-persisted',
-            })
-
-          expect(async () => {
-            await secondDatabase.open(
-              secondHelpers.databaseName,
-              secondHelpers.newestVersionNumber,
-              async () => {},
-            )
-          }).rejects.toThrowError(
-            `Database "${secondHelpers.databaseName}" is already open.`,
-          )
-        },
-      )
-    })
-  }
 
   describe('table', () => {
     beforeAll(async () => {

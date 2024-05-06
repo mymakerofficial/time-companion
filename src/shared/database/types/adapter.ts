@@ -1,8 +1,21 @@
 import type { Nullable } from '@shared/lib/utils/types'
+import type { ColumnType } from '@shared/database/types/database'
 
 export type DatabaseInfo = {
   name: string
   version: number
+}
+
+export type DatabaseAdapterColumnSchema = {
+  name: string
+  type: ColumnType
+  isNullable: boolean
+}
+
+export type DatabaseAdapterTableSchema = {
+  tableName: string
+  primaryKey: string
+  columns: Array<DatabaseAdapterColumnSchema>
 }
 
 export interface DatabaseCursor<TData extends object> {
@@ -34,7 +47,7 @@ export interface DatabaseTransactionAdapter {
   getTable<TData extends object>(tableName: string): DatabaseTableAdapter<TData>
 
   // note: a table can only be created in a versionchange transaction
-  createTable(tableName: string, primaryKey: string): Promise<void>
+  createTable(schema: DatabaseAdapterTableSchema): Promise<void>
   // note: a table can only be deleted in a versionchange transaction
   deleteTable(tableName: string): Promise<void>
 
@@ -52,9 +65,7 @@ export interface DatabaseAdapter {
   openDatabase(
     databaseName: string,
     version: number,
-    // called when the database needs to be upgraded
-    upgrade: AdapterUpgradeFunction,
-  ): Promise<void>
+  ): Promise<Nullable<DatabaseTransactionAdapter>>
   closeDatabase(): Promise<void>
   deleteDatabase(databaseName: string): Promise<void>
 

@@ -1,5 +1,4 @@
 import type {
-  AdapterUpgradeFunction,
   DatabaseAdapter,
   DatabaseInfo,
   DatabaseTransactionAdapter,
@@ -7,17 +6,16 @@ import type {
 } from '@shared/database/types/adapter'
 import type { InMemoryDataTables } from '@shared/database/adapters/inMemory/helpers/dataTable'
 import { emptyMap, toArray } from '@shared/lib/utils/list'
-import { todo } from '@shared/lib/utils/todo'
 import type { Nullable } from '@shared/lib/utils/types'
 import { InMemoryDatabaseTransactionAdapterImpl } from '@shared/database/adapters/inMemory/transaction'
 import {
   check,
   isDefined,
   isNotNull,
+  isNull,
   isUndefined,
 } from '@shared/lib/utils/checks'
 import { getOrDefault } from '@shared/lib/utils/result'
-import { ensurePromise } from '@shared/lib/utils/guards'
 
 export function inMemoryDBAdapter(): DatabaseAdapter {
   return new InMemoryDatabaseAdapterImpl()
@@ -29,8 +27,9 @@ type DatabaseRecord = {
 }
 
 export class InMemoryDatabaseAdapterImpl implements DatabaseAdapter {
-  protected openDatabaseName: Nullable<string> = null
   protected readonly databases: Map<string, DatabaseRecord> = emptyMap()
+  protected openDatabaseName: Nullable<string> = null
+  protected transaction: Nullable<DatabaseTransactionAdapter> = null
 
   protected getOpenDatabase(): DatabaseRecord {
     const databaseName = this.openDatabaseName
@@ -48,12 +47,11 @@ export class InMemoryDatabaseAdapterImpl implements DatabaseAdapter {
   async openDatabase(
     databaseName: string,
     version: number,
-    upgrade: AdapterUpgradeFunction,
-  ): Promise<void> {
+  ): Promise<Nullable<DatabaseTransactionAdapter>> {
     return new Promise((resolve) => {
       const databaseRecord = this.databases.get(databaseName)
-      const currentVersion = getOrDefault(databaseRecord?.info.version, 0)
 
+      const currentVersion = getOrDefault(databaseRecord?.info.version, 0)
       const needsUpgrade = version > currentVersion
 
       if (isUndefined(databaseRecord)) {
@@ -67,13 +65,9 @@ export class InMemoryDatabaseAdapterImpl implements DatabaseAdapter {
       this.getOpenDatabase().info.version = version
 
       if (needsUpgrade) {
-        this.openTransaction([], 'versionchange').then((transactionAdapter) => {
-          upgrade(transactionAdapter).then(() => {
-            resolve()
-          })
-        })
+        this.openTransaction([], 'versionchange').then(resolve)
       } else {
-        resolve()
+        resolve(null)
       }
     })
   }
@@ -81,7 +75,6 @@ export class InMemoryDatabaseAdapterImpl implements DatabaseAdapter {
   closeDatabase(): Promise<void> {
     return new Promise((resolve) => {
       check(isNotNull(this.openDatabaseName), 'No database is open.')
-
       this.openDatabaseName = null
       resolve()
     })
@@ -103,13 +96,25 @@ export class InMemoryDatabaseAdapterImpl implements DatabaseAdapter {
     tableNames: Array<string>,
     mode: DatabaseTransactionMode,
   ): Promise<DatabaseTransactionAdapter> {
-    return Promise.resolve(
-      new InMemoryDatabaseTransactionAdapterImpl(
+    return new Promise((resolve) => {
+      check(isNull(this.transaction), 'Transaction already open.')
+
+      const transactionAdapter = new InMemoryDatabaseTransactionAdapterImpl(
         this.getOpenDatabase().tables,
         tableNames,
         mode,
-      ),
-    )
+        () => {
+          this.transaction = null
+        },
+        () => {
+          this.transaction = null
+        },
+      )
+
+      this.transaction = transactionAdapter
+
+      resolve(transactionAdapter)
+    })
   }
 
   getDatabaseInfo(databaseName: string): Promise<Nullable<DatabaseInfo>> {

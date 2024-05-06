@@ -1,9 +1,9 @@
 import type {
+  DatabaseAdapterTableSchema,
   DatabaseTableAdapter,
   DatabaseTransactionAdapter,
   DatabaseTransactionMode,
 } from '@shared/database/types/adapter'
-import { todo } from '@shared/lib/utils/todo'
 import { check } from '@shared/lib/utils/checks'
 import { IndexedDBDatabaseTableAdapterImpl } from '@shared/database/adapters/indexedDB/table'
 
@@ -24,15 +24,15 @@ export class IndexedDBDatabaseTransactionAdapterImpl
     return new IndexedDBDatabaseTableAdapterImpl<TData>(objectStore)
   }
 
-  createTable(tableName: string, primaryKey: string): Promise<void> {
+  createTable(schema: DatabaseAdapterTableSchema): Promise<void> {
     return new Promise((resolve) => {
       check(
         this.mode === 'versionchange',
         'Transaction is not a versionchange transaction.',
       )
 
-      this.database.createObjectStore(tableName, {
-        keyPath: primaryKey,
+      this.database.createObjectStore(schema.tableName, {
+        keyPath: schema.primaryKey,
         autoIncrement: false,
       })
 

@@ -1,11 +1,12 @@
 import { emptyMap, toArray } from '@shared/lib/utils/list'
 import { check, isDefined } from '@shared/lib/utils/checks'
 import { InMemoryCursorImpl } from '@shared/database/adapters/inMemory/helpers/cursor'
-import type { OrderByDirection } from '@shared/database/types/database'
 import type {
+  DatabaseAdapterTableSchema,
   DatabaseCursor,
   DatabaseCursorDirection,
 } from '@shared/database/types/adapter'
+import type { DatabaseTableSchemaRaw } from '@shared/database/types/schema'
 
 type Index<
   TData extends object,
@@ -20,6 +21,7 @@ type Index<
 }
 
 export interface InMemoryDataTable<TData extends object> {
+  getSchema(): DatabaseAdapterTableSchema
   getPrimaryKey(): keyof TData
   getRows(): Map<TData[keyof TData], TData>
   getIndexes(): Map<keyof TData, Index<TData, keyof TData>>
@@ -56,7 +58,6 @@ export type InMemoryDataTables = Map<string, InMemoryDataTable<any>>
 export class InMemoryDataTableImpl<TData extends object>
   implements InMemoryDataTable<TData>
 {
-  protected primaryKey: keyof TData
   protected rows: Map<TData[typeof this.primaryKey], TData>
   protected indexes: Map<
     keyof TData /* keyPath */,
@@ -65,19 +66,26 @@ export class InMemoryDataTableImpl<TData extends object>
 
   protected locked = false
 
-  constructor(primaryKey: keyof TData) {
-    this.primaryKey = primaryKey
+  constructor(protected readonly schema: DatabaseAdapterTableSchema) {
     this.rows = emptyMap()
     this.indexes = emptyMap()
 
-    this.indexes.set(primaryKey, {
+    this.indexes.set(schema.primaryKey as keyof TData, {
       unique: true,
       values: [],
     })
   }
 
+  protected get primaryKey() {
+    return this.schema.primaryKey as keyof TData
+  }
+
   getPrimaryKey() {
     return this.primaryKey
+  }
+
+  getSchema(): DatabaseAdapterTableSchema {
+    return this.schema
   }
 
   getRows() {

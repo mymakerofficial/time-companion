@@ -1,4 +1,5 @@
 import type {
+  DatabaseAdapterTableSchema,
   DatabaseTableAdapter,
   DatabaseTransactionAdapter,
   DatabaseTransactionMode,
@@ -10,7 +11,9 @@ import {
 } from '@shared/database/adapters/inMemory/helpers/dataTable'
 import { check, isDefined } from '@shared/lib/utils/checks'
 import { InMemoryDatabaseTableAdapterImpl } from '@shared/database/adapters/inMemory/table'
-import { noop } from '@shared/lib/utils/noop'
+import { asyncNoop } from '@shared/lib/utils/noop'
+import type { MaybePromise } from '@shared/lib/utils/types'
+import { ensurePromise } from '@shared/lib/utils/guards'
 
 export class InMemoryDatabaseTransactionAdapterImpl
   implements DatabaseTransactionAdapter
@@ -19,8 +22,8 @@ export class InMemoryDatabaseTransactionAdapterImpl
     protected readonly tables: InMemoryDataTables,
     protected readonly tableNames: Array<string>,
     protected readonly mode: DatabaseTransactionMode,
-    protected readonly onCommit: () => void = noop,
-    protected readonly onRollback: () => void = noop,
+    protected readonly onCommit: () => MaybePromise<void> = asyncNoop,
+    protected readonly onRollback: () => MaybePromise<void> = asyncNoop,
   ) {}
 
   getTable<TData extends object>(
@@ -39,10 +42,10 @@ export class InMemoryDatabaseTransactionAdapterImpl
     return new InMemoryDatabaseTableAdapterImpl<TData>(dataTable)
   }
 
-  async createTable(tableName: string, primaryKey: string): Promise<void> {
+  async createTable(schema: DatabaseAdapterTableSchema): Promise<void> {
     return new Promise((resolve) => {
-      const table = new InMemoryDataTableImpl(primaryKey)
-      this.tables.set(tableName, table)
+      const table = new InMemoryDataTableImpl(schema)
+      this.tables.set(schema.tableName, table)
       resolve()
     })
   }
@@ -52,10 +55,10 @@ export class InMemoryDatabaseTransactionAdapterImpl
   }
 
   async commit(): Promise<void> {
-    // TODO
+    await ensurePromise(this.onCommit())
   }
 
   async rollback(): Promise<void> {
-    // TODO
+    await ensurePromise(this.onRollback())
   }
 }

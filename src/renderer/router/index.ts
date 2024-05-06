@@ -4,17 +4,17 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
+      rootPath: '/',
       name: 'app-dashboard',
       component: () => import('../views/app/dashboard/DashboardView.vue'),
     },
     {
-      path: '/report',
+      rootPath: '/report',
       name: 'app-report',
       component: () => import('../views/app/report/ReportView.vue'),
     },
     {
-      path: '/settings',
+      rootPath: '/settings',
       name: 'app-settings',
       component: () => import('../views/app/settings/SettingsView.vue'),
       redirect(_) {
@@ -22,25 +22,25 @@ const router = createRouter({
       },
       children: [
         {
-          path: 'projects',
+          rootPath: 'projects',
           name: 'app-settings-projects',
           component: () =>
             import('../views/app/settings/SettingsProjectsView.vue'),
         },
         {
-          path: 'reminders',
+          rootPath: 'reminders',
           name: 'app-settings-reminders',
           component: () =>
             import('../views/app/settings/SettingsRemindersView.vue'),
         },
         {
-          path: 'preferences',
+          rootPath: 'preferences',
           name: 'app-settings-general',
           component: () =>
             import('../views/app/settings/SettingsGeneralView.vue'),
         },
         {
-          path: 'appearance',
+          rootPath: 'appearance',
           name: 'app-settings-appearance',
           component: () =>
             import('../views/app/settings/SettingsAppearanceView.vue'),
@@ -48,7 +48,7 @@ const router = createRouter({
       ],
     },
     {
-      path: '/playground',
+      rootPath: '/playground',
       name: 'playground',
       component: () => import('../views/PlaygroundView.vue'),
     },

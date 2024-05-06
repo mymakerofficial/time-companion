@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { InMemoryDataTableImpl } from '@shared/database/adapters/inMemory/helpers/dataTable'
 import { uuid } from '@shared/lib/utils/uuid'
 import { cursorIterator } from '@shared/database/factory/helpers/cursorIterator'
+import { defineTable } from '@shared/database/schema/defineTable'
 
 type Entity = {
   id: string
@@ -12,9 +13,21 @@ function byName(a: Entity, b: Entity) {
   return a.name.localeCompare(b.name)
 }
 
+const schema = defineTable<Entity>('test', {
+  id: { type: 'string', isPrimaryKey: true },
+  name: { type: 'string' },
+})
+
 describe('In Memory Data Table', () => {
   it('should sort an indexed key', async () => {
-    const table = new InMemoryDataTableImpl<Entity>('id')
+    const table = new InMemoryDataTableImpl<Entity>({
+      tableName: 'test',
+      primaryKey: 'id',
+      columns: [
+        { name: 'id', type: 'string', isNullable: false },
+        { name: 'name', type: 'string', isNullable: false },
+      ],
+    })
 
     table.createIndex('name', false)
 
@@ -41,7 +54,14 @@ describe('In Memory Data Table', () => {
   })
 
   it('should update a value and maintain index sorting', async () => {
-    const table = new InMemoryDataTableImpl<Entity>('id')
+    const table = new InMemoryDataTableImpl<Entity>({
+      tableName: 'test',
+      primaryKey: 'id',
+      columns: [
+        { name: 'id', type: 'string', isNullable: false },
+        { name: 'name', type: 'string', isNullable: false },
+      ],
+    })
 
     table.createIndex('name', false)
 
@@ -78,7 +98,14 @@ describe('In Memory Data Table', () => {
   })
 
   it('should delete a value and maintain index sorting', async () => {
-    const table = new InMemoryDataTableImpl<Entity>('id')
+    const table = new InMemoryDataTableImpl<Entity>({
+      tableName: 'test',
+      primaryKey: 'id',
+      columns: [
+        { name: 'id', type: 'string', isNullable: false },
+        { name: 'name', type: 'string', isNullable: false },
+      ],
+    })
 
     table.createIndex('name', false)
 
