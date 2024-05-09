@@ -1,11 +1,7 @@
-import { describe, it, expect, expectTypeOf } from 'vitest'
-import {
-  boolean,
-  number,
-  string,
-  t,
-} from '@shared/database/schema/columnBuilder'
+import { describe, expect, it } from 'vitest'
+import { string, t } from '@shared/database/schema/columnBuilder'
 import { defineTable } from '@shared/database/schema/defineTable'
+import { projectsTable } from '@shared/model/project'
 
 describe('schema', () => {
   describe('columnBuilder', () => {
@@ -69,6 +65,8 @@ describe('schema', () => {
       const where = foo.name
         .contains('John')
         .or(foo.name.contains('Jane'))
+        .or(foo.name.contains('James'))
+        .and(foo.name.contains('Doe'))
         .and(foo.color.isNotNull().or(foo.color.equals('red')))
         .or(foo.id.equals('123'))
 
@@ -96,7 +94,19 @@ describe('schema', () => {
                     operator: 'contains',
                     value: 'Jane',
                   },
+                  {
+                    type: 'condition',
+                    column: expect.objectContaining({ columnName: 'name' }),
+                    operator: 'contains',
+                    value: 'James',
+                  },
                 ],
+              },
+              {
+                type: 'condition',
+                column: expect.objectContaining({ columnName: 'name' }),
+                operator: 'contains',
+                value: 'Doe',
               },
               {
                 type: 'booleanGroup',

@@ -42,7 +42,9 @@ export type WhereBuilder<T> = {
     raw: RawWhere<T>
   }
 } & {
-  [O in WhereBooleanOperator]: <G>(other: WhereBuilder<G>) => WhereBuilder<T>
+  [O in WhereBooleanOperator]: {
+    <G>(other: WhereBuilder<G>): WhereBuilder<T>
+  }
 }
 
 export type ColumnDefinitionRaw<T> = {

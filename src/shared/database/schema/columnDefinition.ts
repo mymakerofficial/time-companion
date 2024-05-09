@@ -3,6 +3,7 @@ import type {
   ColumnDefinitionBase,
   ColumnDefinitionRaw,
   RawWhere,
+  RawWhereBooleanGroup,
   WhereBuilder,
 } from '@shared/database/types/schema'
 import {
@@ -43,14 +44,29 @@ export function createColumnDefinition<T>(
 class WhereGroupBuilderImpl<T> implements WhereBuilder<T> {
   constructor(
     protected booleanOperator: WhereBooleanOperator,
-    protected conditions: Array<WhereBuilder<any>>,
+    protected parent: WhereBuilder<unknown>,
+    protected others: Array<WhereBuilder<unknown>>,
   ) {}
+
+  protected get conditions(): Array<RawWhere<unknown>> {
+    return this.others.map((condition) => condition._.raw)
+  }
+
+  protected get conditionsWithParent(): Array<RawWhere<unknown>> {
+    return [this.parent._.raw, ...this.conditions]
+  }
+
+  protected get group(): RawWhereBooleanGroup<T> {
+    return {
+      booleanOperator: this.booleanOperator,
+      conditions: this.conditionsWithParent,
+    }
+  }
 
   protected get where(): RawWhere<T> {
     return {
       type: 'booleanGroup',
-      booleanOperator: this.booleanOperator,
-      conditions: this.conditions.map((condition) => condition._.raw),
+      ...this.group,
     }
   }
 
@@ -61,11 +77,21 @@ class WhereGroupBuilderImpl<T> implements WhereBuilder<T> {
   }
 
   and<G>(other: WhereBuilder<G>): WhereBuilder<T> {
-    return new WhereGroupBuilderImpl('and', [...this.conditions, other])
+    if (this.booleanOperator === 'and') {
+      this.others.push(other)
+      return this
+    }
+
+    return new WhereGroupBuilderImpl('and', this, [other])
   }
 
   or<G>(other: WhereBuilder<G>): WhereBuilder<T> {
-    return new WhereGroupBuilderImpl('or', [...this.conditions, other])
+    if (this.booleanOperator === 'or') {
+      this.others.push(other)
+      return this
+    }
+
+    return new WhereGroupBuilderImpl('or', this, [other])
   }
 }
 
@@ -92,10 +118,10 @@ class WhereConditionBuilderImpl<T> implements WhereBuilder<T> {
   }
 
   and<G>(other: WhereBuilder<G>): WhereBuilder<T> {
-    return new WhereGroupBuilderImpl('and', [this, other])
+    return new WhereGroupBuilderImpl('and', this, [other])
   }
 
   or<G>(other: WhereBuilder<G>): WhereBuilder<T> {
-    return new WhereGroupBuilderImpl('or', [this, other])
+    return new WhereGroupBuilderImpl('or', this, [other])
   }
 }
