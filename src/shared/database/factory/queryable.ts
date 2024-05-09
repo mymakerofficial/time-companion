@@ -21,19 +21,15 @@ export class DatabaseQueryableImpl<TData extends object>
     args?: FindManyArgs<TData>,
     predicate?: (value: TData) => boolean,
   ) {
-    const unwrappedOrderBy = getOrDefault(maybeUnwrapOrderBy(args?.orderBy), {
-      key: null,
-      direction: 'asc',
-    })
-
-    const orderBy = unwrappedOrderBy.key as Nullable<string>
-    const direction = unwrappedOrderBy.direction === 'desc' ? 'prev' : 'next'
+    const orderByColumn = getOrNull(args?.orderBy?.column.columnName)
+    const direction =
+      getOrNull(args?.orderBy?.direction) === 'desc' ? 'prev' : 'next'
 
     const indexes = await this.tableAdapter.getIndexNames()
 
     check(
-      isNull(orderBy) || indexes.includes(orderBy),
-      `The index "${orderBy}" does not exist. You can only order by existing indexes or primary key.`,
+      isNull(orderByColumn) || indexes.includes(orderByColumn),
+      `The index "${orderByColumn}" does not exist. You can only order by existing indexes or primary key.`,
     )
 
     // this is a workaround
@@ -43,7 +39,7 @@ export class DatabaseQueryableImpl<TData extends object>
         args?.where?._?.raw
       : args?.where
 
-    const cursor = await this.tableAdapter.openCursor(orderBy, direction)
+    const cursor = await this.tableAdapter.openCursor(orderByColumn, direction)
     return filteredIterator(
       cursorIterator(cursor),
       where,

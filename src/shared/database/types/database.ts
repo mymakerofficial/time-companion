@@ -8,6 +8,7 @@ import type {
   InferTable,
   WhereBuilder,
   RawWhere,
+  ColumnDefinitionRaw,
 } from '@shared/database/types/schema'
 
 export const whereBooleanOperators = ['and', 'or'] as const
@@ -39,11 +40,11 @@ export const whereOperators = [
 
 export type WhereOperator = (typeof whereOperators)[number]
 
-const orderDirections = ['asc', 'desc'] as const
+export const orderDirections = ['asc', 'desc'] as const
 export type OrderByDirection = (typeof orderDirections)[number]
 
 type HasOrder<TData extends object> = {
-  orderBy?: OrderByInput<TData>
+  orderBy?: OrderBy<TData>
 }
 
 type HasOffset<TData extends object> = HasOrder<TData> & {
@@ -54,8 +55,9 @@ type HasLimit<TData extends object> = HasOrder<TData> & {
   limit?: number
 }
 
-export type OrderByInput<TData extends object> = {
-  [K in keyof TData]?: OrderByDirection
+export type OrderBy<TColumn> = {
+  column: ColumnDefinitionRaw<TColumn>
+  direction: OrderByDirection
 }
 
 export type InsertArgs<TData extends object> = {

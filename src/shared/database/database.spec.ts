@@ -333,7 +333,7 @@ describe.each([
           [personsTable],
           async (transaction) => {
             return await transaction.table(personsTable).findFirst({
-              orderBy: { firstName: 'asc' },
+              orderBy: personsTable.firstName.asc(),
             })
           },
         )
@@ -348,7 +348,7 @@ describe.each([
           [personsTable],
           async (transaction) => {
             return await transaction.table(personsTable).findFirst({
-              orderBy: { firstName: 'desc' },
+              orderBy: personsTable.firstName.desc(),
             })
           },
         )
@@ -449,7 +449,7 @@ describe.each([
           [personsTable],
           async (transaction) => {
             return await transaction.table(personsTable).findMany({
-              orderBy: { firstName: 'asc' },
+              orderBy: personsTable.firstName.asc(),
             })
           },
         )
@@ -464,7 +464,7 @@ describe.each([
           [personsTable],
           async (transaction) => {
             return await transaction.table(personsTable).findMany({
-              orderBy: { firstName: 'desc' },
+              orderBy: personsTable.firstName.desc(),
             })
           },
         )
@@ -480,7 +480,7 @@ describe.each([
             [personsTable],
             async (transaction) => {
               return await transaction.table(personsTable).findMany({
-                orderBy: { lastName: 'asc' },
+                orderBy: personsTable.lastName.asc(),
               })
             },
           )

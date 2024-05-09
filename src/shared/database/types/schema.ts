@@ -1,5 +1,7 @@
 import {
   type ColumnType,
+  type OrderBy,
+  type OrderByDirection,
   type WhereBooleanOperator,
   type WhereEqualityOperator,
   type WhereListOperator,
@@ -25,16 +27,16 @@ export type RawWhere<T> =
   | ({ type: 'booleanGroup' } & RawWhereBooleanGroup<T>)
   | ({ type: 'condition' } & RawWhereCondition<T>)
 
-export type WhereConditionFactory<T> = {
-  [O in WhereEqualityOperator]: (value: T) => WhereBuilder<T>
+export type WhereConditionFactory<TColumn> = {
+  [O in WhereEqualityOperator]: (value: TColumn) => WhereBuilder<TColumn>
 } & {
-  [O in WhereStringOperator]: (value: string) => WhereBuilder<T>
+  [O in WhereStringOperator]: (value: string) => WhereBuilder<TColumn>
 } & {
-  [O in WhereListOperator]: (value: Array<T>) => WhereBuilder<T>
+  [O in WhereListOperator]: (value: Array<TColumn>) => WhereBuilder<TColumn>
 } & {
-  [O in WhereNumberOperator]: (value: number) => WhereBuilder<T>
+  [O in WhereNumberOperator]: (value: number) => WhereBuilder<TColumn>
 } & {
-  [O in WhereNullabilityOperator]: () => WhereBuilder<T>
+  [O in WhereNullabilityOperator]: () => WhereBuilder<TColumn>
 }
 
 export type WhereBuilder<T> = {
@@ -47,7 +49,13 @@ export type WhereBuilder<T> = {
   }
 }
 
-export type ColumnDefinitionRaw<T> = {
+export type OrderByColumnFactory<TColumn> = {
+  [D in OrderByDirection]: () => OrderBy<TColumn>
+} & {
+  direction: (direction: OrderByDirection) => OrderBy<TColumn>
+}
+
+export type ColumnDefinitionRaw<TColumn> = {
   tableName: string
   columnName: string
   dataType: ColumnType
@@ -55,15 +63,15 @@ export type ColumnDefinitionRaw<T> = {
   isNullable: boolean
 }
 
-export type ColumnDefinitionBase<T> = {
+export type ColumnDefinitionBase<TColumn> = {
   _: {
-    raw: ColumnDefinitionRaw<T>
-    where: (operator: WhereOperator, value: any) => WhereBuilder<T>
+    raw: ColumnDefinitionRaw<TColumn>
+    where: (operator: WhereOperator, value: any) => WhereBuilder<TColumn>
   }
-}
+} & OrderByColumnFactory<TColumn>
 
-export type ColumnDefinition<T> = ColumnDefinitionBase<T> &
-  WhereConditionFactory<T>
+export type ColumnDefinition<TColumn> = ColumnDefinitionBase<TColumn> &
+  WhereConditionFactory<TColumn>
 
 export type ColumnBuilder<T> = {
   _: {

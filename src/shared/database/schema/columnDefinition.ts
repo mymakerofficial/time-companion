@@ -2,18 +2,23 @@ import type {
   ColumnDefinition,
   ColumnDefinitionBase,
   ColumnDefinitionRaw,
+  OrderByColumnFactory,
   RawWhere,
   RawWhereBooleanGroup,
   WhereBuilder,
 } from '@shared/database/types/schema'
 import {
+  type OrderBy,
+  type OrderByDirection,
   type WhereBooleanOperator,
   type WhereOperator,
   whereOperators,
 } from '@shared/database/types/database'
 
-class ColumnDefinitionBaseImpl<T> implements ColumnDefinitionBase<T> {
-  constructor(protected rawDefinition: ColumnDefinitionRaw<T>) {}
+class ColumnDefinitionBaseImpl<TColumn>
+  implements ColumnDefinitionBase<TColumn>
+{
+  constructor(protected rawDefinition: ColumnDefinitionRaw<TColumn>) {}
 
   get _() {
     return {
@@ -21,6 +26,21 @@ class ColumnDefinitionBaseImpl<T> implements ColumnDefinitionBase<T> {
       where: (operator: WhereOperator, value?: unknown) =>
         new WhereConditionBuilderImpl(this.rawDefinition, operator, value),
     }
+  }
+
+  direction(direction: OrderByDirection): OrderBy<TColumn> {
+    return {
+      column: this.rawDefinition,
+      direction,
+    }
+  }
+
+  asc(): OrderBy<TColumn> {
+    return this.direction('asc')
+  }
+
+  desc(): OrderBy<TColumn> {
+    return this.direction('desc')
   }
 }
 

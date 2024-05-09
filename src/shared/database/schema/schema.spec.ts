@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { string, t } from '@shared/database/schema/columnBuilder'
 import { defineTable } from '@shared/database/schema/defineTable'
-import { projectsTable } from '@shared/model/project'
+import { orderDirections } from '@shared/database/types/database'
 
 describe('schema', () => {
   describe('columnBuilder', () => {
@@ -135,6 +135,20 @@ describe('schema', () => {
             value: '123',
           },
         ],
+      })
+    })
+  })
+
+  describe('orderBy', () => {
+    it.each(orderDirections)('should return an %s order by', (direction) => {
+      const foo = defineTable('foo', {
+        id: string().primaryKey(),
+        name: string(),
+      })
+
+      expect(foo.name[direction]()).toEqual({
+        column: expect.objectContaining({ columnName: 'name' }),
+        direction: direction,
       })
     })
   })
