@@ -305,9 +305,7 @@ describe.each([
           [personsTable],
           async (transaction) => {
             return await transaction.table(personsTable).findFirst({
-              where: {
-                id: { equals: randomPerson.id },
-              },
+              where: personsTable.id.equals(randomPerson.id),
             })
           },
         )
@@ -368,17 +366,10 @@ describe.each([
           [personsTable],
           async (transaction) => {
             return await transaction.table(personsTable).findFirst({
-              where: {
-                and: [
-                  { firstName: { equals: randomPerson.firstName } },
-                  {
-                    and: [
-                      { age: { equals: randomPerson.age } },
-                      { id: { notEquals: 'not-an-id' } },
-                    ],
-                  },
-                ],
-              },
+              where: personsTable.firstName
+                .equals(randomPerson.firstName)
+                .and(personsTable.age.equals(randomPerson.age))
+                .and(personsTable.id.notEquals('not-an-id')),
             })
           },
         )
@@ -393,9 +384,7 @@ describe.each([
           [personsTable],
           async (transaction) => {
             return await transaction.table(personsTable).findFirst({
-              where: {
-                id: { equals: 'non-existent-id' },
-              },
+              where: personsTable.id.equals('non-existent-id'),
             })
           },
         )
@@ -428,7 +417,7 @@ describe.each([
           [personsTable],
           async (transaction) => {
             return await transaction.table(personsTable).findMany({
-              where: { firstName: { equals: randomPerson.firstName } },
+              where: personsTable.firstName.equals(randomPerson.firstName),
             })
           },
         )
@@ -553,9 +542,7 @@ describe.each([
           [personsTable],
           async (transaction) => {
             return await transaction.table(personsTable).findMany({
-              where: {
-                id: { equals: 'non-existent-id' },
-              },
+              where: personsTable.id.equals('non-existent-id'),
             })
           },
         )
@@ -583,7 +570,7 @@ describe.each([
               .table(personsTable)
               .leftJoin(petsTable, {
                 on: { id: 'ownerId' },
-                where: { id: { equals: petId } },
+                where: petsTable.id.equals(petId),
               })
               .findFirst()
           },
@@ -614,7 +601,7 @@ describe.each([
               .table(personsTable)
               .leftJoin(petsTable, {
                 on: { id: 'ownerId' },
-                where: { id: { equals: petId } },
+                where: petsTable.id.equals(petId),
               })
               .deleteAll()
           },
@@ -651,7 +638,7 @@ describe.each([
                   .table(personsTable)
                   .leftJoin(petsTable, {
                     on: { id: 'age' },
-                    where: { id: { equals: randomPet.id } },
+                    where: petsTable.id.equals(randomPet.id),
                   })
                   .findMany()
               },
@@ -675,7 +662,7 @@ describe.each([
           [personsTable],
           async (transaction) => {
             return await transaction.table(personsTable).update({
-              where: { id: { equals: randomPerson.id } },
+              where: personsTable.id.equals(randomPerson.id),
               data: {
                 firstName: newFirstName,
                 gender: newGender,
@@ -705,7 +692,7 @@ describe.each([
           [personsTable],
           async (transaction) => {
             return await transaction.table(personsTable).update({
-              where: { id: { equals: 'non-existent-id' } },
+              where: personsTable.id.equals('non-existent-id'),
               data: {
                 firstName: 'Jeff',
               },
@@ -727,7 +714,7 @@ describe.each([
         await expect(
           database.withWriteTransaction([personsTable], async (transaction) => {
             return await transaction.table(personsTable).update({
-              where: { id: { equals: randomPerson.id } },
+              where: personsTable.id.equals(randomPerson.id),
               data: {
                 id: newId,
               },
@@ -752,7 +739,7 @@ describe.each([
               [personsTable],
               async (transaction) => {
                 return await transaction.table(personsTable).update({
-                  where: { id: { equals: randomPerson.id } },
+                  where: personsTable.id.equals(randomPerson.id),
                   data: {
                     username: otherRandomPerson.username,
                   },
@@ -780,7 +767,7 @@ describe.each([
           [personsTable],
           async (transaction) => {
             return await transaction.table(personsTable).updateMany({
-              where: { id: { in: ids } },
+              where: personsTable.id.in(ids),
               data: {
                 lastName: newLastName,
               },
@@ -811,7 +798,9 @@ describe.each([
           [personsTable],
           async (transaction) => {
             return await transaction.table(personsTable).updateMany({
-              where: { id: { in: randomPersons.map((person) => person.id) } },
+              where: personsTable.id.in(
+                randomPersons.map((person) => person.id),
+              ),
               data: {
                 lastName: newLastName,
               },
@@ -907,9 +896,7 @@ describe.each([
           async (transaction) => {
             return await transaction.table(personsTable).updateMany({
               data: { firstName: 'Jeff' },
-              where: {
-                id: { equals: 'non-existent-id' },
-              },
+              where: personsTable.id.equals('non-existent-id'),
             })
           },
         )
@@ -930,7 +917,7 @@ describe.each([
           async (transaction) => {
             await transaction
               .table(personsTable)
-              .delete({ where: { id: { equals: randomPerson.id } } })
+              .delete({ where: personsTable.id.equals(randomPerson.id) })
           },
         )
 
@@ -953,7 +940,7 @@ describe.each([
           async (transaction) => {
             await transaction
               .table(personsTable)
-              .deleteMany({ where: { id: { in: ids } } })
+              .deleteMany({ where: personsTable.id.in(ids) })
           },
         )
 

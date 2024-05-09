@@ -189,7 +189,7 @@ export class DatabaseTestHelpers {
       [this.personsTable],
       async (transaction) => {
         return await transaction.table(this.personsTable).findMany({
-          where: { id: { in: ids } },
+          where: this.personsTable.id.in(ids),
         })
       },
     )
@@ -200,7 +200,7 @@ export class DatabaseTestHelpers {
       [this.personsTable],
       async (transaction) => {
         return await transaction.table(this.personsTable).findFirst({
-          where: { id: { equals: id } },
+          where: this.personsTable.id.equals(id),
         })
       },
     )

@@ -1,45 +1,41 @@
-import { describe, test, expect } from 'vitest'
+import { describe, expect, test } from 'vitest'
 import { wherePredicate } from '@shared/database/helpers/wherePredicate'
-import type { WhereInput } from '@shared/database/types/database'
+import { defineTable } from '@shared/database/schema/defineTable'
+import { number, string } from '@shared/database/schema/columnBuilder'
+import { uuid } from '@shared/lib/utils/uuid'
+import type { WhereBuilder } from '@shared/database/types/schema'
 
 interface Person {
+  id: string
   name: string
   favouriteColor: string
   favouriteSport: string
   age: number
 }
 
-const whereComplicated: WhereInput<Person> = {
-  and: [
-    {
-      and: [{ name: { contains: 'John' } }, { name: { contains: 'Doe' } }],
-    },
-    {
-      or: [
-        { favouriteColor: { equals: 'red' } },
-        { favouriteColor: { equals: 'blue' } },
-      ],
-    },
-    {
-      and: [
-        {
-          age: { gte: 18 },
-        },
-        {
-          age: { lt: 30 },
-        },
-      ],
-    },
-    {
-      favouriteSport: { in: ['bouldering', 'cycling'] },
-    },
-  ],
-}
+const personsTable = defineTable<Person>('persons', {
+  id: string().primaryKey(),
+  name: string(),
+  favouriteColor: string(),
+  favouriteSport: string(),
+  age: number(),
+})
+
+const whereComplicated = personsTable.name
+  .contains('John')
+  .and(personsTable.name.contains('Doe'))
+  .and(
+    personsTable.favouriteColor
+      .equals('red')
+      .or(personsTable.favouriteColor.equals('blue')),
+  )
+  .and(personsTable.age.gte(18).and(personsTable.age.lt(30)))
+  .and(personsTable.favouriteSport.in(['bouldering', 'cycling']))
 
 interface Case {
   name: string
   data: Person
-  where: WhereInput<Person>
+  where: WhereBuilder<unknown>
   expected: boolean
 }
 
@@ -47,6 +43,7 @@ const cases: Array<Case> = [
   {
     name: 'returns true because all conditions are satisfied perfectly',
     data: {
+      id: uuid(),
       name: 'John Doe',
       favouriteColor: 'red',
       favouriteSport: 'bouldering',
@@ -58,6 +55,7 @@ const cases: Array<Case> = [
   {
     name: 'returns true even if field with contains condition contains extra characters',
     data: {
+      id: uuid(),
       name: 'John James Doe The third',
       favouriteColor: 'red',
       favouriteSport: 'cycling',
@@ -69,6 +67,7 @@ const cases: Array<Case> = [
   {
     name: 'returns false because field does not satisfy all contains conditions',
     data: {
+      id: uuid(),
       name: 'John',
       favouriteColor: 'red',
       favouriteSport: 'bouldering',
@@ -80,6 +79,7 @@ const cases: Array<Case> = [
   {
     name: 'returns false because field with greater than or equal condition is less than expected',
     data: {
+      id: uuid(),
       name: 'John Doe',
       favouriteColor: 'red',
       favouriteSport: 'bouldering',
@@ -91,6 +91,7 @@ const cases: Array<Case> = [
   {
     name: 'returns false because field with less than condition is greater than expected',
     data: {
+      id: uuid(),
       name: 'John Doe',
       favouriteColor: 'red',
       favouriteSport: 'bouldering',
@@ -102,6 +103,7 @@ const cases: Array<Case> = [
   {
     name: 'returns false because field with in condition is not in the list',
     data: {
+      id: uuid(),
       name: 'John Doe',
       favouriteColor: 'red',
       favouriteSport: 'running',
@@ -113,6 +115,7 @@ const cases: Array<Case> = [
   {
     name: 'returns false because not all or conditions are satisfied',
     data: {
+      id: uuid(),
       name: 'John Doe',
       favouriteColor: 'green',
       favouriteSport: 'bouldering',
@@ -129,6 +132,6 @@ const mappedCases: Array<[string, Omit<Case, 'name'>]> = cases.map(
 
 describe('wherePredicateFn', () => {
   test.each(mappedCases)('%s', (_, { data, where, expected }) => {
-    expect(wherePredicate(where)(data)).toBe(expected)
+    expect(wherePredicate(where._.raw)(data)).toBe(expected)
   })
 })

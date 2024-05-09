@@ -1,17 +1,15 @@
 import type { DatabaseIteratedCursor } from '@shared/database/factory/helpers/cursorIterator'
-import type { FindManyArgs } from '@shared/database/types/database'
-import { getOrDefault } from '@shared/lib/utils/result'
 import { wherePredicate } from '@shared/database/helpers/wherePredicate'
+import type { RawWhere } from '@shared/database/types/schema'
 
 export async function* filteredIterator<TData extends object>(
   iterator: AsyncGenerator<DatabaseIteratedCursor<TData>>,
-  args?: FindManyArgs<TData>,
+  where: RawWhere<unknown>,
+  limit: number = Infinity,
+  offset: number = 0,
   predicate?: (value: TData) => boolean,
 ) {
-  const limit = getOrDefault(args?.limit, Infinity)
-  const offset = getOrDefault(args?.offset, 0)
-
-  const matches = wherePredicate(args?.where)
+  const matches = wherePredicate(where)
 
   let count = 0
   for await (const cursor of iterator) {

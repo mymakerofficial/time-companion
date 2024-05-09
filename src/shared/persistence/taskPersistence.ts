@@ -35,9 +35,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
 
   private async getTasksQuery(transaction: Transaction) {
     return await transaction.table(tasksTable).findMany({
-      where: {
-        deletedAt: { equals: null },
-      },
+      where: tasksTable.deletedAt.isNull(),
       orderBy: { displayName: 'asc' },
     })
   }
@@ -53,9 +51,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
 
   private async getTaskByIdQuery(transaction: Transaction, id: string) {
     return await transaction.table(tasksTable).findFirst({
-      where: {
-        and: [{ id: { equals: id } }, { deletedAt: { equals: null } }],
-      },
+      where: tasksTable.id.equals(id).and(tasksTable.deletedAt.isNull()),
     })
   }
 
@@ -78,13 +74,10 @@ export class TaskPersistenceImpl implements TaskPersistence {
     projectId: string,
   ) {
     return transaction.table(tasksTable).findFirst({
-      where: {
-        and: [
-          { displayName: { equals: displayName } },
-          { projectId: { equals: projectId } },
-          { deletedAt: { equals: null } },
-        ],
-      },
+      where: tasksTable.displayName
+        .equals(displayName)
+        .and(tasksTable.projectId.equals(projectId))
+        .and(tasksTable.deletedAt.isNull()),
     })
   }
 
@@ -116,9 +109,9 @@ export class TaskPersistenceImpl implements TaskPersistence {
     projectId: string,
   ) {
     return await transaction.table(projectsTable).findFirst({
-      where: {
-        and: [{ id: { equals: projectId } }, { deletedAt: { equals: null } }],
-      },
+      where: projectsTable.id
+        .equals(projectId)
+        .and(projectsTable.deletedAt.isNull()),
     })
   }
 
@@ -127,12 +120,9 @@ export class TaskPersistenceImpl implements TaskPersistence {
     projectId: string,
   ) {
     return await transaction.table(tasksTable).findMany({
-      where: {
-        and: [
-          { projectId: { equals: projectId } },
-          { deletedAt: { equals: null } },
-        ],
-      },
+      where: tasksTable.projectId
+        .equals(projectId)
+        .and(tasksTable.deletedAt.isNull()),
       orderBy: { displayName: 'asc' },
     })
   }
@@ -199,7 +189,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
     partialTask: Partial<Readonly<TaskEntityDto>>,
   ) {
     return await transaction.table(tasksTable).update({
-      where: { id: { equals: id } },
+      where: tasksTable.id.equals(id),
       data: partialTask,
     })
   }

@@ -33,7 +33,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
 
   private async getProjectsQuery(transaction: Transaction) {
     return await transaction.table(projectsTable).findMany({
-      where: { deletedAt: { equals: null } },
+      where: projectsTable.deletedAt.isNotNull(),
       orderBy: { displayName: 'asc' },
     })
   }
@@ -49,9 +49,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
 
   private async getProjectByIdQuery(transaction: Transaction, id: string) {
     return await transaction.table(projectsTable).findFirst({
-      where: {
-        and: [{ id: { equals: id } }, { deletedAt: { equals: null } }],
-      },
+      where: projectsTable.id.equals(id).and(projectsTable.deletedAt.isNull()),
     })
   }
 
@@ -73,12 +71,9 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     displayName: string,
   ) {
     return await transaction.table(projectsTable).findFirst({
-      where: {
-        and: [
-          { displayName: { equals: displayName } },
-          { deletedAt: { equals: null } },
-        ],
-      },
+      where: projectsTable.displayName
+        .equals(displayName)
+        .and(projectsTable.deletedAt.isNull()),
     })
   }
 
@@ -108,10 +103,10 @@ class ProjectPersistenceImpl implements ProjectPersistence {
       .table(projectsTable)
       .leftJoin(tasksTable, {
         on: { id: 'projectId' },
-        where: { id: { equals: taskId } },
+        where: tasksTable.id.equals(taskId),
       })
       .findFirst({
-        where: { deletedAt: { equals: null } },
+        where: projectsTable.deletedAt.isNull(),
       })
   }
 
@@ -159,7 +154,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     partialProject: Partial<Readonly<ProjectEntityDto>>,
   ) {
     return await transaction.table(projectsTable).update({
-      where: { id: { equals: id } },
+      where: projectsTable.id.equals(id),
       data: partialProject,
     })
   }

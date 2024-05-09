@@ -1,27 +1,20 @@
-import type { WhereInput } from '@shared/database/types/database'
-import {
-  maybeUnwrapWhere,
-  type UnwrapWhere,
-  unwrapWhere,
-  type UnwrapWhereBooleanGroup,
-  type UnwrapWhereCondition,
-} from '@shared/database/helpers/unwrapWhere'
 import { isAbsent } from '@shared/lib/utils/checks'
-import type { Maybe, Nullable } from '@shared/lib/utils/types'
+import type { Maybe } from '@shared/lib/utils/types'
+import type {
+  RawWhere,
+  RawWhereBooleanGroup,
+  RawWhereCondition,
+} from '@shared/database/types/schema'
 
 function resolveBooleanGroup<TData extends object>(
   data: TData,
-  { booleanOperator, conditions }: UnwrapWhereBooleanGroup<TData>,
+  { booleanOperator, conditions }: RawWhereBooleanGroup<TData>,
 ): boolean {
   if (booleanOperator === 'and') {
-    return conditions.every((condition) =>
-      unwrappedWherePredicateFn(data, condition),
-    )
+    return conditions.every((condition) => wherePredicateFn(data, condition))
   }
   if (booleanOperator === 'or') {
-    return conditions.some((condition) =>
-      unwrappedWherePredicateFn(data, condition),
-    )
+    return conditions.some((condition) => wherePredicateFn(data, condition))
   }
 
   return false
@@ -29,83 +22,67 @@ function resolveBooleanGroup<TData extends object>(
 
 function resolveCondition<TData extends object>(
   data: TData,
-  { key, operator, value }: UnwrapWhereCondition<TData>,
+  { column, operator, value }: RawWhereCondition<TData>,
 ): boolean {
+  const columnName = column.columnName as keyof TData
+
   if (operator === 'equals') {
-    return data[key] === value
+    return data[columnName] === value
   }
   if (operator === 'notEquals') {
-    return data[key] !== value
+    return data[columnName] !== value
   }
   if (operator === 'contains') {
-    return (data[key] as string).includes(value)
+    return (data[columnName] as string).includes(value)
   }
   if (operator === 'notContains') {
-    return !(data[key] as string).includes(value)
+    return !(data[columnName] as string).includes(value)
   }
   if (operator === 'in') {
-    return (value as Array<(typeof data)[typeof key]>).includes(data[key])
+    return (value as Array<unknown>).includes(data[columnName])
   }
   if (operator === 'notIn') {
-    return !(value as Array<(typeof data)[typeof key]>).includes(data[key])
+    return !(value as Array<unknown>).includes(data[columnName])
   }
   if (operator === 'lt') {
-    return data[key] < value
+    return data[columnName] < value
   }
   if (operator === 'lte') {
-    return data[key] <= value
+    return data[columnName] <= value
   }
   if (operator === 'gt') {
-    return data[key] > value
+    return data[columnName] > value
   }
   if (operator === 'gte') {
-    return data[key] >= value
+    return data[columnName] >= value
   }
 
   return false
 }
-export function unwrappedWherePredicateFn<TData extends object>(
+export function wherePredicateFn<TData extends object>(
   data: TData,
-  unwrappedWhere: Maybe<UnwrapWhere<TData>>,
-): boolean {
-  if (isAbsent(unwrappedWhere)) {
-    return true
-  }
-
-  if (unwrappedWhere.type === 'booleanGroup') {
-    return resolveBooleanGroup(data, unwrappedWhere)
-  } else if (unwrappedWhere.type === 'condition') {
-    return resolveCondition(data, unwrappedWhere)
-  }
-
-  return false
-}
-
-// checks if the data matches the where input
-export function unwrappedWherePredicate<TData extends object>(
-  unwrappedWhere: Nullable<UnwrapWhere<TData>>,
-): (data: TData) => boolean {
-  return (data) => unwrappedWherePredicateFn(data, unwrappedWhere)
-}
-
-function wherePredicateFn<TData extends object>(
-  data: TData,
-  where: Maybe<WhereInput<TData>>,
+  where: Maybe<RawWhere<TData>>,
 ): boolean {
   if (isAbsent(where)) {
     return true
   }
 
-  const unwrappedWhere = unwrapWhere(where)
+  if (where.type === 'booleanGroup') {
+    return resolveBooleanGroup(data, where)
+  } else if (where.type === 'condition') {
+    return resolveCondition(data, where)
+  }
 
-  return unwrappedWherePredicateFn(data, unwrappedWhere)
+  return false
 }
 
 // checks if the data matches the where input
 export function wherePredicate<TData extends object>(
-  where?: WhereInput<TData>,
+  where: Maybe<RawWhere<TData>>,
 ): (data: TData) => boolean {
-  const unwrappedWhere = maybeUnwrapWhere(where)
+  if (isAbsent(where)) {
+    return () => true
+  }
 
-  return (data) => unwrappedWherePredicateFn(data, unwrappedWhere)
+  return (data) => wherePredicateFn(data, where)
 }

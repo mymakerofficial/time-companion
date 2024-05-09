@@ -3,7 +3,12 @@ import type {
   DatabaseTransactionMode,
 } from '@shared/database/types/adapter'
 import type { Nullable } from '@shared/lib/utils/types'
-import type { TableSchema, InferTable } from '@shared/database/types/schema'
+import type {
+  TableSchema,
+  InferTable,
+  WhereBuilder,
+  RawWhere,
+} from '@shared/database/types/schema'
 
 export const whereBooleanOperators = ['and', 'or'] as const
 export type WhereBooleanOperator = (typeof whereBooleanOperators)[number]
@@ -34,20 +39,6 @@ export const whereOperators = [
 
 export type WhereOperator = (typeof whereOperators)[number]
 
-export type WhereInput<TData extends object> = {
-  [O in WhereBooleanOperator]?: Array<WhereInput<TData>>
-} & {
-  [K in keyof TData]?: {
-    [O in WhereEqualityOperator]?: TData[K]
-  } & {
-    [O in WhereStringOperator]?: string
-  } & {
-    [O in WhereListOperator]?: Array<TData[K]>
-  } & {
-    [O in WhereNumberOperator]?: number
-  }
-}
-
 const orderDirections = ['asc', 'desc'] as const
 export type OrderByDirection = (typeof orderDirections)[number]
 
@@ -76,14 +67,14 @@ export type InsertManyArgs<TData extends object> = {
 }
 
 export type FindArgs<TData extends object> = HasOffset<TData> & {
-  where?: WhereInput<TData>
+  where?: WhereBuilder<TData> | RawWhere<TData>
 }
 
 export type FindManyArgs<TData extends object> = FindArgs<TData> &
   HasLimit<TData>
 
 export type UpdateArgs<TData extends object> = HasOffset<TData> & {
-  where?: WhereInput<TData>
+  where?: WhereBuilder<TData> | RawWhere<TData>
   data: Partial<TData>
 }
 
@@ -91,7 +82,7 @@ export type UpdateManyArgs<TData extends object> = UpdateArgs<TData> &
   HasLimit<TData>
 
 export type DeleteArgs<TData extends object> = HasOffset<TData> & {
-  where?: WhereInput<TData>
+  where?: WhereBuilder<TData> | RawWhere<TData>
 }
 
 export type DeleteManyArgs<TData extends object> = DeleteArgs<TData> &
@@ -125,7 +116,7 @@ export type LeftJoinArgs<
   on: {
     [K in keyof TLeftData]?: keyof TRightData
   }
-  where?: WhereInput<TRightData>
+  where?: WhereBuilder<TRightData> | RawWhere<TRightData>
 }
 
 export interface Joinable<TLeftData extends object> {

@@ -7,7 +7,7 @@ import type { DatabaseTableAdapter } from '@shared/database/types/adapter'
 import { getOrDefault, getOrNull } from '@shared/lib/utils/result'
 import { maybeUnwrapOrderBy } from '@shared/database/helpers/unwrapOrderBy'
 import type { Nullable } from '@shared/lib/utils/types'
-import { check, isNull } from '@shared/lib/utils/checks'
+import { check, isDefined, isNull } from '@shared/lib/utils/checks'
 import { filteredIterator } from '@shared/database/factory/helpers/filteredIterator'
 import { cursorIterator } from '@shared/database/factory/helpers/cursorIterator'
 import { firstOf, firstOfOrNull } from '@shared/lib/utils/list'
@@ -36,8 +36,21 @@ export class DatabaseQueryableImpl<TData extends object>
       `The index "${orderBy}" does not exist. You can only order by existing indexes or primary key.`,
     )
 
+    // this is a workaround
+    // @ts-expect-error
+    const where = isDefined(args?.where?._?.raw)
+      ? // @ts-expect-error
+        args?.where?._?.raw
+      : args?.where
+
     const cursor = await this.tableAdapter.openCursor(orderBy, direction)
-    return filteredIterator(cursorIterator(cursor), args, predicate)
+    return filteredIterator(
+      cursorIterator(cursor),
+      where,
+      args?.limit,
+      args?.offset,
+      predicate,
+    )
   }
 
   async findFirst(args?: FindArgs<TData>): Promise<Nullable<TData>> {
