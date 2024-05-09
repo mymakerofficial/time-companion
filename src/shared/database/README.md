@@ -12,6 +12,8 @@ const database = createDatabase(inMemoryDBAdapter())
 
 ### Opening a Database
 
+**wip**
+
 ```ts
 await database.open('my-database', 1, async (transaction, newVersion) => {
   // lets ignore migrations for now...
@@ -24,13 +26,15 @@ await database.open('my-database', 1, async (transaction, newVersion) => {
 
 ## Tables
 
+**wip**
+
 ```ts
 // define a table schema
 const usersTable = defineTable<UserEntityDto>('users', {
-  id: { type: 'string', primaryKey: true },
-  name: { type: 'string' },
-  age: { type: 'number' },
-  favouriteColor: { type: 'string' },
+  id: string().primaryKey(),
+  name: string(),
+  age: number(),
+  favouriteColor: string().nullable(),
 })
 
 await database.open('my-database', 1, async (transaction, newVersion) => {
@@ -90,10 +94,7 @@ await database.withTransaction(async (transaction) => {
 const res = await database.withTransaction(async (transaction) => {
   return await transaction.table(usersTable).findMany({
     // we can use where to filter the results
-    //  it is recommended to use this instead of filtering the result manually
-    where: {
-      name: { contains: 'Doe' }
-    }
+    where: usersTable.name.contains('Doe'),
   })
 })
 ```
@@ -107,9 +108,7 @@ You can order, limit and offset the results of a query.
 const res = await database.withTransaction(async (transaction) => {
   return await transaction.table(usersTable).findMany({
     // we can order the results
-    orderBy: {
-      name: 'asc'
-    },
+    orderBy: usersTable.name.asc(),
     // we can limit the results
     limit: 10,
     // we can offset the results
@@ -123,22 +122,16 @@ const res = await database.withTransaction(async (transaction) => {
 You can define complex filters using the `where` property.
 
 ```ts
-{
-  AND: [
-    {
-      AND: [{ name: { contains: 'John' } }, { name: { contains: 'Doe' } }],
-    },
-    {
-      OR: [
-        { favouriteColor: { equals: 'red' } },
-        { favouriteColor: { equals: 'blue' } },
-      ],
-    },
-    {
-      age: { gte: 18 },
-    },
-  ]
-}
+usersTable.name.contains('John')
+  .or(usersTable.name.contains('Jane'))
+  .and(
+    usersTable.age.gte(18)
+      .and(usersTable.age.lte(30))
+  )
+  .and(
+    usersTable.favouriteColor.equals('red')
+      .or(usersTable.favouriteColor.equals('blue'))
+  )
 ```
 
 ### Create
@@ -158,15 +151,15 @@ table.insertMany({
 
 ```ts
 table.find({
-  where: { /* ... */ },
-  orderBy: { key: 'asc' | 'desc' },
+  where: tableSchema.column.equals('value'),
+  orderBy: tableSchema.column.direction('asc' | 'desc'),
   offset: 10,
 })
 ```
 ```ts
 table.findMany({
-  where: { /* ... */ },
-  orderBy: { key: 'asc' | 'desc' },
+  where: tableSchema.column.equals('value'),
+  orderBy: tableSchema.column.direction('asc' | 'desc'),
   offset: 10,
   limit: 10,
 })
@@ -177,16 +170,16 @@ table.findMany({
 ```ts
 table.update({
   data: { /* ... */ },
-  where: { /* ... */ },
-  orderBy: { key: 'asc' | 'desc' },
+  where: tableSchema.column.equals('value'),
+  orderBy: tableSchema.column.direction('asc' | 'desc'),
   offset: 10,
 })
 ```
 ```ts
 table.updateMany({
   data: { /* ... */ },
-  where: { /* ... */ },
-  orderBy: { key: 'asc' | 'desc' },
+  where: tableSchema.column.equals('value'),
+  orderBy: tableSchema.column.direction('asc' | 'desc'),
   offset: 10,
   limit: 10,
 })
@@ -196,15 +189,15 @@ table.updateMany({
 
 ```ts
 table.delete({
-  where: { /* ... */ },
-  orderBy: { key: 'asc' | 'desc' },
+  where: tableSchema.column.equals('value'),
+  orderBy: tableSchema.column.direction('asc' | 'desc'),
   offset: 10,
 })
 ```
 ```ts
 table.deleteMany({
-  where: { /* ... */ },
-  orderBy: { key: 'asc' | 'desc' },
+  where: tableSchema.column.equals('value'),
+  orderBy: tableSchema.column.direction('asc' | 'desc'),
   offset: 10,
   limit: 10,
 })
