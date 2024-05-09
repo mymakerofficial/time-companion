@@ -3,6 +3,7 @@ import { InMemoryDataTableImpl } from '@shared/database/adapters/inMemory/helper
 import { uuid } from '@shared/lib/utils/uuid'
 import { cursorIterator } from '@shared/database/factory/helpers/cursorIterator'
 import { defineTable } from '@shared/database/schema/defineTable'
+import { t } from '@shared/database/schema/columnBuilder'
 
 type Entity = {
   id: string
@@ -14,8 +15,8 @@ function byName(a: Entity, b: Entity) {
 }
 
 const schema = defineTable<Entity>('test', {
-  id: { type: 'string', isPrimaryKey: true },
-  name: { type: 'string' },
+  id: t.string().primaryKey(),
+  name: t.string(),
 })
 
 describe('In Memory Data Table', () => {

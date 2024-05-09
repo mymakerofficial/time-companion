@@ -4,6 +4,7 @@ import type { HasModifiedAt } from '@shared/model/helpers/hasModifiedAt'
 import type { HasDeletedAt } from '@shared/model/helpers/hasDeletedAt'
 import type { Nullable } from '@shared/lib/utils/types'
 import { defineTable } from '@shared/database/schema/defineTable'
+import { t } from '@shared/database/schema/columnBuilder'
 
 export type TaskDto = {
   projectId: string
@@ -22,11 +23,11 @@ export type TaskEntityDao = Omit<TaskDto, 'projectId'> & {
 }
 
 export const tasksTable = defineTable<TaskEntityDto>('tasks', {
-  id: { type: 'string', isPrimaryKey: true },
-  projectId: { type: 'string' },
-  displayName: { type: 'string' },
-  color: { type: 'string', isNullable: true },
-  createdAt: { type: 'string' },
-  modifiedAt: { type: 'string', isNullable: true },
-  deletedAt: { type: 'string', isNullable: true },
+  id: t.string().primaryKey(),
+  projectId: t.string(),
+  displayName: t.string(),
+  color: t.string().nullable(),
+  createdAt: t.string(),
+  modifiedAt: t.string().nullable(),
+  deletedAt: t.string().nullable(),
 })

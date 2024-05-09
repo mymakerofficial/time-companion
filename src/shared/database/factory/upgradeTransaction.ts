@@ -18,15 +18,7 @@ export class DatabaseUpgradeTransactionImpl
     TData extends object = object,
     TSchema extends DatabaseTableSchema<TData> = DatabaseTableSchema<TData>,
   >(schema: TSchema): Promise<UpgradeTable<InferTableType<TSchema>>> {
-    await this.transactionAdapter.createTable({
-      tableName: schema._raw.tableName,
-      primaryKey: schema._raw.primaryKey,
-      columns: schema._raw.columns.map((column) => ({
-        name: column.name,
-        type: column.type,
-        isNullable: column.isNullable ?? false,
-      })),
-    })
+    await this.transactionAdapter.createTable(schema.getRaw())
     return this.table(schema)
   }
 
@@ -34,7 +26,7 @@ export class DatabaseUpgradeTransactionImpl
     TData extends object = object,
     TSchema extends DatabaseTableSchema<TData> = DatabaseTableSchema<TData>,
   >(table: TSchema | string): UpgradeTable<InferTableType<TSchema>> {
-    const tableName = isString(table) ? table : table._raw.tableName
+    const tableName = isString(table) ? table : table.getRaw().tableName
 
     const tableAdapter =
       this.transactionAdapter.getTable<InferTableType<TSchema>>(tableName)

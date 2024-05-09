@@ -21,7 +21,7 @@ export class DatabaseTransactionImpl implements Transaction {
     TData extends object = object,
     TSchema extends DatabaseTableSchema<TData> = DatabaseTableSchema<TData>,
   >(table: TSchema | string): Table<InferTableType<TSchema>> {
-    const tableName = isString(table) ? table : table._raw.tableName
+    const tableName = isString(table) ? table : table.getRaw().tableName
 
     const tableAdapter =
       this.transactionAdapter.getTable<InferTableType<TSchema>>(tableName)

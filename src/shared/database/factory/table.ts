@@ -36,7 +36,7 @@ export class DatabaseTableImpl<TLeftData extends object>
   ): JoinedTable<TLeftData, InferTableType<TRightSchema>> {
     const rightTableName = isString(rightTable)
       ? rightTable
-      : rightTable._raw.tableName
+      : rightTable.getRaw().tableName
 
     const rightTableAdapter =
       this.transactionAdapter.getTable<InferTableType<TRightSchema>>(

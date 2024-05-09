@@ -81,7 +81,7 @@ export class DatabaseImpl implements Database {
     check(isNotEmpty(tables), 'Cannot open transaction without tables.')
 
     const tableNames = tables.map((table) =>
-      isString(table) ? table : table._raw.tableName,
+      isString(table) ? table : table.getRaw().tableName,
     )
 
     const transaction = await this.adapter.openTransaction(tableNames, mode)
