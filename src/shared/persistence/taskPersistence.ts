@@ -1,6 +1,6 @@
 import type { Database, Transaction } from '@shared/database/types/database'
 import { type TaskEntityDto, tasksTable } from '@shared/model/task'
-import { type ProjectEntityDto, projectsTable } from '@shared/model/project'
+import { projectsTable } from '@shared/model/project'
 import { check, isNotNull, isNull } from '@shared/lib/utils/checks'
 
 export interface TaskPersistenceDependencies {
@@ -54,7 +54,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
   private async getTaskByIdQuery(transaction: Transaction, id: string) {
     return await transaction.table(tasksTable).findFirst({
       where: {
-        AND: [{ id: { equals: id } }, { deletedAt: { equals: null } }],
+        and: [{ id: { equals: id } }, { deletedAt: { equals: null } }],
       },
     })
   }
@@ -79,7 +79,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
   ) {
     return transaction.table(tasksTable).findFirst({
       where: {
-        AND: [
+        and: [
           { displayName: { equals: displayName } },
           { projectId: { equals: projectId } },
           { deletedAt: { equals: null } },
@@ -117,7 +117,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
   ) {
     return await transaction.table(projectsTable).findFirst({
       where: {
-        AND: [{ id: { equals: projectId } }, { deletedAt: { equals: null } }],
+        and: [{ id: { equals: projectId } }, { deletedAt: { equals: null } }],
       },
     })
   }
@@ -128,7 +128,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
   ) {
     return await transaction.table(tasksTable).findMany({
       where: {
-        AND: [
+        and: [
           { projectId: { equals: projectId } },
           { deletedAt: { equals: null } },
         ],

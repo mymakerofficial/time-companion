@@ -1,47 +1,38 @@
-import { entriesOf } from '@shared/lib/utils/object'
+import { entriesOf, valuesOf } from '@shared/lib/utils/object'
 import type {
-  DatabaseColumnDefinitionBuilder,
-  DatabaseTableSchema,
-  DatabaseTableSchemaRaw,
+  ColumnBuilder,
+  ColumnDefinitionRaw,
+  TableSchema,
 } from '@shared/database/types/schema'
 import { check, isDefined } from '@shared/lib/utils/checks'
+import { createTableSchema } from '@shared/database/schema/tableSchema'
 
 export function defineTable<TData extends object>(
   tableName: string,
   columns: {
-    [K in keyof TData]: DatabaseColumnDefinitionBuilder<TData[K]>
+    [K in keyof TData]: ColumnBuilder<TData[K]>
   },
-): DatabaseTableSchema<TData> {
-  const columnsRaw = entriesOf(columns).map(([key, column]) => ({
-    ...column.getRaw(),
-    name: key.toString(),
-  }))
+): TableSchema<TData> {
+  const columnsRaw = entriesOf(columns).reduce(
+    (acc, [columnName, column]) => {
+      acc[columnName] = {
+        ...column._.raw,
+        tableName,
+        columnName: columnName as string,
+      }
 
-  const primaryKey = columnsRaw.find((column) => column.isPrimaryKey)
+      return acc
+    },
+    {} as Record<keyof TData, ColumnDefinitionRaw<unknown>>,
+  )
+
+  const primaryKey = valuesOf(columnsRaw).find((column) => column.isPrimaryKey)
 
   check(isDefined(primaryKey), 'Table must have a primary key column')
 
   return createTableSchema<TData>({
     tableName,
-    primaryKey: primaryKey.name,
+    primaryKey: primaryKey.columnName,
     columns: columnsRaw,
   })
-}
-
-function createTableSchema<TData extends object>(
-  raw: DatabaseTableSchemaRaw<TData>,
-): DatabaseTableSchema<TData> {
-  return new Proxy(
-    {},
-    {
-      // @ts-ignore
-      get(target, prop: keyof DatabaseTableSchema<TData>) {
-        if (prop === 'getRaw') {
-          return () => raw
-        }
-
-        return Reflect.get(target, prop)
-      },
-    },
-  ) as DatabaseTableSchema<TData>
 }

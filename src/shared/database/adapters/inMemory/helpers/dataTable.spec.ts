@@ -25,8 +25,8 @@ describe('In Memory Data Table', () => {
       tableName: 'test',
       primaryKey: 'id',
       columns: [
-        { name: 'id', type: 'string', isNullable: false },
-        { name: 'name', type: 'string', isNullable: false },
+        { columnName: 'id', dataType: 'string', isNullable: false },
+        { columnName: 'name', dataType: 'string', isNullable: false },
       ],
     })
 
@@ -59,8 +59,8 @@ describe('In Memory Data Table', () => {
       tableName: 'test',
       primaryKey: 'id',
       columns: [
-        { name: 'id', type: 'string', isNullable: false },
-        { name: 'name', type: 'string', isNullable: false },
+        { columnName: 'id', dataType: 'string', isNullable: false },
+        { columnName: 'name', dataType: 'string', isNullable: false },
       ],
     })
 
@@ -103,8 +103,8 @@ describe('In Memory Data Table', () => {
       tableName: 'test',
       primaryKey: 'id',
       columns: [
-        { name: 'id', type: 'string', isNullable: false },
-        { name: 'name', type: 'string', isNullable: false },
+        { columnName: 'id', dataType: 'string', isNullable: false },
+        { columnName: 'name', dataType: 'string', isNullable: false },
       ],
     })
 

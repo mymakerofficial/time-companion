@@ -13,12 +13,12 @@ function resolveBooleanGroup<TData extends object>(
   data: TData,
   { booleanOperator, conditions }: UnwrapWhereBooleanGroup<TData>,
 ): boolean {
-  if (booleanOperator === 'AND') {
+  if (booleanOperator === 'and') {
     return conditions.every((condition) =>
       unwrappedWherePredicateFn(data, condition),
     )
   }
-  if (booleanOperator === 'OR') {
+  if (booleanOperator === 'or') {
     return conditions.some((condition) =>
       unwrappedWherePredicateFn(data, condition),
     )

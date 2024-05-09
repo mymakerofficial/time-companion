@@ -6,7 +6,6 @@ import type {
   DatabaseCursor,
   DatabaseCursorDirection,
 } from '@shared/database/types/adapter'
-import type { DatabaseTableSchemaRaw } from '@shared/database/types/schema'
 
 type Index<
   TData extends object,

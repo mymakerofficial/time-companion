@@ -10,18 +10,18 @@ interface Person {
 }
 
 const whereComplicated: WhereInput<Person> = {
-  AND: [
+  and: [
     {
-      AND: [{ name: { contains: 'John' } }, { name: { contains: 'Doe' } }],
+      and: [{ name: { contains: 'John' } }, { name: { contains: 'Doe' } }],
     },
     {
-      OR: [
+      or: [
         { favouriteColor: { equals: 'red' } },
         { favouriteColor: { equals: 'blue' } },
       ],
     },
     {
-      AND: [
+      and: [
         {
           age: { gte: 18 },
         },

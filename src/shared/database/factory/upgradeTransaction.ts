@@ -4,10 +4,7 @@ import type {
 } from '@shared/database/types/database'
 import { DatabaseTransactionImpl } from '@shared/database/factory/transaction'
 import { DatabaseUpgradeTableImpl } from '@shared/database/factory/upgradeTable'
-import type {
-  DatabaseTableSchema,
-  InferTableType,
-} from '@shared/database/types/schema'
+import type { TableSchema, InferTable } from '@shared/database/types/schema'
 import { isString } from '@shared/lib/utils/checks'
 
 export class DatabaseUpgradeTransactionImpl
@@ -16,20 +13,20 @@ export class DatabaseUpgradeTransactionImpl
 {
   async createTable<
     TData extends object = object,
-    TSchema extends DatabaseTableSchema<TData> = DatabaseTableSchema<TData>,
-  >(schema: TSchema): Promise<UpgradeTable<InferTableType<TSchema>>> {
-    await this.transactionAdapter.createTable(schema.getRaw())
+    TSchema extends TableSchema<TData> = TableSchema<TData>,
+  >(schema: TSchema): Promise<UpgradeTable<InferTable<TSchema>>> {
+    await this.transactionAdapter.createTable(schema._.raw)
     return this.table(schema)
   }
 
   table<
     TData extends object = object,
-    TSchema extends DatabaseTableSchema<TData> = DatabaseTableSchema<TData>,
-  >(table: TSchema | string): UpgradeTable<InferTableType<TSchema>> {
-    const tableName = isString(table) ? table : table.getRaw().tableName
+    TSchema extends TableSchema<TData> = TableSchema<TData>,
+  >(table: TSchema | string): UpgradeTable<InferTable<TSchema>> {
+    const tableName = isString(table) ? table : table._.raw.tableName
 
     const tableAdapter =
-      this.transactionAdapter.getTable<InferTableType<TSchema>>(tableName)
+      this.transactionAdapter.getTable<InferTable<TSchema>>(tableName)
     return new DatabaseUpgradeTableImpl(this.transactionAdapter, tableAdapter)
   }
 }

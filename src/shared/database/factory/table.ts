@@ -9,10 +9,7 @@ import type {
   DatabaseTransactionAdapter,
 } from '@shared/database/types/adapter'
 import { DatabaseTableBaseImpl } from '@shared/database/factory/tableBase'
-import type {
-  DatabaseTableSchema,
-  InferTableType,
-} from '@shared/database/types/schema'
+import type { TableSchema, InferTable } from '@shared/database/types/schema'
 import { isString } from '@shared/lib/utils/checks'
 
 export class DatabaseTableImpl<TLeftData extends object>
@@ -28,20 +25,17 @@ export class DatabaseTableImpl<TLeftData extends object>
 
   leftJoin<
     TRightData extends object = object,
-    TRightSchema extends
-      DatabaseTableSchema<TRightData> = DatabaseTableSchema<TRightData>,
+    TRightSchema extends TableSchema<TRightData> = TableSchema<TRightData>,
   >(
     rightTable: TRightSchema | string,
-    args: LeftJoinArgs<TLeftData, InferTableType<TRightSchema>>,
-  ): JoinedTable<TLeftData, InferTableType<TRightSchema>> {
+    args: LeftJoinArgs<TLeftData, InferTable<TRightSchema>>,
+  ): JoinedTable<TLeftData, InferTable<TRightSchema>> {
     const rightTableName = isString(rightTable)
       ? rightTable
-      : rightTable.getRaw().tableName
+      : rightTable._.raw.tableName
 
     const rightTableAdapter =
-      this.transactionAdapter.getTable<InferTableType<TRightSchema>>(
-        rightTableName,
-      )
+      this.transactionAdapter.getTable<InferTable<TRightSchema>>(rightTableName)
 
     return new DatabaseJoinedTableImpl(
       this.leftTableAdapter,

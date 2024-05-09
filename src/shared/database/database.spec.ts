@@ -358,7 +358,7 @@ describe.each([
         expect(res).toEqual(lastOf(samplePersons.sort(byFirstName)))
       })
 
-      it('should find a single entity in a table with using AND filters', async () => {
+      it('should find a single entity in a table with using and filters', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
         const randomPerson = randomElement(samplePersons, {
           safetyOffset: 1,
@@ -369,10 +369,10 @@ describe.each([
           async (transaction) => {
             return await transaction.table(personsTable).findFirst({
               where: {
-                AND: [
+                and: [
                   { firstName: { equals: randomPerson.firstName } },
                   {
-                    AND: [
+                    and: [
                       { age: { equals: randomPerson.age } },
                       { id: { notEquals: 'not-an-id' } },
                     ],

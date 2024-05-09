@@ -18,7 +18,7 @@ import {
 import { DatabaseTransactionImpl } from '@shared/database/factory/transaction'
 import { DatabaseUpgradeTransactionImpl } from '@shared/database/factory/upgradeTransaction'
 import { getOrDefault } from '@shared/lib/utils/result'
-import type { DatabaseTableSchema } from '@shared/database/types/schema'
+import type { TableSchema } from '@shared/database/types/schema'
 
 export function createDatabase(adapter: DatabaseAdapter): Database {
   return new DatabaseImpl(adapter)
@@ -73,7 +73,7 @@ export class DatabaseImpl implements Database {
   }
 
   protected async runTransaction<TResult>(
-    tables: Array<DatabaseTableSchema<object>> | Array<string>,
+    tables: Array<TableSchema<object>> | Array<string>,
     mode: 'readonly' | 'readwrite',
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult> {
@@ -81,7 +81,7 @@ export class DatabaseImpl implements Database {
     check(isNotEmpty(tables), 'Cannot open transaction without tables.')
 
     const tableNames = tables.map((table) =>
-      isString(table) ? table : table.getRaw().tableName,
+      isString(table) ? table : table._.raw.tableName,
     )
 
     const transaction = await this.adapter.openTransaction(tableNames, mode)
@@ -98,21 +98,21 @@ export class DatabaseImpl implements Database {
   }
 
   async withTransaction<TResult>(
-    tables: Array<DatabaseTableSchema<object>> | Array<string>,
+    tables: Array<TableSchema<object>> | Array<string>,
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult> {
     return await this.withReadTransaction(tables, block)
   }
 
   async withWriteTransaction<TResult>(
-    tables: Array<DatabaseTableSchema<object>> | Array<string>,
+    tables: Array<TableSchema<object>> | Array<string>,
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult> {
     return await this.runTransaction(tables, 'readwrite', block)
   }
 
   async withReadTransaction<TResult>(
-    tables: Array<DatabaseTableSchema<object>> | Array<string>,
+    tables: Array<TableSchema<object>> | Array<string>,
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult> {
     return await this.runTransaction(tables, 'readonly', block)

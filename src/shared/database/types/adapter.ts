@@ -7,15 +7,17 @@ export type DatabaseInfo = {
 }
 
 export type DatabaseAdapterColumnSchema = {
-  name: string
-  type: ColumnType
+  columnName: string
+  dataType: ColumnType
   isNullable: boolean
 }
 
 export type DatabaseAdapterTableSchema = {
   tableName: string
   primaryKey: string
-  columns: Array<DatabaseAdapterColumnSchema>
+  columns: {
+    [key: string]: DatabaseAdapterColumnSchema
+  }
 }
 
 export interface DatabaseCursor<TData extends object> {

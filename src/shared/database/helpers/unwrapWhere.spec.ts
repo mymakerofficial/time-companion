@@ -13,12 +13,12 @@ interface Person {
 
 test('unwrapWhere unwraps a where object correctly', () => {
   const where: WhereInput<Person> = {
-    AND: [
+    and: [
       {
-        AND: [{ name: { contains: 'John' } }, { name: { contains: 'Doe' } }],
+        and: [{ name: { contains: 'John' } }, { name: { contains: 'Doe' } }],
       },
       {
-        OR: [
+        or: [
           { favouriteColor: { equals: 'red' } },
           { favouriteColor: { equals: 'blue' } },
         ],
@@ -33,11 +33,11 @@ test('unwrapWhere unwraps a where object correctly', () => {
 
   expect(unwrapped).toEqual({
     type: 'booleanGroup',
-    booleanOperator: 'AND',
+    booleanOperator: 'and',
     conditions: [
       {
         type: 'booleanGroup',
-        booleanOperator: 'AND',
+        booleanOperator: 'and',
         conditions: [
           {
             type: 'condition',
@@ -55,7 +55,7 @@ test('unwrapWhere unwraps a where object correctly', () => {
       },
       {
         type: 'booleanGroup',
-        booleanOperator: 'OR',
+        booleanOperator: 'or',
         conditions: [
           {
             type: 'condition',

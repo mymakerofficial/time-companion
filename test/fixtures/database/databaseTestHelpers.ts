@@ -11,7 +11,7 @@ import { randomElements } from '@shared/lib/utils/random'
 import { check } from '@renderer/lib/utils'
 import type { Nullable } from '@shared/lib/utils/types'
 import { defineTable } from '@shared/database/schema/defineTable'
-import { t } from '@shared/database/schema/columnBuilder'
+import { number, string, t } from '@shared/database/schema/columnBuilder'
 
 export class DatabaseTestHelpers {
   constructor(
@@ -33,21 +33,21 @@ export class DatabaseTestHelpers {
 
   get personsTable() {
     return defineTable<Person>(this.personsTableName, {
-      id: t.string().primaryKey(),
-      firstName: t.string(),
-      lastName: t.string(),
-      username: t.string(),
-      gender: t.string(),
-      age: t.number(),
+      id: string().primaryKey(),
+      firstName: string(),
+      lastName: string(),
+      username: string(),
+      gender: string(),
+      age: number(),
     })
   }
 
   get petsTable() {
     return defineTable<Pet>(this.petsTableName, {
-      id: t.string().primaryKey(),
-      name: t.string(),
-      age: t.number(),
-      ownerId: t.string(),
+      id: string().primaryKey(),
+      name: string(),
+      age: number(),
+      ownerId: string(),
     })
   }
 

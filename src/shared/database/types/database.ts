@@ -3,12 +3,9 @@ import type {
   DatabaseTransactionMode,
 } from '@shared/database/types/adapter'
 import type { Nullable } from '@shared/lib/utils/types'
-import type {
-  DatabaseTableSchema,
-  InferTableType,
-} from '@shared/database/types/schema'
+import type { TableSchema, InferTable } from '@shared/database/types/schema'
 
-export const whereBooleanOperators = ['AND', 'OR'] as const
+export const whereBooleanOperators = ['and', 'or'] as const
 export type WhereBooleanOperator = (typeof whereBooleanOperators)[number]
 
 export const whereEqualityOperators = ['equals', 'notEquals'] as const
@@ -23,11 +20,16 @@ export type WhereListOperator = (typeof whereListOperators)[number]
 export const whereNumberOperators = ['lt', 'lte', 'gt', 'gte'] as const
 export type WhereNumberOperator = (typeof whereNumberOperators)[number]
 
+export const whereNullabilityOperators = ['isNull', 'isNotNull'] as const
+export type WhereNullabilityOperator =
+  (typeof whereNullabilityOperators)[number]
+
 export const whereOperators = [
   ...whereEqualityOperators,
   ...whereStringOperators,
   ...whereListOperators,
   ...whereNumberOperators,
+  ...whereNullabilityOperators,
 ] as const
 
 export type WhereOperator = (typeof whereOperators)[number]
@@ -129,12 +131,11 @@ export type LeftJoinArgs<
 export interface Joinable<TLeftData extends object> {
   leftJoin<
     TRightData extends object = object,
-    TRightSchema extends
-      DatabaseTableSchema<TRightData> = DatabaseTableSchema<TRightData>,
+    TRightSchema extends TableSchema<TRightData> = TableSchema<TRightData>,
   >(
     rightTable: TRightSchema | string,
-    args: LeftJoinArgs<TLeftData, InferTableType<TRightSchema>>,
-  ): JoinedTable<TLeftData, InferTableType<TRightSchema>>
+    args: LeftJoinArgs<TLeftData, InferTable<TRightSchema>>,
+  ): JoinedTable<TLeftData, InferTable<TRightSchema>>
 }
 
 export interface TableBase<TData extends object>
@@ -171,10 +172,10 @@ export type CreateIndexArgs<TData extends object> = {
 export interface Transaction {
   table<
     TData extends object = object,
-    TSchema extends DatabaseTableSchema<TData> = DatabaseTableSchema<TData>,
+    TSchema extends TableSchema<TData> = TableSchema<TData>,
   >(
     table: TSchema | string,
-  ): Table<InferTableType<TSchema>>
+  ): Table<InferTable<TSchema>>
 }
 
 export interface UpgradeTable<TData extends object> extends Table<TData> {
@@ -184,16 +185,16 @@ export interface UpgradeTable<TData extends object> extends Table<TData> {
 export interface UpgradeTransaction extends Transaction {
   createTable<
     TData extends object = object,
-    TSchema extends DatabaseTableSchema<TData> = DatabaseTableSchema<TData>,
+    TSchema extends TableSchema<TData> = TableSchema<TData>,
   >(
     schema: TSchema,
-  ): Promise<UpgradeTable<InferTableType<TSchema>>>
+  ): Promise<UpgradeTable<InferTable<TSchema>>>
   table<
     TData extends object = object,
-    TSchema extends DatabaseTableSchema<TData> = DatabaseTableSchema<TData>,
+    TSchema extends TableSchema<TData> = TableSchema<TData>,
   >(
     table: TSchema | string,
-  ): UpgradeTable<InferTableType<TSchema>>
+  ): UpgradeTable<InferTable<TSchema>>
 }
 
 export type UpgradeFunction = (
@@ -212,17 +213,17 @@ export interface Database {
   delete(databaseName: string): Promise<void>
   // shorthand for withReadTransaction
   withTransaction<TResult>(
-    tables: Array<DatabaseTableSchema<object>> | Array<string>,
+    tables: Array<TableSchema<object>> | Array<string>,
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>
   // runs the block with a readwrite transaction
   withWriteTransaction<TResult>(
-    tables: Array<DatabaseTableSchema<object>> | Array<string>,
+    tables: Array<TableSchema<object>> | Array<string>,
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>
   // runs the block with a readonly transaction
   withReadTransaction<TResult>(
-    tables: Array<DatabaseTableSchema<object>> | Array<string>,
+    tables: Array<TableSchema<object>> | Array<string>,
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>
   getDatabases(): Promise<Array<DatabaseInfo>>

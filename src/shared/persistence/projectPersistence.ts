@@ -50,7 +50,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   private async getProjectByIdQuery(transaction: Transaction, id: string) {
     return await transaction.table(projectsTable).findFirst({
       where: {
-        AND: [{ id: { equals: id } }, { deletedAt: { equals: null } }],
+        and: [{ id: { equals: id } }, { deletedAt: { equals: null } }],
       },
     })
   }
@@ -74,7 +74,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   ) {
     return await transaction.table(projectsTable).findFirst({
       where: {
-        AND: [
+        and: [
           { displayName: { equals: displayName } },
           { deletedAt: { equals: null } },
         ],
