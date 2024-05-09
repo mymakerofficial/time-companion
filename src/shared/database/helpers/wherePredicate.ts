@@ -56,6 +56,12 @@ function resolveCondition<TData extends object>(
   if (operator === 'gte') {
     return data[columnName] >= value
   }
+  if (operator === 'isNull') {
+    return data[columnName] === null
+  }
+  if (operator === 'isNotNull') {
+    return data[columnName] !== null
+  }
 
   return false
 }
