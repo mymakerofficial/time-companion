@@ -1,12 +1,12 @@
 import type { Transaction } from '@electric-sql/pglite'
-import type { DatabaseTransactionAdapter } from '@shared/database/types/adapter'
+import type { TransactionAdapter } from '@shared/database/types/adapter'
 import { noop } from '@shared/lib/utils/noop'
 import type { Knex } from 'knex'
 import { PGLiteSchemaAdapter } from '@shared/database/adapters/pglite/schema'
 
 export class PGLiteDatabaseTransactionAdapter
   extends PGLiteSchemaAdapter
-  implements DatabaseTransactionAdapter
+  implements TransactionAdapter
 {
   constructor(
     protected readonly knex: Knex,

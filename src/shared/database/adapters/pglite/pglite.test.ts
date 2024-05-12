@@ -25,18 +25,22 @@ describe.sequential('pglite', () => {
   })
 
   test('do a query', async () => {
-    const tx = await adapter.openTransaction(['test'], 'readwrite')
+    const tx1 = await adapter.openTransaction(['test'], 'readwrite')
 
     const testData = {
       id: uuid(),
       name: faker.internet.userName(),
     }
 
-    await tx.getTable('test').insert({
+    await tx1.getTable('test').insert({
       data: testData,
     })
 
-    const res = await tx.getTable('test').select({
+    await tx1.commit()
+
+    const tx2 = await adapter.openTransaction(['test'], 'readwrite')
+
+    const res = await tx2.getTable('test').select({
       orderByTable: 'test',
       orderByColumn: 'id',
       oderByDirection: 'asc',
@@ -45,9 +49,7 @@ describe.sequential('pglite', () => {
       where: null,
     })
 
-    onTestFinished(async () => {
-      await tx.commit()
-    })
+    await tx2.commit()
 
     expect(res).toEqual([testData])
   })

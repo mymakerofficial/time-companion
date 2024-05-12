@@ -1,70 +1,31 @@
 import type {
-  DatabaseAdapterTableSchema,
-  DatabaseTableAdapter,
-  DatabaseTransactionAdapter,
+  TransactionAdapter,
   DatabaseTransactionMode,
 } from '@shared/database/types/adapter'
-import { check } from '@shared/lib/utils/checks'
-import { IndexedDBDatabaseTableAdapterImpl } from '@shared/database/adapters/indexedDB/table'
+import { IdbSchemaAdapter } from '@shared/database/adapters/indexedDB/schema'
 
-export class IndexedDBDatabaseTransactionAdapterImpl
-  implements DatabaseTransactionAdapter
+export class IdbDatabaseTransactionAdapter
+  extends IdbSchemaAdapter
+  implements TransactionAdapter
 {
   constructor(
-    protected readonly database: IDBDatabase,
-    protected readonly transaction: IDBTransaction,
-    protected readonly tableNames: Array<string>,
+    protected readonly db: IDBDatabase,
+    protected readonly tx: IDBTransaction,
     protected readonly mode: DatabaseTransactionMode,
-  ) {}
-
-  getTable<TData extends object>(
-    tableName: string,
-  ): DatabaseTableAdapter<TData> {
-    const objectStore = this.transaction.objectStore(tableName)
-    return new IndexedDBDatabaseTableAdapterImpl<TData>(objectStore)
-  }
-
-  createTable(schema: DatabaseAdapterTableSchema): Promise<void> {
-    return new Promise((resolve) => {
-      check(
-        this.mode === 'versionchange',
-        'Transaction is not a versionchange transaction.',
-      )
-
-      this.database.createObjectStore(schema.tableName, {
-        keyPath: schema.primaryKey,
-        autoIncrement: false,
-      })
-
-      // the object store is created synchronously, so we can resolve immediately
-      resolve()
-    })
-  }
-
-  deleteTable(tableName: string): Promise<void> {
-    return new Promise((resolve) => {
-      check(
-        this.mode === 'versionchange',
-        'Transaction is not a versionchange transaction.',
-      )
-
-      this.database.deleteObjectStore(tableName)
-
-      // the object store is deleted synchronously, so we can resolve immediately
-      resolve()
-    })
+  ) {
+    super(db, tx, mode)
   }
 
   commit(): Promise<void> {
     return new Promise((resolve) => {
-      this.transaction.commit()
+      this.tx.commit()
       resolve()
     })
   }
 
   rollback(): Promise<void> {
     return new Promise((resolve) => {
-      this.transaction.abort()
+      this.tx.abort()
       resolve()
     })
   }

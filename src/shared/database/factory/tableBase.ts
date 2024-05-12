@@ -1,42 +1,82 @@
-import { DatabaseQueryableImpl } from '@shared/database/factory/queryable'
 import type {
   DeleteArgs,
   DeleteManyArgs,
+  FindArgs,
+  FindManyArgs,
   InsertArgs,
   InsertManyArgs,
+  TableBase,
   UpdateArgs,
   UpdateManyArgs,
 } from '@shared/database/types/database'
 import { firstOfOrNull } from '@shared/lib/utils/list'
 import type { Nullable } from '@shared/lib/utils/types'
+import type { TableAdapter } from '@shared/database/types/adapter'
+import { getOrDefault, getOrNull } from '@shared/lib/utils/result'
+import type { RawWhere, WhereBuilder } from '@shared/database/types/schema'
+import { isNotDefined } from '@renderer/lib/utils'
+import { isDefined } from '@shared/lib/utils/checks'
 
-export class DatabaseTableBaseImpl<
-  TData extends object,
-> extends DatabaseQueryableImpl<TData> {
+export class DatabaseTableBaseImpl<TData extends object>
+  implements TableBase<TData>
+{
+  constructor(protected readonly tableAdapter: TableAdapter<TData>) {}
+
+  protected getWhere(args?: {
+    where?: WhereBuilder<TData> | RawWhere
+  }): Nullable<RawWhere> {
+    if (isNotDefined(args) || isNotDefined(args.where)) {
+      return null
+    }
+
+    if (isDefined((args.where as WhereBuilder<TData>)._)) {
+      return (args.where as WhereBuilder<TData>)._.raw
+    }
+
+    return args.where as RawWhere
+  }
+
+  async findFirst(args?: FindArgs<TData>): Promise<Nullable<TData>> {
+    const res = await this.findMany({ ...args, limit: 1, offset: 0 })
+
+    return firstOfOrNull(res)
+  }
+
+  async findMany(args?: FindManyArgs<TData>): Promise<Array<TData>> {
+    return await this.tableAdapter.select({
+      orderByColumn: getOrNull(args?.orderBy?.column.columnName),
+      orderByTable: getOrNull(args?.orderBy?.column.tableName),
+      oderByDirection: getOrDefault(args?.orderBy?.direction, 'asc'),
+      where: this.getWhere(args),
+      limit: getOrNull(args?.limit),
+      offset: getOrNull(args?.offset),
+    })
+  }
+
   async update(args: UpdateArgs<TData>): Promise<Nullable<TData>> {
-    return firstOfOrNull(
-      await this.updateMany({
-        ...args,
-        limit: 1,
-        offset: 0,
-      }),
-    )
+    const res = await this.updateMany({
+      ...args,
+      limit: 1,
+      offset: 0,
+    })
+
+    return firstOfOrNull(res)
   }
 
   async updateMany(args: UpdateManyArgs<TData>): Promise<Array<TData>> {
-    const iterator = await this.openIterator(args)
-
-    const results = []
-    for await (const cursor of iterator) {
-      await cursor.update(args.data)
-      results.push(cursor.value())
-    }
-
-    return results
+    return await this.tableAdapter.update({
+      data: args.data,
+      orderByColumn: getOrNull(args?.orderBy?.column.columnName),
+      orderByTable: getOrNull(args?.orderBy?.column.tableName),
+      oderByDirection: getOrDefault(args?.orderBy?.direction, 'asc'),
+      where: this.getWhere(args),
+      limit: getOrNull(args.limit),
+      offset: getOrNull(args.offset),
+    })
   }
 
   async delete(args: DeleteArgs<TData>): Promise<void> {
-    await this.deleteMany({
+    return await this.deleteMany({
       ...args,
       limit: 1,
       offset: 0,
@@ -44,28 +84,29 @@ export class DatabaseTableBaseImpl<
   }
 
   async deleteMany(args: DeleteManyArgs<TData>): Promise<void> {
-    const iterator = await this.openIterator(args)
-
-    for await (const cursor of iterator) {
-      await cursor.delete()
-    }
+    return await this.tableAdapter.delete({
+      orderByColumn: getOrNull(args?.orderBy?.column.columnName),
+      orderByTable: getOrNull(args?.orderBy?.column.tableName),
+      oderByDirection: getOrDefault(args?.orderBy?.direction, 'asc'),
+      where: this.getWhere(args),
+      limit: getOrNull(args.limit),
+      offset: getOrNull(args.offset),
+    })
   }
 
   async deleteAll(): Promise<void> {
-    await this.tableAdapter.deleteAll()
+    return await this.tableAdapter.deleteAll()
   }
 
   async insert(args: InsertArgs<TData>): Promise<TData> {
-    await this.tableAdapter.insert(args.data)
-    return args.data
+    return await this.tableAdapter.insert({
+      data: args.data,
+    })
   }
 
-  insertMany(args: InsertManyArgs<TData>): Promise<Array<TData>> {
-    return new Promise((resolve) => {
-      args.data.forEach(async (data) => {
-        await this.tableAdapter.insert(data)
-      })
-      resolve(args.data)
+  async insertMany(args: InsertManyArgs<TData>): Promise<Array<TData>> {
+    return await this.tableAdapter.insertMany({
+      data: args.data,
     })
   }
 }

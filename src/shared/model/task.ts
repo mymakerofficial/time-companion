@@ -25,7 +25,7 @@ export type TaskEntityDao = Omit<TaskDto, 'projectId'> & {
 export const tasksTable = defineTable<TaskEntityDto>('tasks', {
   id: string().primaryKey(),
   projectId: string(),
-  displayName: string(),
+  displayName: string().indexed(),
   color: string().nullable(),
   createdAt: string(),
   modifiedAt: string().nullable(),

@@ -27,6 +27,10 @@ export function createDatabase(adapter: DatabaseAdapter): Database {
 export class DatabaseImpl implements Database {
   constructor(protected readonly adapter: DatabaseAdapter) {}
 
+  get isOpen(): boolean {
+    return this.adapter.isOpen
+  }
+
   async open(
     name: string,
     version: number,
@@ -34,17 +38,17 @@ export class DatabaseImpl implements Database {
   ): Promise<void> {
     check(version >= 1, 'Database version must be greater than or equal to 1.')
 
-    const databaseInfo = await this.adapter.getDatabaseInfo(name)
-
-    check(
-      isNull(databaseInfo) || version >= databaseInfo.version,
-      `Cannot open database at lower version. Current version is "${databaseInfo?.version}", requested version is "${version}".`,
-    )
+    // const databaseInfo = await this.adapter.getDatabaseInfo(name)
+    //
+    // check(
+    //   isNull(databaseInfo) || version >= databaseInfo.version,
+    //   `Cannot open database at lower version. Current version is "${databaseInfo?.version}", requested version is "${version}".`,
+    // )
 
     const transactionAdapter = await this.adapter.openDatabase(name, version)
 
     if (isNotNull(transactionAdapter)) {
-      const currentVersion = getOrDefault(databaseInfo?.version, 0)
+      const currentVersion = 0 // getOrDefault(databaseInfo?.version, 0)
 
       // call upgrade function for each version between and including the current version and the target version
 

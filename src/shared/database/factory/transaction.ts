@@ -3,16 +3,14 @@ import type {
   Table,
   Transaction,
 } from '@shared/database/types/database'
-import type { DatabaseTransactionAdapter } from '@shared/database/types/adapter'
+import type { TransactionAdapter } from '@shared/database/types/adapter'
 import { todo } from '@shared/lib/utils/todo'
 import { DatabaseTableImpl } from '@shared/database/factory/table'
 import type { TableSchema, InferTable } from '@shared/database/types/schema'
 import { isString } from '@shared/lib/utils/checks'
 
 export class DatabaseTransactionImpl implements Transaction {
-  constructor(
-    protected readonly transactionAdapter: DatabaseTransactionAdapter,
-  ) {}
+  constructor(protected readonly transactionAdapter: TransactionAdapter) {}
 
   table<
     TData extends object = object,

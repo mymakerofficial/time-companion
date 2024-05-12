@@ -12,20 +12,20 @@ import {
 } from '@shared/database/types/database'
 import type { Nullable } from '@shared/lib/utils/types'
 
-export type RawWhereCondition<T> = {
-  column: ColumnDefinitionRaw<T>
+export type RawWhereCondition = {
+  column: ColumnDefinitionRaw<unknown>
   operator: WhereOperator
   value: any
 }
 
-export type RawWhereBooleanGroup<T> = {
+export type RawWhereBooleanGroup = {
   booleanOperator: WhereBooleanOperator
-  conditions: Array<RawWhere<T>>
+  conditions: Array<RawWhere>
 }
 
-export type RawWhere<T> =
-  | ({ type: 'booleanGroup' } & RawWhereBooleanGroup<T>)
-  | ({ type: 'condition' } & RawWhereCondition<T>)
+export type RawWhere =
+  | ({ type: 'booleanGroup' } & RawWhereBooleanGroup)
+  | ({ type: 'condition' } & RawWhereCondition)
 
 export type WhereConditionFactory<TColumn> = {
   [O in WhereEqualityOperator]: (value: TColumn) => WhereBuilder<TColumn>
@@ -41,7 +41,7 @@ export type WhereConditionFactory<TColumn> = {
 
 export type WhereBuilder<T> = {
   _: {
-    raw: RawWhere<T>
+    raw: RawWhere
   }
 } & {
   [O in WhereBooleanOperator]: {
@@ -61,6 +61,8 @@ export type ColumnDefinitionRaw<TColumn> = {
   dataType: ColumnType
   isPrimaryKey: boolean
   isNullable: boolean
+  isIndexed: boolean
+  isUnique: boolean
 }
 
 export type ColumnDefinitionBase<TColumn> = {
@@ -79,6 +81,8 @@ export type ColumnBuilder<T> = {
   }
   primaryKey: () => ColumnBuilder<T>
   nullable: () => ColumnBuilder<Nullable<T>>
+  indexed: () => ColumnBuilder<T>
+  unique: () => ColumnBuilder<T>
 }
 
 export type TableSchemaRaw<T extends object> = {

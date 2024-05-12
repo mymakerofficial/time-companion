@@ -3,22 +3,21 @@ import type {
   LeftJoinArgs,
   Table,
 } from '@shared/database/types/database'
-import { DatabaseJoinedTableImpl } from '@shared/database/factory/joinedTable'
 import type {
-  DatabaseTableAdapter,
-  DatabaseTransactionAdapter,
+  TransactionAdapter,
+  TableAdapter,
 } from '@shared/database/types/adapter'
 import { DatabaseTableBaseImpl } from '@shared/database/factory/tableBase'
-import type { TableSchema, InferTable } from '@shared/database/types/schema'
-import { isString } from '@shared/lib/utils/checks'
+import type { InferTable, TableSchema } from '@shared/database/types/schema'
+import { todo } from '@shared/lib/utils/todo'
 
 export class DatabaseTableImpl<TLeftData extends object>
   extends DatabaseTableBaseImpl<TLeftData>
   implements Table<TLeftData>
 {
   constructor(
-    protected readonly transactionAdapter: DatabaseTransactionAdapter,
-    protected readonly leftTableAdapter: DatabaseTableAdapter<TLeftData>,
+    protected readonly transactionAdapter: TransactionAdapter,
+    protected readonly leftTableAdapter: TableAdapter<TLeftData>,
   ) {
     super(leftTableAdapter)
   }
@@ -30,17 +29,6 @@ export class DatabaseTableImpl<TLeftData extends object>
     rightTable: TRightSchema | string,
     args: LeftJoinArgs<TLeftData, InferTable<TRightSchema>>,
   ): JoinedTable<TLeftData, InferTable<TRightSchema>> {
-    const rightTableName = isString(rightTable)
-      ? rightTable
-      : rightTable._.raw.tableName
-
-    const rightTableAdapter =
-      this.transactionAdapter.getTable<InferTable<TRightSchema>>(rightTableName)
-
-    return new DatabaseJoinedTableImpl(
-      this.leftTableAdapter,
-      rightTableAdapter,
-      args,
-    )
+    todo()
   }
 }

@@ -12,6 +12,8 @@ describe('schema', () => {
         dataType: 'string',
         isPrimaryKey: true,
         isNullable: false,
+        isIndexed: false,
+        isUnique: false,
       })
     })
   })
@@ -20,7 +22,7 @@ describe('schema', () => {
     it('should define a table', () => {
       const foo = defineTable('foo', {
         id: string().primaryKey(),
-        name: string(),
+        name: string().indexed(),
         color: string().nullable(),
       })
 
@@ -34,6 +36,8 @@ describe('schema', () => {
             dataType: 'string',
             isPrimaryKey: true,
             isNullable: false,
+            isIndexed: false,
+            isUnique: false,
           },
           name: {
             tableName: 'foo',
@@ -41,6 +45,8 @@ describe('schema', () => {
             dataType: 'string',
             isPrimaryKey: false,
             isNullable: false,
+            isIndexed: true,
+            isUnique: false,
           },
           color: {
             tableName: 'foo',
@@ -48,6 +54,8 @@ describe('schema', () => {
             dataType: 'string',
             isPrimaryKey: false,
             isNullable: true,
+            isIndexed: false,
+            isUnique: false,
           },
         },
       })

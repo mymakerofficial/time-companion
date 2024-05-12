@@ -15,6 +15,8 @@ class ColumnBuilderImpl<T> implements ColumnBuilder<T> {
       dataType,
       isPrimaryKey: false,
       isNullable: false,
+      isIndexed: false,
+      isUnique: false,
     }
   }
 
@@ -32,6 +34,16 @@ class ColumnBuilderImpl<T> implements ColumnBuilder<T> {
   nullable() {
     this.definition.isNullable = true
     return this as ColumnBuilder<Nullable<T>>
+  }
+
+  indexed() {
+    this.definition.isIndexed = true
+    return this as ColumnBuilder<T>
+  }
+
+  unique() {
+    this.definition.isUnique = true
+    return this as ColumnBuilder<T>
   }
 }
 

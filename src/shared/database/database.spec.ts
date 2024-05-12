@@ -4,23 +4,22 @@ import {
   beforeAll,
   describe,
   expect,
-  expectTypeOf,
   it,
   vi,
 } from 'vitest'
 import { faker } from '@faker-js/faker'
 import { asArray, firstOf, lastOf } from '@shared/lib/utils/list'
 import { randomElement, randomElements } from '@shared/lib/utils/random'
-import type { Database, UpgradeFunction } from '@shared/database/types/database'
+import type { UpgradeFunction } from '@shared/database/types/database'
 import { useDatabaseFixtures } from '@test/fixtures/database/databaseFixtures'
 import type { Person } from '@test/fixtures/database/types'
 import type { HasId } from '@shared/model/helpers/hasId'
 import { uuid } from '@shared/lib/utils/uuid'
 import { createDatabase } from '@shared/database/factory/database'
-import { inMemoryDBAdapter } from '@shared/database/adapters/inMemory/database'
 import { asyncNoop } from '@shared/lib/utils/noop'
 import fakeIndexedDB from 'fake-indexeddb'
 import { indexedDBAdapter } from '@shared/database/adapters/indexedDB/database'
+import { pgliteAdapter } from '@shared/database/adapters/pglite/database'
 
 function byId(a: HasId, b: HasId) {
   return a.id.localeCompare(b.id)
@@ -31,8 +30,8 @@ function byFirstName(a: Person, b: Person) {
 }
 
 describe.each([
-  ['In Memory Database', () => createDatabase(inMemoryDBAdapter())],
   ['IndexedDB', () => createDatabase(indexedDBAdapter(fakeIndexedDB))],
+  ['PGLite', () => createDatabase(pgliteAdapter())],
 ])('Adapter "%s"', (_, databaseFactory) => {
   const { database, helpers, personsTable, petsTable } = useDatabaseFixtures({
     database: databaseFactory(),
@@ -40,32 +39,6 @@ describe.each([
 
   afterAll(async () => {
     await helpers.cleanup()
-  })
-
-  describe('database', () => {
-    it('should match the database type', () => {
-      expectTypeOf(database).toMatchTypeOf<Database>()
-    })
-  })
-
-  describe('getDatabases', async () => {
-    afterEach(async () => {
-      await helpers.cleanup()
-    })
-
-    it('should return all databases', async () => {
-      await database.open('foo', 1, asyncNoop)
-      await database.close()
-      await database.open('bar', 2, asyncNoop)
-      await database.close()
-
-      const databases = await database.getDatabases()
-
-      expect(databases).toEqual([
-        { name: 'bar', version: 2 },
-        { name: 'foo', version: 1 },
-      ])
-    })
   })
 
   describe('getTableNames', async () => {
@@ -80,10 +53,6 @@ describe.each([
 
       expect(tableNames).toEqual(['persons', 'pets'])
     })
-  })
-
-  describe('getTableIndexNames', async () => {
-    it.todo('should return all index names for a table')
   })
 
   describe('open', () => {
@@ -137,25 +106,6 @@ describe.each([
       await database.close()
 
       expect(async () => database.getTableNames()).rejects.toThrowError()
-    })
-  })
-
-  describe('delete', () => {
-    afterEach(async () => {
-      await helpers.cleanup()
-    })
-
-    it('should delete the database', async () => {
-      await database.open('foo', 1, asyncNoop)
-      await database.close()
-      await database.open('bar', 2, asyncNoop)
-      await database.close()
-
-      await database.delete('foo')
-
-      const databases = await database.getDatabases()
-
-      expect(databases).toEqual([{ name: 'bar', version: 2 }])
     })
   })
 

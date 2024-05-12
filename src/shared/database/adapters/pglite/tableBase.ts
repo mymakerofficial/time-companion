@@ -34,9 +34,11 @@ export class PGLiteTableBaseAdapter<TData extends object>
   }
 
   protected query(builder: Knex.QueryBuilder) {
-    const query = builder.toSQL()
+    const query = builder.toSQL().toNative()
 
-    return this.db.query<TData>(query.sql, [...query.bindings])
+    return this.db.query<TData>(query.sql, [...query.bindings]).catch((err) => {
+      throw new Error(`${err.message}; "${query.sql}"`)
+    })
   }
 
   protected exec(builder: Knex.QueryBuilder) {
@@ -66,7 +68,7 @@ export class PGLiteTableBaseAdapter<TData extends object>
   }
 
   async deleteAll(): Promise<void> {
-    const builder = this.knex.delete().from(this.tableName)
+    const builder = this.knex.truncate().table(this.tableName)
 
     await this.query(builder)
   }

@@ -69,14 +69,14 @@ export type InsertManyArgs<TData extends object> = {
 }
 
 export type FindArgs<TData extends object> = HasOffset<TData> & {
-  where?: WhereBuilder<TData> | RawWhere<TData>
+  where?: WhereBuilder<TData> | RawWhere
 }
 
 export type FindManyArgs<TData extends object> = FindArgs<TData> &
   HasLimit<TData>
 
 export type UpdateArgs<TData extends object> = HasOffset<TData> & {
-  where?: WhereBuilder<TData> | RawWhere<TData>
+  where?: WhereBuilder<TData> | RawWhere
   data: Partial<TData>
 }
 
@@ -84,7 +84,7 @@ export type UpdateManyArgs<TData extends object> = UpdateArgs<TData> &
   HasLimit<TData>
 
 export type DeleteArgs<TData extends object> = HasOffset<TData> & {
-  where?: WhereBuilder<TData> | RawWhere<TData>
+  where?: WhereBuilder<TData> | RawWhere
 }
 
 export type DeleteManyArgs<TData extends object> = DeleteArgs<TData> &
@@ -118,7 +118,7 @@ export type LeftJoinArgs<
   on: {
     [K in keyof TLeftData]?: keyof TRightData
   }
-  where?: WhereBuilder<TRightData> | RawWhere<TRightData>
+  where?: WhereBuilder<TRightData> | RawWhere
 }
 
 export interface Joinable<TLeftData extends object> {
@@ -172,7 +172,7 @@ export interface Transaction {
 }
 
 export interface UpgradeTable<TData extends object> extends Table<TData> {
-  createIndex(args: CreateIndexArgs<TData>): Promise<void>
+  // ...
 }
 
 export interface UpgradeTransaction extends Transaction {
@@ -197,6 +197,7 @@ export type UpgradeFunction = (
 ) => Promise<void>
 
 export interface Database {
+  readonly isOpen: boolean
   open(
     databaseName: string,
     version: number,

@@ -1,7 +1,7 @@
 import type {
   DatabaseAdapter,
   DatabaseInfo,
-  DatabaseTransactionAdapter,
+  TransactionAdapter,
 } from '@shared/database/types/adapter'
 import type { Knex } from 'knex'
 import createKnex from 'knex'
@@ -11,6 +11,7 @@ import { check, isNotNull } from '@shared/lib/utils/checks'
 import { PGLiteDatabaseTransactionAdapter } from '@shared/database/adapters/pglite/transaction'
 import path from 'path'
 import { todo } from '@shared/lib/utils/todo'
+import { getOrDefault } from '@shared/lib/utils/result'
 
 export function pgliteAdapter(): DatabaseAdapter {
   return new PGLiteDatabaseAdapter()
@@ -35,10 +36,14 @@ export class PGLiteDatabaseAdapter implements DatabaseAdapter {
     return `${this.protocol}://${path.join(this.basePath, databaseName)}`
   }
 
+  get isOpen(): boolean {
+    return isNotNull(this.db) && !this.db.closed
+  }
+
   async openDatabase(
     databaseName: string,
     version: number,
-  ): Promise<Nullable<DatabaseTransactionAdapter>> {
+  ): Promise<Nullable<TransactionAdapter>> {
     this.db = new PGlite(this.getDataDir(databaseName))
     await this.db.waitReady
     return await this.openTransaction()
@@ -53,7 +58,7 @@ export class PGLiteDatabaseAdapter implements DatabaseAdapter {
     todo()
   }
 
-  async openTransaction(): Promise<DatabaseTransactionAdapter> {
+  async openTransaction(): Promise<TransactionAdapter> {
     return new Promise((resolveAdapter) => {
       check(isNotNull(this.db), 'No database is open.')
 
@@ -83,7 +88,17 @@ export class PGLiteDatabaseAdapter implements DatabaseAdapter {
     todo()
   }
 
-  getTableNames(): Promise<Array<string>> {
-    todo()
+  async getTableNames(): Promise<Array<string>> {
+    check(isNotNull(this.db), 'No database is open.')
+
+    const builder = this.knex
+      .select('tablename')
+      .from('pg_catalog.pg_tables')
+      .whereNot('schemaname', 'pg_catalog')
+      .whereNot('schemaname', 'information_schema')
+
+    const res = await this.db.query(builder.toString())
+
+    return getOrDefault(res.rows, []).map((row: any) => row.tablename)
   }
 }

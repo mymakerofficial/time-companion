@@ -33,26 +33,6 @@ export interface DatabaseCursor<TData extends object> {
   close(): void
 }
 
-export type DatabaseCursorDirection = 'next' | 'prev'
-
-/***
- @deprecated
-  */
-export interface DatabaseTableAdapter<TData extends object> {
-  insert(data: TData): Promise<void>
-
-  deleteAll(): Promise<void>
-
-  // note: opening a cursor locks the table until the cursor is closed
-  openCursor(
-    indexName: Nullable<string>,
-    direction: DatabaseCursorDirection,
-  ): Promise<DatabaseCursor<TData>>
-
-  createIndex(keyPath: string, unique: boolean): Promise<void>
-  getIndexNames(): Promise<Array<string>>
-}
-
 type HasOrder = {
   orderByTable: Nullable<string>
   orderByColumn: Nullable<string>
@@ -64,15 +44,15 @@ type HasLimitAndOffset = HasOrder & {
   offset: Nullable<number>
 }
 
-type HasWhere<TData extends object> = {
-  where: Nullable<RawWhere<TData>>
+type HasWhere = {
+  where: Nullable<RawWhere>
 }
 
 export type AdapterSelectOptions<TData extends object> = HasLimitAndOffset &
-  HasWhere<TData>
+  HasWhere
 
 export type AdapterUpdateOptions<TData extends object> = HasLimitAndOffset &
-  HasWhere<TData> & {
+  HasWhere & {
     data: Partial<TData>
   }
 
@@ -123,17 +103,19 @@ export interface SchemaAdapter {
   deleteTable(tableName: string): Promise<void>
 }
 
-export interface DatabaseTransactionAdapter extends SchemaAdapter {
+export interface TransactionAdapter extends SchemaAdapter {
   commit(): Promise<void>
   rollback(): Promise<void>
 }
 
 export interface DatabaseAdapter {
+  readonly isOpen: boolean
+
   // returns a transaction when the database needs to be upgraded, otherwise returns null
   openDatabase(
     databaseName: string,
     version: number,
-  ): Promise<Nullable<DatabaseTransactionAdapter>>
+  ): Promise<Nullable<TransactionAdapter>>
   closeDatabase(): Promise<void>
   deleteDatabase(databaseName: string): Promise<void>
 
@@ -141,7 +123,7 @@ export interface DatabaseAdapter {
   openTransaction(
     tableNames: Array<string>,
     mode: DatabaseTransactionMode,
-  ): Promise<DatabaseTransactionAdapter>
+  ): Promise<TransactionAdapter>
 
   getDatabaseInfo(databaseName: string): Promise<Nullable<DatabaseInfo>>
   getDatabases(): Promise<Array<DatabaseInfo>>

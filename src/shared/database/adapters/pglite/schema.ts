@@ -36,6 +36,14 @@ export class PGLiteSchemaAdapter implements SchemaAdapter {
           if (column.isNullable) {
             columnBuilder.nullable()
           }
+
+          if (column.isIndexed) {
+            columnBuilder.index()
+          }
+
+          if (column.isUnique) {
+            columnBuilder.unique()
+          }
         })
       },
     )

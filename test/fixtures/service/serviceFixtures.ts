@@ -16,6 +16,8 @@ import { createDatabase } from '@shared/database/factory/database'
 import { inMemoryDBAdapter } from '@shared/database/adapters/inMemory/database'
 import { projectsTable } from '@shared/model/project'
 import { tasksTable } from '@shared/model/task'
+import { indexedDBAdapter } from '@shared/database/adapters/indexedDB/database'
+import fakeIndexedDB from 'fake-indexeddb'
 
 export interface ServiceFixtures {
   database: Database
@@ -31,23 +33,13 @@ export interface ServiceFixtures {
 
 export const useServiceFixtures = createFixtures<ServiceFixtures>({
   database: () => {
-    return createDatabase(inMemoryDBAdapter())
+    return createDatabase(indexedDBAdapter(fakeIndexedDB))
   },
   databaseHelpers: ({ database }) => ({
     setup: async () => {
       return await database.open('services-test-db', 1, async (transaction) => {
         const projects = await transaction.createTable(projectsTable)
         const tasks = await transaction.createTable(tasksTable)
-
-        await transaction.table(projectsTable).createIndex({
-          keyPath: 'displayName',
-          unique: true,
-        })
-
-        await tasks.createIndex({
-          keyPath: 'displayName',
-          unique: true,
-        })
       })
     },
     teardown: async () => {

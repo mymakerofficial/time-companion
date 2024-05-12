@@ -20,7 +20,7 @@ export class DatabaseTestHelpers {
   ) {}
 
   get newestVersionNumber(): number {
-    return 3
+    return 2
   }
 
   get personsTableName(): string {
@@ -34,18 +34,18 @@ export class DatabaseTestHelpers {
   get personsTable() {
     return defineTable<Person>(this.personsTableName, {
       id: string().primaryKey(),
-      firstName: string(),
+      firstName: string().indexed(),
       lastName: string(),
-      username: string(),
+      username: string().indexed().unique(),
       gender: string(),
-      age: number(),
+      age: number().indexed(),
     })
   }
 
   get petsTable() {
     return defineTable<Pet>(this.petsTableName, {
       id: string().primaryKey(),
-      name: string(),
+      name: string().indexed(),
       age: number(),
       ownerId: string(),
     })
@@ -58,33 +58,8 @@ export class DatabaseTestHelpers {
       }
 
       if (newVersion === 2) {
-        const personsTable = await transaction.createTable(this.personsTable)
-
-        await personsTable.createIndex({
-          keyPath: 'firstName',
-          unique: false,
-        })
-
-        const petsTable = await transaction.createTable(this.petsTable)
-
-        await petsTable.createIndex({
-          keyPath: 'name',
-          unique: true,
-        })
-      }
-
-      if (newVersion === 3) {
-        const personsTable = transaction.table(this.personsTable)
-
-        await personsTable.createIndex({
-          keyPath: 'username',
-          unique: true,
-        })
-
-        await personsTable.createIndex({
-          keyPath: 'age',
-          unique: false,
-        })
+        await transaction.createTable(this.personsTable)
+        await transaction.createTable(this.petsTable)
       }
     }
   }
@@ -247,22 +222,16 @@ export class DatabaseTestHelpers {
 
   // closes the open database and deletes all databases
   async cleanup(): Promise<void> {
-    try {
-      await this.database.close()
-    } catch (_) {}
+    if (!this.database.isOpen) {
+      return
+    }
 
-    try {
-      await this.database.delete(this.databaseName)
-    } catch (_) {}
+    const tables = await this.database.getTableNames()
 
-    // try {
-    //   const databases = await this.database.getDatabases()
-    //
-    //   await Promise.all(
-    //     databases.map((it) => {
-    //       return this.database.delete(it.name)
-    //     }),
-    //   )
-    // } catch (_) {}
+    await this.database.withWriteTransaction(tables, async (transaction) => {
+      for (const table of tables) {
+        await transaction.table(table).deleteAll()
+      }
+    })
   }
 }

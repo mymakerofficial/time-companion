@@ -2,10 +2,10 @@ import type { Nullable } from '@shared/lib/utils/types'
 import type {
   DatabaseAdapter,
   DatabaseInfo,
-  DatabaseTransactionAdapter,
+  TransactionAdapter,
   DatabaseTransactionMode,
 } from '@shared/database/types/adapter'
-import { IndexedDBDatabaseTransactionAdapterImpl } from '@shared/database/adapters/indexedDB/transaction'
+import { IdbDatabaseTransactionAdapter } from '@shared/database/adapters/indexedDB/transaction'
 import {
   check,
   isNotEmpty,
@@ -16,20 +16,24 @@ import { toArray } from '@shared/lib/utils/list'
 import { todo } from '@shared/lib/utils/todo'
 
 export function indexedDBAdapter(indexedDB?: IDBFactory): DatabaseAdapter {
-  return new IndexedDBDatabaseAdapterImpl(indexedDB)
+  return new IdbDatabaseAdapter(indexedDB)
 }
 
-export class IndexedDBDatabaseAdapterImpl implements DatabaseAdapter {
+export class IdbDatabaseAdapter implements DatabaseAdapter {
   protected database: Nullable<IDBDatabase>
 
   constructor(private readonly indexedDB: IDBFactory = window.indexedDB) {
     this.database = null
   }
 
+  get isOpen(): boolean {
+    return isNotNull(this.database)
+  }
+
   openDatabase(
     name: string,
     version: number,
-  ): Promise<Nullable<DatabaseTransactionAdapter>> {
+  ): Promise<Nullable<TransactionAdapter>> {
     return new Promise((resolve, reject) => {
       const request = this.indexedDB.open(name, version)
 
@@ -51,11 +55,10 @@ export class IndexedDBDatabaseAdapterImpl implements DatabaseAdapter {
         // @ts-expect-error
         const transaction = event.target.transaction
 
-        const transactionAdapter: DatabaseTransactionAdapter =
-          new IndexedDBDatabaseTransactionAdapterImpl(
+        const transactionAdapter: TransactionAdapter =
+          new IdbDatabaseTransactionAdapter(
             request.result,
             transaction,
-            [],
             'versionchange',
           )
 
@@ -91,7 +94,7 @@ export class IndexedDBDatabaseAdapterImpl implements DatabaseAdapter {
   openTransaction(
     tableNames: Array<string>,
     mode: DatabaseTransactionMode,
-  ): Promise<DatabaseTransactionAdapter> {
+  ): Promise<TransactionAdapter> {
     return new Promise((resolve) => {
       check(isNotNull(this.database), 'Database is not open.')
 
@@ -105,12 +108,7 @@ export class IndexedDBDatabaseAdapterImpl implements DatabaseAdapter {
       const transaction = this.database.transaction(tableNames, mode)
 
       resolve(
-        new IndexedDBDatabaseTransactionAdapterImpl(
-          this.database,
-          transaction,
-          tableNames,
-          mode,
-        ),
+        new IdbDatabaseTransactionAdapter(this.database, transaction, mode),
       )
     })
   }

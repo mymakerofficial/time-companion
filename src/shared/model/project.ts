@@ -22,7 +22,7 @@ export type ProjectEntityDao = ProjectDto & {
 
 export const projectsTable = defineTable<ProjectEntityDto>('projects', {
   id: string().primaryKey(),
-  displayName: string(),
+  displayName: string().indexed(),
   color: string().nullable(),
   isBillable: boolean(),
   createdAt: string(),
