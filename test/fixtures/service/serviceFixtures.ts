@@ -13,7 +13,6 @@ import { createFixtures } from '@test/helpers/createFixtures'
 import { ProjectTestHelpers } from '@test/fixtures/service/projectTestHelpers'
 import { TaskTestHelpers } from '@test/fixtures/service/taskTestHelpers'
 import { createDatabase } from '@shared/database/factory/database'
-import { inMemoryDBAdapter } from '@shared/database/adapters/inMemory/database'
 import { projectsTable } from '@shared/model/project'
 import { tasksTable } from '@shared/model/task'
 import { indexedDBAdapter } from '@shared/database/adapters/indexedDB/database'
@@ -38,8 +37,8 @@ export const useServiceFixtures = createFixtures<ServiceFixtures>({
   databaseHelpers: ({ database }) => ({
     setup: async () => {
       return await database.open('services-test-db', 1, async (transaction) => {
-        const projects = await transaction.createTable(projectsTable)
-        const tasks = await transaction.createTable(tasksTable)
+        await transaction.createTable(projectsTable)
+        await transaction.createTable(tasksTable)
       })
     },
     teardown: async () => {

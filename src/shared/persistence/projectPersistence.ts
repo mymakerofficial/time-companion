@@ -34,7 +34,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   private async getProjectsQuery(transaction: Transaction) {
     return await transaction.table(projectsTable).findMany({
       where: projectsTable.deletedAt.isNotNull(),
-      orderBy: { displayName: 'asc' },
+      orderBy: projectsTable.displayName.asc(),
     })
   }
 
