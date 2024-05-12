@@ -19,6 +19,7 @@
     "format": "npx prettier . --write"
   },
   "dependencies": {
+    "@electric-sql/pglite": "^0.1.5",
     "@js-joda/core": "^5.6.1",
     "@js-joda/locale_en": "^4.8.11",
     "@tanstack/vue-table": "^8.11.6",
@@ -30,6 +31,7 @@
     "clsx": "^2.0.0",
     "color": "^4.2.3",
     "electron-squirrel-startup": "^1.0.0",
+    "knex": "^3.1.0",
     "lucide-vue-next": "^0.294.0",
     "pinia": "^2.1.7",
     "radix-vue": "^1.2.7",
