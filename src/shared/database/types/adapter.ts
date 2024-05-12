@@ -58,10 +58,6 @@ export interface DatabaseTransactionAdapter {
   rollback(): Promise<void>
 }
 
-export type AdapterUpgradeFunction = (
-  transactionAdapter: DatabaseTransactionAdapter,
-) => Promise<void>
-
 export interface DatabaseAdapter {
   // returns a transaction when the database needs to be upgraded, otherwise returns null
   openDatabase(
