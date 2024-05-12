@@ -1,23 +1,28 @@
 import type { Nullable } from '@shared/lib/utils/types'
-import type { ColumnType } from '@shared/database/types/database'
+import type {
+  ColumnType,
+  DeleteArgs,
+  DeleteManyArgs,
+  FindArgs,
+  FindManyArgs,
+  InsertArgs,
+  InsertManyArgs,
+  OrderBy,
+  OrderByDirection,
+  UpdateArgs,
+  UpdateManyArgs,
+} from '@shared/database/types/database'
+import type {
+  InferTable,
+  RawWhere,
+  TableSchema,
+  TableSchemaRaw,
+  WhereBuilder,
+} from '@shared/database/types/schema'
 
 export type DatabaseInfo = {
   name: string
   version: number
-}
-
-export type DatabaseAdapterColumnSchema = {
-  columnName: string
-  dataType: ColumnType
-  isNullable: boolean
-}
-
-export type DatabaseAdapterTableSchema = {
-  tableName: string
-  primaryKey: string
-  columns: {
-    [key: string]: DatabaseAdapterColumnSchema
-  }
 }
 
 export interface DatabaseCursor<TData extends object> {
@@ -30,9 +35,14 @@ export interface DatabaseCursor<TData extends object> {
 
 export type DatabaseCursorDirection = 'next' | 'prev'
 
+/***
+ @deprecated
+  */
 export interface DatabaseTableAdapter<TData extends object> {
   insert(data: TData): Promise<void>
+
   deleteAll(): Promise<void>
+
   // note: opening a cursor locks the table until the cursor is closed
   openCursor(
     indexName: Nullable<string>,
@@ -43,17 +53,77 @@ export interface DatabaseTableAdapter<TData extends object> {
   getIndexNames(): Promise<Array<string>>
 }
 
+type HasOrder = {
+  orderByTable: Nullable<string>
+  orderByColumn: Nullable<string>
+  oderByDirection: OrderByDirection
+}
+
+type HasLimitAndOffset = HasOrder & {
+  limit: Nullable<number>
+  offset: Nullable<number>
+}
+
+type HasWhere<TData extends object> = {
+  where: Nullable<RawWhere<TData>>
+}
+
+export type AdapterSelectOptions<TData extends object> = HasLimitAndOffset &
+  HasWhere<TData>
+
+export type AdapterUpdateOptions<TData extends object> = HasLimitAndOffset &
+  HasWhere<TData> & {
+    data: Partial<TData>
+  }
+
+export type AdapterDeleteOptions<TData extends object> =
+  AdapterSelectOptions<TData>
+
+export type AdapterInsertOptions<TData extends object> = {
+  data: TData
+}
+
+export type AdapterInsertManyOptions<TData extends object> = {
+  data: Array<TData>
+}
+
+export interface TableBaseAdapter<TData extends object> {
+  select(options: AdapterSelectOptions<TData>): Promise<Array<TData>>
+  update(options: AdapterUpdateOptions<TData>): Promise<Array<TData>>
+  delete(options: AdapterDeleteOptions<TData>): Promise<void>
+  deleteAll(): Promise<void>
+  insert(options: AdapterInsertOptions<TData>): Promise<TData>
+  insertMany(options: AdapterInsertManyOptions<TData>): Promise<Array<TData>>
+}
+
+export interface TableJoinAdapter<TLeftData extends object> {
+  leftJoin<TRightData extends object>(
+    rightTableName: string,
+    leftTableColumn: string,
+    rightTableColumn: string,
+  ): JoinedTableAdapter<TLeftData, TRightData>
+}
+
+export interface TableAdapter<TData extends object>
+  extends TableBaseAdapter<TData>,
+    TableJoinAdapter<TData> {}
+
+export interface JoinedTableAdapter<
+  TLeftData extends object,
+  TRightData extends object,
+> extends TableBaseAdapter<TLeftData> {}
+
 export type DatabaseTransactionMode = 'readwrite' | 'readonly' | 'versionchange'
 
-export interface DatabaseTransactionAdapter {
-  getTable<TData extends object>(tableName: string): DatabaseTableAdapter<TData>
-
-  // note: a table can only be created in a versionchange transaction
-  createTable(schema: DatabaseAdapterTableSchema): Promise<void>
-  // note: a table can only be deleted in a versionchange transaction
+export interface SchemaAdapter {
+  getTable<TData extends object>(tableName: string): TableAdapter<TData>
+  createTable<TData extends object>(
+    schema: TableSchemaRaw<TData>,
+  ): Promise<void>
   deleteTable(tableName: string): Promise<void>
+}
 
-  // note: a transaction can not be committed while a table is locked
+export interface DatabaseTransactionAdapter extends SchemaAdapter {
   commit(): Promise<void>
   rollback(): Promise<void>
 }

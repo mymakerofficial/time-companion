@@ -3,13 +3,13 @@ import type { Nullable, Optional } from '@shared/lib/utils/types'
 
 export function firstOf<T extends ReadonlyArray<unknown>>(
   values: T,
-): Optional<T[0]> {
-  return values[0]
+): typeof values.length extends 0 ? undefined : T[0] {
+  return values[0] ?? undefined
 }
 
 export function firstOfOrNull<T extends ReadonlyArray<unknown>>(
   values: T,
-): Nullable<T[0]> {
+): typeof values.length extends 0 ? null : T[0] {
   return values[0] ?? null
 }
 
@@ -23,8 +23,10 @@ export function secondOf<T extends ReadonlyArray<unknown>>(values: T): T[1] {
   return values[1]
 }
 
-export function lastOf<T extends ReadonlyArray<unknown>>(values: T): T[number] {
-  return values[values.length - 1]
+export function lastOf<T extends ReadonlyArray<unknown>>(
+  values: T,
+): typeof values.length extends 0 ? undefined : T[number] {
+  return values[values.length - 1] ?? undefined
 }
 
 export function asArray(value: null): [null]

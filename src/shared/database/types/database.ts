@@ -51,7 +51,7 @@ type HasOffset<TData extends object> = HasOrder<TData> & {
   offset?: number
 }
 
-type HasLimit<TData extends object> = HasOrder<TData> & {
+type HasLimit<TData extends object> = HasOffset<TData> & {
   limit?: number
 }
 
