@@ -5,7 +5,7 @@ import type { PGliteInterface, Transaction } from '@electric-sql/pglite'
 import type { Knex } from 'knex'
 import { valuesOf } from '@shared/lib/utils/object'
 import type { TableSchemaRaw } from '@shared/database/types/schema'
-import { dataTypeToPgType } from '@shared/database/adapters/pglite/helpers/dataTypeToPgType'
+import { genericTypeToPgType } from '@shared/database/adapters/pglite/helpers/genericTypeToPgType'
 
 export class PGLiteSchemaAdapter implements SchemaAdapter {
   constructor(
@@ -26,7 +26,7 @@ export class PGLiteSchemaAdapter implements SchemaAdapter {
         valuesOf(schema.columns).forEach((column) => {
           const columnBuilder = tableBuilder.specificType(
             column.columnName,
-            dataTypeToPgType(column.dataType),
+            genericTypeToPgType(column.dataType),
           )
 
           if (column.isPrimaryKey) {
