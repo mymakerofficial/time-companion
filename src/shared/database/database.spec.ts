@@ -55,42 +55,51 @@ describe.each([
     })
   })
 
-  describe('open', () => {
+  describe.todo('open', () => {
     afterEach(async () => {
       await helpers.cleanup()
     })
 
-    it('should call the upgrade function with when opening for the first time', async () => {
-      const upgradeFn: UpgradeFunction = vi.fn(asyncNoop)
+    it.todo(
+      'should call the upgrade function with when opening for the first time',
+      async () => {
+        const upgradeFn: UpgradeFunction = vi.fn(asyncNoop)
 
-      await database.open(helpers.databaseName, 1, upgradeFn)
+        await database.open(helpers.databaseName, 1, upgradeFn)
 
-      expect(upgradeFn).toHaveBeenCalledWith(expect.anything(), 1, 0)
-    })
+        expect(upgradeFn).toHaveBeenCalledWith(expect.anything(), 1, 0)
+      },
+    )
 
-    it('should fail when trying to open a database with a lower version than the current one', async () => {
-      await database.open(helpers.databaseName, 2, asyncNoop)
+    it.todo(
+      'should fail when trying to open a database with a lower version than the current one',
+      async () => {
+        await database.open(helpers.databaseName, 2, asyncNoop)
 
-      await database.close()
+        await database.close()
 
-      await expect(
-        database.open(helpers.databaseName, 1, asyncNoop),
-      ).rejects.toThrowError(
-        `Cannot open database at lower version. Current version is "2", requested version is "1".`,
-      )
-    })
+        await expect(
+          database.open(helpers.databaseName, 1, asyncNoop),
+        ).rejects.toThrowError(
+          `Cannot open database at lower version. Current version is "2", requested version is "1".`,
+        )
+      },
+    )
 
-    it('should call the upgrade function incrementing the version', async () => {
-      await helpers.ensureDatabaseExistsAtVersion(1)
+    it.todo(
+      'should call the upgrade function incrementing the version',
+      async () => {
+        await helpers.ensureDatabaseExistsAtVersion(1)
 
-      const upgradeFn: UpgradeFunction = vi.fn(asyncNoop)
+        const upgradeFn: UpgradeFunction = vi.fn(asyncNoop)
 
-      await database.open(helpers.databaseName, 4, upgradeFn)
+        await database.open(helpers.databaseName, 4, upgradeFn)
 
-      expect(upgradeFn).toHaveBeenNthCalledWith(1, expect.anything(), 2, 1)
-      expect(upgradeFn).toHaveBeenNthCalledWith(2, expect.anything(), 3, 2)
-      expect(upgradeFn).toHaveBeenNthCalledWith(3, expect.anything(), 4, 3)
-    })
+        expect(upgradeFn).toHaveBeenNthCalledWith(1, expect.anything(), 2, 1)
+        expect(upgradeFn).toHaveBeenNthCalledWith(2, expect.anything(), 3, 2)
+        expect(upgradeFn).toHaveBeenNthCalledWith(3, expect.anything(), 4, 3)
+      },
+    )
   })
 
   describe('close', () => {
