@@ -1,9 +1,9 @@
 import type {
-  AdapterDeleteOptions,
-  AdapterInsertManyOptions,
-  AdapterInsertOptions,
-  AdapterSelectOptions,
-  AdapterUpdateOptions,
+  AdapterDeleteProps,
+  AdapterInsertManyProps,
+  AdapterInsertProps,
+  AdapterSelectProps,
+  AdapterUpdateProps,
   TableBaseAdapter,
 } from '@shared/database/types/adapter'
 import { IdbQueryable } from '@shared/database/adapters/indexedDB/queryable'
@@ -12,7 +12,7 @@ export class IdbTableBaseAdapter<TData extends object>
   extends IdbQueryable<TData>
   implements TableBaseAdapter<TData>
 {
-  async select(options: AdapterSelectOptions<TData>): Promise<Array<TData>> {
+  async select(options: AdapterSelectProps<TData>): Promise<Array<TData>> {
     const iterator = await this.openIterator(options)
 
     const results = []
@@ -23,7 +23,7 @@ export class IdbTableBaseAdapter<TData extends object>
     return results
   }
 
-  async update(options: AdapterUpdateOptions<TData>): Promise<Array<TData>> {
+  async update(options: AdapterUpdateProps<TData>): Promise<Array<TData>> {
     const iterator = await this.openIterator(options)
 
     const results = []
@@ -35,7 +35,7 @@ export class IdbTableBaseAdapter<TData extends object>
     return results
   }
 
-  async delete(options: AdapterDeleteOptions<TData>): Promise<void> {
+  async delete(options: AdapterDeleteProps<TData>): Promise<void> {
     const iterator = await this.openIterator(options)
 
     for await (const cursor of iterator) {
@@ -57,7 +57,7 @@ export class IdbTableBaseAdapter<TData extends object>
     })
   }
 
-  insert(options: AdapterInsertOptions<TData>): Promise<TData> {
+  insert(options: AdapterInsertProps<TData>): Promise<TData> {
     return new Promise((resolve, reject) => {
       const request = this.objectStore.add(options.data)
 
@@ -72,7 +72,7 @@ export class IdbTableBaseAdapter<TData extends object>
   }
 
   async insertMany(
-    options: AdapterInsertManyOptions<TData>,
+    options: AdapterInsertManyProps<TData>,
   ): Promise<Array<TData>> {
     const promises = options.data.map((data) => this.insert({ data }))
     return await Promise.all(promises)

@@ -1,8 +1,8 @@
 import type {
-  AdapterInsertManyOptions,
-  AdapterInsertOptions,
-  AdapterSelectOptions,
-  AdapterUpdateOptions,
+  AdapterInsertManyProps,
+  AdapterInsertProps,
+  AdapterSelectProps,
+  AdapterUpdateProps,
   TableBaseAdapter,
 } from '@shared/database/types/adapter'
 import type { PGliteInterface, Transaction } from '@electric-sql/pglite'
@@ -19,7 +19,7 @@ export class PGLiteTableBaseAdapter<TData extends object>
     protected readonly tableName: string,
   ) {}
 
-  protected build(options: AdapterSelectOptions<TData>) {
+  protected build(options: AdapterSelectProps<TData>) {
     const builder = this.knex.table(this.tableName)
 
     if (isNotNull(options.limit)) {
@@ -45,7 +45,7 @@ export class PGLiteTableBaseAdapter<TData extends object>
     return this.db.exec(builder.toString())
   }
 
-  async select(options: AdapterSelectOptions<TData>): Promise<Array<TData>> {
+  async select(options: AdapterSelectProps<TData>): Promise<Array<TData>> {
     const builder = this.build(options).select('*')
 
     const res = await this.query(builder)
@@ -53,7 +53,7 @@ export class PGLiteTableBaseAdapter<TData extends object>
     return res.rows
   }
 
-  async update(options: AdapterUpdateOptions<TData>): Promise<Array<TData>> {
+  async update(options: AdapterUpdateProps<TData>): Promise<Array<TData>> {
     const builder = this.build(options).update(options.data)
 
     const res = await this.query(builder)
@@ -61,7 +61,7 @@ export class PGLiteTableBaseAdapter<TData extends object>
     return res.rows
   }
 
-  async delete(options: AdapterSelectOptions<TData>): Promise<void> {
+  async delete(options: AdapterSelectProps<TData>): Promise<void> {
     const builder = this.build(options).delete()
 
     await this.query(builder)
@@ -73,14 +73,14 @@ export class PGLiteTableBaseAdapter<TData extends object>
     await this.query(builder)
   }
 
-  async insert(options: AdapterInsertOptions<TData>): Promise<TData> {
+  async insert(options: AdapterInsertProps<TData>): Promise<TData> {
     const res = await this.insertMany({ data: [options.data] })
 
     return firstOf(res)
   }
 
   async insertMany(
-    options: AdapterInsertManyOptions<TData>,
+    options: AdapterInsertManyProps<TData>,
   ): Promise<Array<TData>> {
     const builder = this.knex
       .insert(options.data)

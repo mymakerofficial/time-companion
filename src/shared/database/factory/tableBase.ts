@@ -1,13 +1,13 @@
 import type {
-  DeleteArgs,
-  DeleteManyArgs,
-  FindArgs,
-  FindManyArgs,
-  InsertArgs,
-  InsertManyArgs,
-  TableBase,
-  UpdateArgs,
-  UpdateManyArgs,
+  DeleteProps,
+  DeleteManyProps,
+  FindProps,
+  FindManyProps,
+  InsertProps,
+  InsertManyProps,
+  QueryableTable,
+  UpdateProps,
+  UpdateManyProps,
 } from '@shared/database/types/database'
 import { firstOfOrNull } from '@shared/lib/utils/list'
 import type { Nullable } from '@shared/lib/utils/types'
@@ -18,7 +18,7 @@ import { isNotDefined } from '@renderer/lib/utils'
 import { isDefined } from '@shared/lib/utils/checks'
 
 export class DatabaseTableBaseImpl<TData extends object>
-  implements TableBase<TData>
+  implements QueryableTable<TData>
 {
   constructor(protected readonly tableAdapter: TableAdapter<TData>) {}
 
@@ -36,13 +36,13 @@ export class DatabaseTableBaseImpl<TData extends object>
     return args.where as RawWhere
   }
 
-  async findFirst(args?: FindArgs<TData>): Promise<Nullable<TData>> {
+  async findFirst(args?: FindProps<TData>): Promise<Nullable<TData>> {
     const res = await this.findMany({ ...args, limit: 1, offset: 0 })
 
     return firstOfOrNull(res)
   }
 
-  async findMany(args?: FindManyArgs<TData>): Promise<Array<TData>> {
+  async findMany(args?: FindManyProps<TData>): Promise<Array<TData>> {
     return await this.tableAdapter.select({
       orderByColumn: getOrNull(args?.orderBy?.column.columnName),
       orderByTable: getOrNull(args?.orderBy?.column.tableName),
@@ -53,7 +53,7 @@ export class DatabaseTableBaseImpl<TData extends object>
     })
   }
 
-  async update(args: UpdateArgs<TData>): Promise<Nullable<TData>> {
+  async update(args: UpdateProps<TData>): Promise<Nullable<TData>> {
     const res = await this.updateMany({
       ...args,
       limit: 1,
@@ -63,7 +63,7 @@ export class DatabaseTableBaseImpl<TData extends object>
     return firstOfOrNull(res)
   }
 
-  async updateMany(args: UpdateManyArgs<TData>): Promise<Array<TData>> {
+  async updateMany(args: UpdateManyProps<TData>): Promise<Array<TData>> {
     return await this.tableAdapter.update({
       data: args.data,
       orderByColumn: getOrNull(args?.orderBy?.column.columnName),
@@ -75,7 +75,7 @@ export class DatabaseTableBaseImpl<TData extends object>
     })
   }
 
-  async delete(args: DeleteArgs<TData>): Promise<void> {
+  async delete(args: DeleteProps<TData>): Promise<void> {
     return await this.deleteMany({
       ...args,
       limit: 1,
@@ -83,7 +83,7 @@ export class DatabaseTableBaseImpl<TData extends object>
     })
   }
 
-  async deleteMany(args: DeleteManyArgs<TData>): Promise<void> {
+  async deleteMany(args: DeleteManyProps<TData>): Promise<void> {
     return await this.tableAdapter.delete({
       orderByColumn: getOrNull(args?.orderBy?.column.columnName),
       orderByTable: getOrNull(args?.orderBy?.column.tableName),
@@ -98,13 +98,13 @@ export class DatabaseTableBaseImpl<TData extends object>
     return await this.tableAdapter.deleteAll()
   }
 
-  async insert(args: InsertArgs<TData>): Promise<TData> {
+  async insert(args: InsertProps<TData>): Promise<TData> {
     return await this.tableAdapter.insert({
       data: args.data,
     })
   }
 
-  async insertMany(args: InsertManyArgs<TData>): Promise<Array<TData>> {
+  async insertMany(args: InsertManyProps<TData>): Promise<Array<TData>> {
     return await this.tableAdapter.insertMany({
       data: args.data,
     })

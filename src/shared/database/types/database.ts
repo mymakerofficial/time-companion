@@ -1,14 +1,12 @@
-import type {
-  DatabaseInfo,
-  DatabaseTransactionMode,
-} from '@shared/database/types/adapter'
+import type { DatabaseInfo } from '@shared/database/types/adapter'
 import type { Nullable } from '@shared/lib/utils/types'
 import type {
-  TableSchema,
-  InferTable,
-  WhereBuilder,
-  RawWhere,
   ColumnDefinitionRaw,
+  InferTable,
+  RawWhere,
+  TableSchema,
+  WhereBuilder,
+  WhereBuilderOrRaw,
 } from '@shared/database/types/schema'
 
 export const whereBooleanOperators = ['and', 'or'] as const
@@ -43,6 +41,11 @@ export type WhereOperator = (typeof whereOperators)[number]
 export const orderDirections = ['asc', 'desc'] as const
 export type OrderByDirection = (typeof orderDirections)[number]
 
+export type OrderBy<TColumn> = {
+  column: ColumnDefinitionRaw<TColumn>
+  direction: OrderByDirection
+}
+
 type HasOrder<TData extends object> = {
   orderBy?: OrderBy<TData>
 }
@@ -55,114 +58,85 @@ type HasLimit<TData extends object> = HasOffset<TData> & {
   limit?: number
 }
 
-export type OrderBy<TColumn> = {
-  column: ColumnDefinitionRaw<TColumn>
-  direction: OrderByDirection
+export type FindProps<TData extends object> = HasOffset<TData> & {
+  where?: WhereBuilderOrRaw<TData>
 }
 
-export type InsertArgs<TData extends object> = {
-  data: TData
-}
-
-export type InsertManyArgs<TData extends object> = {
-  data: Array<TData>
-}
-
-export type FindArgs<TData extends object> = HasOffset<TData> & {
-  where?: WhereBuilder<TData> | RawWhere
-}
-
-export type FindManyArgs<TData extends object> = FindArgs<TData> &
+export type FindManyProps<TData extends object> = FindProps<TData> &
   HasLimit<TData>
 
-export type UpdateArgs<TData extends object> = HasOffset<TData> & {
+export type UpdateProps<TData extends object> = HasOffset<TData> & {
   where?: WhereBuilder<TData> | RawWhere
   data: Partial<TData>
 }
 
-export type UpdateManyArgs<TData extends object> = UpdateArgs<TData> &
+export type UpdateManyProps<TData extends object> = UpdateProps<TData> &
   HasLimit<TData>
 
-export type DeleteArgs<TData extends object> = HasOffset<TData> & {
+export type DeleteProps<TData extends object> = HasOffset<TData> & {
   where?: WhereBuilder<TData> | RawWhere
 }
 
-export type DeleteManyArgs<TData extends object> = DeleteArgs<TData> &
+export type DeleteManyProps<TData extends object> = DeleteProps<TData> &
   HasLimit<TData>
 
-export interface Queryable<TData extends object> {
-  findFirst(args?: FindArgs<TData>): Promise<Nullable<TData>>
-  findMany(args?: FindManyArgs<TData>): Promise<Array<TData>>
+export type InsertProps<TData extends object> = {
+  data: TData
 }
 
-export interface Updatable<TData extends object> {
-  update(args: UpdateArgs<TData>): Promise<Nullable<TData>>
-  updateMany(args: UpdateManyArgs<TData>): Promise<Array<TData>>
+export type InsertManyProps<TData extends object> = {
+  data: Array<TData>
 }
 
-export interface Deletable<TData extends object> {
-  delete(args: DeleteArgs<TData>): Promise<void>
-  deleteMany(args: DeleteManyArgs<TData>): Promise<void>
+export interface QueryableTable<TData extends object> {
+  findFirst(props?: FindProps<TData>): Promise<Nullable<TData>>
+  findMany(props?: FindManyProps<TData>): Promise<Array<TData>>
+  update(props: UpdateProps<TData>): Promise<Nullable<TData>>
+  updateMany(props: UpdateManyProps<TData>): Promise<Array<TData>>
+  delete(props: DeleteProps<TData>): Promise<void>
+  deleteMany(props: DeleteManyProps<TData>): Promise<void>
   deleteAll(): Promise<void>
+  insert(props: InsertProps<TData>): Promise<TData>
+  insertMany(props: InsertManyProps<TData>): Promise<Array<TData>>
 }
 
-export interface Insertable<TData extends object> {
-  insert(args: InsertArgs<TData>): Promise<TData>
-  insertMany(args: InsertManyArgs<TData>): Promise<Array<TData>>
-}
-
-export type LeftJoinArgs<
+export type LeftJoinProps<
   TLeftData extends object,
   TRightData extends object,
 > = {
   on: {
     [K in keyof TLeftData]?: keyof TRightData
   }
-  where?: WhereBuilder<TRightData> | RawWhere
+  where?: WhereBuilderOrRaw<TRightData>
 }
 
-export interface Joinable<TLeftData extends object> {
+export interface JoinableTable<TLeftData extends object> {
   leftJoin<
     TRightData extends object = object,
     TRightSchema extends TableSchema<TRightData> = TableSchema<TRightData>,
   >(
     rightTable: TRightSchema | string,
-    args: LeftJoinArgs<TLeftData, InferTable<TRightSchema>>,
+    props: LeftJoinProps<TLeftData, InferTable<TRightSchema>>,
   ): JoinedTable<TLeftData, InferTable<TRightSchema>>
 }
 
-export interface TableBase<TData extends object>
-  extends Queryable<TData>,
-    Updatable<TData>,
-    Deletable<TData>,
-    Insertable<TData> {}
-
 export interface Table<TData extends object>
-  extends TableBase<TData>,
-    Joinable<TData> {}
+  extends QueryableTable<TData>,
+    JoinableTable<TData> {}
 
 export interface JoinedTable<
   TLeftData extends object,
   TRightData extends object,
-> extends TableBase<TLeftData> {}
+> extends QueryableTable<TLeftData> {}
+
+export interface UpgradeTable<TData extends object> extends Table<TData> {
+  // ...
+}
 
 export const columnTypes = ['string', 'number', 'boolean'] as const
 export type ColumnType = (typeof columnTypes)[number]
 
-export type CreateTableArgs<TData extends object> = {
-  name: string
-  schema: {
-    [K in keyof TData]: ColumnType
-  }
-  primaryKey: keyof TData
-}
-
-export type CreateIndexArgs<TData extends object> = {
-  keyPath: keyof TData
-  unique?: boolean
-}
-
-export interface Transaction {
+export interface TableFactory {
   table<
     TData extends object = object,
     TSchema extends TableSchema<TData> = TableSchema<TData>,
@@ -171,11 +145,7 @@ export interface Transaction {
   ): Table<InferTable<TSchema>>
 }
 
-export interface UpgradeTable<TData extends object> extends Table<TData> {
-  // ...
-}
-
-export interface UpgradeTransaction extends Transaction {
+export interface UpgradeTableFactory extends TableFactory {
   createTable<
     TData extends object = object,
     TSchema extends TableSchema<TData> = TableSchema<TData>,
@@ -189,6 +159,10 @@ export interface UpgradeTransaction extends Transaction {
     table: TSchema | string,
   ): UpgradeTable<InferTable<TSchema>>
 }
+
+export interface Transaction extends TableFactory {}
+
+export interface UpgradeTransaction extends UpgradeTableFactory {}
 
 export type UpgradeFunction = (
   transaction: UpgradeTransaction,
@@ -205,17 +179,20 @@ export interface Database {
   ): Promise<void>
   close(): Promise<void>
   delete(databaseName: string): Promise<void>
-  // shorthand for withReadTransaction
   withTransaction<TResult>(
     tables: Array<TableSchema<object>> | Array<string>,
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>
-  // runs the block with a readwrite transaction
+  /***
+   * @deprecated use withTransaction instead
+   */
   withWriteTransaction<TResult>(
     tables: Array<TableSchema<object>> | Array<string>,
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>
-  // runs the block with a readonly transaction
+  /***
+   * @deprecated use withTransaction instead
+   */
   withReadTransaction<TResult>(
     tables: Array<TableSchema<object>> | Array<string>,
     block: (transaction: Transaction) => Promise<TResult>,

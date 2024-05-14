@@ -1,6 +1,6 @@
 import type {
   JoinedTable,
-  LeftJoinArgs,
+  LeftJoinProps,
   Table,
 } from '@shared/database/types/database'
 import type {
@@ -27,7 +27,7 @@ export class DatabaseTableImpl<TLeftData extends object>
     TRightSchema extends TableSchema<TRightData> = TableSchema<TRightData>,
   >(
     rightTable: TRightSchema | string,
-    args: LeftJoinArgs<TLeftData, InferTable<TRightSchema>>,
+    args: LeftJoinProps<TLeftData, InferTable<TRightSchema>>,
   ): JoinedTable<TLeftData, InferTable<TRightSchema>> {
     todo()
   }

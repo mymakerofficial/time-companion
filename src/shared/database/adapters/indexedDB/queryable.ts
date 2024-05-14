@@ -1,5 +1,5 @@
 import type {
-  AdapterSelectOptions,
+  AdapterSelectProps,
   DatabaseCursor,
 } from '@shared/database/types/adapter'
 import type { Nullable } from '@shared/lib/utils/types'
@@ -20,7 +20,7 @@ export class IdbQueryable<TData extends object> {
       limit,
       offset,
       where,
-    }: AdapterSelectOptions<TData>,
+    }: AdapterSelectProps<TData>,
     predicate?: (value: TData) => boolean,
   ) {
     const indexes = toArray(this.objectStore.indexNames)

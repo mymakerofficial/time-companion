@@ -49,6 +49,8 @@ export type WhereBuilder<T> = {
   }
 }
 
+export type WhereBuilderOrRaw<T> = WhereBuilder<T> | RawWhere
+
 export type OrderByColumnFactory<TColumn> = {
   [D in OrderByDirection]: () => OrderBy<TColumn>
 } & {

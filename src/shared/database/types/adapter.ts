@@ -1,16 +1,16 @@
 import type { Nullable } from '@shared/lib/utils/types'
 import type {
   ColumnType,
-  DeleteArgs,
-  DeleteManyArgs,
-  FindArgs,
-  FindManyArgs,
-  InsertArgs,
-  InsertManyArgs,
+  DeleteProps,
+  DeleteManyProps,
+  FindProps,
+  FindManyProps,
+  InsertProps,
+  InsertManyProps,
   OrderBy,
   OrderByDirection,
-  UpdateArgs,
-  UpdateManyArgs,
+  UpdateProps,
+  UpdateManyProps,
 } from '@shared/database/types/database'
 import type {
   InferTable,
@@ -48,32 +48,35 @@ type HasWhere = {
   where: Nullable<RawWhere>
 }
 
-export type AdapterSelectOptions<TData extends object> = HasLimitAndOffset &
+export type AdapterBaseQueryProps<TData extends object> = HasLimitAndOffset &
   HasWhere
 
-export type AdapterUpdateOptions<TData extends object> = HasLimitAndOffset &
-  HasWhere & {
+export type AdapterSelectProps<TData extends object> =
+  AdapterBaseQueryProps<TData>
+
+export type AdapterUpdateProps<TData extends object> =
+  AdapterBaseQueryProps<TData> & {
     data: Partial<TData>
   }
 
-export type AdapterDeleteOptions<TData extends object> =
-  AdapterSelectOptions<TData>
+export type AdapterDeleteProps<TData extends object> =
+  AdapterBaseQueryProps<TData>
 
-export type AdapterInsertOptions<TData extends object> = {
+export type AdapterInsertProps<TData extends object> = {
   data: TData
 }
 
-export type AdapterInsertManyOptions<TData extends object> = {
+export type AdapterInsertManyProps<TData extends object> = {
   data: Array<TData>
 }
 
 export interface TableBaseAdapter<TData extends object> {
-  select(options: AdapterSelectOptions<TData>): Promise<Array<TData>>
-  update(options: AdapterUpdateOptions<TData>): Promise<Array<TData>>
-  delete(options: AdapterDeleteOptions<TData>): Promise<void>
+  select(props: AdapterSelectProps<TData>): Promise<Array<TData>>
+  update(props: AdapterUpdateProps<TData>): Promise<Array<TData>>
+  delete(props: AdapterDeleteProps<TData>): Promise<void>
   deleteAll(): Promise<void>
-  insert(options: AdapterInsertOptions<TData>): Promise<TData>
-  insertMany(options: AdapterInsertManyOptions<TData>): Promise<Array<TData>>
+  insert(props: AdapterInsertProps<TData>): Promise<TData>
+  insertMany(props: AdapterInsertManyProps<TData>): Promise<Array<TData>>
 }
 
 export interface TableJoinAdapter<TLeftData extends object> {
