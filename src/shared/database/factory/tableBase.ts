@@ -22,40 +22,40 @@ export class DatabaseTableBaseImpl<TData extends object>
 {
   constructor(protected readonly tableAdapter: TableAdapter<TData>) {}
 
-  protected getWhere(args?: {
+  protected getWhere(props?: {
     where?: WhereBuilder<TData> | RawWhere
   }): Nullable<RawWhere> {
-    if (isNotDefined(args) || isNotDefined(args.where)) {
+    if (isNotDefined(props) || isNotDefined(props.where)) {
       return null
     }
 
-    if (isDefined((args.where as WhereBuilder<TData>)._)) {
-      return (args.where as WhereBuilder<TData>)._.raw
+    if (isDefined((props.where as WhereBuilder<TData>)._)) {
+      return (props.where as WhereBuilder<TData>)._.raw
     }
 
-    return args.where as RawWhere
+    return props.where as RawWhere
   }
 
-  async findFirst(args?: FindProps<TData>): Promise<Nullable<TData>> {
-    const res = await this.findMany({ ...args, limit: 1, offset: 0 })
+  async findFirst(props?: FindProps<TData>): Promise<Nullable<TData>> {
+    const res = await this.findMany({ ...props, limit: 1, offset: 0 })
 
     return firstOfOrNull(res)
   }
 
-  async findMany(args?: FindManyProps<TData>): Promise<Array<TData>> {
+  async findMany(props?: FindManyProps<TData>): Promise<Array<TData>> {
     return await this.tableAdapter.select({
-      orderByColumn: getOrNull(args?.orderBy?.column.columnName),
-      orderByTable: getOrNull(args?.orderBy?.column.tableName),
-      oderByDirection: getOrDefault(args?.orderBy?.direction, 'asc'),
-      where: this.getWhere(args),
-      limit: getOrNull(args?.limit),
-      offset: getOrNull(args?.offset),
+      orderByColumn: getOrNull(props?.orderBy?.column.columnName),
+      orderByTable: getOrNull(props?.orderBy?.column.tableName),
+      oderByDirection: getOrDefault(props?.orderBy?.direction, 'asc'),
+      where: this.getWhere(props),
+      limit: getOrNull(props?.limit),
+      offset: getOrNull(props?.offset),
     })
   }
 
-  async update(args: UpdateProps<TData>): Promise<Nullable<TData>> {
+  async update(props: UpdateProps<TData>): Promise<Nullable<TData>> {
     const res = await this.updateMany({
-      ...args,
+      ...props,
       limit: 1,
       offset: 0,
     })
@@ -63,34 +63,34 @@ export class DatabaseTableBaseImpl<TData extends object>
     return firstOfOrNull(res)
   }
 
-  async updateMany(args: UpdateManyProps<TData>): Promise<Array<TData>> {
+  async updateMany(props: UpdateManyProps<TData>): Promise<Array<TData>> {
     return await this.tableAdapter.update({
-      data: args.data,
-      orderByColumn: getOrNull(args?.orderBy?.column.columnName),
-      orderByTable: getOrNull(args?.orderBy?.column.tableName),
-      oderByDirection: getOrDefault(args?.orderBy?.direction, 'asc'),
-      where: this.getWhere(args),
-      limit: getOrNull(args.limit),
-      offset: getOrNull(args.offset),
+      data: props.data,
+      orderByColumn: getOrNull(props?.orderBy?.column.columnName),
+      orderByTable: getOrNull(props?.orderBy?.column.tableName),
+      oderByDirection: getOrDefault(props?.orderBy?.direction, 'asc'),
+      where: this.getWhere(props),
+      limit: getOrNull(props.limit),
+      offset: getOrNull(props.offset),
     })
   }
 
-  async delete(args: DeleteProps<TData>): Promise<void> {
+  async delete(props: DeleteProps<TData>): Promise<void> {
     return await this.deleteMany({
-      ...args,
+      ...props,
       limit: 1,
       offset: 0,
     })
   }
 
-  async deleteMany(args: DeleteManyProps<TData>): Promise<void> {
+  async deleteMany(props: DeleteManyProps<TData>): Promise<void> {
     return await this.tableAdapter.delete({
-      orderByColumn: getOrNull(args?.orderBy?.column.columnName),
-      orderByTable: getOrNull(args?.orderBy?.column.tableName),
-      oderByDirection: getOrDefault(args?.orderBy?.direction, 'asc'),
-      where: this.getWhere(args),
-      limit: getOrNull(args.limit),
-      offset: getOrNull(args.offset),
+      orderByColumn: getOrNull(props?.orderBy?.column.columnName),
+      orderByTable: getOrNull(props?.orderBy?.column.tableName),
+      oderByDirection: getOrDefault(props?.orderBy?.direction, 'asc'),
+      where: this.getWhere(props),
+      limit: getOrNull(props.limit),
+      offset: getOrNull(props.offset),
     })
   }
 

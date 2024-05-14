@@ -97,7 +97,7 @@ export class PGLiteDatabaseAdapter implements DatabaseAdapter {
       .whereNot('schemaname', 'pg_catalog')
       .whereNot('schemaname', 'information_schema')
 
-    const res = await this.db.query(builder.toString())
+    const res = await this.db.query(builder.toQuery())
 
     return getOrDefault(res.rows, []).map((row: any) => row.tablename)
   }
