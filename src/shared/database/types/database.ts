@@ -41,88 +41,86 @@ export type WhereOperator = (typeof whereOperators)[number]
 export const orderDirections = ['asc', 'desc'] as const
 export type OrderByDirection = (typeof orderDirections)[number]
 
-export type OrderBy<TColumn> = {
-  column: ColumnDefinitionRaw<TColumn>
+export type OrderBy<TRow extends object, TColumn = unknown> = {
+  column: ColumnDefinitionRaw<TRow, TColumn>
   direction: OrderByDirection
 }
 
-type HasOrder<TData extends object> = {
-  orderBy?: OrderBy<TData>
+type HasOrder<TRow extends object> = {
+  orderBy?: OrderBy<TRow>
 }
 
-type HasOffset<TData extends object> = HasOrder<TData> & {
+type HasOffset<TRow extends object> = HasOrder<TRow> & {
   offset?: number
 }
 
-type HasLimit<TData extends object> = HasOffset<TData> & {
+type HasLimit<TRow extends object> = HasOffset<TRow> & {
   limit?: number
 }
 
-export type FindProps<TData extends object> = HasOffset<TData> & {
-  where?: WhereBuilderOrRaw<TData>
+export type FindProps<TRow extends object> = HasOffset<TRow> & {
+  where?: WhereBuilderOrRaw<TRow>
 }
 
-export type FindManyProps<TData extends object> = FindProps<TData> &
-  HasLimit<TData>
+export type FindManyProps<TRow extends object> = FindProps<TRow> &
+  HasLimit<TRow>
 
-export type UpdateProps<TData extends object> = HasOffset<TData> & {
-  where?: WhereBuilder<TData> | RawWhere
-  data: Partial<TData>
+// TODO: Update should only accept a where clause
+export type UpdateProps<TRow extends object> = HasOffset<TRow> & {
+  where?: WhereBuilder<TRow> | RawWhere
+  data: Partial<TRow>
 }
 
-export type UpdateManyProps<TData extends object> = UpdateProps<TData> &
-  HasLimit<TData>
+// TODO: UpdateMany is redundant
+export type UpdateManyProps<TRow extends object> = UpdateProps<TRow> &
+  HasLimit<TRow>
 
-export type DeleteProps<TData extends object> = HasOffset<TData> & {
-  where?: WhereBuilder<TData> | RawWhere
+// TODO: Delete should only accept a where clause
+export type DeleteProps<TRow extends object> = HasOffset<TRow> & {
+  where?: WhereBuilder<TRow> | RawWhere
 }
 
-export type DeleteManyProps<TData extends object> = DeleteProps<TData> &
-  HasLimit<TData>
+// TODO: DeleteMany is redundant
+export type DeleteManyProps<TRow extends object> = DeleteProps<TRow> &
+  HasLimit<TRow>
 
-export type InsertProps<TData extends object> = {
-  data: TData
+export type InsertProps<TRow extends object> = {
+  data: TRow
 }
 
-export type InsertManyProps<TData extends object> = {
-  data: Array<TData>
+export type InsertManyProps<TRow extends object> = {
+  data: Array<TRow>
 }
 
-export interface QueryableTable<TData extends object> {
-  findFirst(props?: FindProps<TData>): Promise<Nullable<TData>>
-  findMany(props?: FindManyProps<TData>): Promise<Array<TData>>
-  update(props: UpdateProps<TData>): Promise<Nullable<TData>>
-  updateMany(props: UpdateManyProps<TData>): Promise<Array<TData>>
-  delete(props: DeleteProps<TData>): Promise<void>
-  deleteMany(props: DeleteManyProps<TData>): Promise<void>
+export interface QueryableTable<TRow extends object> {
+  findFirst(props?: FindProps<TRow>): Promise<Nullable<TRow>>
+  findMany(props?: FindManyProps<TRow>): Promise<Array<TRow>>
+  update(props: UpdateProps<TRow>): Promise<Nullable<TRow>>
+  updateMany(props: UpdateManyProps<TRow>): Promise<Array<TRow>>
+  delete(props: DeleteProps<TRow>): Promise<void>
+  deleteMany(props: DeleteManyProps<TRow>): Promise<void>
   deleteAll(): Promise<void>
-  insert(props: InsertProps<TData>): Promise<TData>
-  insertMany(props: InsertManyProps<TData>): Promise<Array<TData>>
+  insert(props: InsertProps<TRow>): Promise<TRow>
+  insertMany(props: InsertManyProps<TRow>): Promise<Array<TRow>>
 }
 
-export type LeftJoinProps<
-  TLeftData extends object,
-  TRightData extends object,
-> = {
-  on: {
-    [K in keyof TLeftData]?: keyof TRightData
-  }
-  where?: WhereBuilderOrRaw<TRightData>
+export type LeftJoinProps<TLeftRow extends object, TRightRow extends object> = {
+  on: WhereBuilderOrRaw<TLeftRow | TRightRow>
 }
 
-export interface JoinableTable<TLeftData extends object> {
+export interface JoinableTable<TLeftRow extends object> {
   leftJoin<
-    TRightData extends object = object,
-    TRightSchema extends TableSchema<TRightData> = TableSchema<TRightData>,
+    TRightRow extends object = object,
+    TRightSchema extends TableSchema<TRightRow> = TableSchema<TRightRow>,
   >(
     rightTable: TRightSchema | string,
-    props: LeftJoinProps<TLeftData, InferTable<TRightSchema>>,
-  ): JoinedTable<TLeftData, InferTable<TRightSchema>>
+    props: LeftJoinProps<TLeftRow, InferTable<TRightSchema>>,
+  ): JoinedTable<TLeftRow, InferTable<TRightSchema>>
 }
 
-export interface Table<TData extends object>
-  extends QueryableTable<TData>,
-    JoinableTable<TData> {}
+export interface Table<TRow extends object>
+  extends QueryableTable<TRow>,
+    JoinableTable<TRow> {}
 
 export interface JoinedTable<
   TLeftData extends object,

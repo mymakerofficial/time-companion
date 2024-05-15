@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { string, t } from '@shared/database/schema/columnBuilder'
+import { number, string, t } from '@shared/database/schema/columnBuilder'
 import { defineTable } from '@shared/database/schema/defineTable'
 import { orderDirections } from '@shared/database/types/database'
 
@@ -25,6 +25,13 @@ describe('schema', () => {
         name: string().indexed(),
         color: string().nullable(),
       })
+
+      const bar = defineTable('bar', {
+        id: string().primaryKey(),
+        number: number(),
+      })
+
+      const where = foo.name.equals('foo').and(bar.number.equals(12))
 
       expect(foo._.raw).toEqual({
         tableName: 'foo',

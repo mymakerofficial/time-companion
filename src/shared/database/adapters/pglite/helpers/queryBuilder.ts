@@ -1,29 +1,29 @@
 import type { AdapterBaseQueryProps } from '@shared/database/types/adapter'
 import type { Knex } from 'knex'
-import { isNotNull } from '@shared/lib/utils/checks'
+import { isPresent } from '@shared/lib/utils/checks'
 import type { RawWhere } from '@shared/database/types/schema'
 import { genericOperatorToPgOperator } from '@shared/database/adapters/pglite/helpers/genericOperatorToPgOperator'
 
 export function buildQuery<TData extends object>(
   knex: Knex,
   tableName: string,
-  props: AdapterBaseQueryProps<TData>,
+  props: Partial<AdapterBaseQueryProps<TData>>,
 ) {
-  const builder = knex.from(tableName).as(tableName)
+  const builder = knex.from(tableName)
 
-  if (isNotNull(props.limit)) {
+  if (isPresent(props.limit)) {
     builder.limit(props.limit)
   }
 
-  if (isNotNull(props.offset)) {
+  if (isPresent(props.offset)) {
     builder.offset(props.offset)
   }
 
-  if (isNotNull(props.where)) {
+  if (isPresent(props.where)) {
     builder.where(buildWhere(props.where))
   }
 
-  if (isNotNull(props.orderByTable) && isNotNull(props.orderByColumn)) {
+  if (isPresent(props.orderByTable) && isPresent(props.orderByColumn)) {
     builder.orderBy(
       `${props.orderByTable}.${props.orderByColumn}`,
       props.oderByDirection,

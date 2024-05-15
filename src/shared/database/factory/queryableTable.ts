@@ -1,26 +1,26 @@
 import type {
-  DeleteProps,
   DeleteManyProps,
-  FindProps,
+  DeleteProps,
   FindManyProps,
-  InsertProps,
+  FindProps,
   InsertManyProps,
+  InsertProps,
   QueryableTable,
-  UpdateProps,
   UpdateManyProps,
+  UpdateProps,
 } from '@shared/database/types/database'
 import { firstOfOrNull } from '@shared/lib/utils/list'
 import type { Nullable } from '@shared/lib/utils/types'
-import type { TableAdapter } from '@shared/database/types/adapter'
+import type { QueryableTableAdapter } from '@shared/database/types/adapter'
 import { getOrDefault, getOrNull } from '@shared/lib/utils/result'
 import type { RawWhere, WhereBuilder } from '@shared/database/types/schema'
 import { isNotDefined } from '@renderer/lib/utils'
 import { isDefined } from '@shared/lib/utils/checks'
 
-export class DatabaseTableBaseImpl<TData extends object>
+export class DatabaseQueryableTableImpl<TData extends object>
   implements QueryableTable<TData>
 {
-  constructor(protected readonly tableAdapter: TableAdapter<TData>) {}
+  constructor(protected readonly tableAdapter: QueryableTableAdapter<TData>) {}
 
   protected getWhere(props?: {
     where?: WhereBuilder<TData> | RawWhere

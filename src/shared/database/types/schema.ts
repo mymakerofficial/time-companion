@@ -13,7 +13,7 @@ import {
 import type { Nullable } from '@shared/lib/utils/types'
 
 export type RawWhereCondition = {
-  column: ColumnDefinitionRaw<unknown>
+  column: ColumnDefinitionRaw<object, never>
   operator: WhereOperator
   value: any
 }
@@ -27,37 +27,51 @@ export type RawWhere =
   | ({ type: 'booleanGroup' } & RawWhereBooleanGroup)
   | ({ type: 'condition' } & RawWhereCondition)
 
-export type WhereConditionFactory<TColumn> = {
-  [O in WhereEqualityOperator]: (value: TColumn) => WhereBuilder<TColumn>
+export type WhereConditionFactory<
+  TRow extends object,
+  TColumn extends TRow[keyof TRow],
+> = {
+  [O in WhereEqualityOperator]: (
+    value: TColumn | ColumnDefinition<any, TColumn>,
+  ) => WhereBuilder<TRow, TColumn>
 } & {
-  [O in WhereStringOperator]: (value: string) => WhereBuilder<TColumn>
+  [O in WhereStringOperator]: (value: string) => WhereBuilder<TRow, TColumn>
 } & {
-  [O in WhereListOperator]: (value: Array<TColumn>) => WhereBuilder<TColumn>
+  [O in WhereListOperator]: (
+    value: Array<TColumn>,
+  ) => WhereBuilder<TRow, TColumn>
 } & {
-  [O in WhereNumberOperator]: (value: number) => WhereBuilder<TColumn>
+  [O in WhereNumberOperator]: (value: number) => WhereBuilder<TRow, TColumn>
 } & {
-  [O in WhereNullabilityOperator]: () => WhereBuilder<TColumn>
+  [O in WhereNullabilityOperator]: () => WhereBuilder<TRow, TColumn>
 }
 
-export type WhereBuilder<T> = {
+export type WhereBuilder<TRow extends object, TColumn = unknown> = {
   _: {
     raw: RawWhere
   }
 } & {
   [O in WhereBooleanOperator]: {
-    <G>(other: WhereBuilder<G>): WhereBuilder<T>
+    <GRow extends object, GColumn>(
+      other: WhereBuilder<GRow, GColumn>,
+    ): WhereBuilder<TRow | GRow, TColumn | GColumn>
   }
 }
 
-export type WhereBuilderOrRaw<T> = WhereBuilder<T> | RawWhere
+export type WhereBuilderOrRaw<TRow extends object, TColumn = unknown> =
+  | WhereBuilder<TRow, TColumn>
+  | RawWhere
 
-export type OrderByColumnFactory<TColumn> = {
-  [D in OrderByDirection]: () => OrderBy<TColumn>
+export type OrderByColumnFactory<
+  TRow extends object,
+  TColumn extends TRow[keyof TRow],
+> = {
+  [D in OrderByDirection]: () => OrderBy<TRow, TColumn>
 } & {
-  direction: (direction: OrderByDirection) => OrderBy<TColumn>
+  direction: (direction: OrderByDirection) => OrderBy<TRow, TColumn>
 }
 
-export type ColumnDefinitionRaw<TColumn> = {
+export type ColumnDefinitionRaw<TRow extends object, TColumn> = {
   tableName: string
   columnName: string
   dataType: ColumnType
@@ -67,19 +81,24 @@ export type ColumnDefinitionRaw<TColumn> = {
   isUnique: boolean
 }
 
-export type ColumnDefinitionBase<TColumn> = {
+export type ColumnDefinitionBase<
+  TRow extends object,
+  TColumn extends TRow[keyof TRow],
+> = {
   _: {
-    raw: ColumnDefinitionRaw<TColumn>
-    where: (operator: WhereOperator, value: any) => WhereBuilder<TColumn>
+    raw: ColumnDefinitionRaw<TRow, TColumn>
+    where: (operator: WhereOperator, value: any) => WhereBuilder<TRow, TColumn>
   }
-} & OrderByColumnFactory<TColumn>
+} & OrderByColumnFactory<TRow, TColumn>
 
-export type ColumnDefinition<TColumn> = ColumnDefinitionBase<TColumn> &
-  WhereConditionFactory<TColumn>
+export type ColumnDefinition<
+  TRow extends object,
+  TColumn extends TRow[keyof TRow],
+> = ColumnDefinitionBase<TRow, TColumn> & WhereConditionFactory<TRow, TColumn>
 
 export interface ColumnBuilder<TColumn> {
   _: {
-    raw: ColumnDefinitionRaw<TColumn>
+    raw: ColumnDefinitionRaw<any, TColumn>
   }
   primaryKey: () => ColumnBuilder<TColumn>
   nullable: () => ColumnBuilder<Nullable<TColumn>>
@@ -93,22 +112,22 @@ export interface ColumnBuilderFactory {
   boolean: () => ColumnBuilder<boolean>
 }
 
-export type TableSchemaRaw<T extends object> = {
+export type TableSchemaRaw<TRow extends object> = {
   tableName: string
   primaryKey: string
   columns: {
-    [K in keyof T]: ColumnDefinitionRaw<T[K]>
+    [K in keyof TRow]: ColumnDefinitionRaw<TRow, TRow[K]>
   }
 }
 
-export type TableSchemaBase<T extends object> = {
+export type TableSchemaBase<TRow extends object> = {
   _: {
-    raw: TableSchemaRaw<T>
+    raw: TableSchemaRaw<TRow>
   }
 }
 
-export type TableSchema<T extends object> = TableSchemaBase<T> & {
-  [K in keyof T]: ColumnDefinition<T[K]>
+export type TableSchema<TRow extends object> = TableSchemaBase<TRow> & {
+  [K in keyof TRow]: ColumnDefinition<TRow, TRow[K]>
 }
 
 export type InferTable<T> = T extends TableSchema<infer U> ? U : never

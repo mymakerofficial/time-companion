@@ -2,11 +2,11 @@ import type {
   JoinedTableAdapter,
   TableAdapter,
 } from '@shared/database/types/adapter'
-import { PGLiteTableBaseAdapter } from '@shared/database/adapters/pglite/tableBase'
-import { todo } from '@shared/lib/utils/todo'
+import { PGLiteQueryableTableAdapter } from '@shared/database/adapters/pglite/queryableTable'
+import { PGLiteJoinedTableAdapter } from '@shared/database/adapters/pglite/joinedTable'
 
 export class PGLiteTableAdapter<TData extends object>
-  extends PGLiteTableBaseAdapter<TData>
+  extends PGLiteQueryableTableAdapter<TData>
   implements TableAdapter<TData>
 {
   leftJoin<TRightData extends object>(
@@ -14,6 +14,13 @@ export class PGLiteTableAdapter<TData extends object>
     leftTableColumn: string,
     rightTableColumn: string,
   ): JoinedTableAdapter<TData, TRightData> {
-    todo()
+    return new PGLiteJoinedTableAdapter(
+      this.knex,
+      this.db,
+      this.tableName,
+      rightTableName,
+      leftTableColumn,
+      rightTableColumn,
+    )
   }
 }

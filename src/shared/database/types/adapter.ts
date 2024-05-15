@@ -1,24 +1,6 @@
 import type { Nullable } from '@shared/lib/utils/types'
-import type {
-  ColumnType,
-  DeleteProps,
-  DeleteManyProps,
-  FindProps,
-  FindManyProps,
-  InsertProps,
-  InsertManyProps,
-  OrderBy,
-  OrderByDirection,
-  UpdateProps,
-  UpdateManyProps,
-} from '@shared/database/types/database'
-import type {
-  InferTable,
-  RawWhere,
-  TableSchema,
-  TableSchemaRaw,
-  WhereBuilder,
-} from '@shared/database/types/schema'
+import type { OrderByDirection } from '@shared/database/types/database'
+import type { RawWhere, TableSchemaRaw } from '@shared/database/types/schema'
 
 export type DatabaseInfo = {
   name: string
@@ -54,11 +36,13 @@ export type AdapterBaseQueryProps<TData extends object> = HasLimitAndOffset &
 export type AdapterSelectProps<TData extends object> =
   AdapterBaseQueryProps<TData>
 
+// TODO: Update should only accept a where clause
 export type AdapterUpdateProps<TData extends object> =
   AdapterBaseQueryProps<TData> & {
     data: Partial<TData>
   }
 
+// TODO: Delete should only accept a where clause
 export type AdapterDeleteProps<TData extends object> =
   AdapterBaseQueryProps<TData>
 
@@ -70,7 +54,7 @@ export type AdapterInsertManyProps<TData extends object> = {
   data: Array<TData>
 }
 
-export interface TableBaseAdapter<TData extends object> {
+export interface QueryableTableAdapter<TData extends object> {
   select(props: AdapterSelectProps<TData>): Promise<Array<TData>>
   update(props: AdapterUpdateProps<TData>): Promise<Array<TData>>
   delete(props: AdapterDeleteProps<TData>): Promise<void>
@@ -79,7 +63,7 @@ export interface TableBaseAdapter<TData extends object> {
   insertMany(props: AdapterInsertManyProps<TData>): Promise<Array<TData>>
 }
 
-export interface TableJoinAdapter<TLeftData extends object> {
+export interface JoinableTableAdapter<TLeftData extends object> {
   leftJoin<TRightData extends object>(
     rightTableName: string,
     leftTableColumn: string,
@@ -88,13 +72,13 @@ export interface TableJoinAdapter<TLeftData extends object> {
 }
 
 export interface TableAdapter<TData extends object>
-  extends TableBaseAdapter<TData>,
-    TableJoinAdapter<TData> {}
+  extends QueryableTableAdapter<TData>,
+    JoinableTableAdapter<TData> {}
 
 export interface JoinedTableAdapter<
   TLeftData extends object,
   TRightData extends object,
-> extends TableBaseAdapter<TLeftData> {}
+> extends QueryableTableAdapter<TLeftData> {}
 
 export type DatabaseTransactionMode = 'readwrite' | 'readonly' | 'versionchange'
 

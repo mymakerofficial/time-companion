@@ -7,12 +7,12 @@ import type {
 import { check, isDefined } from '@shared/lib/utils/checks'
 import { createTableSchema } from '@shared/database/schema/tableSchema'
 
-export function defineTable<TData extends object>(
+export function defineTable<TRow extends object>(
   tableName: string,
   columns: {
-    [K in keyof TData]: ColumnBuilder<TData[K]>
+    [K in keyof TRow]: ColumnBuilder<TRow[K]>
   },
-): TableSchema<TData> {
+): TableSchema<TRow> {
   const columnsRaw = entriesOf(columns).reduce(
     (acc, [columnName, column]) => {
       acc[columnName] = {
@@ -23,14 +23,16 @@ export function defineTable<TData extends object>(
 
       return acc
     },
-    {} as Record<keyof TData, ColumnDefinitionRaw<unknown>>,
+    {} as {
+      [K in keyof TRow]: ColumnDefinitionRaw<TRow, TRow[K]>
+    },
   )
 
   const primaryKey = valuesOf(columnsRaw).find((column) => column.isPrimaryKey)
 
   check(isDefined(primaryKey), 'Table must have a primary key column')
 
-  return createTableSchema<TData>({
+  return createTableSchema<TRow>({
     tableName,
     primaryKey: primaryKey.columnName,
     columns: columnsRaw,

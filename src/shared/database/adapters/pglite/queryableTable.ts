@@ -5,15 +5,15 @@ import type {
   AdapterInsertProps,
   AdapterSelectProps,
   AdapterUpdateProps,
-  TableBaseAdapter,
+  QueryableTableAdapter,
 } from '@shared/database/types/adapter'
 import type { PGliteInterface, Transaction } from '@electric-sql/pglite'
 import type { Knex } from 'knex'
 import { firstOf } from '@shared/lib/utils/list'
 import { buildQuery } from '@shared/database/adapters/pglite/helpers/queryBuilder'
 
-export class PGLiteTableBaseAdapter<TData extends object>
-  implements TableBaseAdapter<TData>
+export class PGLiteQueryableTableAdapter<TData extends object>
+  implements QueryableTableAdapter<TData>
 {
   constructor(
     protected readonly knex: Knex,
@@ -21,8 +21,8 @@ export class PGLiteTableBaseAdapter<TData extends object>
     protected readonly tableName: string,
   ) {}
 
-  protected build(options: AdapterBaseQueryProps<TData>) {
-    return buildQuery(this.knex, this.tableName, options)
+  protected build(props: Partial<AdapterBaseQueryProps<TData>>) {
+    return buildQuery(this.knex, this.tableName, props)
   }
 
   protected query(builder: Knex.QueryBuilder) {
@@ -38,7 +38,7 @@ export class PGLiteTableBaseAdapter<TData extends object>
   }
 
   async select(props: AdapterSelectProps<TData>): Promise<Array<TData>> {
-    const builder = this.build(props).select('*')
+    const builder = this.build(props).select(`${this.tableName}.*`)
 
     const res = await this.query(builder)
 

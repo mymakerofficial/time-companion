@@ -507,10 +507,11 @@ describe.each([
             return await transaction
               .table(personsTable)
               .leftJoin(petsTable, {
-                on: { id: 'ownerId' },
+                on: personsTable.id.equals(petsTable.ownerId),
+              })
+              .findFirst({
                 where: petsTable.id.equals(petId),
               })
-              .findFirst()
           },
         )
 
@@ -538,10 +539,11 @@ describe.each([
             return await transaction
               .table(personsTable)
               .leftJoin(petsTable, {
-                on: { id: 'ownerId' },
+                on: personsTable.id.equals(petsTable.ownerId),
+              })
+              .delete({
                 where: petsTable.id.equals(petId),
               })
-              .deleteAll()
           },
         )
 
@@ -555,35 +557,8 @@ describe.each([
 
         const personsInDatabase = await helpers.getAllPersonsInDatabase()
 
-        expect(personsInDatabase).toEqual(expectedPersons)
+        expect(personsInDatabase.sort(byId)).toEqual(expectedPersons)
       })
-
-      it.todo(
-        'should fail when trying to join on incompatible keys',
-        async () => {
-          await helpers.insertSamplePersons(6)
-          const samplePets = await helpers.insertSamplePets(3, 1)
-
-          const randomPet = randomElement(samplePets, {
-            safetyOffset: 1,
-          })
-
-          expect(async () => {
-            await database.withReadTransaction(
-              [personsTable],
-              async (transaction) => {
-                return await transaction
-                  .table(personsTable)
-                  .leftJoin(petsTable, {
-                    on: { id: 'age' },
-                    where: petsTable.id.equals(randomPet.id),
-                  })
-                  .findMany()
-              },
-            )
-          }).rejects.toThrowError(`The keys "id" and "age" are not compatible.`)
-        },
-      )
     })
 
     describe('update', () => {

@@ -4,13 +4,13 @@ import type {
   AdapterInsertProps,
   AdapterSelectProps,
   AdapterUpdateProps,
-  TableBaseAdapter,
+  QueryableTableAdapter,
 } from '@shared/database/types/adapter'
 import { IdbQueryable } from '@shared/database/adapters/indexedDB/queryable'
 
 export class IdbTableBaseAdapter<TData extends object>
   extends IdbQueryable<TData>
-  implements TableBaseAdapter<TData>
+  implements QueryableTableAdapter<TData>
 {
   async select(options: AdapterSelectProps<TData>): Promise<Array<TData>> {
     const iterator = await this.openIterator(options)
