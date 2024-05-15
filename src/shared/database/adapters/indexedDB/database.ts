@@ -3,15 +3,9 @@ import type {
   DatabaseAdapter,
   DatabaseInfo,
   TransactionAdapter,
-  DatabaseTransactionMode,
 } from '@shared/database/types/adapter'
 import { IdbDatabaseTransactionAdapter } from '@shared/database/adapters/indexedDB/transaction'
-import {
-  check,
-  isNotEmpty,
-  isNotNull,
-  isUndefined,
-} from '@shared/lib/utils/checks'
+import { check, isNotNull, isUndefined } from '@shared/lib/utils/checks'
 import { toArray } from '@shared/lib/utils/list'
 import { todo } from '@shared/lib/utils/todo'
 
@@ -91,24 +85,21 @@ export class IdbDatabaseAdapter implements DatabaseAdapter {
     })
   }
 
-  openTransaction(
-    tableNames: Array<string>,
-    mode: DatabaseTransactionMode,
-  ): Promise<TransactionAdapter> {
+  openTransaction(): Promise<TransactionAdapter> {
     return new Promise((resolve) => {
       check(isNotNull(this.database), 'Database is not open.')
 
-      check(
-        mode !== 'versionchange',
-        'Cannot open transaction with mode "versionchange".',
+      const transaction = this.database.transaction(
+        this.database.objectStoreNames,
+        'readwrite',
       )
 
-      check(isNotEmpty(tableNames), 'Table names must not be empty.')
-
-      const transaction = this.database.transaction(tableNames, mode)
-
       resolve(
-        new IdbDatabaseTransactionAdapter(this.database, transaction, mode),
+        new IdbDatabaseTransactionAdapter(
+          this.database,
+          transaction,
+          'readwrite',
+        ),
       )
     })
   }

@@ -74,8 +74,6 @@ export interface JoinedTableAdapter<
   TRightData extends object,
 > extends QueryableTableAdapter<TLeftData> {}
 
-export type DatabaseTransactionMode = 'readwrite' | 'readonly' | 'versionchange'
-
 export interface SchemaAdapter {
   getTable<TData extends object>(tableName: string): TableAdapter<TData>
   createTable<TData extends object>(
@@ -101,10 +99,7 @@ export interface DatabaseAdapter {
   deleteDatabase(databaseName: string): Promise<void>
 
   // note: only one transaction can be open at a time
-  openTransaction(
-    tableNames: Array<string>,
-    mode: DatabaseTransactionMode,
-  ): Promise<TransactionAdapter>
+  openTransaction(): Promise<TransactionAdapter>
 
   getDatabaseInfo(databaseName: string): Promise<Nullable<DatabaseInfo>>
   getDatabases(): Promise<Array<DatabaseInfo>>

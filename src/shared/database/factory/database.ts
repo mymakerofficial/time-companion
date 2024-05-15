@@ -77,18 +77,9 @@ export class DatabaseImpl implements Database {
   }
 
   protected async runTransaction<TResult>(
-    tables: Array<TableSchema<object>> | Array<string>,
-    mode: 'readonly' | 'readwrite',
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult> {
-    check(isArray(tables), 'Tables must be an array.')
-    check(isNotEmpty(tables), 'Cannot open transaction without tables.')
-
-    const tableNames = tables.map((table) =>
-      isString(table) ? table : table._.raw.tableName,
-    )
-
-    const transaction = await this.adapter.openTransaction(tableNames, mode)
+    const transaction = await this.adapter.openTransaction()
 
     return await block(new DatabaseTransactionImpl(transaction))
       .catch(async (error) => {
@@ -102,24 +93,9 @@ export class DatabaseImpl implements Database {
   }
 
   async withTransaction<TResult>(
-    tables: Array<TableSchema<object>> | Array<string>,
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult> {
-    return await this.withReadTransaction(tables, block)
-  }
-
-  async withWriteTransaction<TResult>(
-    tables: Array<TableSchema<object>> | Array<string>,
-    block: (transaction: Transaction) => Promise<TResult>,
-  ): Promise<TResult> {
-    return await this.runTransaction(tables, 'readwrite', block)
-  }
-
-  async withReadTransaction<TResult>(
-    tables: Array<TableSchema<object>> | Array<string>,
-    block: (transaction: Transaction) => Promise<TResult>,
-  ): Promise<TResult> {
-    return await this.runTransaction(tables, 'readonly', block)
+    return await this.runTransaction(block)
   }
 
   async getDatabases(): Promise<Array<DatabaseInfo>> {

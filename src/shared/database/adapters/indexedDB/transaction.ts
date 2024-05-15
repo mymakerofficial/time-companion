@@ -1,7 +1,4 @@
-import type {
-  TransactionAdapter,
-  DatabaseTransactionMode,
-} from '@shared/database/types/adapter'
+import type { TransactionAdapter } from '@shared/database/types/adapter'
 import { IdbSchemaAdapter } from '@shared/database/adapters/indexedDB/schema'
 
 export class IdbDatabaseTransactionAdapter
@@ -11,7 +8,7 @@ export class IdbDatabaseTransactionAdapter
   constructor(
     protected readonly db: IDBDatabase,
     protected readonly tx: IDBTransaction,
-    protected readonly mode: DatabaseTransactionMode,
+    protected readonly mode: IDBTransactionMode,
   ) {
     super(db, tx, mode)
   }

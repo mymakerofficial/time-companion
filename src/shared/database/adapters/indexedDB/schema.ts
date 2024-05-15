@@ -1,5 +1,4 @@
 import type {
-  DatabaseTransactionMode,
   SchemaAdapter,
   TableAdapter,
 } from '@shared/database/types/adapter'
@@ -7,13 +6,12 @@ import { IdbTableAdapter } from '@shared/database/adapters/indexedDB/table'
 import type { TableSchemaRaw } from '@shared/database/types/schema'
 import { check } from '@shared/lib/utils/checks'
 import { valuesOf } from '@shared/lib/utils/object'
-import { genericTypeToPgType } from '@shared/database/adapters/pglite/helpers/genericTypeToPgType'
 
 export class IdbSchemaAdapter implements SchemaAdapter {
   constructor(
     protected readonly db: IDBDatabase,
     protected readonly tx: IDBTransaction,
-    protected readonly mode: DatabaseTransactionMode,
+    protected readonly mode: IDBTransactionMode,
   ) {}
 
   getTable<TData extends object>(tableName: string): TableAdapter<TData> {

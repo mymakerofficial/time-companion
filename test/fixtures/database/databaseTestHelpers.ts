@@ -114,25 +114,19 @@ export class DatabaseTestHelpers {
   }
 
   async insertPersons(persons: Array<Person>): Promise<Array<Person>> {
-    return await this.database.withWriteTransaction(
-      [this.personsTable],
-      async (transaction) => {
-        return await transaction.table(this.personsTable).insertMany({
-          data: persons,
-        })
-      },
-    )
+    return await this.database.withTransaction(async (transaction) => {
+      return await transaction.table(this.personsTable).insertMany({
+        data: persons,
+      })
+    })
   }
 
   async insertPets(pets: Array<Pet>): Promise<Array<Pet>> {
-    return await this.database.withWriteTransaction(
-      [this.petsTable],
-      async (transaction) => {
-        return await transaction.table(this.petsTable).insertMany({
-          data: pets,
-        })
-      },
-    )
+    return await this.database.withTransaction(async (transaction) => {
+      return await transaction.table(this.petsTable).insertMany({
+        data: pets,
+      })
+    })
   }
 
   async insertSamplePersons(amount: number): Promise<Array<Person>> {
@@ -151,57 +145,42 @@ export class DatabaseTestHelpers {
   }
 
   async getAllPersonsInDatabase(): Promise<Array<Person>> {
-    return await this.database.withReadTransaction(
-      [this.personsTable],
-      async (transaction) => {
-        return await transaction.table(this.personsTable).findMany()
-      },
-    )
+    return await this.database.withTransaction(async (transaction) => {
+      return await transaction.table(this.personsTable).findMany()
+    })
   }
 
   async getPersonsInDatabaseByIds(ids: Array<string>): Promise<Array<Person>> {
-    return await this.database.withReadTransaction(
-      [this.personsTable],
-      async (transaction) => {
-        return await transaction.table(this.personsTable).findMany({
-          where: this.personsTable.id.in(ids),
-        })
-      },
-    )
+    return await this.database.withTransaction(async (transaction) => {
+      return await transaction.table(this.personsTable).findMany({
+        where: this.personsTable.id.in(ids),
+      })
+    })
   }
 
   async getPersonInDatabaseById(id: string): Promise<Nullable<Person>> {
-    return await this.database.withReadTransaction(
-      [this.personsTable],
-      async (transaction) => {
-        return await transaction.table(this.personsTable).findFirst({
-          where: this.personsTable.id.equals(id),
-        })
-      },
-    )
+    return await this.database.withTransaction(async (transaction) => {
+      return await transaction.table(this.personsTable).findFirst({
+        where: this.personsTable.id.equals(id),
+      })
+    })
   }
 
   async getAllPetsInDatabase(): Promise<Array<Pet>> {
-    return await this.database.withReadTransaction(
-      [this.petsTable],
-      async (transaction) => {
-        return await transaction.table(this.petsTable).findMany()
-      },
-    )
+    return await this.database.withTransaction(async (transaction) => {
+      return await transaction.table(this.petsTable).findMany()
+    })
   }
 
   // deletes all data from all tables, but keeps the tables
   async clearDatabase(): Promise<void> {
     const tableNames = await this.database.getTableNames()
 
-    await this.database.withWriteTransaction(
-      tableNames,
-      async (transaction) => {
-        for (const table of tableNames) {
-          await transaction.table(table).deleteAll()
-        }
-      },
-    )
+    await this.database.withTransaction(async (transaction) => {
+      for (const table of tableNames) {
+        await transaction.table(table).deleteAll()
+      }
+    })
   }
 
   // opens the database and creates the tables at the specified version
@@ -228,7 +207,7 @@ export class DatabaseTestHelpers {
 
     const tables = await this.database.getTableNames()
 
-    await this.database.withWriteTransaction(tables, async (transaction) => {
+    await this.database.withTransaction(async (transaction) => {
       for (const table of tables) {
         await transaction.table(table).deleteAll()
       }

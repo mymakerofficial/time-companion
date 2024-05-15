@@ -157,21 +157,6 @@ export interface Database {
   close(): Promise<void>
   delete(databaseName: string): Promise<void>
   withTransaction<TResult>(
-    tables: Array<TableSchema<object>> | Array<string>,
-    block: (transaction: Transaction) => Promise<TResult>,
-  ): Promise<TResult>
-  /***
-   * @deprecated use withTransaction instead
-   */
-  withWriteTransaction<TResult>(
-    tables: Array<TableSchema<object>> | Array<string>,
-    block: (transaction: Transaction) => Promise<TResult>,
-  ): Promise<TResult>
-  /***
-   * @deprecated use withTransaction instead
-   */
-  withReadTransaction<TResult>(
-    tables: Array<TableSchema<object>> | Array<string>,
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>
   getDatabases(): Promise<Array<DatabaseInfo>>
