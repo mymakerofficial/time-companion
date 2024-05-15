@@ -57,14 +57,14 @@ await database.open('my-database', 1, async (transaction, newVersion) => {
 
 ### Table Operations
 
-A table can be accessed using the `table` method on any transaction
+A table can be accessed using the `table` method on the database or any transaction
 by either passing the table schema or the table name.
 
 ```ts
 // passing the table schema will infer all types
-transaction.table(usersTable)
+database.table(usersTable)
 // note: the generic type is optional and only for IDE autocompletion
-transaction.table<UserEntityDto>('users')
+database.table<UserEntityDto>('users')
 ```
 
 ### Transactions
@@ -105,15 +105,13 @@ You can order, limit and offset the results of a query.
 **It is currently only possible to order by an indexed field.**
 
 ```ts
-const res = await database.withTransaction(async (transaction) => {
-  return await transaction.table(usersTable).findMany({
-    // we can order the results
-    orderBy: usersTable.name.asc(),
-    // we can limit the results
-    limit: 10,
-    // we can offset the results
-    offset: 10,
-  })
+const res = await database.table(usersTable).findMany({
+  // we can order the results
+  orderBy: usersTable.name.asc(),
+  // we can limit the results
+  limit: 10,
+  // we can offset the results
+  offset: 10,
 })
 ```
 

@@ -74,8 +74,11 @@ export interface JoinedTableAdapter<
   TRightData extends object,
 > extends QueryableTableAdapter<TLeftData> {}
 
-export interface SchemaAdapter {
+export interface TableAdapterFactory {
   getTable<TData extends object>(tableName: string): TableAdapter<TData>
+}
+
+export interface SchemaAdapter extends TableAdapterFactory {
   createTable<TData extends object>(
     schema: TableSchemaRaw<TData>,
   ): Promise<void>
@@ -87,7 +90,7 @@ export interface TransactionAdapter extends SchemaAdapter {
   rollback(): Promise<void>
 }
 
-export interface DatabaseAdapter {
+export interface DatabaseAdapter extends TableAdapterFactory {
   readonly isOpen: boolean
 
   // returns a transaction when the database needs to be upgraded, otherwise returns null

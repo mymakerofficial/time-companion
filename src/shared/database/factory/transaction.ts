@@ -15,6 +15,6 @@ export class DatabaseTransactionImpl implements Transaction {
 
     const tableAdapter =
       this.transactionAdapter.getTable<InferTable<TSchema>>(tableName)
-    return new DatabaseTableImpl(this.transactionAdapter, tableAdapter)
+    return new DatabaseTableImpl(tableAdapter)
   }
 }

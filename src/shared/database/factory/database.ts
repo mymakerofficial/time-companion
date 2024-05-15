@@ -1,5 +1,6 @@
 import type {
   Database,
+  Table,
   Transaction,
   UpgradeFunction,
 } from '@shared/database/types/database'
@@ -18,7 +19,8 @@ import {
 import { DatabaseTransactionImpl } from '@shared/database/factory/transaction'
 import { DatabaseUpgradeTransactionImpl } from '@shared/database/factory/upgradeTransaction'
 import { getOrDefault } from '@shared/lib/utils/result'
-import type { TableSchema } from '@shared/database/types/schema'
+import type { InferTable, TableSchema } from '@shared/database/types/schema'
+import { DatabaseTableImpl } from '@shared/database/factory/table'
 
 export function createDatabase(adapter: DatabaseAdapter): Database {
   return new DatabaseImpl(adapter)
@@ -72,10 +74,6 @@ export class DatabaseImpl implements Database {
     return await this.adapter.closeDatabase()
   }
 
-  async delete(databaseName: string): Promise<void> {
-    return await this.adapter.deleteDatabase(databaseName)
-  }
-
   protected async runTransaction<TResult>(
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult> {
@@ -98,12 +96,26 @@ export class DatabaseImpl implements Database {
     return await this.runTransaction(block)
   }
 
-  async getDatabases(): Promise<Array<DatabaseInfo>> {
-    return await this.adapter.getDatabases()
+  table<
+    TData extends object = object,
+    TSchema extends TableSchema<TData> = TableSchema<TData>,
+  >(table: TSchema | string): Table<InferTable<TSchema>> {
+    const tableName = isString(table) ? table : table._.raw.tableName
+
+    const tableAdapter = this.adapter.getTable<InferTable<TSchema>>(tableName)
+    return new DatabaseTableImpl(tableAdapter)
   }
 
   async getTableNames(): Promise<Array<string>> {
     return await this.adapter.getTableNames()
+  }
+
+  async delete(databaseName: string): Promise<void> {
+    return await this.adapter.deleteDatabase(databaseName)
+  }
+
+  async getDatabases(): Promise<Array<DatabaseInfo>> {
+    return await this.adapter.getDatabases()
   }
 
   async getTableIndexNames(tableName: string): Promise<Array<string>> {

@@ -1,25 +1,19 @@
 import type { SchemaAdapter } from '@shared/database/types/adapter'
-import { PGLiteTableAdapter } from '@shared/database/adapters/pglite/table'
 import { todo } from '@shared/lib/utils/todo'
-import type { PGliteInterface, Transaction } from '@electric-sql/pglite'
-import type { Knex } from 'knex'
 import { valuesOf } from '@shared/lib/utils/object'
 import type { TableSchemaRaw } from '@shared/database/types/schema'
 import { genericTypeToPgType } from '@shared/database/adapters/pglite/helpers/genericTypeToPgType'
+import { check, isNotNull } from '@shared/lib/utils/checks'
+import { PGLiteTableAdapterFactory } from '@shared/database/adapters/pglite/tableFactory'
 
-export class PGLiteSchemaAdapter implements SchemaAdapter {
-  constructor(
-    protected readonly knex: Knex,
-    protected readonly db: Transaction | PGliteInterface,
-  ) {}
-
-  getTable<TData extends object>(tableName: string) {
-    return new PGLiteTableAdapter<TData>(this.knex, this.db, tableName)
-  }
-
+export class PGLiteSchemaAdapter
+  extends PGLiteTableAdapterFactory
+  implements SchemaAdapter
+{
   async createTable<TData extends object>(
     schema: TableSchemaRaw<TData>,
   ): Promise<void> {
+    check(isNotNull(this.db), 'Database is not open.')
     const builder = this.knex.schema.createTable(
       schema.tableName,
       (tableBuilder) => {
@@ -56,6 +50,7 @@ export class PGLiteSchemaAdapter implements SchemaAdapter {
   }
 
   deleteTable(): Promise<void> {
+    check(isNotNull(this.db), 'Database is not open.')
     todo()
   }
 }

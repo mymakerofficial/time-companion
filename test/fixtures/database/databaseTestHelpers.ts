@@ -145,31 +145,23 @@ export class DatabaseTestHelpers {
   }
 
   async getAllPersonsInDatabase(): Promise<Array<Person>> {
-    return await this.database.withTransaction(async (transaction) => {
-      return await transaction.table(this.personsTable).findMany()
-    })
+    return await this.database.table(this.personsTable).findMany()
   }
 
   async getPersonsInDatabaseByIds(ids: Array<string>): Promise<Array<Person>> {
-    return await this.database.withTransaction(async (transaction) => {
-      return await transaction.table(this.personsTable).findMany({
-        where: this.personsTable.id.in(ids),
-      })
+    return await this.database.table(this.personsTable).findMany({
+      where: this.personsTable.id.in(ids),
     })
   }
 
   async getPersonInDatabaseById(id: string): Promise<Nullable<Person>> {
-    return await this.database.withTransaction(async (transaction) => {
-      return await transaction.table(this.personsTable).findFirst({
-        where: this.personsTable.id.equals(id),
-      })
+    return await this.database.table(this.personsTable).findFirst({
+      where: this.personsTable.id.equals(id),
     })
   }
 
   async getAllPetsInDatabase(): Promise<Array<Pet>> {
-    return await this.database.withTransaction(async (transaction) => {
-      return await transaction.table(this.petsTable).findMany()
-    })
+    return await this.database.table(this.petsTable).findMany()
   }
 
   // deletes all data from all tables, but keeps the tables

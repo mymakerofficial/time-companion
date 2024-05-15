@@ -2,12 +2,14 @@ import type { Nullable } from '@shared/lib/utils/types'
 import type {
   DatabaseAdapter,
   DatabaseInfo,
+  TableAdapter,
   TransactionAdapter,
 } from '@shared/database/types/adapter'
 import { IdbDatabaseTransactionAdapter } from '@shared/database/adapters/indexedDB/transaction'
 import { check, isNotNull, isUndefined } from '@shared/lib/utils/checks'
 import { toArray } from '@shared/lib/utils/list'
 import { todo } from '@shared/lib/utils/todo'
+import { IdbTableAdapter } from '@shared/database/adapters/indexedDB/table'
 
 export function indexedDBAdapter(indexedDB?: IDBFactory): DatabaseAdapter {
   return new IdbDatabaseAdapter(indexedDB)
@@ -102,6 +104,10 @@ export class IdbDatabaseAdapter implements DatabaseAdapter {
         ),
       )
     })
+  }
+
+  getTable<TData extends object>(tableName: string): TableAdapter<TData> {
+    todo()
   }
 
   async getDatabaseInfo(databaseName: string): Promise<Nullable<DatabaseInfo>> {

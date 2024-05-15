@@ -23,10 +23,7 @@ export class DatabaseTableImpl<TLeftData extends object>
   extends DatabaseQueryableTableImpl<TLeftData>
   implements Table<TLeftData>
 {
-  constructor(
-    protected readonly transactionAdapter: TransactionAdapter,
-    protected readonly leftTableAdapter: TableAdapter<TLeftData>,
-  ) {
+  constructor(protected readonly leftTableAdapter: TableAdapter<TLeftData>) {
     super(leftTableAdapter)
   }
 
@@ -51,6 +48,7 @@ export class DatabaseTableImpl<TLeftData extends object>
     rightTable: TRightSchema | string,
     props: LeftJoinProps<TLeftData, InferTable<TRightSchema>>,
   ): JoinedTable<TLeftData, InferTable<TRightSchema>> {
+    // @ts-ignore
     const onWhere = this.getWhere(props.on) // TODO: why the type not work?
 
     check(onWhere?.type === 'condition', '"on" must be a simple condition')

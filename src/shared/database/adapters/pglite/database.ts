@@ -5,31 +5,38 @@ import type {
 } from '@shared/database/types/adapter'
 import type { Knex } from 'knex'
 import createKnex from 'knex'
-import { PGlite, type PGliteInterface } from '@electric-sql/pglite'
+import {
+  PGlite,
+  type PGliteInterface,
+  type Transaction,
+} from '@electric-sql/pglite'
 import type { Nullable } from '@shared/lib/utils/types'
 import { check, isNotNull } from '@shared/lib/utils/checks'
 import { PGLiteDatabaseTransactionAdapter } from '@shared/database/adapters/pglite/transaction'
 import path from 'path'
 import { todo } from '@shared/lib/utils/todo'
 import { getOrDefault } from '@shared/lib/utils/result'
+import { PGLiteSchemaAdapter } from '@shared/database/adapters/pglite/schema'
+import { PGLiteTableAdapterFactory } from '@shared/database/adapters/pglite/tableFactory'
 
 export function pgliteAdapter(): DatabaseAdapter {
   return new PGLiteDatabaseAdapter()
 }
 
-export class PGLiteDatabaseAdapter implements DatabaseAdapter {
-  protected readonly knex: Knex
-  protected db: Nullable<PGliteInterface>
-
+export class PGLiteDatabaseAdapter
+  extends PGLiteTableAdapterFactory
+  implements DatabaseAdapter
+{
   constructor(
     protected readonly protocol: string = 'memory',
     protected readonly basePath: string = '',
   ) {
-    this.knex = createKnex({
-      client: 'pg',
-    })
-
-    this.db = null
+    super(
+      createKnex({
+        client: 'pg',
+      }),
+      null,
+    )
   }
 
   protected getDataDir(databaseName: string): string {
@@ -50,8 +57,8 @@ export class PGLiteDatabaseAdapter implements DatabaseAdapter {
   }
 
   async closeDatabase(): Promise<void> {
-    check(isNotNull(this.db), 'No database is open.')
-    await this.db.close()
+    check(isNotNull(this.db), 'Database is not open.')
+    await (this.db as PGliteInterface).close()
   }
 
   async deleteDatabase(databaseName: string): Promise<void> {
@@ -61,8 +68,7 @@ export class PGLiteDatabaseAdapter implements DatabaseAdapter {
   async openTransaction(): Promise<TransactionAdapter> {
     return new Promise((resolveAdapter) => {
       check(isNotNull(this.db), 'No database is open.')
-
-      this.db.transaction((tx) => {
+      ;(this.db as PGliteInterface).transaction((tx) => {
         return new Promise((resolveTransaction) => {
           const adapter = new PGLiteDatabaseTransactionAdapter(
             this.knex,

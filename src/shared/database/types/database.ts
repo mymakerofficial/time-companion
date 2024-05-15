@@ -147,7 +147,7 @@ export type UpgradeFunction = (
   oldVersion: number,
 ) => Promise<void>
 
-export interface Database {
+export interface Database extends TableFactory {
   readonly isOpen: boolean
   open(
     databaseName: string,
@@ -155,11 +155,20 @@ export interface Database {
     upgrade: UpgradeFunction,
   ): Promise<void>
   close(): Promise<void>
-  delete(databaseName: string): Promise<void>
   withTransaction<TResult>(
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>
-  getDatabases(): Promise<Array<DatabaseInfo>>
   getTableNames(): Promise<Array<string>>
+  /***
+   * @deprecated use native methods to delete databases
+   */
+  delete(databaseName: string): Promise<void>
+  /***
+   * @deprecated future versions will only support one database
+   */
+  getDatabases(): Promise<Array<DatabaseInfo>>
+  /***
+   * @deprecated
+   */
   getTableIndexNames(tableName: string): Promise<Array<string>>
 }
