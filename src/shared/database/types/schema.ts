@@ -77,14 +77,20 @@ export type ColumnDefinitionBase<TColumn> = {
 export type ColumnDefinition<TColumn> = ColumnDefinitionBase<TColumn> &
   WhereConditionFactory<TColumn>
 
-export type ColumnBuilder<T> = {
+export interface ColumnBuilder<TColumn> {
   _: {
-    raw: ColumnDefinitionRaw<T>
+    raw: ColumnDefinitionRaw<TColumn>
   }
-  primaryKey: () => ColumnBuilder<T>
-  nullable: () => ColumnBuilder<Nullable<T>>
-  indexed: () => ColumnBuilder<T>
-  unique: () => ColumnBuilder<T>
+  primaryKey: () => ColumnBuilder<TColumn>
+  nullable: () => ColumnBuilder<Nullable<TColumn>>
+  indexed: () => ColumnBuilder<TColumn>
+  unique: () => ColumnBuilder<TColumn>
+}
+
+export interface ColumnBuilderFactory {
+  string: () => ColumnBuilder<string>
+  number: () => ColumnBuilder<number>
+  boolean: () => ColumnBuilder<boolean>
 }
 
 export type TableSchemaRaw<T extends object> = {
