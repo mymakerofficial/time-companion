@@ -3,9 +3,7 @@ import type { Nullable } from '@shared/lib/utils/types'
 import type {
   ColumnDefinitionRaw,
   InferTable,
-  RawWhere,
   TableSchema,
-  WhereBuilder,
   WhereBuilderOrRaw,
 } from '@shared/database/types/schema'
 
@@ -46,43 +44,26 @@ export type OrderBy<TRow extends object, TColumn = unknown> = {
   direction: OrderByDirection
 }
 
-type HasOrder<TRow extends object> = {
+export type FindProps<TRow extends object> = {
+  where?: WhereBuilderOrRaw<TRow>
   orderBy?: OrderBy<TRow>
 }
 
-type HasOffset<TRow extends object> = HasOrder<TRow> & {
+export type FindManyProps<TRow extends object> = {
+  where?: WhereBuilderOrRaw<TRow>
+  orderBy?: OrderBy<TRow>
   offset?: number
-}
-
-type HasLimit<TRow extends object> = HasOffset<TRow> & {
   limit?: number
 }
 
-export type FindProps<TRow extends object> = HasOffset<TRow> & {
+export type UpdateProps<TRow extends object> = {
   where?: WhereBuilderOrRaw<TRow>
-}
-
-export type FindManyProps<TRow extends object> = FindProps<TRow> &
-  HasLimit<TRow>
-
-// TODO: Update should only accept a where clause
-export type UpdateProps<TRow extends object> = HasOffset<TRow> & {
-  where?: WhereBuilder<TRow> | RawWhere
   data: Partial<TRow>
 }
 
-// TODO: UpdateMany is redundant
-export type UpdateManyProps<TRow extends object> = UpdateProps<TRow> &
-  HasLimit<TRow>
-
-// TODO: Delete should only accept a where clause
-export type DeleteProps<TRow extends object> = HasOffset<TRow> & {
-  where?: WhereBuilder<TRow> | RawWhere
+export type DeleteProps<TRow extends object> = {
+  where?: WhereBuilderOrRaw<TRow>
 }
-
-// TODO: DeleteMany is redundant
-export type DeleteManyProps<TRow extends object> = DeleteProps<TRow> &
-  HasLimit<TRow>
 
 export type InsertProps<TRow extends object> = {
   data: TRow
@@ -95,10 +76,8 @@ export type InsertManyProps<TRow extends object> = {
 export interface QueryableTable<TRow extends object> {
   findFirst(props?: FindProps<TRow>): Promise<Nullable<TRow>>
   findMany(props?: FindManyProps<TRow>): Promise<Array<TRow>>
-  update(props: UpdateProps<TRow>): Promise<Nullable<TRow>>
-  updateMany(props: UpdateManyProps<TRow>): Promise<Array<TRow>>
+  update(props: UpdateProps<TRow>): Promise<Array<TRow>>
   delete(props: DeleteProps<TRow>): Promise<void>
-  deleteMany(props: DeleteManyProps<TRow>): Promise<void>
   deleteAll(): Promise<void>
   insert(props: InsertProps<TRow>): Promise<TRow>
   insertMany(props: InsertManyProps<TRow>): Promise<Array<TRow>>

@@ -24,7 +24,7 @@ export class PGLiteJoinedTableAdapter<
     super(knex, db, leftTableName)
   }
 
-  override build(props: Partial<AdapterBaseQueryProps<TData>>) {
+  override build(props: Partial<AdapterBaseQueryProps>) {
     const builder = super.build(props)
 
     return builder.leftJoin(

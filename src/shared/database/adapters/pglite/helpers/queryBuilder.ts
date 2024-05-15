@@ -4,10 +4,10 @@ import { isPresent } from '@shared/lib/utils/checks'
 import type { RawWhere } from '@shared/database/types/schema'
 import { genericOperatorToPgOperator } from '@shared/database/adapters/pglite/helpers/genericOperatorToPgOperator'
 
-export function buildQuery<TData extends object>(
+export function buildQuery(
   knex: Knex,
   tableName: string,
-  props: Partial<AdapterBaseQueryProps<TData>>,
+  props: Partial<AdapterBaseQueryProps>,
 ) {
   const builder = knex.from(tableName)
 

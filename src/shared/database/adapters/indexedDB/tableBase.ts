@@ -12,8 +12,8 @@ export class IdbTableBaseAdapter<TData extends object>
   extends IdbQueryable<TData>
   implements QueryableTableAdapter<TData>
 {
-  async select(options: AdapterSelectProps<TData>): Promise<Array<TData>> {
-    const iterator = await this.openIterator(options)
+  async select(props: AdapterSelectProps<TData>): Promise<Array<TData>> {
+    const iterator = await this.openIterator(props)
 
     const results = []
     for await (const cursor of iterator) {
@@ -23,20 +23,20 @@ export class IdbTableBaseAdapter<TData extends object>
     return results
   }
 
-  async update(options: AdapterUpdateProps<TData>): Promise<Array<TData>> {
-    const iterator = await this.openIterator(options)
+  async update(props: AdapterUpdateProps<TData>): Promise<Array<TData>> {
+    const iterator = await this.openIterator(props)
 
     const results = []
     for await (const cursor of iterator) {
-      await cursor.update(options.data)
+      await cursor.update(props.data)
       results.push(cursor.value())
     }
 
     return results
   }
 
-  async delete(options: AdapterDeleteProps<TData>): Promise<void> {
-    const iterator = await this.openIterator(options)
+  async delete(props: AdapterDeleteProps<TData>): Promise<void> {
+    const iterator = await this.openIterator(props)
 
     for await (const cursor of iterator) {
       await cursor.delete()
@@ -57,12 +57,12 @@ export class IdbTableBaseAdapter<TData extends object>
     })
   }
 
-  insert(options: AdapterInsertProps<TData>): Promise<TData> {
+  insert(props: AdapterInsertProps<TData>): Promise<TData> {
     return new Promise((resolve, reject) => {
-      const request = this.objectStore.add(options.data)
+      const request = this.objectStore.add(props.data)
 
       request.onsuccess = () => {
-        resolve(options.data)
+        resolve(props.data)
       }
 
       request.onerror = () => {
@@ -72,9 +72,9 @@ export class IdbTableBaseAdapter<TData extends object>
   }
 
   async insertMany(
-    options: AdapterInsertManyProps<TData>,
+    props: AdapterInsertManyProps<TData>,
   ): Promise<Array<TData>> {
-    const promises = options.data.map((data) => this.insert({ data }))
+    const promises = props.data.map((data) => this.insert({ data }))
     return await Promise.all(promises)
   }
 }

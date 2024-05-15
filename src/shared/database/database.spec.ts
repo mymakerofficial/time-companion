@@ -8,7 +8,7 @@ import {
   vi,
 } from 'vitest'
 import { faker } from '@faker-js/faker'
-import { asArray, firstOf, lastOf } from '@shared/lib/utils/list'
+import { asArray, emptyArray, firstOf, lastOf } from '@shared/lib/utils/list'
 import { randomElement, randomElements } from '@shared/lib/utils/random'
 import type { UpgradeFunction } from '@shared/database/types/database'
 import { useDatabaseFixtures } from '@test/fixtures/database/databaseFixtures'
@@ -594,11 +594,43 @@ describe.each([
           gender: newGender,
         }
 
-        expect(res).toEqual(expected)
+        expect(res).toEqual([expected])
         expect(personInDatabase).toEqual(expected)
       })
 
-      it('should return null when updating an entry that does not exist', async () => {
+      it('should update multiple entries in a table', async () => {
+        const samplePersons = await helpers.insertSamplePersons(6)
+        const randomPersons = randomElements(samplePersons, 2, {
+          safetyOffset: 1,
+        })
+        const ids = randomPersons.map((person) => person.id)
+
+        const newLastName = faker.person.lastName()
+
+        const res = await database.withWriteTransaction(
+          [personsTable],
+          async (transaction) => {
+            return await transaction.table(personsTable).update({
+              where: personsTable.id.in(ids),
+              data: {
+                lastName: newLastName,
+              },
+            })
+          },
+        )
+
+        const personsInDatabase = await helpers.getPersonsInDatabaseByIds(ids)
+
+        const expected: Array<Person> = randomPersons.map((person) => ({
+          ...person,
+          lastName: newLastName,
+        }))
+
+        expect(res.sort(byId)).toEqual(expected.sort(byId))
+        expect(personsInDatabase.sort(byId)).toEqual(expected.sort(byId))
+      })
+
+      it('should return empty array when updating an entry that does not exist', async () => {
         await helpers.insertSamplePersons(6)
 
         const res = await database.withWriteTransaction(
@@ -613,7 +645,7 @@ describe.each([
           },
         )
 
-        expect(res).toBeNull()
+        expect(res).toEqual(emptyArray())
       })
 
       it.todo('should fail when trying to update a primary key', async () => {
@@ -668,138 +700,6 @@ describe.each([
       )
     })
 
-    describe('updateMany', () => {
-      it('should update multiple entries in a table', async () => {
-        const samplePersons = await helpers.insertSamplePersons(6)
-        const randomPersons = randomElements(samplePersons, 2, {
-          safetyOffset: 1,
-        })
-        const ids = randomPersons.map((person) => person.id)
-
-        const newLastName = faker.person.lastName()
-
-        const res = await database.withWriteTransaction(
-          [personsTable],
-          async (transaction) => {
-            return await transaction.table(personsTable).updateMany({
-              where: personsTable.id.in(ids),
-              data: {
-                lastName: newLastName,
-              },
-            })
-          },
-        )
-
-        const personsInDatabase = await helpers.getPersonsInDatabaseByIds(ids)
-
-        const expected: Array<Person> = randomPersons.map((person) => ({
-          ...person,
-          lastName: newLastName,
-        }))
-
-        expect(res.sort(byId)).toEqual(expected.sort(byId))
-        expect(personsInDatabase.sort(byId)).toEqual(expected.sort(byId))
-      })
-
-      it.todo('should only update the first n entries in a table', async () => {
-        // TBD: Order by on update is not supported by Postgres
-
-        const samplePersons = await helpers.insertSamplePersons(6)
-
-        await database.withWriteTransaction(
-          [personsTable],
-          async (transaction) => {
-            await transaction.table(personsTable).updateMany({
-              data: { firstName: 'Jeff' },
-              limit: 3,
-            })
-          },
-        )
-
-        const personsInDatabase = await helpers.getAllPersonsInDatabase()
-
-        const expected = samplePersons.sort(byId).map((person, index) => ({
-          ...person,
-          firstName: index < 3 ? 'Jeff' : person.firstName,
-        }))
-
-        expect(personsInDatabase).toEqual(expected)
-      })
-
-      it.todo(
-        'should update all entries except the first n entries in a table',
-        async () => {
-          // TBD: Order by on update is not supported by Postgres
-
-          const samplePersons = await helpers.insertSamplePersons(6)
-
-          await database.withWriteTransaction(
-            [personsTable],
-            async (transaction) => {
-              await transaction.table(personsTable).updateMany({
-                data: { firstName: 'Jeff' },
-                offset: 3,
-              })
-            },
-          )
-
-          const personsInDatabase = await helpers.getAllPersonsInDatabase()
-
-          const expected = samplePersons.sort(byId).map((person, index) => ({
-            ...person,
-            firstName: index < 3 ? person.firstName : 'Jeff',
-          }))
-
-          expect(personsInDatabase).toEqual(expected)
-        },
-      )
-
-      it.todo(
-        'should only update the first n after skipping the first m entries in a table',
-        async () => {
-          // TBD: Order by on update is not supported by Postgres
-
-          const samplePersons = await helpers.insertSamplePersons(12)
-
-          await database.withWriteTransaction(
-            [personsTable],
-            async (transaction) => {
-              await transaction.table(personsTable).updateMany({
-                data: { firstName: 'Jeff' },
-                offset: 3,
-                limit: 5,
-              })
-            },
-          )
-
-          const personsInDatabase = await helpers.getAllPersonsInDatabase()
-
-          const expected = samplePersons.sort(byId).map((person, index) => ({
-            ...person,
-            firstName: index >= 3 && index < 8 ? 'Jeff' : person.firstName,
-          }))
-
-          expect(personsInDatabase).toEqual(expected)
-        },
-      )
-
-      it('should return empty array when no entry is found', async () => {
-        await helpers.insertSamplePersons(6)
-
-        const res = await database.withWriteTransaction(
-          [personsTable],
-          async (transaction) => {
-            return await transaction.table(personsTable).updateMany({
-              data: { firstName: 'Jeff' },
-              where: personsTable.id.equals('non-existent-id'),
-            })
-          },
-        )
-
-        expect(res).toHaveLength(0)
-      })
-    })
-
     describe('delete', () => {
       it('should delete a single entry in a table', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
@@ -820,9 +720,7 @@ describe.each([
 
         expect(personsInDatabase).not.toContain(randomPerson)
       })
-    })
 
-    describe('deleteMany', () => {
       it('should delete multiple entries in a table', async () => {
         const samplePersons = await helpers.insertSamplePersons(6)
         const randomPersons = randomElements(samplePersons, 2, {
@@ -835,7 +733,7 @@ describe.each([
           async (transaction) => {
             await transaction
               .table(personsTable)
-              .deleteMany({ where: personsTable.id.in(ids) })
+              .delete({ where: personsTable.id.in(ids) })
           },
         )
 
@@ -843,73 +741,6 @@ describe.each([
 
         expect(personsInDatabase).not.toContain(randomPersons)
       })
-
-      it.todo('should only delete the first n entries in a table', async () => {
-        // TBD: Order by on delete is not supported by Postgres
-
-        const samplePersons = await helpers.insertSamplePersons(6)
-
-        await database.withWriteTransaction(
-          [personsTable],
-          async (transaction) => {
-            await transaction.table(personsTable).deleteMany({ limit: 3 })
-          },
-        )
-
-        const personsInDatabase = await helpers.getAllPersonsInDatabase()
-
-        expect(personsInDatabase).toEqual(samplePersons.sort(byId).slice(3))
-      })
-
-      it.todo(
-        'should delete all entries except the first n entries in a table',
-        async () => {
-          // TBD: Order by on delete is not supported by Postgres
-
-          const samplePersons = await helpers.insertSamplePersons(6)
-
-          await database.withWriteTransaction(
-            [personsTable],
-            async (transaction) => {
-              await transaction.table(personsTable).deleteMany({ offset: 3 })
-            },
-          )
-
-          const personsInDatabase = await helpers.getAllPersonsInDatabase()
-
-          expect(personsInDatabase).toEqual(
-            samplePersons.sort(byId).slice(0, 3),
-          )
-        },
-      )
-
-      it.todo(
-        'should only delete the first n after skipping the first m entries in a table',
-        async () => {
-          // TBD: Order by on delete is not supported by Postgres
-
-          const samplePersons = await helpers.insertSamplePersons(12)
-
-          await database.withWriteTransaction(
-            [personsTable],
-            async (transaction) => {
-              await transaction
-                .table(personsTable)
-                .deleteMany({ offset: 3, limit: 5 })
-            },
-          )
-
-          const personsInDatabase = await helpers.getAllPersonsInDatabase()
-
-          const expectedDeleted = samplePersons.sort(byId).slice(3, 8)
-
-          expect(personsInDatabase).toEqual(
-            samplePersons
-              .sort(byId)
-              .filter((person) => !expectedDeleted.includes(person)),
-          )
-        },
-      )
     })
 
     describe('deleteAll', () => {

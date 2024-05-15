@@ -1,41 +1,41 @@
 import type {
-  AdapterSelectProps,
+  AdapterBaseQueryProps,
   DatabaseCursor,
 } from '@shared/database/types/adapter'
 import type { Nullable } from '@shared/lib/utils/types'
-import { check, isNotNull, isNull } from '@shared/lib/utils/checks'
+import { isAbsent, isNotNull } from '@shared/lib/utils/checks'
 import { filteredIterator } from '@shared/database/helpers/filteredIterator'
 import { cursorIterator } from '@shared/database/helpers/cursorIterator'
-import { toArray } from '@shared/lib/utils/list'
+import { asArray, firstOf, toArray } from '@shared/lib/utils/list'
 import { IndexedDBCursorImpl } from '@shared/database/adapters/indexedDB/helpers/cursor'
 import type { OrderByDirection } from '@shared/database/types/database'
+import { getOrDefault, getOrNull } from '@shared/lib/utils/result'
 
 export class IdbQueryable<TData extends object> {
   constructor(protected readonly objectStore: IDBObjectStore) {}
 
   protected async openIterator(
-    {
-      orderByColumn,
-      oderByDirection,
-      limit,
-      offset,
-      where,
-    }: AdapterSelectProps<TData>,
+    props: Partial<AdapterBaseQueryProps>,
     predicate?: (value: TData) => boolean,
   ) {
     const indexes = toArray(this.objectStore.indexNames)
 
-    check(
-      isNull(orderByColumn) || indexes.includes(orderByColumn),
-      `The index "${orderByColumn}" does not exist. You can only order by existing indexes or primary key.`,
-    )
+    const orderByColumn =
+      isAbsent(props.orderByColumn) || !indexes.includes(props.orderByColumn)
+        ? null
+        : props.orderByColumn
+    const oderByDirection = getOrDefault(props.oderByDirection, 'asc')
+
+    const where = getOrNull(props.where)
+    const limit = getOrDefault(props.limit, Infinity)
+    const offset = getOrDefault(props.offset, 0)
 
     const cursor = await this.openCursor(orderByColumn, oderByDirection)
     return filteredIterator(
       cursorIterator(cursor),
       where,
-      limit ?? Infinity,
-      offset ?? 0,
+      limit,
+      offset,
       predicate,
     )
   }

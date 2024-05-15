@@ -30,37 +30,31 @@ type HasWhere = {
   where: Nullable<RawWhere>
 }
 
-export type AdapterBaseQueryProps<TData extends object> = HasLimitAndOffset &
-  HasWhere
+export type AdapterBaseQueryProps = HasLimitAndOffset & HasWhere
 
-export type AdapterSelectProps<TData extends object> =
-  AdapterBaseQueryProps<TData>
+export type AdapterSelectProps<TRow extends object> = AdapterBaseQueryProps
 
-// TODO: Update should only accept a where clause
-export type AdapterUpdateProps<TData extends object> =
-  AdapterBaseQueryProps<TData> & {
-    data: Partial<TData>
-  }
-
-// TODO: Delete should only accept a where clause
-export type AdapterDeleteProps<TData extends object> =
-  AdapterBaseQueryProps<TData>
-
-export type AdapterInsertProps<TData extends object> = {
-  data: TData
+export type AdapterUpdateProps<TRow extends object> = HasWhere & {
+  data: Partial<TRow>
 }
 
-export type AdapterInsertManyProps<TData extends object> = {
-  data: Array<TData>
+export type AdapterDeleteProps<TRow extends object> = HasWhere
+
+export type AdapterInsertProps<TRow extends object> = {
+  data: TRow
 }
 
-export interface QueryableTableAdapter<TData extends object> {
-  select(props: AdapterSelectProps<TData>): Promise<Array<TData>>
-  update(props: AdapterUpdateProps<TData>): Promise<Array<TData>>
-  delete(props: AdapterDeleteProps<TData>): Promise<void>
+export type AdapterInsertManyProps<TRow extends object> = {
+  data: Array<TRow>
+}
+
+export interface QueryableTableAdapter<TRow extends object> {
+  select(props: AdapterSelectProps<TRow>): Promise<Array<TRow>>
+  update(props: AdapterUpdateProps<TRow>): Promise<Array<TRow>>
+  delete(props: AdapterDeleteProps<TRow>): Promise<void>
   deleteAll(): Promise<void>
-  insert(props: AdapterInsertProps<TData>): Promise<TData>
-  insertMany(props: AdapterInsertManyProps<TData>): Promise<Array<TData>>
+  insert(props: AdapterInsertProps<TRow>): Promise<TRow>
+  insertMany(props: AdapterInsertManyProps<TRow>): Promise<Array<TRow>>
 }
 
 export interface JoinableTableAdapter<TLeftData extends object> {

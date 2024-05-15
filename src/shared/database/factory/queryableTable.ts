@@ -1,12 +1,10 @@
 import type {
-  DeleteManyProps,
   DeleteProps,
   FindManyProps,
   FindProps,
   InsertManyProps,
   InsertProps,
   QueryableTable,
-  UpdateManyProps,
   UpdateProps,
 } from '@shared/database/types/database'
 import { firstOfOrNull } from '@shared/lib/utils/list'
@@ -53,44 +51,16 @@ export class DatabaseQueryableTableImpl<TData extends object>
     })
   }
 
-  async update(props: UpdateProps<TData>): Promise<Nullable<TData>> {
-    const res = await this.updateMany({
-      ...props,
-      limit: 1,
-      offset: 0,
-    })
-
-    return firstOfOrNull(res)
-  }
-
-  async updateMany(props: UpdateManyProps<TData>): Promise<Array<TData>> {
+  async update(props: UpdateProps<TData>): Promise<Array<TData>> {
     return await this.tableAdapter.update({
       data: props.data,
-      orderByColumn: getOrNull(props?.orderBy?.column.columnName),
-      orderByTable: getOrNull(props?.orderBy?.column.tableName),
-      oderByDirection: getOrDefault(props?.orderBy?.direction, 'asc'),
       where: this.getWhere(props),
-      limit: getOrNull(props.limit),
-      offset: getOrNull(props.offset),
     })
   }
 
   async delete(props: DeleteProps<TData>): Promise<void> {
-    return await this.deleteMany({
-      ...props,
-      limit: 1,
-      offset: 0,
-    })
-  }
-
-  async deleteMany(props: DeleteManyProps<TData>): Promise<void> {
     return await this.tableAdapter.delete({
-      orderByColumn: getOrNull(props?.orderBy?.column.columnName),
-      orderByTable: getOrNull(props?.orderBy?.column.tableName),
-      oderByDirection: getOrDefault(props?.orderBy?.direction, 'asc'),
       where: this.getWhere(props),
-      limit: getOrNull(props.limit),
-      offset: getOrNull(props.offset),
     })
   }
 

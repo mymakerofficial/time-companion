@@ -21,7 +21,7 @@ export class PGLiteQueryableTableAdapter<TData extends object>
     protected readonly tableName: string,
   ) {}
 
-  protected build(props: Partial<AdapterBaseQueryProps<TData>>) {
+  protected build(props: Partial<AdapterBaseQueryProps>) {
     return buildQuery(this.knex, this.tableName, props)
   }
 
