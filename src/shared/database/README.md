@@ -7,50 +7,37 @@
 ```ts
 const database = createDatabase(indexedDBAdapter())
 // or
-const database = createDatabase(inMemoryDBAdapter())
-```
-
-### Opening a Database
-
-**wip**
-
-```ts
-await database.open('my-database', 1, async (transaction, newVersion) => {
-  // lets ignore migrations for now...
-  
-  // the code inside this callback will be called when the database is out of date
-  //  or when the database is created for the first time.
-  // the transaction we get here is called a versionchange transaction and is unique to this callback
-})
+const database = createDatabase(pgliteDBAdapter())
 ```
 
 ## Tables
 
-**wip**
+You can define a table schema using `defineTable` and use the resulting value to access the table, build where clauses and other things.
 
 ```ts
-// define a table schema
 const usersTable = defineTable<UserEntityDto>('users', {
   id: string().primaryKey(),
-  name: string(),
+  name: string().indexed().unique(),
   age: number(),
   favouriteColor: string().nullable(),
 })
+```
 
-await database.open('my-database', 1, async (transaction, newVersion) => {
-  // we can create a table
-  //  this can only be done inside a versionchange transaction
-  await transaction.createTable(usersTable)
-  
-  // we can create an index on a table
-  //  this can only be done inside a versionchange transaction
-  await transaction.table(usersTable).createIndex({
-    keyPath: 'name',
-    unique: true,
-  })
-  
-  // we can perform any other operation on the database just like a normal transaction
+Note: Passing a generic type to `defineTable` is optional and if not given the row type will automatically be infered.
+```ts
+const petsTable = defineTable('pets', {
+  id: string().primaryKey(),
+  name: string().indexed().unique(),
+  age: number(),
+  favouriteFood: string().nullable(),
 })
+
+assertTypeOf(petsTable).toBe<TableSchema<{
+  id: string
+  name: string
+  age: number
+  favouriteFood: string | null
+}>>()
 ```
 
 ## CRUD
@@ -74,7 +61,7 @@ All operations on the database are done inside a transaction.
 ```ts
 await database.withTransaction(async (transaction) => {
   // we can insert data into a table
-  await transaction.table(usersTable).insert({
+  const res = await transaction.table(usersTable).insert({
     data: {
       id: uuid(),
       name: 'John Doe',
@@ -82,21 +69,23 @@ await database.withTransaction(async (transaction) => {
   })
   
   // we can execute multiple operations in a single transaction
-  await transaction.table(usersTable).insert({
+  await transaction.table(usersTable).update({
     data: {
-      id: uuid(),
       name: 'Jane Doe',
     }
+    where: usersTable.id.equals(res.id)
   })
 })
-
+```
+```ts
 // transactions can return any value
 const res = await database.withTransaction(async (transaction) => {
   return await transaction.table(usersTable).findMany({
-    // we can use where to filter the results
     where: usersTable.name.contains('Doe'),
   })
 })
+
+assertTypeOf(res).toBe<UserEntityDto[]>()
 ```
 
 ### Odering and Limiting
@@ -134,11 +123,16 @@ usersTable.name.contains('John')
 
 ### Create
 
+#### insert
+Inserts the given row and inserts the inserted value.
 ```ts
 table.insert({
   data: { /* ... */ }
 })
 ```
+
+####
+Inserts many rows and returns the inserted values.
 ```ts
 table.insertMany({
   data: [{ /* ... */ }, { /* ... */ }]
@@ -147,60 +141,73 @@ table.insertMany({
 
 ### Read
 
-```ts
-table.find({
-  where: tableSchema.column.equals('value'),
-  orderBy: tableSchema.column.direction('asc' | 'desc'),
-  offset: 10,
-})
-```
+#### findMany
+Returns all rows that match the `where` clause or all if no `where` is given.
+The result can be ordered using the `orderBy` property. The result will be ordered arbitrarily when no `orderBy` is given.
 ```ts
 table.findMany({
-  where: tableSchema.column.equals('value'),
-  orderBy: tableSchema.column.direction('asc' | 'desc'),
-  offset: 10,
-  limit: 10,
+  where?: tableSchema.column.equals('value'),
+  orderBy?: tableSchema.column.direction('asc' | 'desc'),
+  offset?: 10,
+  limit?: 10,
+})
+```
+
+#### find
+Alias for `findMany` with `limit: 1`.
+Returns an `object` or `null` when nothing was found.
+```ts
+table.find({
+  where?: tableSchema.column.equals('value'),
+  orderBy?: tableSchema.column.direction('asc' | 'desc'),
+  offset?: 10,
 })
 ```
 
 ### Update
 
+#### updates
+Patches all rows that match the `where` clause with the given values. Not all values are required.
+Returns the updated values.
 ```ts
 table.update({
   data: { /* ... */ },
-  where: tableSchema.column.equals('value'),
-  orderBy: tableSchema.column.direction('asc' | 'desc'),
-  offset: 10,
-})
-```
-```ts
-table.updateMany({
-  data: { /* ... */ },
-  where: tableSchema.column.equals('value'),
-  orderBy: tableSchema.column.direction('asc' | 'desc'),
-  offset: 10,
-  limit: 10,
+  where?: tableSchema.column.equals('value'),
 })
 ```
 
 ### Delete
 
+#### delete
+Deletes all rows that match the `where` clause or deletes all `when` no where is given.
 ```ts
 table.delete({
-  where: tableSchema.column.equals('value'),
-  orderBy: tableSchema.column.direction('asc' | 'desc'),
-  offset: 10,
+  where?: tableSchema.column.equals('value'),
 })
 ```
+
+#### deleteAll
+deleteAll truncates a table when using Postgres or deletes every row one by one when using IndexedDB.
 ```ts
-table.deleteMany({
-  where: tableSchema.column.equals('value'),
-  orderBy: tableSchema.column.direction('asc' | 'desc'),
-  offset: 10,
-  limit: 10,
-})
-```
-```ts
-// the fastest way to lose all your data
 table.deleteAll()
+```
+
+## Joins
+
+Tables can be joined
+
+### Left Join
+```ts
+database
+  .table(personsTable)
+  .leftJoin(petsTable, {
+    on: personsTable.id.equals(petsTable.ownerId),
+  })
+  .findFirst({
+    where: petsTable.name.equals('Hedwig'),
+  })
+```
+will result in the following SQL statement (when using Postgres)
+```sql
+select "persons".* from "persons" left join "pets" on "persons"."id" = "pets"."ownerId" where ("pets"."name" = 'Hedwig') limit 1
 ```
