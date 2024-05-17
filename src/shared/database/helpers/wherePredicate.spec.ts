@@ -35,7 +35,7 @@ const whereComplicated = personsTable.name
 interface Case {
   name: string
   data: Person
-  where: WhereBuilder<unknown>
+  where: WhereBuilder<Person>
   expected: boolean
 }
 

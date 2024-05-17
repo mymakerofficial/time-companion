@@ -8,7 +8,7 @@ import type {
 
 function resolveBooleanGroup<TData extends object>(
   data: TData,
-  { booleanOperator, conditions }: RawWhereBooleanGroup<TData>,
+  { booleanOperator, conditions }: RawWhereBooleanGroup,
 ): boolean {
   if (booleanOperator === 'and') {
     return conditions.every((condition) => wherePredicateFn(data, condition))
@@ -22,7 +22,7 @@ function resolveBooleanGroup<TData extends object>(
 
 function resolveCondition<TData extends object>(
   data: TData,
-  { column, operator, value }: RawWhereCondition<TData>,
+  { column, operator, value }: RawWhereCondition,
 ): boolean {
   const columnName = column.columnName as keyof TData
 
@@ -38,22 +38,22 @@ function resolveCondition<TData extends object>(
   if (operator === 'notContains') {
     return !(data[columnName] as string).includes(value)
   }
-  if (operator === 'in') {
+  if (operator === 'inArray') {
     return (value as Array<unknown>).includes(data[columnName])
   }
-  if (operator === 'notIn') {
+  if (operator === 'notInArray') {
     return !(value as Array<unknown>).includes(data[columnName])
   }
-  if (operator === 'lt') {
+  if (operator === 'lessThan') {
     return data[columnName] < value
   }
-  if (operator === 'lte') {
+  if (operator === 'lessThanOrEquals') {
     return data[columnName] <= value
   }
-  if (operator === 'gt') {
+  if (operator === 'greaterThan') {
     return data[columnName] > value
   }
-  if (operator === 'gte') {
+  if (operator === 'greaterThanOrEquals') {
     return data[columnName] >= value
   }
   if (operator === 'isNull') {
@@ -67,7 +67,7 @@ function resolveCondition<TData extends object>(
 }
 export function wherePredicateFn<TData extends object>(
   data: TData,
-  where: Maybe<RawWhere<TData>>,
+  where: Maybe<RawWhere>,
 ): boolean {
   if (isAbsent(where)) {
     return true
@@ -84,7 +84,7 @@ export function wherePredicateFn<TData extends object>(
 
 // checks if the data matches the where input
 export function wherePredicate<TData extends object>(
-  where: Maybe<RawWhere<TData>>,
+  where: Maybe<RawWhere>,
 ): (data: TData) => boolean {
   if (isAbsent(where)) {
     return () => true

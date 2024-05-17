@@ -1,6 +1,5 @@
 import type {
   ColumnDefinition,
-  ColumnDefinitionBase,
   ColumnDefinitionRaw,
   RawWhere,
   RawWhereBooleanGroup,
@@ -11,78 +10,155 @@ import {
   type OrderByDirection,
   type WhereBooleanOperator,
   type WhereOperator,
-  whereOperators,
 } from '@shared/database/types/database'
 
-class ColumnDefinitionBaseImpl<TColumn>
-  implements ColumnDefinitionBase<TColumn>
+export class ColumnDefinitionImpl<TRow extends object, TColumn = unknown>
+  implements ColumnDefinition<TRow, TColumn>
 {
-  constructor(protected rawDefinition: ColumnDefinitionRaw<TColumn>) {}
+  constructor(protected rawDefinition: ColumnDefinitionRaw<TRow, TColumn>) {}
 
   get _() {
     return {
       raw: this.rawDefinition,
-      where: (operator: WhereOperator, value?: unknown) =>
-        new WhereConditionBuilderImpl(this.rawDefinition, operator, value),
     }
   }
 
-  direction(direction: OrderByDirection): OrderBy<TColumn> {
+  protected where(
+    operator: WhereOperator,
+    value?: unknown,
+  ): WhereBuilder<TRow, TColumn> {
+    return new WhereConditionBuilderImpl(this.rawDefinition, operator, value)
+  }
+
+  direction(direction: OrderByDirection): OrderBy<TRow, TColumn> {
     return {
       column: this.rawDefinition,
       direction,
     }
   }
 
-  asc(): OrderBy<TColumn> {
+  dir(direction: OrderByDirection): OrderBy<TRow, TColumn> {
+    return this.direction(direction)
+  }
+
+  asc(): OrderBy<TRow, TColumn> {
     return this.direction('asc')
   }
 
-  desc(): OrderBy<TColumn> {
+  desc(): OrderBy<TRow, TColumn> {
     return this.direction('desc')
+  }
+
+  contains(value: string): WhereBuilder<TRow, TColumn> {
+    return this.where('contains', value)
+  }
+
+  eq(
+    value: ColumnDefinition<any, TColumn> | TColumn,
+  ): WhereBuilder<TRow, TColumn> {
+    return this.equals(value)
+  }
+
+  equals(
+    value: ColumnDefinition<any, TColumn> | TColumn,
+  ): WhereBuilder<TRow, TColumn> {
+    return this.where('equals', value)
+  }
+
+  greaterThan(value: number): WhereBuilder<TRow, TColumn> {
+    return this.where('greaterThan', value)
+  }
+
+  greaterThanOrEquals(value: number): WhereBuilder<TRow, TColumn> {
+    return this.where('greaterThanOrEquals', value)
+  }
+
+  gt(value: number): WhereBuilder<TRow, TColumn> {
+    return this.greaterThan(value)
+  }
+
+  gte(value: number): WhereBuilder<TRow, TColumn> {
+    return this.greaterThanOrEquals(value)
+  }
+
+  in(values: Array<TColumn>): WhereBuilder<TRow, TColumn> {
+    return this.inArray(values)
+  }
+
+  inArray(values: Array<TColumn>): WhereBuilder<TRow, TColumn> {
+    return this.where('inArray', values)
+  }
+
+  isNotNull(): WhereBuilder<TRow, TColumn> {
+    return this.where('isNotNull')
+  }
+
+  isNull(): WhereBuilder<TRow, TColumn> {
+    return this.where('isNull')
+  }
+
+  lessThan(value: number): WhereBuilder<TRow, TColumn> {
+    return this.where('lessThan', value)
+  }
+
+  lessThanOrEquals(value: number): WhereBuilder<TRow, TColumn> {
+    return this.where('lessThanOrEquals', value)
+  }
+
+  lt(value: number): WhereBuilder<TRow, TColumn> {
+    return this.lessThan(value)
+  }
+
+  lte(value: number): WhereBuilder<TRow, TColumn> {
+    return this.lessThanOrEquals(value)
+  }
+
+  neq(value: TColumn): WhereBuilder<TRow, TColumn> {
+    return this.notEquals(value)
+  }
+
+  notContains(value: string): WhereBuilder<TRow, TColumn> {
+    return this.where('notContains', value)
+  }
+
+  notEquals(value: TColumn): WhereBuilder<TRow, TColumn> {
+    return this.where('notEquals', value)
+  }
+
+  notIn(value: Array<TColumn>): WhereBuilder<TRow, TColumn> {
+    return this.notInArray(value)
+  }
+
+  notInArray(value: Array<TColumn>): WhereBuilder<TRow, TColumn> {
+    return this.where('notInArray', value)
   }
 }
 
-export function createColumnDefinition<T>(
-  rawDefinition: ColumnDefinitionRaw<T>,
-): ColumnDefinition<T> {
-  const base = new ColumnDefinitionBaseImpl(rawDefinition)
-
-  return Object.assign(
-    base,
-    whereOperators.reduce(
-      (acc, operator) => {
-        acc[operator] = (value?: unknown) => base._.where(operator, value)
-        return acc
-      },
-      {} as Record<WhereOperator, (value?: unknown) => WhereBuilder<T>>,
-    ),
-  ) as ColumnDefinition<T>
-}
-
-class WhereGroupBuilderImpl<T> implements WhereBuilder<T> {
+class WhereGroupBuilderImpl<TRow extends object, TColumn = unknown>
+  implements WhereBuilder<TRow, TColumn>
+{
   constructor(
     protected booleanOperator: WhereBooleanOperator,
-    protected parent: WhereBuilder<unknown>,
-    protected others: Array<WhereBuilder<unknown>>,
+    protected parent: WhereBuilder<object>,
+    protected others: Array<WhereBuilder<object>>,
   ) {}
 
-  protected get conditions(): Array<RawWhere<unknown>> {
+  protected get conditions(): Array<RawWhere> {
     return this.others.map((condition) => condition._.raw)
   }
 
-  protected get conditionsWithParent(): Array<RawWhere<unknown>> {
+  protected get conditionsWithParent(): Array<RawWhere> {
     return [this.parent._.raw, ...this.conditions]
   }
 
-  protected get group(): RawWhereBooleanGroup<T> {
+  protected get group(): RawWhereBooleanGroup {
     return {
       booleanOperator: this.booleanOperator,
       conditions: this.conditionsWithParent,
     }
   }
 
-  protected get where(): RawWhere<T> {
+  protected get where(): RawWhere {
     return {
       type: 'booleanGroup',
       ...this.group,
@@ -95,7 +171,9 @@ class WhereGroupBuilderImpl<T> implements WhereBuilder<T> {
     }
   }
 
-  and<G>(other: WhereBuilder<G>): WhereBuilder<T> {
+  and<GRow extends object, GColumn>(
+    other: WhereBuilder<GRow, GColumn>,
+  ): WhereBuilder<TRow, TColumn> {
     if (this.booleanOperator === 'and') {
       this.others.push(other)
       return this
@@ -104,7 +182,9 @@ class WhereGroupBuilderImpl<T> implements WhereBuilder<T> {
     return new WhereGroupBuilderImpl('and', this, [other])
   }
 
-  or<G>(other: WhereBuilder<G>): WhereBuilder<T> {
+  or<GRow extends object, GColumn>(
+    other: WhereBuilder<GRow, GColumn>,
+  ): WhereBuilder<TRow, TColumn> {
     if (this.booleanOperator === 'or') {
       this.others.push(other)
       return this
@@ -114,14 +194,16 @@ class WhereGroupBuilderImpl<T> implements WhereBuilder<T> {
   }
 }
 
-class WhereConditionBuilderImpl<T> implements WhereBuilder<T> {
+class WhereConditionBuilderImpl<TRow extends object, TColumn = unknown>
+  implements WhereBuilder<TRow, TColumn>
+{
   constructor(
-    protected column: ColumnDefinitionRaw<T>,
+    protected column: ColumnDefinitionRaw<TRow, TColumn>,
     protected operator: WhereOperator,
     protected value?: unknown,
   ) {}
 
-  protected get where(): RawWhere<T> {
+  protected get where(): RawWhere {
     return {
       type: 'condition',
       column: this.column,
@@ -136,11 +218,15 @@ class WhereConditionBuilderImpl<T> implements WhereBuilder<T> {
     }
   }
 
-  and<G>(other: WhereBuilder<G>): WhereBuilder<T> {
+  and<GRow extends object, GColumn>(
+    other: WhereBuilder<GRow, GColumn>,
+  ): WhereBuilder<TRow, TColumn> {
     return new WhereGroupBuilderImpl('and', this, [other])
   }
 
-  or<G>(other: WhereBuilder<G>): WhereBuilder<T> {
+  or<GRow extends object, GColumn>(
+    other: WhereBuilder<GRow, GColumn>,
+  ): WhereBuilder<TRow, TColumn> {
     return new WhereGroupBuilderImpl('or', this, [other])
   }
 }

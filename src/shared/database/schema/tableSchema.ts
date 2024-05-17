@@ -4,7 +4,7 @@ import type {
   TableSchemaBase,
   TableSchemaRaw,
 } from '@shared/database/types/schema'
-import { createColumnDefinition } from '@shared/database/schema/columnDefinition'
+import { ColumnDefinitionImpl } from '@shared/database/schema/columnDefinition'
 import { valuesOf } from '@shared/lib/utils/object'
 
 class TableSchemaBaseImpl<T extends object> implements TableSchemaBase<T> {
@@ -17,20 +17,22 @@ class TableSchemaBaseImpl<T extends object> implements TableSchemaBase<T> {
   }
 }
 
-export function createTableSchema<T extends object>(
-  rawSchema: TableSchemaRaw<T>,
-): TableSchema<T> {
+export function createTableSchema<TRow extends object>(
+  rawSchema: TableSchemaRaw<TRow>,
+): TableSchema<TRow> {
   const base = new TableSchemaBaseImpl(rawSchema)
 
   return Object.assign(
     base,
     valuesOf(rawSchema.columns).reduce(
       (acc, column) => {
-        acc[column.columnName] = createColumnDefinition(column)
+        acc[column.columnName as keyof TRow] = new ColumnDefinitionImpl(column)
 
         return acc
       },
-      {} as Record<string, ColumnDefinition<unknown>>,
+      {} as {
+        [K in keyof TRow]: ColumnDefinition<TRow, TRow[K]>
+      },
     ),
-  ) as TableSchema<T>
+  ) as TableSchema<TRow>
 }

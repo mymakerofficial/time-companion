@@ -16,10 +16,15 @@ export type WhereEqualityOperator = (typeof whereEqualityOperators)[number]
 export const whereStringOperators = ['contains', 'notContains'] as const
 export type WhereStringOperator = (typeof whereStringOperators)[number]
 
-export const whereListOperators = ['in', 'notIn'] as const
+export const whereListOperators = ['inArray', 'notInArray'] as const
 export type WhereListOperator = (typeof whereListOperators)[number]
 
-export const whereNumberOperators = ['lt', 'lte', 'gt', 'gte'] as const
+export const whereNumberOperators = [
+  'lessThan',
+  'lessThanOrEquals',
+  'greaterThan',
+  'greaterThanOrEquals',
+] as const
 export type WhereNumberOperator = (typeof whereNumberOperators)[number]
 
 export const whereNullabilityOperators = ['isNull', 'isNotNull'] as const

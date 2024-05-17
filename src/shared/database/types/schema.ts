@@ -3,12 +3,7 @@ import {
   type OrderBy,
   type OrderByDirection,
   type WhereBooleanOperator,
-  type WhereEqualityOperator,
-  type WhereListOperator,
-  type WhereNullabilityOperator,
-  type WhereNumberOperator,
   type WhereOperator,
-  type WhereStringOperator,
 } from '@shared/database/types/database'
 import type { Nullable } from '@shared/lib/utils/types'
 
@@ -27,23 +22,116 @@ export type RawWhere =
   | ({ type: 'booleanGroup' } & RawWhereBooleanGroup)
   | ({ type: 'condition' } & RawWhereCondition)
 
-export type WhereConditionFactory<
-  TRow extends object,
-  TColumn extends TRow[keyof TRow],
-> = {
-  [O in WhereEqualityOperator]: (
+export type WhereConditionFactory<TRow extends object, TColumn = unknown> = {
+  /***
+   * Check if the column equals the value or another column
+   * @example
+   * ```ts
+   * db
+   *  .table(usersTable)
+   *  .findMany({
+   *    where: usersTable.userName.equals('admin'),
+   *  })
+   * ```
+   * @example
+   * ```ts
+   * db
+   *  .table(usersTable)
+   *  .leftJoin({
+   *    on: usersTable.id.equals(projectsTable.userId),
+   *  })
+   *  .findMany()
+   * ```
+   */
+  equals: (
     value: TColumn | ColumnDefinition<any, TColumn>,
   ) => WhereBuilder<TRow, TColumn>
-} & {
-  [O in WhereStringOperator]: (value: string) => WhereBuilder<TRow, TColumn>
-} & {
-  [O in WhereListOperator]: (
-    value: Array<TColumn>,
+  /***
+   * Check if the column does not equal the value
+   * @example
+   * ```ts
+   * db
+   *  .table(usersTable)
+   *  .findMany({
+   *    where: usersTable.userName.notEquals('admin'),
+   *  })
+   * ```
+   */
+  notEquals: (value: TColumn) => WhereBuilder<TRow, TColumn>
+  /***
+   * Shorthand for {@link equals}
+   */
+  eq: (
+    value: TColumn | ColumnDefinition<any, TColumn>,
   ) => WhereBuilder<TRow, TColumn>
-} & {
-  [O in WhereNumberOperator]: (value: number) => WhereBuilder<TRow, TColumn>
-} & {
-  [O in WhereNullabilityOperator]: () => WhereBuilder<TRow, TColumn>
+  /***
+   * Shorthand for {@link notEquals}
+   */
+  neq: (value: TColumn) => WhereBuilder<TRow, TColumn>
+  /***
+   * Check if the column contains the value
+   */
+  contains: (value: string) => WhereBuilder<TRow, TColumn>
+  /***
+   * Check if the column does not contain the value
+   */
+  notContains: (value: string) => WhereBuilder<TRow, TColumn>
+  /***
+   * Check if the column is contained in the array
+   */
+  inArray: (values: Array<TColumn>) => WhereBuilder<TRow, TColumn>
+  /***
+   * Check if the column is not contained in the array
+   */
+  notInArray: (values: Array<TColumn>) => WhereBuilder<TRow, TColumn>
+  /***
+   * Shorthand for {@link inArray}
+   */
+  in: (values: Array<TColumn>) => WhereBuilder<TRow, TColumn>
+  /***
+   * Shorthand for {@link notInArray}
+   */
+  notIn: (values: Array<TColumn>) => WhereBuilder<TRow, TColumn>
+  /***
+   * Check if the column is less than the value
+   */
+  lessThan: (value: number) => WhereBuilder<TRow, TColumn>
+  /***
+   * Check if the column is less than or equal to the value
+   */
+  lessThanOrEquals: (value: number) => WhereBuilder<TRow, TColumn>
+  /***
+   * Check if the column is greater than the value
+   */
+  greaterThan: (value: number) => WhereBuilder<TRow, TColumn>
+  /***
+   * Check if the column is greater than or equal to the value
+   */
+  greaterThanOrEquals: (value: number) => WhereBuilder<TRow, TColumn>
+  /***
+   * Shorthand for {@link lessThan}
+   */
+  lt: (value: number) => WhereBuilder<TRow, TColumn>
+  /***
+   * Shorthand for {@link lessThanOrEquals}
+   */
+  lte: (value: number) => WhereBuilder<TRow, TColumn>
+  /***
+   * Shorthand for {@link greaterThan}
+   */
+  gt: (value: number) => WhereBuilder<TRow, TColumn>
+  /***
+   * Shorthand for {@link greaterThanOrEquals}
+   */
+  gte: (value: number) => WhereBuilder<TRow, TColumn>
+  /***
+   * Check if the column is null
+   */
+  isNull: () => WhereBuilder<TRow, TColumn>
+  /***
+   * Check if the column is not null
+   */
+  isNotNull: () => WhereBuilder<TRow, TColumn>
 }
 
 export type WhereBuilder<TRow extends object, TColumn = unknown> = {
@@ -51,24 +139,41 @@ export type WhereBuilder<TRow extends object, TColumn = unknown> = {
     raw: RawWhere
   }
 } & {
-  [O in WhereBooleanOperator]: {
-    <GRow extends object, GColumn>(
-      other: WhereBuilder<GRow, GColumn>,
-    ): WhereBuilder<TRow | GRow, TColumn | GColumn>
-  }
+  /***
+   * Groups the previous condition with the next condition using the AND operator
+   */
+  and: <GRow extends object, GColumn>(
+    other: WhereBuilder<GRow, GColumn>,
+  ) => WhereBuilder<TRow | GRow, TColumn | GColumn>
+  /***
+   * Groups the previous condition with the next condition using the OR operator
+   */
+  or: <GRow extends object, GColumn>(
+    other: WhereBuilder<GRow, GColumn>,
+  ) => WhereBuilder<TRow | GRow, TColumn | GColumn>
 }
 
 export type WhereBuilderOrRaw<TRow extends object, TColumn = unknown> =
   | WhereBuilder<TRow, TColumn>
   | RawWhere
 
-export type OrderByColumnFactory<
-  TRow extends object,
-  TColumn extends TRow[keyof TRow],
-> = {
-  [D in OrderByDirection]: () => OrderBy<TRow, TColumn>
-} & {
+export type OrderByColumnFactory<TRow extends object, TColumn = unknown> = {
+  /***
+   * Order the results by this column in ascending order
+   */
+  asc: () => OrderBy<TRow, TColumn>
+  /***
+   * Order the results by this column in descending order
+   */
+  desc: () => OrderBy<TRow, TColumn>
+  /***
+   * Order the results by this column in the specified direction
+   */
   direction: (direction: OrderByDirection) => OrderBy<TRow, TColumn>
+  /***
+   * Shorthand for {@link direction}
+   */
+  dir: (direction: OrderByDirection) => OrderBy<TRow, TColumn>
 }
 
 export type ColumnDefinitionRaw<TRow extends object, TColumn> = {
@@ -81,19 +186,15 @@ export type ColumnDefinitionRaw<TRow extends object, TColumn> = {
   isUnique: boolean
 }
 
-export type ColumnDefinitionBase<
-  TRow extends object,
-  TColumn extends TRow[keyof TRow],
-> = {
+export type ColumnDefinitionBase<TRow extends object, TColumn = unknown> = {
   _: {
     raw: ColumnDefinitionRaw<TRow, TColumn>
-    where: (operator: WhereOperator, value: any) => WhereBuilder<TRow, TColumn>
   }
 } & OrderByColumnFactory<TRow, TColumn>
 
 export type ColumnDefinition<
   TRow extends object,
-  TColumn extends TRow[keyof TRow],
+  TColumn = unknown,
 > = ColumnDefinitionBase<TRow, TColumn> & WhereConditionFactory<TRow, TColumn>
 
 export interface ColumnBuilder<TColumn> {
