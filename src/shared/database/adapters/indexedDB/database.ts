@@ -107,7 +107,16 @@ export class IdbDatabaseAdapter implements DatabaseAdapter {
   }
 
   getTable<TData extends object>(tableName: string): TableAdapter<TData> {
-    todo()
+    check(isNotNull(this.database), 'Database is not open.')
+
+    const transaction = this.database.transaction(
+      this.database.objectStoreNames,
+      'readwrite',
+    )
+
+    const objectStore = transaction.objectStore(tableName)
+
+    return new IdbTableAdapter<TData>(objectStore)
   }
 
   async getDatabaseInfo(databaseName: string): Promise<Nullable<DatabaseInfo>> {
