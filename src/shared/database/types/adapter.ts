@@ -78,14 +78,11 @@ export interface TableAdapterFactory {
   getTable<TData extends object>(tableName: string): TableAdapter<TData>
 }
 
-export interface SchemaAdapter extends TableAdapterFactory {
+export interface TransactionAdapter extends TableAdapterFactory {
   createTable<TData extends object>(
     schema: TableSchemaRaw<TData>,
   ): Promise<void>
   deleteTable(tableName: string): Promise<void>
-}
-
-export interface TransactionAdapter extends SchemaAdapter {
   commit(): Promise<void>
   rollback(): Promise<void>
 }
