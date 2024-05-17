@@ -3,8 +3,12 @@ import type { PgColumnType } from '@shared/database/adapters/pglite/helpers/type
 
 const pgColumnTypeMap: Record<ColumnType, PgColumnType> = {
   string: 'text',
-  number: 'integer',
+  number: 'double precision',
   boolean: 'boolean',
+  uuid: 'uuid',
+  double: 'double precision',
+  integer: 'integer',
+  json: 'json',
 }
 
 export function genericTypeToPgType(type: ColumnType): PgColumnType {

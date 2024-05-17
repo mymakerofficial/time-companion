@@ -2,7 +2,6 @@ import type {
   ColumnDefinition,
   ColumnDefinitionBase,
   ColumnDefinitionRaw,
-  OrderByColumnFactory,
   RawWhere,
   RawWhereBooleanGroup,
   WhereBuilder,

@@ -110,7 +110,15 @@ export interface UpgradeTable<TData extends object> extends Table<TData> {
   // ...
 }
 
-export const columnTypes = ['string', 'number', 'boolean'] as const
+export const columnTypes = [
+  'string',
+  'number',
+  'boolean',
+  'uuid',
+  'double',
+  'integer',
+  'json',
+] as const
 export type ColumnType = (typeof columnTypes)[number]
 
 export interface TableFactory {

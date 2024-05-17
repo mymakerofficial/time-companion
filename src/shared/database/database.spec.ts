@@ -273,7 +273,7 @@ describe.each([
           where: personsTable.firstName
             .equals(randomPerson.firstName)
             .and(personsTable.age.equals(randomPerson.age))
-            .and(personsTable.id.notEquals('not-an-id')),
+            .and(personsTable.id.notEquals(uuid())), // non-existent id
         })
 
         expect(res).toEqual(randomPerson)
@@ -283,7 +283,7 @@ describe.each([
         await helpers.insertSamplePersons(6)
 
         const res = await database.table(personsTable).findFirst({
-          where: personsTable.id.equals('non-existent-id'),
+          where: personsTable.id.equals(uuid()), // non-existent id
         })
 
         expect(res).toBeNull()
@@ -390,7 +390,7 @@ describe.each([
         await helpers.insertSamplePersons(6)
 
         const res = await database.table(personsTable).findMany({
-          where: personsTable.id.equals('non-existent-id'),
+          where: personsTable.id.equals(uuid()), // non-existent id
         })
 
         expect(res).toHaveLength(0)
@@ -522,7 +522,7 @@ describe.each([
         await helpers.insertSamplePersons(6)
 
         const res = await database.table(personsTable).update({
-          where: personsTable.id.equals('non-existent-id'),
+          where: personsTable.id.equals(uuid()), // non-existent id
           data: {
             firstName: 'Jeff',
           },

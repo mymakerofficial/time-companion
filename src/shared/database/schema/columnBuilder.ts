@@ -7,7 +7,7 @@ import type {
 import type { Nullable } from '@shared/lib/utils/types'
 
 class ColumnBuilderImpl<TColumn> implements ColumnBuilder<TColumn> {
-  protected definition: ColumnDefinitionRaw<TColumn>
+  protected definition: ColumnDefinitionRaw<object, TColumn>
 
   constructor(dataType: ColumnType = 'string') {
     this.definition = {
@@ -60,6 +60,22 @@ class ColumnBuilderFactoryImpl implements ColumnBuilderFactory {
   boolean() {
     return new ColumnBuilderImpl('boolean') as ColumnBuilder<boolean>
   }
+
+  uuid() {
+    return new ColumnBuilderImpl('uuid') as ColumnBuilder<string>
+  }
+
+  double() {
+    return new ColumnBuilderImpl('double') as ColumnBuilder<number>
+  }
+
+  integer() {
+    return new ColumnBuilderImpl('integer') as ColumnBuilder<number>
+  }
+
+  json<T extends object = object>() {
+    return new ColumnBuilderImpl('json') as ColumnBuilder<T>
+  }
 }
 
 export const t = new ColumnBuilderFactoryImpl() as ColumnBuilderFactory
@@ -67,3 +83,7 @@ export const t = new ColumnBuilderFactoryImpl() as ColumnBuilderFactory
 export const string = t.string
 export const number = t.number
 export const boolean = t.boolean
+export const uuid = t.uuid
+export const double = t.double
+export const integer = t.integer
+export const json = t.json

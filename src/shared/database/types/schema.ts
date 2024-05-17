@@ -108,8 +108,13 @@ export interface ColumnBuilder<TColumn> {
 
 export interface ColumnBuilderFactory {
   string: () => ColumnBuilder<string>
+  // alias for double
   number: () => ColumnBuilder<number>
   boolean: () => ColumnBuilder<boolean>
+  uuid: () => ColumnBuilder<string>
+  double: () => ColumnBuilder<number>
+  integer: () => ColumnBuilder<number>
+  json: <T extends object = object>() => ColumnBuilder<T>
 }
 
 export type TableSchemaRaw<TRow extends object> = {
