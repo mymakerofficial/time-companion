@@ -3,10 +3,7 @@ import type {
   LeftJoinProps,
   Table,
 } from '@shared/database/types/database'
-import type {
-  TableAdapter,
-  TransactionAdapter,
-} from '@shared/database/types/adapter'
+import type { TableAdapter } from '@shared/database/types/adapter'
 import { DatabaseQueryableTableImpl } from '@shared/database/factory/queryableTable'
 import type {
   InferTable,

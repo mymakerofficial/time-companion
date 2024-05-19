@@ -5,21 +5,26 @@ import {
   describe,
   expect,
   it,
+  onTestFinished,
   vi,
 } from 'vitest'
 import { faker } from '@faker-js/faker'
 import { asArray, emptyArray, firstOf, lastOf } from '@shared/lib/utils/list'
 import { randomElement, randomElements } from '@shared/lib/utils/random'
-import type { UpgradeFunction } from '@shared/database/types/database'
 import { useDatabaseFixtures } from '@test/fixtures/database/databaseFixtures'
 import type { Person } from '@test/fixtures/database/types'
 import type { HasId } from '@shared/model/helpers/hasId'
 import { uuid } from '@shared/lib/utils/uuid'
 import { createDatabase } from '@shared/database/factory/database'
-import { asyncNoop } from '@shared/lib/utils/noop'
-import fakeIndexedDB from 'fake-indexeddb'
 import { indexedDBAdapter } from '@shared/database/adapters/indexedDB/database'
+import config from '@test/fixtures/database/config'
 import { pgliteAdapter } from '@shared/database/adapters/pglite/database'
+import type {
+  Database,
+  UpgradeTransaction,
+} from '@shared/database/types/database'
+import { t } from '@shared/database/schema/columnBuilder'
+import 'fake-indexeddb/auto'
 
 function byId(a: HasId, b: HasId) {
   return a.id.localeCompare(b.id)
@@ -30,598 +35,687 @@ function byFirstName(a: Person, b: Person) {
 }
 
 describe.each([
-  ['IndexedDB', () => createDatabase(indexedDBAdapter(fakeIndexedDB))],
-  ['PGLite', () => createDatabase(pgliteAdapter())],
-])('Adapter "%s"', (_, databaseFactory) => {
-  const { database, helpers, personsTable, petsTable } = useDatabaseFixtures({
-    database: databaseFactory(),
-  })
-
-  afterAll(async () => {
-    await helpers.cleanup()
-  })
-
-  describe.todo('getTableNames', async () => {
-    afterEach(async () => {
-      await helpers.cleanup()
-    })
-
-    it.todo('should return all table names', async () => {
-      await helpers.openDatabaseAndMigrateIfNecessary()
-
-      const tableNames = await database.getTableNames()
-
-      expect(tableNames).toEqual(['persons', 'pets'])
-    })
-  })
-
-  describe.todo('open', () => {
-    afterEach(async () => {
-      await helpers.cleanup()
-    })
-
-    it.todo(
-      'should call the upgrade function with when opening for the first time',
-      async () => {
-        const upgradeFn: UpgradeFunction = vi.fn(asyncNoop)
-
-        await database.open(helpers.databaseName, 1, upgradeFn)
-
-        expect(upgradeFn).toHaveBeenCalledWith(expect.anything(), 1, 0)
-      },
+  [
+    'IndexedDB',
+    (requirePersist: boolean) => indexedDBAdapter(`test-database-${uuid()}`),
+  ],
+  [
+    'PGLite',
+    (requirePersist: boolean) =>
+      pgliteAdapter(
+        `${requirePersist ? 'idb' : 'memory'}://test-database-${uuid()}`,
+      ),
+  ],
+])('Adapter "%s"', (_, adapterFactory) => {
+  describe('migrations', () => {
+    const migration001 = vi.fn(
+      () => import('@test/fixtures/database/migrations/001_add_persons'),
+    )
+    const migration002 = vi.fn(
+      () => import('@test/fixtures/database/migrations/002_add_pets'),
     )
 
-    it.todo(
-      'should fail when trying to open a database with a lower version than the current one',
-      async () => {
-        await database.open(helpers.databaseName, 2, asyncNoop)
+    afterEach(() => {
+      migration001.mockClear()
+      migration002.mockClear()
+    })
 
+    it('should open a new database and run all migration', async () => {
+      const adapter = adapterFactory(false)
+      let database: Database
+      onTestFinished(async () => {
         await database.close()
+      })
 
-        await expect(
-          database.open(helpers.databaseName, 1, asyncNoop),
-        ).rejects.toThrowError(
-          `Cannot open database at lower version. Current version is "2", requested version is "1".`,
-        )
-      },
-    )
+      database = createDatabase(adapter, {
+        migrations: [migration001, migration002],
+      })
 
-    it.todo(
-      'should call the upgrade function incrementing the version',
-      async () => {
-        await helpers.ensureDatabaseExistsAtVersion(1)
+      expect(database.isOpen).toBe(false)
+      expect(database.version).toBe(0)
+      expect(migration001).not.toHaveBeenCalled()
+      expect(migration002).not.toHaveBeenCalled()
 
-        const upgradeFn: UpgradeFunction = vi.fn(asyncNoop)
+      await database.open()
 
-        await database.open(helpers.databaseName, 4, upgradeFn)
+      expect(database.isOpen).toBe(true)
+      expect(database.version).toBe(2)
+      expect(migration001).toHaveBeenCalled()
+      expect(migration002).toHaveBeenCalled()
 
-        expect(upgradeFn).toHaveBeenNthCalledWith(1, expect.anything(), 2, 1)
-        expect(upgradeFn).toHaveBeenNthCalledWith(2, expect.anything(), 3, 2)
-        expect(upgradeFn).toHaveBeenNthCalledWith(3, expect.anything(), 4, 3)
-      },
-    )
-  })
-
-  describe.todo('close', () => {
-    afterEach(async () => {
-      await helpers.cleanup()
+      expect(database.table('persons')).toBeDefined()
+      expect(database.table('pets')).toBeDefined()
     })
 
-    it.todo('should close the database', async () => {
-      await helpers.openDatabaseAndCreateTablesAtVersion(1)
+    it('should migrate an existing database to the latest version', async () => {
+      const adapter = adapterFactory(true)
+      let database: Database
+      onTestFinished(async () => {
+        await database.close()
+      })
 
-      expect(async () => database.getTableNames()).not.toThrowError()
+      database = createDatabase(adapter, {
+        migrations: [migration001],
+      })
+
+      await database.open()
+
+      expect(database.version).toBe(1)
+      expect(migration001).toHaveBeenCalled()
+      expect(migration002).not.toHaveBeenCalled()
 
       await database.close()
+      migration001.mockClear()
+      migration002.mockClear()
 
-      expect(async () => database.getTableNames()).rejects.toThrowError()
+      database = createDatabase(adapter, {
+        migrations: [migration001, migration002],
+      })
+
+      await database.open()
+
+      expect(database.version).toBe(2)
+      expect(migration001).not.toHaveBeenCalled()
+      expect(migration002).toHaveBeenCalled()
+    })
+
+    it.todo('should rollback the migration if an error occurs', async () => {
+      // apparently this doesn't work with indexeddb out of the box o.o
+
+      const adapter = adapterFactory(true)
+      let database: Database
+      onTestFinished(async () => {
+        await database.close()
+      })
+
+      const migrationAddValues = vi.fn(
+        async (transaction: UpgradeTransaction) => {
+          await transaction.table<Person>('persons').insert({
+            data: {
+              id: uuid(),
+              username: 'johndoe',
+              firstName: 'John',
+              lastName: 'Doe',
+              gender: faker.person.gender(),
+              age: 30,
+            },
+          })
+        },
+      )
+
+      const migrationWithError = vi.fn(
+        async (transaction: UpgradeTransaction) => {
+          await transaction.createTable('pets', {
+            id: t.uuid().primaryKey(),
+          })
+
+          throw new Error('Error in migration')
+        },
+      )
+
+      database = createDatabase(adapter, {
+        migrations: [migration001, migrationAddValues, migrationWithError],
+      })
+
+      await expect(database.open()).rejects.toThrowError('Error in migration')
+
+      // expect(database.version).toBe(1)
+      expect(migration001).toHaveBeenCalled()
+      expect(migrationAddValues).toHaveBeenCalled()
+      expect(migrationWithError).toHaveBeenCalled()
+
+      expect(database.table('persons')).toBeDefined()
+      expect(database.table('pets')).toThrowError()
+
+      expect(await database.table('persons').findMany()).toHaveLength(0)
+    })
+
+    it('should not migrate a database that is already at the latest version', async () => {
+      const adapter = adapterFactory(true)
+      let database: Database
+      onTestFinished(async () => {
+        await database.close()
+      })
+
+      database = createDatabase(adapter, {
+        migrations: [migration001, migration002],
+      })
+
+      await database.open()
+
+      expect(database.version).toBe(2)
+      expect(migration001).toHaveBeenCalled()
+      expect(migration002).toHaveBeenCalled()
+
+      await database.close()
+      migration001.mockClear()
+      migration002.mockClear()
+
+      database = createDatabase(adapter, {
+        migrations: [migration001, migration002],
+      })
+
+      await database.open()
+
+      expect(database.version).toBe(2)
+      expect(migration001).not.toHaveBeenCalled()
+      expect(migration002).not.toHaveBeenCalled()
     })
   })
 
-  describe('table', () => {
+  describe('queries', () => {
+    const { database, helpers, personsTable, petsTable } = useDatabaseFixtures({
+      database: createDatabase(adapterFactory(false), config),
+    })
+
     beforeAll(async () => {
+      await database.open()
+    })
+
+    afterAll(async () => {
       await helpers.cleanup()
-      await helpers.openDatabaseAndMigrateIfNecessary()
     })
 
-    afterEach(async () => {
-      await helpers.clearDatabase()
-    })
-
-    describe('insert', () => {
-      it('should insert data', async () => {
-        const samplePerson = helpers.samplePerson()
-
-        const res = await database.table(personsTable).insert({
-          data: samplePerson,
-        })
-
-        const personsInDatabase = await helpers.getAllPersonsInDatabase()
-
-        expect(res).toEqual(samplePerson)
-        expect(personsInDatabase).toEqual(asArray(samplePerson))
+    describe('table', () => {
+      afterEach(async () => {
+        await helpers.clearDatabase()
       })
 
-      it.todo(
-        'should fail when trying to insert an entry with a key that is not part of the schema',
-        async () => {
+      describe('insert', () => {
+        it('should insert data', async () => {
           const samplePerson = helpers.samplePerson()
-          const wrongPerson = {
-            ...samplePerson,
-            wrongKey: 'wrong value',
-          }
 
-          await expect(
-            database.withTransaction(async (transaction) => {
-              return await transaction.table(personsTable).insert({
-                data: wrongPerson,
-              })
-            }),
-          ).rejects.toThrowError(
-            `The key "wrongKey" is not part of the schema of table "persons".`,
-          )
-        },
-      )
-
-      it.todo(
-        'should fail when trying to insert an entry with missing fields',
-        async () => {
-          const missingPerson = {
-            id: uuid(),
-          }
-
-          await expect(
-            database.withTransaction(async (transaction) => {
-              return await transaction.table(personsTable).insert({
-                // @ts-expect-error
-                data: missingPerson,
-              })
-            }),
-          ).rejects.toThrowError(
-            `The key "firstName" is required but missing in the data.`,
-          )
-        },
-      )
-
-      it.todo(
-        'should fail when trying to insert a value that already exists on a unique column',
-        async () => {
-          const samplePersons = await helpers.insertSamplePersons(6)
-          const randomPerson = randomElement(samplePersons)
-
-          const newPersonWithSameUsername = helpers.samplePerson({
-            username: randomPerson.username,
+          const res = await database.table(personsTable).insert({
+            data: samplePerson,
           })
 
-          await expect(
-            database.withTransaction(async (transaction) => {
-              return await transaction.table(personsTable).insert({
-                data: newPersonWithSameUsername,
-              })
-            }),
-          ).rejects.toThrowError(
-            `Unique constraint failed on column "username".`,
-          )
-        },
-      )
-    })
+          const personsInDatabase = await helpers.getAllPersonsInDatabase()
 
-    describe('insertMany', () => {
-      it('should insert data', async () => {
-        const samplePersons = helpers.samplePersons(3)
-
-        const res = await database.table(personsTable).insertMany({
-          data: samplePersons,
+          expect(res).toEqual(samplePerson)
+          expect(personsInDatabase).toEqual(asArray(samplePerson))
         })
 
-        const personsInDatabase = await helpers.getAllPersonsInDatabase()
+        it.todo(
+          'should fail when trying to insert an entry with a key that is not part of the schema',
+          async () => {
+            const samplePerson = helpers.samplePerson()
+            const wrongPerson = {
+              ...samplePerson,
+              wrongKey: 'wrong value',
+            }
 
-        expect(res.sort(byId)).toEqual(samplePersons.sort(byId))
-        expect(personsInDatabase.sort(byId)).toEqual(samplePersons.sort(byId))
-      })
-    })
-
-    describe('findFirst', () => {
-      it('should return a value that was inserted', async () => {
-        const samplePersons = await helpers.insertSamplePersons(3)
-
-        const res = await database.table(personsTable).findFirst()
-
-        expect(samplePersons).toContainEqual(res)
-      })
-
-      it('should find unique entry in a table', async () => {
-        const samplePersons = await helpers.insertSamplePersons(6)
-        const randomPerson = randomElement(samplePersons, {
-          safetyOffset: 1,
-        })
-
-        const res = await database.table(personsTable).findFirst({
-          where: personsTable.id.equals(randomPerson.id),
-        })
-
-        expect(res).toEqual(randomPerson)
-      })
-
-      it('should find a single entry in a table with order ascending', async () => {
-        const samplePersons = await helpers.insertSamplePersons(6)
-
-        const res = await database.table(personsTable).findFirst({
-          orderBy: personsTable.firstName.asc(),
-        })
-
-        expect(res).toEqual(firstOf(samplePersons.sort(byFirstName)))
-      })
-
-      it('should find the first entry in a table sorted descending', async () => {
-        const samplePersons = await helpers.insertSamplePersons(6)
-
-        const res = await database.table(personsTable).findFirst({
-          orderBy: personsTable.firstName.desc(),
-        })
-
-        expect(res).toEqual(lastOf(samplePersons.sort(byFirstName)))
-      })
-
-      it('should find a single entity in a table with using and filters', async () => {
-        const samplePersons = await helpers.insertSamplePersons(6)
-        const randomPerson = randomElement(samplePersons, {
-          safetyOffset: 1,
-        })
-
-        const res = await database.table(personsTable).findFirst({
-          where: personsTable.firstName
-            .equals(randomPerson.firstName)
-            .and(personsTable.age.equals(randomPerson.age))
-            .and(personsTable.id.notEquals(uuid())), // non-existent id
-        })
-
-        expect(res).toEqual(randomPerson)
-      })
-
-      it('should return null when no entry is found', async () => {
-        await helpers.insertSamplePersons(6)
-
-        const res = await database.table(personsTable).findFirst({
-          where: personsTable.id.equals(uuid()), // non-existent id
-        })
-
-        expect(res).toBeNull()
-      })
-    })
-
-    describe('findMany', () => {
-      it('should find all entries in a table', async () => {
-        const samplePersons = await helpers.insertSamplePersons(6)
-
-        const res = await database.table(personsTable).findMany()
-
-        expect(res.sort(byId)).toEqual(samplePersons.sort(byId))
-      })
-
-      it('should find all entries in a table with a filter', async () => {
-        const samplePersons = await helpers.insertSamplePersons(6)
-        const randomPerson = randomElement(samplePersons, {
-          safetyOffset: 1,
-        })
-
-        const res = await database.table(personsTable).findMany({
-          where: personsTable.firstName.equals(randomPerson.firstName),
-        })
-
-        expect(res.sort(byId)).toEqual(
-          samplePersons
-            .filter((person) => person.firstName === randomPerson.firstName)
-            .sort(byId),
+            await expect(
+              database.withTransaction(async (transaction) => {
+                return await transaction.table(personsTable).insert({
+                  data: wrongPerson,
+                })
+              }),
+            ).rejects.toThrowError(
+              `The key "wrongKey" is not part of the schema of table "persons".`,
+            )
+          },
         )
-      })
 
-      it('should find all entries in a table ordered by indexed key ascending', async () => {
-        const samplePersons = await helpers.insertSamplePersons(6)
+        it.todo(
+          'should fail when trying to insert an entry with missing fields',
+          async () => {
+            const missingPerson = {
+              id: uuid(),
+            }
 
-        const res = await database.table(personsTable).findMany({
-          orderBy: personsTable.firstName.asc(),
-        })
+            await expect(
+              database.withTransaction(async (transaction) => {
+                return await transaction.table(personsTable).insert({
+                  // @ts-expect-error
+                  data: missingPerson,
+                })
+              }),
+            ).rejects.toThrowError(
+              `The key "firstName" is required but missing in the data.`,
+            )
+          },
+        )
 
-        expect(res).toEqual(samplePersons.sort(byFirstName))
-      })
+        it.todo(
+          'should fail when trying to insert a value that already exists on a unique column',
+          async () => {
+            const samplePersons = await helpers.insertSamplePersons(6)
+            const randomPerson = randomElement(samplePersons)
 
-      it('should find all entries in a table ordered by indexed key descending', async () => {
-        const samplePersons = await helpers.insertSamplePersons(6)
-
-        const res = await database.table(personsTable).findMany({
-          orderBy: personsTable.firstName.desc(),
-        })
-
-        expect(res).toEqual(samplePersons.sort(byFirstName).reverse())
-      })
-
-      it.todo('should fail when ordering by un-indexed key', async () => {
-        // TBD: this is required for IndexedDB, but not for Postgres
-
-        await helpers.insertSamplePersons(6)
-
-        expect(async () => {
-          await database.withTransaction(async (transaction) => {
-            return await transaction.table(personsTable).findMany({
-              orderBy: personsTable.lastName.asc(),
+            const newPersonWithSameUsername = helpers.samplePerson({
+              username: randomPerson.username,
             })
-          })
-        }).rejects.toThrow(
-          'The index "lastName" does not exist. You can only order by existing indexes or primary key.',
+
+            await expect(
+              database.withTransaction(async (transaction) => {
+                return await transaction.table(personsTable).insert({
+                  data: newPersonWithSameUsername,
+                })
+              }),
+            ).rejects.toThrowError(
+              `Unique constraint failed on column "username".`,
+            )
+          },
         )
       })
 
-      it('should only return the first n entries in a table', async () => {
-        const samplePersons = await helpers.insertSamplePersons(6)
+      describe('insertMany', () => {
+        it('should insert data', async () => {
+          const samplePersons = helpers.samplePersons(3)
 
-        const res = await database.table(personsTable).findMany({
-          limit: 3,
-          orderBy: personsTable.firstName.asc(),
-        })
-
-        expect(res).toEqual(samplePersons.sort(byFirstName).slice(0, 3))
-      })
-
-      it('should return all entries except the first n entries in a table', async () => {
-        const samplePersons = await helpers.insertSamplePersons(6)
-
-        const res = await database.table(personsTable).findMany({
-          offset: 3,
-          orderBy: personsTable.firstName.asc(),
-        })
-
-        expect(res).toEqual(samplePersons.sort(byFirstName).slice(3))
-      })
-
-      it('should only return the first n after skipping the first m entries in a table', async () => {
-        const samplePersons = await helpers.insertSamplePersons(6)
-
-        const res = await database.table(personsTable).findMany({
-          offset: 2,
-          limit: 2,
-          orderBy: personsTable.firstName.asc(),
-        })
-
-        expect(res).toEqual(samplePersons.sort(byFirstName).slice(2, 4))
-      })
-
-      it('should return empty array when no entry is found', async () => {
-        await helpers.insertSamplePersons(6)
-
-        const res = await database.table(personsTable).findMany({
-          where: personsTable.id.equals(uuid()), // non-existent id
-        })
-
-        expect(res).toHaveLength(0)
-      })
-    })
-
-    describe('leftJoin', () => {
-      it('should find an entity by joined entity id', async () => {
-        const samplePersons = await helpers.insertSamplePersons(6)
-        const samplePets = await helpers.insertSamplePets(3, 1)
-
-        const randomPet = randomElement(samplePets, {
-          safetyOffset: 1,
-        })
-
-        const petId = randomPet.id
-
-        // find the owner of the pet with the random id
-        const owner = await database
-          .table(personsTable)
-          .leftJoin(petsTable, {
-            on: personsTable.id.equals(petsTable.ownerId),
-          })
-          .findFirst({
-            where: petsTable.id.equals(petId),
+          const res = await database.table(personsTable).insertMany({
+            data: samplePersons,
           })
 
-        const expectedOwner = samplePersons.find(
-          (person) => person.id === randomPet.ownerId,
-        )
+          const personsInDatabase = await helpers.getAllPersonsInDatabase()
 
-        expect(owner).toEqual(expectedOwner)
+          expect(res.sort(byId)).toEqual(samplePersons.sort(byId))
+          expect(personsInDatabase.sort(byId)).toEqual(samplePersons.sort(byId))
+        })
       })
 
-      it('should delete an entity by joined entity id', async () => {
-        const samplePersons = await helpers.insertSamplePersons(6)
-        const samplePets = await helpers.insertSamplePets(3, 1)
+      describe('findFirst', () => {
+        it('should return a value that was inserted', async () => {
+          const samplePersons = await helpers.insertSamplePersons(3)
 
-        const randomPet = randomElement(samplePets, {
-          safetyOffset: 1,
+          const res = await database.table(personsTable).findFirst()
+
+          expect(samplePersons).toContainEqual(res)
         })
 
-        const petId = randomPet.id
-
-        // delete the owner of the pet with the random id
-        await database
-          .table(personsTable)
-          .leftJoin(petsTable, {
-            on: personsTable.id.equals(petsTable.ownerId),
-          })
-          .delete({
-            where: petsTable.id.equals(petId),
+        it('should find unique entry in a table', async () => {
+          const samplePersons = await helpers.insertSamplePersons(6)
+          const randomPerson = randomElement(samplePersons, {
+            safetyOffset: 1,
           })
 
-        const owner = samplePersons.find(
-          (person) => person.id === randomPet.ownerId,
-        )!
+          const res = await database.table(personsTable).findFirst({
+            where: personsTable.id.equals(randomPerson.id),
+          })
 
-        const expectedPersons = samplePersons
-          .filter((person) => person.id !== owner.id)
-          .sort(byId)
+          expect(res).toEqual(randomPerson)
+        })
 
-        const personsInDatabase = await helpers.getAllPersonsInDatabase()
+        it('should find a single entry in a table with order ascending', async () => {
+          const samplePersons = await helpers.insertSamplePersons(6)
 
-        expect(personsInDatabase.sort(byId)).toEqual(expectedPersons)
+          const res = await database.table(personsTable).findFirst({
+            orderBy: personsTable.firstName.asc(),
+          })
+
+          expect(res).toEqual(firstOf(samplePersons.sort(byFirstName)))
+        })
+
+        it('should find the first entry in a table sorted descending', async () => {
+          const samplePersons = await helpers.insertSamplePersons(6)
+
+          const res = await database.table(personsTable).findFirst({
+            orderBy: personsTable.firstName.desc(),
+          })
+
+          expect(res).toEqual(lastOf(samplePersons.sort(byFirstName)))
+        })
+
+        it('should find a single entity in a table with using and filters', async () => {
+          const samplePersons = await helpers.insertSamplePersons(6)
+          const randomPerson = randomElement(samplePersons, {
+            safetyOffset: 1,
+          })
+
+          const res = await database.table(personsTable).findFirst({
+            where: personsTable.firstName
+              .equals(randomPerson.firstName)
+              .and(personsTable.age.equals(randomPerson.age))
+              .and(personsTable.id.notEquals(uuid())), // non-existent id
+          })
+
+          expect(res).toEqual(randomPerson)
+        })
+
+        it('should return null when no entry is found', async () => {
+          await helpers.insertSamplePersons(6)
+
+          const res = await database.table(personsTable).findFirst({
+            where: personsTable.id.equals(uuid()), // non-existent id
+          })
+
+          expect(res).toBeNull()
+        })
       })
-    })
 
-    describe('update', () => {
-      it('should update a single entry in a table', async () => {
-        const samplePersons = await helpers.insertSamplePersons(6)
-        const randomPerson = randomElement(samplePersons, {
-          safetyOffset: 1,
+      describe('findMany', () => {
+        it('should find all entries in a table', async () => {
+          const samplePersons = await helpers.insertSamplePersons(6)
+
+          const res = await database.table(personsTable).findMany()
+
+          expect(res.sort(byId)).toEqual(samplePersons.sort(byId))
         })
 
-        const newFirstName = faker.person.firstName()
-        const newGender = faker.person.gender()
+        it('should find all entries in a table with a filter', async () => {
+          const samplePersons = await helpers.insertSamplePersons(6)
+          const randomPerson = randomElement(samplePersons, {
+            safetyOffset: 1,
+          })
 
-        const res = await database.table(personsTable).update({
-          where: personsTable.id.equals(randomPerson.id),
-          data: {
+          const res = await database.table(personsTable).findMany({
+            where: personsTable.firstName.equals(randomPerson.firstName),
+          })
+
+          expect(res.sort(byId)).toEqual(
+            samplePersons
+              .filter((person) => person.firstName === randomPerson.firstName)
+              .sort(byId),
+          )
+        })
+
+        it('should find all entries in a table ordered by indexed key ascending', async () => {
+          const samplePersons = await helpers.insertSamplePersons(6)
+
+          const res = await database.table(personsTable).findMany({
+            orderBy: personsTable.firstName.asc(),
+          })
+
+          expect(res).toEqual(samplePersons.sort(byFirstName))
+        })
+
+        it('should find all entries in a table ordered by indexed key descending', async () => {
+          const samplePersons = await helpers.insertSamplePersons(6)
+
+          const res = await database.table(personsTable).findMany({
+            orderBy: personsTable.firstName.desc(),
+          })
+
+          expect(res).toEqual(samplePersons.sort(byFirstName).reverse())
+        })
+
+        it.todo('should fail when ordering by un-indexed key', async () => {
+          // TBD: this is required for IndexedDB, but not for Postgres
+
+          await helpers.insertSamplePersons(6)
+
+          expect(async () => {
+            await database.withTransaction(async (transaction) => {
+              return await transaction.table(personsTable).findMany({
+                orderBy: personsTable.lastName.asc(),
+              })
+            })
+          }).rejects.toThrow(
+            'The index "lastName" does not exist. You can only order by existing indexes or primary key.',
+          )
+        })
+
+        it('should only return the first n entries in a table', async () => {
+          const samplePersons = await helpers.insertSamplePersons(6)
+
+          const res = await database.table(personsTable).findMany({
+            limit: 3,
+            orderBy: personsTable.firstName.asc(),
+          })
+
+          expect(res).toEqual(samplePersons.sort(byFirstName).slice(0, 3))
+        })
+
+        it('should return all entries except the first n entries in a table', async () => {
+          const samplePersons = await helpers.insertSamplePersons(6)
+
+          const res = await database.table(personsTable).findMany({
+            offset: 3,
+            orderBy: personsTable.firstName.asc(),
+          })
+
+          expect(res).toEqual(samplePersons.sort(byFirstName).slice(3))
+        })
+
+        it('should only return the first n after skipping the first m entries in a table', async () => {
+          const samplePersons = await helpers.insertSamplePersons(6)
+
+          const res = await database.table(personsTable).findMany({
+            offset: 2,
+            limit: 2,
+            orderBy: personsTable.firstName.asc(),
+          })
+
+          expect(res).toEqual(samplePersons.sort(byFirstName).slice(2, 4))
+        })
+
+        it('should return empty array when no entry is found', async () => {
+          await helpers.insertSamplePersons(6)
+
+          const res = await database.table(personsTable).findMany({
+            where: personsTable.id.equals(uuid()), // non-existent id
+          })
+
+          expect(res).toHaveLength(0)
+        })
+      })
+
+      describe.skip('leftJoin', () => {
+        it('should find an entity by joined entity id', async () => {
+          const samplePersons = await helpers.insertSamplePersons(6)
+          const samplePets = await helpers.insertSamplePets(3, 1)
+
+          const randomPet = randomElement(samplePets, {
+            safetyOffset: 1,
+          })
+
+          const petId = randomPet.id
+
+          // find the owner of the pet with the random id
+          const owner = await database
+            .table(personsTable)
+            .leftJoin(petsTable, {
+              on: personsTable.id.equals(petsTable.ownerId),
+            })
+            .findFirst({
+              where: petsTable.id.equals(petId),
+            })
+
+          const expectedOwner = samplePersons.find(
+            (person) => person.id === randomPet.ownerId,
+          )
+
+          expect(owner).toEqual(expectedOwner)
+        })
+
+        it('should delete an entity by joined entity id', async () => {
+          const samplePersons = await helpers.insertSamplePersons(6)
+          const samplePets = await helpers.insertSamplePets(3, 1)
+
+          const randomPet = randomElement(samplePets, {
+            safetyOffset: 1,
+          })
+
+          const petId = randomPet.id
+
+          // delete the owner of the pet with the random id
+          await database
+            .table(personsTable)
+            .leftJoin(petsTable, {
+              on: personsTable.id.equals(petsTable.ownerId),
+            })
+            .delete({
+              where: petsTable.id.equals(petId),
+            })
+
+          const owner = samplePersons.find(
+            (person) => person.id === randomPet.ownerId,
+          )!
+
+          const expectedPersons = samplePersons
+            .filter((person) => person.id !== owner.id)
+            .sort(byId)
+
+          const personsInDatabase = await helpers.getAllPersonsInDatabase()
+
+          expect(personsInDatabase.sort(byId)).toEqual(expectedPersons)
+        })
+      })
+
+      describe('update', () => {
+        it('should update a single entry in a table', async () => {
+          const samplePersons = await helpers.insertSamplePersons(6)
+          const randomPerson = randomElement(samplePersons, {
+            safetyOffset: 1,
+          })
+
+          const newFirstName = faker.person.firstName()
+          const newGender = faker.person.gender()
+
+          const res = await database.table(personsTable).update({
+            where: personsTable.id.equals(randomPerson.id),
+            data: {
+              firstName: newFirstName,
+              gender: newGender,
+            },
+          })
+
+          const personInDatabase = await helpers.getPersonInDatabaseById(
+            randomPerson.id,
+          )
+
+          const expected: Person = {
+            ...randomPerson,
             firstName: newFirstName,
             gender: newGender,
-          },
+          }
+
+          expect(res).toEqual([expected])
+          expect(personInDatabase).toEqual(expected)
         })
 
-        const personInDatabase = await helpers.getPersonInDatabaseById(
-          randomPerson.id,
-        )
-
-        const expected: Person = {
-          ...randomPerson,
-          firstName: newFirstName,
-          gender: newGender,
-        }
-
-        expect(res).toEqual([expected])
-        expect(personInDatabase).toEqual(expected)
-      })
-
-      it('should update multiple entries in a table', async () => {
-        const samplePersons = await helpers.insertSamplePersons(6)
-        const randomPersons = randomElements(samplePersons, 2, {
-          safetyOffset: 1,
-        })
-        const ids = randomPersons.map((person) => person.id)
-
-        const newLastName = faker.person.lastName()
-
-        const res = await database.table(personsTable).update({
-          where: personsTable.id.in(ids),
-          data: {
-            lastName: newLastName,
-          },
-        })
-
-        const personsInDatabase = await helpers.getPersonsInDatabaseByIds(ids)
-
-        const expected: Array<Person> = randomPersons.map((person) => ({
-          ...person,
-          lastName: newLastName,
-        }))
-
-        expect(res.sort(byId)).toEqual(expected.sort(byId))
-        expect(personsInDatabase.sort(byId)).toEqual(expected.sort(byId))
-      })
-
-      it('should return empty array when updating an entry that does not exist', async () => {
-        await helpers.insertSamplePersons(6)
-
-        const res = await database.table(personsTable).update({
-          where: personsTable.id.equals(uuid()), // non-existent id
-          data: {
-            firstName: 'Jeff',
-          },
-        })
-
-        expect(res).toEqual(emptyArray())
-      })
-
-      it.todo('should fail when trying to update a primary key', async () => {
-        // TBD
-
-        const samplePersons = await helpers.insertSamplePersons(6)
-        const randomPerson = randomElement(samplePersons, {
-          safetyOffset: 1,
-        })
-
-        const newId = uuid()
-
-        await expect(
-          database.withTransaction(async (transaction) => {
-            return await transaction.table(personsTable).update({
-              where: personsTable.id.equals(randomPerson.id),
-              data: {
-                id: newId,
-              },
-            })
-          }),
-        ).rejects.toThrowError(
-          `Primary key cannot be changed. Tried to change columns: id.`,
-        )
-      })
-
-      it.todo(
-        'should fail when trying to change the value of a unique column to an existing value',
-        async () => {
+        it('should update multiple entries in a table', async () => {
           const samplePersons = await helpers.insertSamplePersons(6)
-          const [randomPerson, otherRandomPerson] = randomElements(
-            samplePersons,
-            2,
-          )
+          const randomPersons = randomElements(samplePersons, 2, {
+            safetyOffset: 1,
+          })
+          const ids = randomPersons.map((person) => person.id)
+
+          const newLastName = faker.person.lastName()
+
+          const res = await database.table(personsTable).update({
+            where: personsTable.id.in(ids),
+            data: {
+              lastName: newLastName,
+            },
+          })
+
+          const personsInDatabase = await helpers.getPersonsInDatabaseByIds(ids)
+
+          const expected: Array<Person> = randomPersons.map((person) => ({
+            ...person,
+            lastName: newLastName,
+          }))
+
+          expect(res.sort(byId)).toEqual(expected.sort(byId))
+          expect(personsInDatabase.sort(byId)).toEqual(expected.sort(byId))
+        })
+
+        it('should return empty array when updating an entry that does not exist', async () => {
+          await helpers.insertSamplePersons(6)
+
+          const res = await database.table(personsTable).update({
+            where: personsTable.id.equals(uuid()), // non-existent id
+            data: {
+              firstName: 'Jeff',
+            },
+          })
+
+          expect(res).toEqual(emptyArray())
+        })
+
+        it.todo('should fail when trying to update a primary key', async () => {
+          // TBD
+
+          const samplePersons = await helpers.insertSamplePersons(6)
+          const randomPerson = randomElement(samplePersons, {
+            safetyOffset: 1,
+          })
+
+          const newId = uuid()
 
           await expect(
             database.withTransaction(async (transaction) => {
               return await transaction.table(personsTable).update({
                 where: personsTable.id.equals(randomPerson.id),
                 data: {
-                  username: otherRandomPerson.username,
+                  id: newId,
                 },
               })
             }),
           ).rejects.toThrowError(
-            `Unique constraint failed on column "username".`,
+            `Primary key cannot be changed. Tried to change columns: id.`,
           )
-        },
-      )
-    })
-
-    describe('delete', () => {
-      it('should delete a single entry in a table', async () => {
-        const samplePersons = await helpers.insertSamplePersons(6)
-        const randomPerson = randomElement(samplePersons, {
-          safetyOffset: 1,
         })
 
-        await database.table(personsTable).delete({
-          where: personsTable.id.equals(randomPerson.id),
-        })
+        it.todo(
+          'should fail when trying to change the value of a unique column to an existing value',
+          async () => {
+            const samplePersons = await helpers.insertSamplePersons(6)
+            const [randomPerson, otherRandomPerson] = randomElements(
+              samplePersons,
+              2,
+            )
 
-        const personsInDatabase = await helpers.getAllPersonsInDatabase()
-
-        expect(personsInDatabase).not.toContain(randomPerson)
+            await expect(
+              database.withTransaction(async (transaction) => {
+                return await transaction.table(personsTable).update({
+                  where: personsTable.id.equals(randomPerson.id),
+                  data: {
+                    username: otherRandomPerson.username,
+                  },
+                })
+              }),
+            ).rejects.toThrowError(
+              `Unique constraint failed on column "username".`,
+            )
+          },
+        )
       })
 
-      it('should delete multiple entries in a table', async () => {
-        const samplePersons = await helpers.insertSamplePersons(6)
-        const randomPersons = randomElements(samplePersons, 2, {
-          safetyOffset: 1,
+      describe('delete', () => {
+        it('should delete a single entry in a table', async () => {
+          const samplePersons = await helpers.insertSamplePersons(6)
+          const randomPerson = randomElement(samplePersons, {
+            safetyOffset: 1,
+          })
+
+          await database.table(personsTable).delete({
+            where: personsTable.id.equals(randomPerson.id),
+          })
+
+          const personsInDatabase = await helpers.getAllPersonsInDatabase()
+
+          expect(personsInDatabase).not.toContain(randomPerson)
         })
-        const ids = randomPersons.map((person) => person.id)
 
-        await database.table(personsTable).delete({
-          where: personsTable.id.in(ids),
+        it('should delete multiple entries in a table', async () => {
+          const samplePersons = await helpers.insertSamplePersons(6)
+          const randomPersons = randomElements(samplePersons, 2, {
+            safetyOffset: 1,
+          })
+          const ids = randomPersons.map((person) => person.id)
+
+          await database.table(personsTable).delete({
+            where: personsTable.id.in(ids),
+          })
+
+          const personsInDatabase = await helpers.getAllPersonsInDatabase()
+
+          expect(personsInDatabase).not.toContain(randomPersons)
         })
-
-        const personsInDatabase = await helpers.getAllPersonsInDatabase()
-
-        expect(personsInDatabase).not.toContain(randomPersons)
       })
-    })
 
-    describe('deleteAll', () => {
-      it('should delete all entries in a table', async () => {
-        await helpers.insertSamplePersons(6)
+      describe('deleteAll', () => {
+        it('should delete all entries in a table', async () => {
+          await helpers.insertSamplePersons(6)
 
-        await database.table(personsTable).deleteAll()
+          await database.table(personsTable).deleteAll()
 
-        const personsInDatabase = await helpers.getAllPersonsInDatabase()
+          const personsInDatabase = await helpers.getAllPersonsInDatabase()
 
-        expect(personsInDatabase).toHaveLength(0)
+          expect(personsInDatabase).toHaveLength(0)
+        })
       })
     })
   })

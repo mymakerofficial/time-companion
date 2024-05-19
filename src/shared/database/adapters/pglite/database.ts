@@ -3,34 +3,24 @@ import type {
   DatabaseInfo,
   TransactionAdapter,
 } from '@shared/database/types/adapter'
-import type { Knex } from 'knex'
 import createKnex from 'knex'
-import {
-  PGlite,
-  type PGliteInterface,
-  type Transaction,
-} from '@electric-sql/pglite'
-import type { Nullable } from '@shared/lib/utils/types'
-import { check, isNotNull } from '@shared/lib/utils/checks'
+import { PGlite, type PGliteInterface } from '@electric-sql/pglite'
+import { check, isNotEmpty, isNotNull } from '@shared/lib/utils/checks'
 import { PGLiteDatabaseTransactionAdapter } from '@shared/database/adapters/pglite/transaction'
-import path from 'path'
 import { todo } from '@shared/lib/utils/todo'
-import { getOrDefault } from '@shared/lib/utils/result'
-import { PGLiteSchemaAdapter } from '@shared/database/adapters/pglite/schema'
 import { PGLiteTableAdapterFactory } from '@shared/database/adapters/pglite/tableFactory'
+import { asArray, firstOf } from '@shared/lib/utils/list'
+import type { MaybePromise } from '@shared/lib/utils/types'
 
-export function pgliteAdapter(): DatabaseAdapter {
-  return new PGLiteDatabaseAdapter()
+export function pgliteAdapter(dataDir?: string): DatabaseAdapter {
+  return new PGLiteDatabaseAdapter(dataDir)
 }
 
 export class PGLiteDatabaseAdapter
   extends PGLiteTableAdapterFactory
   implements DatabaseAdapter
 {
-  constructor(
-    protected readonly protocol: string = 'memory',
-    protected readonly basePath: string = '',
-  ) {
+  constructor(protected readonly dataDir: string = 'memory://db') {
     super(
       createKnex({
         client: 'pg',
@@ -39,21 +29,65 @@ export class PGLiteDatabaseAdapter
     )
   }
 
-  protected getDataDir(databaseName: string): string {
-    return `${this.protocol}://${path.join(this.basePath, databaseName)}`
-  }
-
   get isOpen(): boolean {
     return isNotNull(this.db) && !this.db.closed
   }
 
-  async openDatabase(
-    databaseName: string,
-    version: number,
-  ): Promise<Nullable<TransactionAdapter>> {
-    this.db = new PGlite(this.getDataDir(databaseName))
+  protected async init(): Promise<void> {
+    this.db = new PGlite(this.dataDir)
     await this.db.waitReady
-    return await this.openTransaction()
+  }
+
+  protected async runInitialUpgrade(): Promise<void> {
+    check(isNotNull(this.db), 'Database is not open.')
+
+    await this.db.query(
+      this.knex.schema
+        .createTable('__migrations__', (table) => {
+          table.increments('id').primary()
+          table.integer('version').notNullable()
+        })
+        .toQuery(),
+    )
+
+    await this.db.query(
+      this.knex('__migrations__').insert({ version: 1 }).toQuery(),
+    )
+  }
+
+  protected async getDatabaseVersion(): Promise<number> {
+    check(isNotNull(this.db), 'Database is not open.')
+
+    const res = await this.db.query<{
+      version: number
+    }>(
+      this.knex
+        .select('version')
+        .from('__migrations__')
+        .orderBy('version', 'desc')
+        .limit(1)
+        .toQuery(),
+    )
+
+    check(isNotEmpty(res.rows), 'Database version not found.')
+
+    return firstOf(res.rows).version
+  }
+
+  async openDatabase(): Promise<DatabaseInfo> {
+    await this.init()
+
+    const tables = await this.getAllTables()
+
+    if (tables.length === 0) {
+      await this.runInitialUpgrade()
+    }
+
+    const version = await this.getDatabaseVersion()
+
+    return {
+      version,
+    }
   }
 
   async closeDatabase(): Promise<void> {
@@ -65,15 +99,20 @@ export class PGLiteDatabaseAdapter
     todo()
   }
 
-  async openTransaction(): Promise<TransactionAdapter> {
+  protected async getTransaction(
+    onCommit?: () => MaybePromise<void>,
+    onRollback?: () => MaybePromise<void>,
+  ): Promise<TransactionAdapter> {
     return new Promise((resolveAdapter) => {
-      check(isNotNull(this.db), 'No database is open.')
+      check(isNotNull(this.db), 'Database is not open.')
       ;(this.db as PGliteInterface).transaction((tx) => {
         return new Promise((resolveTransaction) => {
           const adapter = new PGLiteDatabaseTransactionAdapter(
             this.knex,
             tx,
             () => resolveTransaction(null),
+            onCommit,
+            onRollback,
           )
 
           resolveAdapter(adapter)
@@ -82,8 +121,29 @@ export class PGLiteDatabaseAdapter
     })
   }
 
-  getDatabaseInfo(databaseName: string): Promise<Nullable<DatabaseInfo>> {
-    todo()
+  openMigration(targetVersion: number): Promise<TransactionAdapter> {
+    return this.getTransaction(async () => {
+      check(isNotNull(this.db), 'Database is not open.')
+
+      await this.db.query(
+        this.knex
+          .insert({ version: targetVersion })
+          .into('__migrations__')
+          .toQuery(),
+      )
+    })
+  }
+
+  async openTransaction(): Promise<TransactionAdapter> {
+    return await this.getTransaction()
+  }
+
+  async getDatabaseInfo(): Promise<DatabaseInfo> {
+    const version = await this.getDatabaseVersion()
+
+    return {
+      version,
+    }
   }
 
   getDatabases(): Promise<Array<DatabaseInfo>> {
@@ -94,17 +154,28 @@ export class PGLiteDatabaseAdapter
     todo()
   }
 
+  protected async getAllTables(): Promise<Array<string>> {
+    check(isNotNull(this.db), 'Database is not open.')
+    check(
+      this.knex.client.config.client === 'pg',
+      'Only PostgreSQL is supported.',
+    )
+
+    const res = await this.db.query<{
+      tablename: string
+    }>(
+      `
+        select "tablename" 
+        from "pg_catalog"."pg_tables" 
+        where not "schemaname" = 'pg_catalog' 
+          and not "schemaname" = 'information_schema'
+      `,
+    )
+
+    return asArray(res.rows).map((row: any) => row.tablename)
+  }
+
   async getTableNames(): Promise<Array<string>> {
-    check(isNotNull(this.db), 'No database is open.')
-
-    const builder = this.knex
-      .select('tablename')
-      .from('pg_catalog.pg_tables')
-      .whereNot('schemaname', 'pg_catalog')
-      .whereNot('schemaname', 'information_schema')
-
-    const res = await this.db.query(builder.toQuery())
-
-    return getOrDefault(res.rows, []).map((row: any) => row.tablename)
+    return await this.getAllTables()
   }
 }

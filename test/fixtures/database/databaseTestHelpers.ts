@@ -1,8 +1,4 @@
-import type {
-  Database,
-  UpgradeFunction,
-  UpgradeTransaction,
-} from '@shared/database/types/database'
+import type { Database } from '@shared/database/types/database'
 import type { Person, Pet } from '@test/fixtures/database/types'
 import { faker } from '@faker-js/faker'
 import { firstOf } from '@shared/lib/utils/list'
@@ -10,59 +6,10 @@ import { uuid } from '@shared/lib/utils/uuid'
 import { randomElements } from '@shared/lib/utils/random'
 import { check } from '@renderer/lib/utils'
 import type { Nullable } from '@shared/lib/utils/types'
-import { defineTable } from '@shared/database/schema/defineTable'
-import { t } from '@shared/database/schema/columnBuilder'
+import { personsTable, petsTable } from '@test/fixtures/database/schema'
 
 export class DatabaseTestHelpers {
-  constructor(
-    private readonly database: Database,
-    public readonly databaseName: string = 'test-database',
-  ) {}
-
-  get newestVersionNumber(): number {
-    return 2
-  }
-
-  get personsTableName(): string {
-    return 'persons'
-  }
-
-  get petsTableName(): string {
-    return 'pets'
-  }
-
-  get personsTable() {
-    return defineTable<Person>(this.personsTableName, {
-      id: t.uuid().primaryKey(),
-      firstName: t.string().indexed(),
-      lastName: t.string(),
-      username: t.string().indexed().unique(),
-      gender: t.string(),
-      age: t.number().indexed(),
-    })
-  }
-
-  get petsTable() {
-    return defineTable<Pet>(this.petsTableName, {
-      id: t.uuid().primaryKey(),
-      name: t.string().indexed(),
-      age: t.number(),
-      ownerId: t.uuid(),
-    })
-  }
-
-  get upgradeFunction(): UpgradeFunction {
-    return async (transaction: UpgradeTransaction, newVersion, oldVersion) => {
-      if (newVersion === 1) {
-        // do nothing
-      }
-
-      if (newVersion === 2) {
-        await transaction.createTable(this.personsTable)
-        await transaction.createTable(this.petsTable)
-      }
-    }
-  }
+  constructor(private readonly database: Database) {}
 
   samplePersons(amount: number): Array<Person> {
     return Array.from({ length: amount }, () => ({
@@ -115,7 +62,7 @@ export class DatabaseTestHelpers {
 
   async insertPersons(persons: Array<Person>): Promise<Array<Person>> {
     return await this.database.withTransaction(async (transaction) => {
-      return await transaction.table(this.personsTable).insertMany({
+      return await transaction.table(personsTable).insertMany({
         data: persons,
       })
     })
@@ -123,7 +70,7 @@ export class DatabaseTestHelpers {
 
   async insertPets(pets: Array<Pet>): Promise<Array<Pet>> {
     return await this.database.withTransaction(async (transaction) => {
-      return await transaction.table(this.petsTable).insertMany({
+      return await transaction.table(petsTable).insertMany({
         data: pets,
       })
     })
@@ -145,23 +92,23 @@ export class DatabaseTestHelpers {
   }
 
   async getAllPersonsInDatabase(): Promise<Array<Person>> {
-    return await this.database.table(this.personsTable).findMany()
+    return await this.database.table(personsTable).findMany()
   }
 
   async getPersonsInDatabaseByIds(ids: Array<string>): Promise<Array<Person>> {
-    return await this.database.table(this.personsTable).findMany({
-      where: this.personsTable.id.in(ids),
+    return await this.database.table(personsTable).findMany({
+      where: personsTable.id.in(ids),
     })
   }
 
   async getPersonInDatabaseById(id: string): Promise<Nullable<Person>> {
-    return await this.database.table(this.personsTable).findFirst({
-      where: this.personsTable.id.equals(id),
+    return await this.database.table(personsTable).findFirst({
+      where: personsTable.id.equals(id),
     })
   }
 
   async getAllPetsInDatabase(): Promise<Array<Pet>> {
-    return await this.database.table(this.petsTable).findMany()
+    return await this.database.table(petsTable).findMany()
   }
 
   // deletes all data from all tables, but keeps the tables
@@ -175,20 +122,12 @@ export class DatabaseTestHelpers {
     })
   }
 
-  // opens the database and creates the tables at the specified version
-  async openDatabaseAndCreateTablesAtVersion(version: number): Promise<void> {
-    await this.database.open(this.databaseName, version, this.upgradeFunction)
-  }
-
   // opens the database and creates the tables at the latest version
-  async openDatabaseAndMigrateIfNecessary(): Promise<void> {
-    await this.openDatabaseAndCreateTablesAtVersion(this.newestVersionNumber)
-  }
-
-  // opens and closes the database at the specified version
-  async ensureDatabaseExistsAtVersion(version: number): Promise<void> {
-    await this.openDatabaseAndCreateTablesAtVersion(version)
-    await this.database.close()
+  async openDatabaseIfNotAlreadyOpen(): Promise<void> {
+    if (this.database.isOpen) {
+      return
+    }
+    await this.database.open()
   }
 
   // closes the open database and deletes all databases

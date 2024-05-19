@@ -1,80 +1,117 @@
 import type {
   Database,
+  DatabaseConfig,
+  MigrationFunction,
   Table,
   Transaction,
-  UpgradeFunction,
+  UpgradeTransaction,
 } from '@shared/database/types/database'
-import type {
-  DatabaseAdapter,
-  DatabaseInfo,
-} from '@shared/database/types/adapter'
-import {
-  check,
-  isArray,
-  isNotEmpty,
-  isNotNull,
-  isNull,
-  isString,
-} from '@shared/lib/utils/checks'
+import type { DatabaseAdapter } from '@shared/database/types/adapter'
+import { check, isNotNull, isString } from '@shared/lib/utils/checks'
 import { DatabaseTransactionImpl } from '@shared/database/factory/transaction'
 import { DatabaseUpgradeTransactionImpl } from '@shared/database/factory/upgradeTransaction'
-import { getOrDefault } from '@shared/lib/utils/result'
-import type { InferTable, TableSchema } from '@shared/database/types/schema'
+import type {
+  DatabaseSchema,
+  InferTable,
+  TableSchema,
+} from '@shared/database/types/schema'
 import { DatabaseTableImpl } from '@shared/database/factory/table'
+import { getOrDefault } from '@shared/lib/utils/result'
 
-export function createDatabase(adapter: DatabaseAdapter): Database {
-  return new DatabaseImpl(adapter)
+export function createDatabase<TSchema extends DatabaseSchema>(
+  adapter: DatabaseAdapter,
+  config: DatabaseConfig<TSchema>,
+): Database<TSchema> {
+  return new DatabaseImpl(adapter, config)
 }
 
-export class DatabaseImpl implements Database {
-  constructor(protected readonly adapter: DatabaseAdapter) {}
+export class DatabaseImpl<TSchema extends DatabaseSchema>
+  implements Database<TSchema>
+{
+  protected _version: number = 0
+
+  constructor(
+    protected readonly adapter: DatabaseAdapter,
+    protected readonly config: DatabaseConfig<TSchema>,
+  ) {}
 
   get isOpen(): boolean {
     return this.adapter.isOpen
   }
 
-  async open(
-    name: string,
+  get version(): number {
+    return this._version
+  }
+
+  protected get targetVersion(): number {
+    return this.config.migrations.length + 1
+  }
+
+  protected async prepareMigration(
     version: number,
-    upgrade: UpgradeFunction,
+  ): Promise<MigrationFunction> {
+    const fn = this.config.migrations[version - 1]
+
+    if (fn.length === 0) {
+      const module = await (
+        fn as () => Promise<{ default: MigrationFunction }>
+      )()
+      return module.default
+    }
+
+    return fn as MigrationFunction
+  }
+
+  protected async runMigrations(
+    migrations: Array<MigrationFunction>,
+    transaction: UpgradeTransaction,
   ): Promise<void> {
-    check(version >= 1, 'Database version must be greater than or equal to 1.')
-
-    // const databaseInfo = await this.adapter.getDatabaseInfo(name)
-    //
-    // check(
-    //   isNull(databaseInfo) || version >= databaseInfo.version,
-    //   `Cannot open database at lower version. Current version is "${databaseInfo?.version}", requested version is "${version}".`,
-    // )
-
-    const transactionAdapter = await this.adapter.openDatabase(name, version)
-
-    if (isNotNull(transactionAdapter)) {
-      const currentVersion = 0 // getOrDefault(databaseInfo?.version, 0)
-
-      // call upgrade function for each version between and including the current version and the target version
-
-      for (
-        let newVersion = currentVersion + 1;
-        newVersion <= version;
-        newVersion++
-      ) {
-        await upgrade(
-          new DatabaseUpgradeTransactionImpl(transactionAdapter),
-          newVersion,
-          newVersion - 1,
-        )
-      }
-
-      await transactionAdapter.commit()
+    for (const migration of migrations) {
+      await migration(transaction)
     }
   }
 
-  async close(): Promise<void> {
-    return await this.adapter.closeDatabase()
+  async open(): Promise<void> {
+    const info = await this.adapter.openDatabase()
+
+    // 1 is the default if the database does not exist or has not been migrated yet
+    const currentVersion = isNotNull(info) ? info.version : 1
+
+    check(currentVersion <= this.targetVersion, 'Database version is too high.')
+
+    if (currentVersion < this.targetVersion) {
+      // prepare all migrations between the current version and the target version
+      const migrations = await Promise.all(
+        Array.from(
+          { length: this.targetVersion - currentVersion },
+          (_, index) => this.prepareMigration(currentVersion + index),
+        ),
+      )
+
+      const transactionAdapter = await this.adapter.openMigration(
+        this.targetVersion,
+      )
+
+      const transaction: UpgradeTransaction =
+        new DatabaseUpgradeTransactionImpl(transactionAdapter)
+
+      await this.runMigrations(migrations, transaction)
+
+      await transactionAdapter.commit()
+    }
+
+    this._version = await this.adapter.getDatabaseInfo().then((info) => {
+      return getOrDefault(info?.version, 1) - 1
+    })
   }
 
-  protected async runTransaction<TResult>(
+  async close(): Promise<void> {
+    return await this.adapter.closeDatabase().then(() => {
+      this._version = 0
+    })
+  }
+
+  async withTransaction<TResult>(
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult> {
     const transaction = await this.adapter.openTransaction()
@@ -90,12 +127,6 @@ export class DatabaseImpl implements Database {
       })
   }
 
-  async withTransaction<TResult>(
-    block: (transaction: Transaction) => Promise<TResult>,
-  ): Promise<TResult> {
-    return await this.runTransaction(block)
-  }
-
   table<
     TData extends object = object,
     TSchema extends TableSchema<TData> = TableSchema<TData>,
@@ -108,17 +139,5 @@ export class DatabaseImpl implements Database {
 
   async getTableNames(): Promise<Array<string>> {
     return await this.adapter.getTableNames()
-  }
-
-  async delete(databaseName: string): Promise<void> {
-    return await this.adapter.deleteDatabase(databaseName)
-  }
-
-  async getDatabases(): Promise<Array<DatabaseInfo>> {
-    return await this.adapter.getDatabases()
-  }
-
-  async getTableIndexNames(tableName: string): Promise<Array<string>> {
-    return await this.adapter.getTableIndexNames(tableName)
   }
 }

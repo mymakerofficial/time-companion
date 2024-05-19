@@ -1,28 +1,30 @@
 import type { Database } from '@shared/database/types/database'
 import { createFixtures } from '@test/helpers/createFixtures'
 import { DatabaseTestHelpers } from '@test/fixtures/database/databaseTestHelpers'
+import { personsTable, petsTable } from '@test/fixtures/database/schema'
+import type { DatabaseSchema, TableSchema } from '@shared/database/types/schema'
+import type { Person, Pet } from '@test/fixtures/database/types'
 
-interface DatabaseTestFixturesOptions {
-  database: Database
+interface DatabaseTestFixturesOptions<TSchema extends DatabaseSchema> {
+  database: Database<TSchema>
   databaseName?: string
 }
 
-interface DatabaseTestFixtures {
-  database: Database
+interface DatabaseTestFixtures<TSchema extends DatabaseSchema> {
+  database: Database<TSchema>
   helpers: DatabaseTestHelpers
-  personsTable: DatabaseTestHelpers['personsTable']
-  petsTable: DatabaseTestHelpers['petsTable']
+  personsTable: TableSchema<Person>
+  petsTable: TableSchema<Pet>
 }
 
-export const useDatabaseFixtures = ({
+export const useDatabaseFixtures = <TSchema extends DatabaseSchema>({
   database,
-  databaseName,
-}: DatabaseTestFixturesOptions) =>
-  createFixtures<DatabaseTestFixtures>({
+}: DatabaseTestFixturesOptions<TSchema>) =>
+  createFixtures<DatabaseTestFixtures<TSchema>>({
     database,
     helpers: ({ database }) => {
-      return new DatabaseTestHelpers(database, databaseName)
+      return new DatabaseTestHelpers(database)
     },
-    personsTable: ({ helpers }) => helpers.personsTable,
-    petsTable: ({ helpers }) => helpers.petsTable,
+    personsTable,
+    petsTable,
   })()

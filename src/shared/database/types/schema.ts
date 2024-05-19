@@ -236,4 +236,8 @@ export type TableSchema<TRow extends object> = TableSchemaBase<TRow> & {
   [K in keyof TRow]: ColumnDefinition<TRow, TRow[K]>
 }
 
+export type DatabaseSchema = {
+  [key: string]: object
+}
+
 export type InferTable<T> = T extends TableSchema<infer U> ? U : never

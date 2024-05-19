@@ -1,4 +1,4 @@
-import { describe, expect, onTestFinished, test } from 'vitest'
+import { describe, expect, test } from 'vitest'
 import { pgliteAdapter } from '@shared/database/adapters/pglite/database'
 import { check, isNotNull } from '@shared/lib/utils/checks'
 import { defineTable } from '@shared/database/schema/defineTable'
@@ -15,17 +15,17 @@ describe.sequential('pglite', () => {
   })
 
   test('open the database', async () => {
-    const tx = await adapter.openDatabase('test', 1)
+    const { transactionAdapter } = await adapter.openDatabase(1)
 
-    check(isNotNull(tx), 'No transaction is open.')
+    check(isNotNull(transactionAdapter), 'No transaction is open.')
 
-    await tx.createTable(testTable._.raw)
+    await transactionAdapter.createTable(testTable._.raw)
 
-    await tx.commit()
+    await transactionAdapter.commit()
   })
 
   test('do a query', async () => {
-    const tx1 = await adapter.openTransaction(['test'], 'readwrite')
+    const tx1 = await adapter.openTransaction()
 
     const testData = {
       id: uuid(),
@@ -38,7 +38,7 @@ describe.sequential('pglite', () => {
 
     await tx1.commit()
 
-    const tx2 = await adapter.openTransaction(['test'], 'readwrite')
+    const tx2 = await adapter.openTransaction()
 
     const res = await tx2.getTable('test').select({
       orderByTable: 'test',

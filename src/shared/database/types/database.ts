@@ -1,7 +1,8 @@
-import type { DatabaseInfo } from '@shared/database/types/adapter'
 import type { Nullable } from '@shared/lib/utils/types'
 import type {
+  ColumnBuilder,
   ColumnDefinitionRaw,
+  DatabaseSchema,
   InferTable,
   TableSchema,
   WhereBuilderOrRaw,
@@ -111,10 +112,6 @@ export interface JoinedTable<
   TRightData extends object,
 > extends QueryableTable<TLeftData> {}
 
-export interface UpgradeTable<TData extends object> extends Table<TData> {
-  // ...
-}
-
 export const columnTypes = [
   'string',
   'number',
@@ -127,6 +124,13 @@ export const columnTypes = [
 export type ColumnType = (typeof columnTypes)[number]
 
 export interface TableFactory {
+  /***
+   * Used to access the table for performing operations on it.
+   * You can either pass the table schema to infer all types automatically,
+   * or pass the table name as a string and optionally provide the types manually.
+   * @param table The table schema or name.
+   * @returns The table.
+   */
   table<
     TData extends object = object,
     TSchema extends TableSchema<TData> = TableSchema<TData>,
@@ -135,53 +139,57 @@ export interface TableFactory {
   ): Table<InferTable<TSchema>>
 }
 
-export interface UpgradeTableFactory extends TableFactory {
-  createTable<
-    TData extends object = object,
-    TSchema extends TableSchema<TData> = TableSchema<TData>,
-  >(
-    schema: TSchema,
-  ): Promise<UpgradeTable<InferTable<TSchema>>>
-  table<
-    TData extends object = object,
-    TSchema extends TableSchema<TData> = TableSchema<TData>,
-  >(
-    table: TSchema | string,
-  ): UpgradeTable<InferTable<TSchema>>
-}
-
 export interface Transaction extends TableFactory {}
 
-export interface UpgradeTransaction extends UpgradeTableFactory {}
+export interface UpgradeTransaction extends Transaction {
+  createTable<TRow extends object>(
+    tableName: string,
+    columns: {
+      [K in keyof TRow]: ColumnBuilder<TRow[K]>
+    },
+  ): Promise<TableSchema<TRow>>
+  dropTable(tableName: string): Promise<void>
+}
 
-export type UpgradeFunction = (
-  transaction: UpgradeTransaction,
-  newVersion: number,
-  oldVersion: number,
-) => Promise<void>
-
-export interface Database extends TableFactory {
+export interface Database<TSchema extends DatabaseSchema = {}>
+  extends TableFactory {
   readonly isOpen: boolean
-  open(
-    databaseName: string,
-    version: number,
-    upgrade: UpgradeFunction,
-  ): Promise<void>
+  readonly version: number
+
+  /***
+   * Opens the database and migrates it to the newest version.
+   */
+  open(): Promise<void>
+  /***
+   * Closes the database.
+   */
   close(): Promise<void>
+  /***
+   * Runs the provided block inside a transaction and commits it if successful, or rolls it back if an error occurs.
+   * @param block The block to run inside the transaction.
+   * @returns The result of the block.
+   */
   withTransaction<TResult>(
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>
+  /***
+   * @deprecated will be removed in the future in favor of getting the schema
+   */
   getTableNames(): Promise<Array<string>>
-  /***
-   * @deprecated use native methods to delete databases
-   */
-  delete(databaseName: string): Promise<void>
-  /***
-   * @deprecated future versions will only support one database
-   */
-  getDatabases(): Promise<Array<DatabaseInfo>>
-  /***
-   * @deprecated
-   */
-  getTableIndexNames(tableName: string): Promise<Array<string>>
+}
+
+export type MigrationFunction = (
+  transaction: UpgradeTransaction,
+) => Promise<void>
+
+export type DatabaseConfig<TSchema extends DatabaseSchema> = {
+  migrations: Array<
+    | (() => Promise<{
+        default: MigrationFunction
+      }>)
+    | MigrationFunction
+  >
+  schema?: {
+    [K in keyof TSchema]: TableSchema<TSchema[K]>
+  }
 }

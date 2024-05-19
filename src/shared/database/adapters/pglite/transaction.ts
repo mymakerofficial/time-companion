@@ -8,6 +8,8 @@ import { valuesOf } from '@shared/lib/utils/object'
 import { genericTypeToPgType } from '@shared/database/adapters/pglite/helpers/genericTypeToPgType'
 import { todo } from '@shared/lib/utils/todo'
 import { PGLiteTableAdapterFactory } from '@shared/database/adapters/pglite/tableFactory'
+import type { MaybePromise } from '@shared/lib/utils/types'
+import { ensurePromise } from '@shared/lib/utils/guards'
 
 export class PGLiteDatabaseTransactionAdapter
   extends PGLiteTableAdapterFactory
@@ -17,6 +19,8 @@ export class PGLiteDatabaseTransactionAdapter
     protected readonly knex: Knex,
     protected readonly tx: Transaction,
     protected readonly close: () => void = noop,
+    protected readonly onCommit: () => MaybePromise<void> = noop,
+    protected readonly onRollback: () => MaybePromise<void> = noop,
   ) {
     super(knex, tx)
   }
@@ -68,6 +72,7 @@ export class PGLiteDatabaseTransactionAdapter
   async commit(): Promise<void> {
     return new Promise((resolve) => {
       this.close()
+      ensurePromise(this.onCommit()).then(resolve)
       resolve()
     })
   }
@@ -75,5 +80,6 @@ export class PGLiteDatabaseTransactionAdapter
   async rollback(): Promise<void> {
     await this.tx.rollback()
     this.close()
+    await ensurePromise(this.onRollback())
   }
 }

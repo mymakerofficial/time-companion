@@ -1,32 +1,25 @@
-import type {
-  UpgradeTable,
-  UpgradeTransaction,
-} from '@shared/database/types/database'
+import type { UpgradeTransaction } from '@shared/database/types/database'
 import { DatabaseTransactionImpl } from '@shared/database/factory/transaction'
-import { DatabaseUpgradeTableImpl } from '@shared/database/factory/upgradeTable'
-import type { TableSchema, InferTable } from '@shared/database/types/schema'
-import { isString } from '@shared/lib/utils/checks'
+import type { ColumnBuilder, TableSchema } from '@shared/database/types/schema'
+import { defineTable } from '@shared/database/schema/defineTable'
+import { todo } from '@shared/lib/utils/todo'
 
 export class DatabaseUpgradeTransactionImpl
   extends DatabaseTransactionImpl
   implements UpgradeTransaction
 {
-  async createTable<
-    TData extends object = object,
-    TSchema extends TableSchema<TData> = TableSchema<TData>,
-  >(schema: TSchema): Promise<UpgradeTable<InferTable<TSchema>>> {
+  async createTable<TRow extends object>(
+    tableName: string,
+    columns: {
+      [K in keyof TRow]: ColumnBuilder<TRow[K]>
+    },
+  ): Promise<TableSchema<TRow>> {
+    const schema = defineTable(tableName, columns)
     await this.transactionAdapter.createTable(schema._.raw)
-    return this.table(schema)
+    return schema
   }
 
-  table<
-    TData extends object = object,
-    TSchema extends TableSchema<TData> = TableSchema<TData>,
-  >(table: TSchema | string): UpgradeTable<InferTable<TSchema>> {
-    const tableName = isString(table) ? table : table._.raw.tableName
-
-    const tableAdapter =
-      this.transactionAdapter.getTable<InferTable<TSchema>>(tableName)
-    return new DatabaseUpgradeTableImpl(this.transactionAdapter, tableAdapter)
+  dropTable(tableName: string): Promise<void> {
+    todo()
   }
 }
