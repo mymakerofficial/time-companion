@@ -15,7 +15,9 @@ describe.sequential('pglite', () => {
   })
 
   test('open the database', async () => {
-    const { transactionAdapter } = await adapter.openDatabase(1)
+    await adapter.openDatabase()
+
+    const transactionAdapter = await adapter.openMigration(1)
 
     check(isNotNull(transactionAdapter), 'No transaction is open.')
 
