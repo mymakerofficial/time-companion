@@ -1,7 +1,10 @@
-import type { Database } from '@shared/database/types/database'
 import { createDatabase } from '@shared/database/factory/database'
-import { inMemoryDBAdapter } from '@shared/database/adapters/inMemory/database'
+import config from '@shared/database.config'
+import { pgliteAdapter } from '@shared/database/adapters/pglite/database'
+import path from 'path'
+import { app } from 'electron'
 
-export const database: Database = (() => {
-  return createDatabase(inMemoryDBAdapter())
+export const database = (() => {
+  const dataDir = path.join(app.getPath('userData'), 'db')
+  return createDatabase(pgliteAdapter(dataDir), config)
 })()

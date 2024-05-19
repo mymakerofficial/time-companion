@@ -9,8 +9,6 @@ import {
   serviceInvokeChannel,
   servicePublishChannel,
 } from '@shared/ipc/helpers/channels'
-import { projectsTable } from '@shared/model/project'
-import { tasksTable } from '@shared/model/task'
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -60,47 +58,7 @@ function createMainWindow() {
 }
 
 async function initialize() {
-  // TODO this is a hack to create the tables
-
-  await database.open('time-companion', 1, async (transaction) => {
-    await transaction.createTable(projectsTable)
-
-    await transaction.table(projectsTable).createIndex({
-      keyPath: 'displayName',
-      unique: true,
-    })
-
-    await transaction.table(projectsTable).insert({
-      data: {
-        id: '1',
-        displayName: 'Project 1',
-        color: 'green',
-        isBillable: true,
-        createdAt: new Date().toISOString(),
-        modifiedAt: null,
-        deletedAt: null,
-      },
-    })
-
-    await transaction.createTable(tasksTable)
-
-    await transaction.table(tasksTable).createIndex({
-      keyPath: 'displayName',
-      unique: true,
-    })
-
-    await transaction.table(tasksTable).insert({
-      data: {
-        id: '1',
-        projectId: '1',
-        displayName: 'Task 1',
-        color: 'green',
-        createdAt: new Date().toISOString(),
-        modifiedAt: null,
-        deletedAt: null,
-      },
-    })
-  })
+  await database.open()
 }
 
 function handleSetTitleBarColors(event: Electron.IpcMainEvent, colors: any) {

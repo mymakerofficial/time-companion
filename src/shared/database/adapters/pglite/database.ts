@@ -12,6 +12,8 @@ import { PGLiteTableAdapterFactory } from '@shared/database/adapters/pglite/tabl
 import { asArray, firstOf } from '@shared/lib/utils/list'
 import type { MaybePromise } from '@shared/lib/utils/types'
 
+// TODO: PGlite is an ES module, but electron doesn't support ES modules
+
 export function pgliteAdapter(dataDir?: string): DatabaseAdapter {
   return new PGLiteDatabaseAdapter(dataDir)
 }

@@ -61,26 +61,20 @@ export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
   }
 
   commit(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      this.tx.commit()
-      this.tx.oncomplete = () => {
-        resolve()
+    return new Promise((resolve) => {
+      if (this.mode !== 'versionchange') {
+        // explicitly calling commit on a versionchange transaction
+        //  will cause the transaction to never complete
+        this.tx.commit()
       }
-      this.tx.onerror = () => {
-        reject(this.tx.error)
-      }
+      resolve()
     })
   }
 
   rollback(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.tx.abort()
-      this.tx.onabort = () => {
-        resolve()
-      }
-      this.tx.onerror = () => {
-        reject(this.tx.error)
-      }
+      resolve()
     })
   }
 }

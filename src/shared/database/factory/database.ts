@@ -77,6 +77,7 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
     // 1 is the default if the database does not exist or has not been migrated yet
     const currentVersion = isNotNull(info) ? info.version : 1
 
+    // the user facing version is always one less than the actual version
     this._version = currentVersion - 1
 
     check(currentVersion <= this.targetVersion, 'Database version is too high.')

@@ -92,6 +92,7 @@ export class IdbDatabaseAdapter implements DatabaseAdapter {
             transaction,
             'versionchange',
           )
+
         resolve(transactionAdapter)
       }
     })
