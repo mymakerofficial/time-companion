@@ -35,10 +35,7 @@ function byFirstName(a: Person, b: Person) {
 }
 
 describe.each([
-  [
-    'IndexedDB',
-    (requirePersist: boolean) => indexedDBAdapter(`test-database-${uuid()}`),
-  ],
+  ['IndexedDB', () => indexedDBAdapter(`test-database-${uuid()}`)],
   [
     'PGLite',
     (requirePersist: boolean) =>
@@ -122,8 +119,6 @@ describe.each([
     })
 
     it('should rollback the migration if an error occurs', async () => {
-      // apparently this doesn't work with indexeddb out of the box o.o
-
       const adapter = adapterFactory(true)
       let database: Database
       onTestFinished(async () => {
@@ -506,8 +501,8 @@ describe.each([
         })
       })
 
-      describe.skip('leftJoin', () => {
-        it('should find an entity by joined entity id', async () => {
+      describe('leftJoin', () => {
+        it.todo('should find an entity by joined entity id', async () => {
           const samplePersons = await helpers.insertSamplePersons(6)
           const samplePets = await helpers.insertSamplePets(3, 1)
 
@@ -534,7 +529,7 @@ describe.each([
           expect(owner).toEqual(expectedOwner)
         })
 
-        it('should delete an entity by joined entity id', async () => {
+        it.todo('should delete an entity by joined entity id', async () => {
           const samplePersons = await helpers.insertSamplePersons(6)
           const samplePets = await helpers.insertSamplePets(3, 1)
 
