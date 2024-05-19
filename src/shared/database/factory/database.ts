@@ -77,6 +77,8 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
     // 1 is the default if the database does not exist or has not been migrated yet
     const currentVersion = isNotNull(info) ? info.version : 1
 
+    this._version = currentVersion - 1
+
     check(currentVersion <= this.targetVersion, 'Database version is too high.')
 
     if (currentVersion < this.targetVersion) {
@@ -95,9 +97,13 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
       const transaction: UpgradeTransaction =
         new DatabaseUpgradeTransactionImpl(transactionAdapter)
 
-      await this.runMigrations(migrations, transaction)
-
-      await transactionAdapter.commit()
+      try {
+        await this.runMigrations(migrations, transaction)
+        await transactionAdapter.commit()
+      } catch (error) {
+        await transactionAdapter.rollback()
+        throw error
+      }
     }
 
     this._version = await this.adapter.getDatabaseInfo().then((info) => {

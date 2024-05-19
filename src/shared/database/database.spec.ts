@@ -83,8 +83,10 @@ describe.each([
       expect(migration001).toHaveBeenCalled()
       expect(migration002).toHaveBeenCalled()
 
-      expect(database.table('persons')).toBeDefined()
-      expect(database.table('pets')).toBeDefined()
+      expect(
+        async () => await database.table('persons').findMany(),
+      ).toBeDefined()
+      expect(async () => await database.table('pets').findMany()).toBeDefined()
     })
 
     it('should migrate an existing database to the latest version', async () => {
@@ -119,7 +121,7 @@ describe.each([
       expect(migration002).toHaveBeenCalled()
     })
 
-    it.todo('should rollback the migration if an error occurs', async () => {
+    it('should rollback the migration if an error occurs', async () => {
       // apparently this doesn't work with indexeddb out of the box o.o
 
       const adapter = adapterFactory(true)
@@ -154,20 +156,34 @@ describe.each([
       )
 
       database = createDatabase(adapter, {
+        migrations: [migration001],
+      })
+
+      await database.open()
+
+      expect(database.version).toBe(1)
+
+      await database.close()
+      migration001.mockClear()
+
+      database = createDatabase(adapter, {
         migrations: [migration001, migrationAddValues, migrationWithError],
       })
 
       await expect(database.open()).rejects.toThrowError('Error in migration')
 
-      // expect(database.version).toBe(1)
-      expect(migration001).toHaveBeenCalled()
+      expect(database.isOpen).toBe(true)
+      expect(database.version).toBe(1)
+      expect(migration001).not.toHaveBeenCalled()
       expect(migrationAddValues).toHaveBeenCalled()
       expect(migrationWithError).toHaveBeenCalled()
 
-      expect(database.table('persons')).toBeDefined()
-      expect(database.table('pets')).toThrowError()
-
-      expect(await database.table('persons').findMany()).toHaveLength(0)
+      expect(
+        async () => await database.table('persons').findMany(),
+      ).toHaveLength(0)
+      expect(
+        async () => await database.table('pets').findMany(),
+      ).rejects.toThrowError()
     })
 
     it('should not migrate a database that is already at the latest version', async () => {
