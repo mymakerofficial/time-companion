@@ -38,7 +38,7 @@ The config object has the following properties:
 An object with table names as keys and [table schemas](#table-schema) as values.
 
 #### migrations
-An array of either dynamic imports or the [migration](#migrations) functions themselves.
+An array of either dynamic imports (`import()`) or the [migration](#migrations-1) functions themselves.
 
 It is recommended to use dynamic imports to make sure the migrations are only loaded when needed.
 
@@ -62,7 +62,7 @@ export default defineConfig({
 You can define a table schema using `defineTable` and use the resulting value to [access the table](#table-operations), 
 [build where clauses](#filtering) and [ordering](#odering-and-limiting) the result.
 
-**Note:** The table schema will not be used to create the table in the database, see [Migrations](#migrations) for that.
+**Note:** The table schema will not be used to create the table in the database, see [defineTable vs createTable](#definetable-vs-createtable).
 ```ts
 export const usersTable = defineTable<UserEntityDto>('users', {
   id: uuid().primaryKey(),
@@ -103,7 +103,7 @@ expectTypeOf(petsTable).toBe<TableSchema<{
 
 ## Table Operations
 
-A table can be accessed using the `table` method on the database or any [transaction](#transactions)
+A table can be accessed using the `table` method on the [database](#creating-an-adapter-instance) or any [transaction](#transactions)
 by either passing the [table schema](#table-schema) or the table name.
 
 ```ts
@@ -259,7 +259,7 @@ select "persons".* from "persons" left join "pets" on "persons"."id" = "pets"."o
 All operations on the database are done inside a transaction
 though you don't have to wrap everything in `withTransaction`, instead you can just use the `table` method on the database instance.
 
-You can not perform any schema alterations inside a normal transaction, use [migrations](#migrations) for that.
+You can not perform any schema alterations inside a normal transaction, use [migrations](#migrations-1) for that.
 
 ### Transactions auto rollback
 
@@ -306,6 +306,10 @@ so if one migration fails the whole database will be [rolled back](#transactions
 
 You can [create tables](#create-table), [alter tables](#alter-table), [drop tables](#drop-table) and [rename tables](#rename-table).
 
+**Note:** You should not use a [table schema](#table-schema) to access tables inside a migration
+as the schema represents the database state **after** the migrations have been executed.
+Instead, use table names and column names as a string.
+
 **Note:** There is no manual way to run migrations, they are run automatically when the database is opened.
 
 ```ts
@@ -322,8 +326,6 @@ export default defineMigration(async (transaction) => {
 ```
 
 You can perform any operation inside a migration that you can perform in a transaction.
-
-**Note:** You should not use a table schema in a migration, instead use table names and column names as a string.
 ```ts
 export default defineMigration(async (transaction) => {
   const users = await transaction.table('users').findMany()
@@ -393,6 +395,7 @@ export default defineMigration(async (transaction) => {
 #### Add Column
 
 The `addColumn` syntax is identical to [defineTable](#table-schema).
+To understand the difference see [defineTable vs createTable](#definetable-vs-createtable). 
 
 ```ts
 export default defineMigration(async (transaction) => {
@@ -426,3 +429,14 @@ export default defineMigration(async (transaction) => {
   })
 })
 ```
+
+## `defineTable` vs `createTable`
+
+`defineTable` and `createTable` look the same but have different purposes.
+
+`defineTable` is used to define a [table schema](#table-schema) and is used to [access the table](#table-operations) in the database.
+**The table schema represents the database state **after** all migrations have been executed.**
+
+`createTable` is used inside a [migration](#migrations-1) to create a table in the database.
+
+You need to both define the [table schema](#table-schema) **and** [create the table](#create-table) in a [migration](#migrations-1).
