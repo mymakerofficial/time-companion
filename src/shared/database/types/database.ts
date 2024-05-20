@@ -1,5 +1,6 @@
 import type { Nullable } from '@shared/lib/utils/types'
 import type {
+  AlterTableBuilder,
   ColumnBuilder,
   ColumnDefinitionRaw,
   DatabaseSchema,
@@ -143,13 +144,60 @@ export interface TableFactory {
 export interface Transaction extends TableFactory {}
 
 export interface UpgradeTransaction extends Transaction {
+  /***
+   * Immediately creates a table in the transaction.
+   * @param tableName The name of the table.
+   *
+   *  **Note:** Table names may not start and end with an underscore.
+   * @param columns The columns of the table.
+   * @example
+   * ```typescript
+   * await transaction.createTable('table', {
+   *  id: t.uuid().primaryKey(),
+   *  name: t.string().nullable(),
+   *  age: t.number(),
+   *  email: t.string().indexed().unique(),
+   * })
+   *```
+   */
   createTable<TRow extends object>(
     tableName: string,
     columns: {
       [K in keyof TRow]: ColumnBuilder<TRow[K]>
     },
-  ): Promise<TableSchema<TRow>>
+  ): Promise<void>
+  /***
+   * Immediately drops a table in the transaction.
+   * @param tableName The name of the table to drop.
+   */
   dropTable(tableName: string): Promise<void>
+  /***
+   * Alters a table.
+   *
+   * **Note:** All alterations are executed together after the block has finished.
+   * @param tableName The name of the table to alter.
+   * @param block The block used to build the alterations.
+   *
+   * @example
+   * ```typescript
+   * await transaction.alterTable('table', (table) => {
+   *  table.renameTo('newTable')
+   *  table.addColumn('newColumn').string().nullable()
+   *  table.dropColumn('oldColumn')
+   *  table.renameColumn('email', 'emailAddress')
+   *  table
+   *    .alterColumn('emailAddress')
+   *    .setDataType('string')
+   *    .dropNullable()
+   *    .setIndexed()
+   *    .setUnique()
+   *})
+   *```
+   */
+  alterTable(
+    tableName: string,
+    block: (table: AlterTableBuilder) => void,
+  ): Promise<void>
 }
 
 export type DatabasePublisherTopics = {

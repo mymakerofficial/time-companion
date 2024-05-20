@@ -1,6 +1,10 @@
 import type { Nullable } from '@shared/lib/utils/types'
 import type { OrderByDirection } from '@shared/database/types/database'
-import type { RawWhere, TableSchemaRaw } from '@shared/database/types/schema'
+import type {
+  AlterTableAction,
+  RawWhere,
+  TableSchemaRaw,
+} from '@shared/database/types/schema'
 
 export type DatabaseInfo = {
   version: number
@@ -81,7 +85,8 @@ export interface TransactionAdapter extends TableAdapterFactory {
   createTable<TData extends object>(
     schema: TableSchemaRaw<TData>,
   ): Promise<void>
-  deleteTable(tableName: string): Promise<void>
+  dropTable(tableName: string): Promise<void>
+  alterTable(tableName: string, actions: Array<AlterTableAction>): Promise<void>
   commit(): Promise<void>
   rollback(): Promise<void>
 }

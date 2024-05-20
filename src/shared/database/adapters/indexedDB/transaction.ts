@@ -3,9 +3,13 @@ import type {
   TransactionAdapter,
 } from '@shared/database/types/adapter'
 import { IdbTableAdapter } from '@shared/database/adapters/indexedDB/table'
-import type { TableSchemaRaw } from '@shared/database/types/schema'
+import type {
+  AlterTableAction,
+  TableSchemaRaw,
+} from '@shared/database/types/schema'
 import { check } from '@shared/lib/utils/checks'
 import { valuesOf } from '@shared/lib/utils/object'
+import { todo } from '@shared/lib/utils/todo'
 
 export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
   constructor(
@@ -46,7 +50,7 @@ export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
     })
   }
 
-  deleteTable(tableName: string): Promise<void> {
+  dropTable(tableName: string): Promise<void> {
     return new Promise((resolve) => {
       check(
         this.mode === 'versionchange',
@@ -58,6 +62,13 @@ export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
       // the object store is deleted synchronously, so we can resolve immediately
       resolve()
     })
+  }
+
+  alterTable(
+    tableName: string,
+    actions: Array<AlterTableAction>,
+  ): Promise<void> {
+    todo()
   }
 
   commit(): Promise<void> {

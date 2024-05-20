@@ -176,7 +176,10 @@ export type OrderByColumnFactory<TRow extends object, TColumn = unknown> = {
   dir: (direction: OrderByDirection) => OrderBy<TRow, TColumn>
 }
 
-export type ColumnDefinitionRaw<TRow extends object, TColumn> = {
+export type ColumnDefinitionRaw<
+  TRow extends object = object,
+  TColumn = unknown,
+> = {
   tableName: string
   columnName: string
   dataType: ColumnType
@@ -218,7 +221,88 @@ export interface ColumnBuilderFactory {
   json: <T extends object = object>() => ColumnBuilder<T>
 }
 
-export type TableSchemaRaw<TRow extends object> = {
+export type AlterColumnSetNullableAction = {
+  type: 'setNullable'
+  nullable: boolean
+}
+
+export type AlterColumnSetIndexedAction = {
+  type: 'setIndexed'
+  indexed: boolean
+}
+
+export type AlterColumnSetUniqueAction = {
+  type: 'setUnique'
+  unique: boolean
+}
+
+export type AlterColumnSetDataTypeAction = {
+  type: 'setDataType'
+  dataType: ColumnType
+}
+
+export type AlterColumnAction =
+  | AlterColumnSetNullableAction
+  | AlterColumnSetIndexedAction
+  | AlterColumnSetUniqueAction
+  | AlterColumnSetDataTypeAction
+
+export interface AlterColumnBuilder {
+  setNullable: (nullable?: boolean) => AlterColumnBuilder
+  dropNullable: () => AlterColumnBuilder
+  setIndexed: (indexed?: boolean) => AlterColumnBuilder
+  dropIndexed: () => AlterColumnBuilder
+  setUnique: (unique?: boolean) => AlterColumnBuilder
+  dropUnique: () => AlterColumnBuilder
+  setDataType: (dataType: ColumnType) => AlterColumnBuilder
+}
+
+export type AlterTableAddColumnAction = {
+  type: 'addColumn'
+  definition: ColumnDefinitionRaw
+}
+
+export type AlterTableAlterColumnAction = {
+  type: 'alterColumn'
+  columnName: string
+  action: AlterColumnAction
+}
+
+export type AlterTableDropColumnAction = {
+  type: 'dropColumn'
+  columnName: string
+}
+
+export type AlterTableRenameColumnAction = {
+  type: 'renameColumn'
+  columnName: string
+  newColumnName: string
+}
+
+export type AlterTableRenameTableAction = {
+  type: 'renameTable'
+  newTableName: string
+}
+
+export type AlterTableAction =
+  | AlterTableAddColumnAction
+  | AlterTableAlterColumnAction
+  | AlterTableDropColumnAction
+  | AlterTableRenameColumnAction
+  | AlterTableRenameTableAction
+
+export interface AlterTableBuilder {
+  _: {
+    actions: Array<AlterTableAction>
+  }
+  renameTo: (newTableName: string) => void
+  addColumn: (columnName: string) => ColumnBuilderFactory
+  dropColumn: (columnName: string) => void
+  renameColumn: (columnName: string, newColumnName: string) => void
+  alterColumn: (columnName: string) => AlterColumnBuilder
+}
+
+export type TableSchemaRaw<TRow extends object = object> = {
   tableName: string
   primaryKey: string
   columns: {
