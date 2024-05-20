@@ -343,6 +343,9 @@ export default defineMigration(async (transaction) => {
 
 ### Create Table
 
+The `createTable` syntax is **identical** to [defineTable](#table-schema).
+To understand the difference see [defineTable vs createTable](#definetable-vs-createtable). 
+
 ```ts
 export default defineMigration(async (transaction) => {
   await transaction.createTable('users', {
@@ -379,7 +382,7 @@ export default defineMigration(async (transaction) => {
 
 #### Rename Table
 
-Use the `renameTo` method to rename a table.
+Renames the table.
 This alteration will automatically be applied last.
 
 **You should only call `renameTo` once inside an `alterTable` block.**
@@ -394,8 +397,8 @@ export default defineMigration(async (transaction) => {
 
 #### Add Column
 
-The `addColumn` syntax is identical to [defineTable](#table-schema).
-To understand the difference see [defineTable vs createTable](#definetable-vs-createtable). 
+Adds a column to the table.
+The `addColumn` syntax is similar to defining columns in [defineTable](#table-schema).
 
 ```ts
 export default defineMigration(async (transaction) => {
@@ -408,7 +411,7 @@ export default defineMigration(async (transaction) => {
 
 #### Drop Column
 
-Drop a column using the `dropColumn` method.
+Drops a column from the table.
 
 ```ts
 export default defineMigration(async (transaction) => {
@@ -420,7 +423,7 @@ export default defineMigration(async (transaction) => {
 
 #### Rename Column
 
-Rename a column using the `renameColumn` method.
+Renames a column on the table.
 
 ```ts
 export default defineMigration(async (transaction) => {
