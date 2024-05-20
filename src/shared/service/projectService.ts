@@ -38,6 +38,12 @@ export interface ProjectService extends EntityService<ProjectEntityDto> {
   softDeleteProject(id: string): Promise<void>
 }
 
+export function createProjectService(
+  deps: ProjectServiceDependencies,
+): ProjectService {
+  return new ProjectServiceImpl(deps)
+}
+
 class ProjectServiceImpl
   extends EntityServiceImpl<ProjectEntityDto>
   implements ProjectService
@@ -114,10 +120,4 @@ class ProjectServiceImpl
 
     this.publishDeleted(id)
   }
-}
-
-export function createProjectService(
-  deps: ProjectServiceDependencies,
-): ProjectService {
-  return new ProjectServiceImpl(deps)
 }

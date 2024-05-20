@@ -40,6 +40,10 @@ export interface TaskService extends EntityService<TaskEntityDto> {
   softDeleteTasksByProjectId: (projectId: string) => Promise<void>
 }
 
+export function createTaskService(deps: TaskServiceDependencies): TaskService {
+  return new TaskServiceImpl(deps)
+}
+
 class TaskServiceImpl
   extends EntityServiceImpl<TaskEntityDto>
   implements TaskService
@@ -125,8 +129,4 @@ class TaskServiceImpl
       await this.softDeleteTask(task.id)
     }
   }
-}
-
-export function createTaskService(deps: TaskServiceDependencies): TaskService {
-  return new TaskServiceImpl(deps)
 }

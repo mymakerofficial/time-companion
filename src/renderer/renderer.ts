@@ -8,7 +8,7 @@ import router from './router'
 import { i18n } from '@renderer/locales/locales'
 import { migrateApplication } from '@renderer/lib/migrations/applicationMigrator'
 import { usePwaService } from '@renderer/services/pwaService'
-import { database } from '@renderer/factory/database/database'
+import { preflightService } from '@renderer/factory/service/preflightService'
 
 migrateApplication()
 
@@ -20,6 +20,6 @@ app.use(i18n)
 
 app.mount('#app')
 
-await database.open()
-
 usePwaService()
+
+preflightService.start()

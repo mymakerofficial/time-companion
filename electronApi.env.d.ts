@@ -10,6 +10,10 @@ interface Window {
       createNewWindow: () => void
     }
     service: {
+      preflight: {
+        invoke: (method: string, ...args: any[]) => Promise<any>
+        onNotify: (callback: (event: object, topics: object) => void) => void
+      }
       project: {
         invoke: (method: string, ...args: any[]) => Promise<any>
         onNotify: (callback: (event: object, topics: object) => void) => void

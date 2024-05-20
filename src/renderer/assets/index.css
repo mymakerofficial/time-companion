@@ -128,6 +128,16 @@
   }
 }
 
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.1s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+
 [data-sonner-toast] [data-button]:not(:first-of-type) {
   margin-left: 0 !important;
 }
