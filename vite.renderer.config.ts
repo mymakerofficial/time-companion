@@ -1,4 +1,4 @@
-import { type ConfigEnv, type UserConfig, defineConfig } from 'vite'
+import { type ConfigEnv, defineConfig, type UserConfig } from 'vite'
 import { pluginExposeRenderer } from './vite.base.config'
 import viteConfig from './vite.config'
 
@@ -15,6 +15,8 @@ export default defineConfig((env) => {
     build: {
       outDir: `.vite/renderer/${name}`,
     },
+    optimizeDeps: viteConfig.optimizeDeps,
+    define: viteConfig.define,
     plugins: [pluginExposeRenderer(name), ...(viteConfig.plugins ?? [])],
     resolve: {
       preserveSymlinks: true,
