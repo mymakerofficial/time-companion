@@ -1,6 +1,8 @@
 import type {
   Database,
   DatabaseConfig,
+  DatabasePublisherEvent,
+  DatabasePublisherTopics,
   MigrationFunction,
   Table,
   Transaction,
@@ -17,6 +19,10 @@ import type {
 } from '@shared/database/types/schema'
 import { DatabaseTableImpl } from '@shared/database/factory/table'
 import { getOrDefault } from '@shared/lib/utils/result'
+import {
+  OpenPublisherImpl,
+  type SubscriberCallback,
+} from '@shared/events/publisher'
 
 export function createDatabase<TSchema extends DatabaseSchema>(
   adapter: DatabaseAdapter,
@@ -29,6 +35,10 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
   implements Database<TSchema>
 {
   protected _version: number = 0
+  protected readonly publisher = new OpenPublisherImpl<
+    DatabasePublisherTopics,
+    DatabasePublisherEvent
+  >()
 
   constructor(
     protected readonly adapter: DatabaseAdapter,
@@ -83,6 +93,8 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
     check(currentVersion <= this.targetVersion, 'Database version is too high.')
 
     if (currentVersion < this.targetVersion) {
+      this.publisher.notify({ type: 'migrationsStarted' }, {})
+
       // prepare all migrations between the current version and the target version
       const migrations = await Promise.all(
         Array.from(
@@ -101,10 +113,14 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
       try {
         await this.runMigrations(migrations, transaction)
         await transactionAdapter.commit()
+        this.publisher.notify({ type: 'migrationsFinished' }, {})
       } catch (error) {
         await transactionAdapter.rollback()
+        this.publisher.notify({ type: 'migrationFailed' }, {})
         throw error
       }
+    } else {
+      this.publisher.notify({ type: 'migrationsSkipped' }, {})
     }
 
     this._version = await this.adapter.getDatabaseInfo().then((info) => {
@@ -146,5 +162,41 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
 
   async getTableNames(): Promise<Array<string>> {
     return await this.adapter.getTableNames()
+  }
+
+  onMigrationsStarted(
+    callback: SubscriberCallback<
+      DatabasePublisherTopics,
+      DatabasePublisherEvent
+    >,
+  ): void {
+    this.publisher.subscribe({ type: 'migrationsStarted' }, callback)
+  }
+
+  onMigrationsSkipped(
+    callback: SubscriberCallback<
+      DatabasePublisherTopics,
+      DatabasePublisherEvent
+    >,
+  ): void {
+    this.publisher.subscribe({ type: 'migrationsSkipped' }, callback)
+  }
+
+  onMigrationsFinished(
+    callback: SubscriberCallback<
+      DatabasePublisherTopics,
+      DatabasePublisherEvent
+    >,
+  ): void {
+    this.publisher.subscribe({ type: 'migrationsFinished' }, callback)
+  }
+
+  onMigrationsFailed(
+    callback: SubscriberCallback<
+      DatabasePublisherTopics,
+      DatabasePublisherEvent
+    >,
+  ): void {
+    this.publisher.subscribe({ type: 'migrationFailed' }, callback)
   }
 }

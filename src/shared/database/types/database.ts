@@ -7,6 +7,7 @@ import type {
   TableSchema,
   WhereBuilderOrRaw,
 } from '@shared/database/types/schema'
+import type { SubscriberCallback } from '@shared/events/publisher'
 
 export const whereBooleanOperators = ['and', 'or'] as const
 export type WhereBooleanOperator = (typeof whereBooleanOperators)[number]
@@ -151,6 +152,16 @@ export interface UpgradeTransaction extends Transaction {
   dropTable(tableName: string): Promise<void>
 }
 
+export type DatabasePublisherTopics = {
+  type:
+    | 'migrationsStarted'
+    | 'migrationsSkipped'
+    | 'migrationsFinished'
+    | 'migrationFailed'
+}
+
+export type DatabasePublisherEvent = {}
+
 export interface Database<TSchema extends DatabaseSchema = {}>
   extends TableFactory {
   readonly isOpen: boolean
@@ -176,6 +187,43 @@ export interface Database<TSchema extends DatabaseSchema = {}>
    * @deprecated will be removed in the future in favor of getting the schema
    */
   getTableNames(): Promise<Array<string>>
+
+  /***
+   * Registers a callback to be called when the migrations are started.
+   */
+  onMigrationsStarted(
+    callback: SubscriberCallback<
+      DatabasePublisherTopics,
+      DatabasePublisherEvent
+    >,
+  ): void
+  /***
+   * Registers a callback to be called when the migrations are skipped.
+   */
+  onMigrationsSkipped(
+    callback: SubscriberCallback<
+      DatabasePublisherTopics,
+      DatabasePublisherEvent
+    >,
+  ): void
+  /***
+   * Registers a callback to be called when the migrations are finished.
+   */
+  onMigrationsFinished(
+    callback: SubscriberCallback<
+      DatabasePublisherTopics,
+      DatabasePublisherEvent
+    >,
+  ): void
+  /***
+   * Registers a callback to be called when a migration fails.
+   */
+  onMigrationsFailed(
+    callback: SubscriberCallback<
+      DatabasePublisherTopics,
+      DatabasePublisherEvent
+    >,
+  ): void
 }
 
 export type MigrationFunction = (
