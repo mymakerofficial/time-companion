@@ -7,7 +7,6 @@ import createKnex from 'knex'
 import { PGlite, type PGliteInterface } from '@electric-sql/pglite'
 import { check, isNotEmpty, isNotNull } from '@shared/lib/utils/checks'
 import { PGLiteDatabaseTransactionAdapter } from '@shared/database/adapters/pglite/transaction'
-import { todo } from '@shared/lib/utils/todo'
 import { PGLiteTableAdapterFactory } from '@shared/database/adapters/pglite/tableFactory'
 import { asArray, firstOf } from '@shared/lib/utils/list'
 import type { MaybePromise } from '@shared/lib/utils/types'
@@ -97,10 +96,6 @@ export class PGLiteDatabaseAdapter
     await (this.db as PGliteInterface).close()
   }
 
-  async deleteDatabase(databaseName: string): Promise<void> {
-    todo()
-  }
-
   protected async getTransaction(
     onCommit?: () => MaybePromise<void>,
     onRollback?: () => MaybePromise<void>,
@@ -148,19 +143,11 @@ export class PGLiteDatabaseAdapter
     }
   }
 
-  getDatabases(): Promise<Array<DatabaseInfo>> {
-    todo()
-  }
-
-  getTableIndexNames(tableName: string): Promise<Array<string>> {
-    todo()
-  }
-
   protected async getAllTables(): Promise<Array<string>> {
     check(isNotNull(this.db), 'Database is not open.')
     check(
       this.knex.client.config.client === 'pg',
-      'Only PostgreSQL is supported.',
+      'Getting all table names is currently only supported in PostgreSQL.',
     )
 
     const res = await this.db.query<{
@@ -178,6 +165,8 @@ export class PGLiteDatabaseAdapter
   }
 
   async getTableNames(): Promise<Array<string>> {
-    return await this.getAllTables()
+    return (await this.getAllTables()).filter(
+      (name) => !name.startsWith('__') && !name.endsWith('__'),
+    )
   }
 }

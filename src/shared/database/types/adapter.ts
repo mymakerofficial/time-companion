@@ -117,21 +117,9 @@ export interface DatabaseAdapter extends TableAdapterFactory {
    * @returns The database info, or `null` if the database does not yet exist.
    */
   getDatabaseInfo(): Promise<Nullable<DatabaseInfo>>
-
   /***
-   * @deprecated will be removed in the future due to not all databases supporting this operation.
-   */
-  deleteDatabase(databaseName: string): Promise<void>
-  /***
-   * @deprecated will be removed in the future due to not all databases supporting this operation.
-   */
-  getDatabases(): Promise<Array<DatabaseInfo>>
-  /***
-   * @deprecated will be removed in the future due to not all databases supporting this operation.
+   * Gets the names of all tables in the database.
+   * @returns The names of all tables in the database.
    */
   getTableNames(): Promise<Array<string>>
-  /***
-   * @deprecated will be removed in the future due to not all databases supporting this operation.
-   */
-  getTableIndexNames(tableName: string): Promise<Array<string>>
 }

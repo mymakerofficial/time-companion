@@ -8,7 +8,6 @@ import type {
 import { IdbDatabaseTransactionAdapter } from '@shared/database/adapters/indexedDB/transaction'
 import { check, isNotNull, isUndefined } from '@shared/lib/utils/checks'
 import { toArray } from '@shared/lib/utils/list'
-import { todo } from '@shared/lib/utils/todo'
 import { IdbTableAdapter } from '@shared/database/adapters/indexedDB/table'
 
 export function indexedDBAdapter(
@@ -127,20 +126,6 @@ export class IdbDatabaseAdapter implements DatabaseAdapter {
     })
   }
 
-  deleteDatabase(databaseName: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const request = this.indexedDB.deleteDatabase(databaseName)
-
-      request.onerror = () => {
-        reject(request.error)
-      }
-
-      request.onsuccess = () => {
-        resolve()
-      }
-    })
-  }
-
   getTable<TData extends object>(tableName: string): TableAdapter<TData> {
     check(isNotNull(this.database), 'Database is not open.')
 
@@ -165,26 +150,11 @@ export class IdbDatabaseAdapter implements DatabaseAdapter {
     return { version: database.version ?? 0 }
   }
 
-  async getDatabases(): Promise<Array<DatabaseInfo>> {
-    const databases = await this.indexedDB.databases()
-
-    return databases
-      .map((it) => ({
-        name: it.name!,
-        version: it.version!,
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name))
-  }
-
   getTableNames(): Promise<Array<string>> {
     return new Promise((resolve) => {
       check(isNotNull(this.database), 'Database is not open.')
 
       resolve(toArray(this.database.objectStoreNames))
     })
-  }
-
-  getTableIndexNames(tableName: string): Promise<Array<string>> {
-    todo()
   }
 }
