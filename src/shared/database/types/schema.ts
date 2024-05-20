@@ -204,20 +204,83 @@ export interface ColumnBuilder<TColumn> {
   _: {
     raw: ColumnDefinitionRaw<any, TColumn>
   }
+  /***
+   * Set the column as the primary key
+   *
+   * **Note:** Only one column can be the primary key
+   */
   primaryKey: () => ColumnBuilder<TColumn>
+  /***
+   * Set the column as nullable
+   */
   nullable: () => ColumnBuilder<Nullable<TColumn>>
+  /***
+   * Create an index on the column
+   */
   indexed: () => ColumnBuilder<TColumn>
+  /***
+   * Create a unique index on the column
+   */
   unique: () => ColumnBuilder<TColumn>
 }
 
 export interface ColumnBuilderFactory {
+  /***
+   * Create a column with the string data type.
+   *
+   * | JavaScript Type | PostgreSQL Type  |
+   * |-----------------|------------------|
+   * | string          | text             |
+   */
   string: () => ColumnBuilder<string>
-  // alias for double
+  /***
+   * Create a column with the number data type.
+   * This is an alias for {@link double}
+   *
+   * | JavaScript Type | PostgreSQL Type  |
+   * |-----------------|------------------|
+   * | number          | double precision |
+   */
   number: () => ColumnBuilder<number>
+  /***
+   * Create a column with the boolean data type.
+   *
+   * | JavaScript Type | PostgreSQL Type |
+   * |-----------------|-----------------|
+   * | boolean         | boolean         |
+   */
   boolean: () => ColumnBuilder<boolean>
+  /***
+   * Create a column with the uuid data type.
+   *
+   * | JavaScript Type | PostgreSQL Type |
+   * |-----------------|-----------------|
+   * | string          | uuid            |
+   */
   uuid: () => ColumnBuilder<string>
+  /***
+   * Create a column with the double data type.
+   *
+   * | JavaScript Type | PostgreSQL Type  |
+   * |-----------------|------------------|
+   * | number          | double precision |
+   */
   double: () => ColumnBuilder<number>
+  /***
+   * Create a column with the integer data type.
+   *
+   * | JavaScript Type | PostgreSQL Type |
+   * |-----------------|-----------------|
+   * | number          | integer         |
+   */
   integer: () => ColumnBuilder<number>
+  /***
+   * Create a column with the json data type.
+   *
+   * | JavaScript Type | PostgreSQL Type |
+   * |-----------------|-----------------|
+   * | object          | json            |
+   */
   json: <T extends object = object>() => ColumnBuilder<T>
 }
 
@@ -248,12 +311,33 @@ export type AlterColumnAction =
   | AlterColumnSetDataTypeAction
 
 export interface AlterColumnBuilder {
+  /***
+   * Set the column as nullable.
+   */
   setNullable: (nullable?: boolean) => AlterColumnBuilder
+  /***
+   * Set the column as not nullable.
+   */
   dropNullable: () => AlterColumnBuilder
+  /***
+   * Create an index on the column.
+   */
   setIndexed: (indexed?: boolean) => AlterColumnBuilder
+  /***
+   * Drop the index on the column.
+   */
   dropIndexed: () => AlterColumnBuilder
+  /***
+   * Create a unique index on the column.
+   */
   setUnique: (unique?: boolean) => AlterColumnBuilder
+  /***
+   * Drop the unique index on the column.
+   */
   dropUnique: () => AlterColumnBuilder
+  /***
+   * Change the data type of the column.
+   */
   setDataType: (dataType: ColumnType) => AlterColumnBuilder
 }
 
@@ -295,10 +379,28 @@ export interface AlterTableBuilder {
   _: {
     actions: Array<AlterTableAction>
   }
+  /***
+   * Rename the table.
+   * This alteration will be applied last.
+   *
+   * **Note:** You should only call this method once.
+   */
   renameTo: (newTableName: string) => void
+  /***
+   * Add a new column to the table.
+   */
   addColumn: (columnName: string) => ColumnBuilderFactory
+  /***
+   * Drop a column from the table.
+   */
   dropColumn: (columnName: string) => void
+  /***
+   * Rename a column.
+   */
   renameColumn: (columnName: string, newColumnName: string) => void
+  /***
+   * Alter a column.
+   */
   alterColumn: (columnName: string) => AlterColumnBuilder
 }
 
