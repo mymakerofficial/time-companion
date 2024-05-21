@@ -47,8 +47,8 @@ It is recommended to use dynamic imports to make sure the migrations are only lo
 
 export default defineConfig({
   schema: {
-    users: usersTable,
-    pets: petsTable,
+    'users': usersTable,
+    'pets': petsTable,
   },
   migrations: [
     () => import('./migrations/001-create-users-table'),
@@ -65,20 +65,20 @@ You can define a table schema using `defineTable` and use the resulting value to
 **Note:** The table schema will not be used to create the table in the database, see [defineTable vs createTable](#definetable-vs-createtable).
 ```ts
 export const usersTable = defineTable<UserEntityDto>('users', {
-  id: uuid().primaryKey(),
-  name: string().indexed().unique(),
-  age: integer(),
-  favouriteColor: string().nullable(),
+  id: t.uuid().primaryKey(),
+  name: t.string().indexed().unique(),
+  age: t.integer(),
+  favouriteColor: t.string().nullable(),
 })
 ```
 
 Passing a generic type to `defineTable` is optional and if not given the row type will automatically be infered.
 ```ts
 const petsTable = defineTable('pets', {
-  id: uuid().primaryKey(),
-  name: string().indexed().unique(),
-  age: integer(),
-  favouriteFood: string().nullable(),
+  id: t.uuid().primaryKey(),
+  name: t.string().indexed().unique(),
+  age: t.integer(),
+  favouriteFood: t.string().nullable(),
 })
 
 expectTypeOf(petsTable).toBe<TableSchema<{
@@ -138,10 +138,10 @@ Returns all rows that match the [where](#filtering) clause or all if no `where` 
 The result can be ordered using the [orderBy](#odering-and-limiting) property. The result will be ordered arbitrarily when no `orderBy` is given.
 ```ts
 database.table(tableSchema).findMany({
-  where?: tableSchema.column.equals('value'),
-  orderBy?: tableSchema.column.direction('asc' | 'desc'),
-  offset?: 10,
-  limit?: 10,
+  where: tableSchema.column.equals('value'),
+  orderBy: tableSchema.column.direction('asc' | 'desc'),
+  offset: 10,
+  limit: 10,
 })
 ```
 
@@ -150,9 +150,9 @@ Alias for `findMany` with `limit: 1`.
 Returns an `object` or `null` when nothing was found.
 ```ts
 database.table(tableSchema).find({
-  where?: tableSchema.column.equals('value'),
-  orderBy?: tableSchema.column.direction('asc' | 'desc'),
-  offset?: 10,
+  where: tableSchema.column.equals('value'),
+  orderBy: tableSchema.column.direction('asc' | 'desc'),
+  offset: 10,
 })
 ```
 
@@ -164,7 +164,7 @@ Returns the updated values.
 ```ts
 database.table(tableSchema).update({
   data: { /* ... */ },
-  where?: tableSchema.column.equals('value'),
+  where: tableSchema.column.equals('value'),
 })
 ```
 
@@ -174,7 +174,7 @@ database.table(tableSchema).update({
 Deletes all rows that match the [where](#filtering) clause or deletes all `when` no where is given.
 ```ts
 database.table(tableSchema).delete({
-  where?: tableSchema.column.equals('value'),
+  where: tableSchema.column.equals('value'),
 })
 ```
 
@@ -317,10 +317,10 @@ Instead, use table names and column names as a string.
 
 export default defineMigration(async (transaction) => {
   await transaction.createTable('users', {
-    id: uuid().primaryKey(),
-    name: string().indexed().unique(),
-    age: integer(),
-    favouriteColor: string().nullable(),
+    id: t.uuid().primaryKey(),
+    name: t.string().indexed().unique(),
+    age: t.integer(),
+    favouriteColor: t.string().nullable(),
   })
 })
 ```
@@ -349,10 +349,10 @@ To understand the difference see [defineTable vs createTable](#definetable-vs-cr
 ```ts
 export default defineMigration(async (transaction) => {
   await transaction.createTable('users', {
-    id: uuid().primaryKey(),
-    name: string().indexed().unique(),
-    age: integer(),
-    favouriteColor: string().nullable(),
+    id: t.uuid().primaryKey(),
+    name: t.string().indexed().unique(),
+    age: t.integer(),
+    favouriteColor: t.string().nullable(),
   })
 })
 ```
