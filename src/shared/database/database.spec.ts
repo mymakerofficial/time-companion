@@ -501,68 +501,6 @@ describe.each([
         })
       })
 
-      describe('leftJoin', () => {
-        it.todo('should find an entity by joined entity id', async () => {
-          const samplePersons = await helpers.insertSamplePersons(6)
-          const samplePets = await helpers.insertSamplePets(3, 1)
-
-          const randomPet = randomElement(samplePets, {
-            safetyOffset: 1,
-          })
-
-          const petId = randomPet.id
-
-          // find the owner of the pet with the random id
-          const owner = await database
-            .table(personsTable)
-            .leftJoin(petsTable, {
-              on: personsTable.id.equals(petsTable.ownerId),
-            })
-            .findFirst({
-              where: petsTable.id.equals(petId),
-            })
-
-          const expectedOwner = samplePersons.find(
-            (person) => person.id === randomPet.ownerId,
-          )
-
-          expect(owner).toEqual(expectedOwner)
-        })
-
-        it.todo('should delete an entity by joined entity id', async () => {
-          const samplePersons = await helpers.insertSamplePersons(6)
-          const samplePets = await helpers.insertSamplePets(3, 1)
-
-          const randomPet = randomElement(samplePets, {
-            safetyOffset: 1,
-          })
-
-          const petId = randomPet.id
-
-          // delete the owner of the pet with the random id
-          await database
-            .table(personsTable)
-            .leftJoin(petsTable, {
-              on: personsTable.id.equals(petsTable.ownerId),
-            })
-            .delete({
-              where: petsTable.id.equals(petId),
-            })
-
-          const owner = samplePersons.find(
-            (person) => person.id === randomPet.ownerId,
-          )!
-
-          const expectedPersons = samplePersons
-            .filter((person) => person.id !== owner.id)
-            .sort(byId)
-
-          const personsInDatabase = await helpers.getAllPersonsInDatabase()
-
-          expect(personsInDatabase.sort(byId)).toEqual(expectedPersons)
-        })
-      })
-
       describe('update', () => {
         it('should update a single entry in a table', async () => {
           const samplePersons = await helpers.insertSamplePersons(6)

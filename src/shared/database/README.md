@@ -234,26 +234,6 @@ usersTable.name.contains('John')
 | isNull              |           | is null                |
 | isNotNull           |           | is not null            |
 
-## Joins
-
-Tables can be joined
-
-### Left Join
-```ts
-database
-  .table(personsTable)
-  .leftJoin(petsTable, {
-    on: personsTable.id.equals(petsTable.ownerId),
-  })
-  .findFirst({
-    where: petsTable.name.equals('Hedwig'),
-  })
-```
-will result in the following SQL statement (when using Postgres)
-```sql
-select "persons".* from "persons" left join "pets" on "persons"."id" = "pets"."ownerId" where ("pets"."name" = 'Hedwig') limit 1
-```
-
 ## Transactions
 
 All operations on the database are done inside a transaction
@@ -443,3 +423,26 @@ export default defineMigration(async (transaction) => {
 `createTable` is used inside a [migration](#migrations-1) to create a table in the database.
 
 You need to both define the [table schema](#table-schema) **and** [create the table](#create-table) in a [migration](#migrations-1).
+
+## Joins
+
+Joins are not supported. You can use multiple queries to achieve the same result.
+
+```ts
+const personsWithPets = await db.withTransaction(async (tx) => {
+  const persons = await tx.table(personsTable).findMany()
+  
+  const personIds = persons.map((person) => person.id)
+  
+  const pets = await tx.table(petsTable).findMany({
+    where: petsTable.ownerId.inArray(personIds),
+  })
+  
+  const petsByOwner: Map<string, PetEntity> = groupBy(pets, 'ownerId')
+  
+  return persons.map((person) => ({
+    ...person,
+    pets: petsByOwner.get(person.id) ?? [],
+  }))
+})
+```

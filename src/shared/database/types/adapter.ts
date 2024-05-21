@@ -60,22 +60,8 @@ export interface QueryableTableAdapter<TRow extends object> {
   insertMany(props: AdapterInsertManyProps<TRow>): Promise<Array<TRow>>
 }
 
-export interface JoinableTableAdapter<TLeftData extends object> {
-  leftJoin<TRightData extends object>(
-    rightTableName: string,
-    leftTableColumn: string,
-    rightTableColumn: string,
-  ): JoinedTableAdapter<TLeftData, TRightData>
-}
-
 export interface TableAdapter<TData extends object>
-  extends QueryableTableAdapter<TData>,
-    JoinableTableAdapter<TData> {}
-
-export interface JoinedTableAdapter<
-  TLeftData extends object,
-  TRightData extends object,
-> extends QueryableTableAdapter<TLeftData> {}
+  extends QueryableTableAdapter<TData> {}
 
 export interface TableAdapterFactory {
   getTable<TData extends object>(tableName: string): TableAdapter<TData>

@@ -24,7 +24,7 @@ export type RawWhere =
 
 export type WhereConditionFactory<TRow extends object, TColumn = unknown> = {
   /***
-   * Check if the column equals the value or another column
+   * Check if the column equals the value
    * @example
    * ```ts
    * db
@@ -33,19 +33,8 @@ export type WhereConditionFactory<TRow extends object, TColumn = unknown> = {
    *    where: usersTable.userName.equals('admin'),
    *  })
    * ```
-   * @example
-   * ```ts
-   * db
-   *  .table(usersTable)
-   *  .leftJoin({
-   *    on: usersTable.id.equals(projectsTable.userId),
-   *  })
-   *  .findMany()
-   * ```
    */
-  equals: (
-    value: TColumn | ColumnDefinition<any, TColumn>,
-  ) => WhereBuilder<TRow, TColumn>
+  equals: (value: TColumn) => WhereBuilder<TRow, TColumn>
   /***
    * Check if the column does not equal the value
    * @example

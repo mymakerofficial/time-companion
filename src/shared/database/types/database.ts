@@ -91,28 +91,7 @@ export interface QueryableTable<TRow extends object> {
   insertMany(props: InsertManyProps<TRow>): Promise<Array<TRow>>
 }
 
-export type LeftJoinProps<TLeftRow extends object, TRightRow extends object> = {
-  on: WhereBuilderOrRaw<TLeftRow | TRightRow>
-}
-
-export interface JoinableTable<TLeftRow extends object> {
-  leftJoin<
-    TRightRow extends object = object,
-    TRightSchema extends TableSchema<TRightRow> = TableSchema<TRightRow>,
-  >(
-    rightTable: TRightSchema | string,
-    props: LeftJoinProps<TLeftRow, InferTable<TRightSchema>>,
-  ): JoinedTable<TLeftRow, InferTable<TRightSchema>>
-}
-
-export interface Table<TRow extends object>
-  extends QueryableTable<TRow>,
-    JoinableTable<TRow> {}
-
-export interface JoinedTable<
-  TLeftData extends object,
-  TRightData extends object,
-> extends QueryableTable<TLeftData> {}
+export interface Table<TRow extends object> extends QueryableTable<TRow> {}
 
 export const columnTypes = [
   'string',
