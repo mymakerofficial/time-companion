@@ -1,10 +1,11 @@
 import type { ProjectService } from '@shared/service/projectService'
+import type { TaskService } from '@shared/service/taskService'
+import type { ProjectDto, ProjectEntityDto } from '@shared/model/project'
+import { faker } from '@faker-js/faker'
 import {
   randomElement,
   type RandomElementOptions,
 } from '@shared/lib/utils/random'
-import type { TaskService } from '@shared/service/taskService'
-import type { ProjectDto } from '@shared/model/project'
 
 export class ProjectTestHelpers {
   constructor(
@@ -12,67 +13,43 @@ export class ProjectTestHelpers {
     private readonly projectService: ProjectService,
   ) {}
 
-  async getExistingProjects() {
-    return await this.projectService.getProjects()
+  sampleProject(override: Partial<ProjectDto> = {}): ProjectDto {
+    return {
+      displayName: faker.company.name(),
+      color: faker.color.human(),
+      isBillable: faker.datatype.boolean(),
+      ...override,
+    }
   }
 
-  async getRandomExistingProject(options?: RandomElementOptions) {
-    return randomElement(await this.getExistingProjects(), options)
+  sampleProjects(
+    amount: number,
+    override: Partial<ProjectDto> = {},
+  ): Array<ProjectDto> {
+    return Array.from({ length: amount }, () => this.sampleProject(override))
   }
 
-  async getExistingProjectsWithTasks() {
-    const projects = await this.projectService.getProjects()
-    const tasks = await this.taskService.getTasks()
+  async createSampleProjects(
+    amount = 6,
+    override: Partial<ProjectDto> = {},
+  ): Promise<Array<ProjectDto>> {
+    const sampleProjects = this.sampleProjects(amount, override)
 
-    return projects.filter((project) =>
-      tasks.some((task) => task.projectId === project.id),
-    )
-  }
-
-  async getRandomExistingProjectWithTasks(options?: RandomElementOptions) {
-    return randomElement(await this.getExistingProjectsWithTasks(), options)
-  }
-
-  async getExistingProjectsWithoutTasks() {
-    const projects = await this.projectService.getProjects()
-    const tasks = await this.taskService.getTasks()
-
-    return projects.filter(
-      (project) => !tasks.some((task) => task.projectId === project.id),
-    )
-  }
-
-  async getRandomExistingProjectWithoutTasks(options?: RandomElementOptions) {
-    return randomElement(await this.getExistingProjectsWithoutTasks(), options)
-  }
-
-  async getSampleProjects() {
-    const sampleProjects: ReadonlyArray<ProjectDto> = [
-      { displayName: 'Taking over the world', color: 'blue', isBillable: true },
-      { displayName: 'Eating some cheese', color: 'yellow', isBillable: true },
-      { displayName: 'Break', color: 'green', isBillable: false },
-    ]
+    for (const sampleProject of sampleProjects) {
+      await this.projectService.createProject(sampleProject)
+    }
 
     return sampleProjects
   }
 
-  getExpectedProjectsLength() {
-    return 3
+  async getAllProjects(): Promise<ReadonlyArray<ProjectEntityDto>> {
+    return await this.projectService.getProjects()
   }
 
-  async getSortedSampleProjects() {
-    const sampleProjects = await this.getSampleProjects()
-
-    return [...sampleProjects].sort((a, b) =>
-      a.displayName.localeCompare(b.displayName),
-    )
-  }
-
-  async createSampleProjects() {
-    const sampleProjects = await this.getSampleProjects()
-
-    for (const project of sampleProjects) {
-      await this.projectService.createProject(project)
-    }
+  async getRandomExistingProject(
+    options?: RandomElementOptions,
+  ): Promise<ProjectEntityDto> {
+    const projects = await this.getAllProjects()
+    return randomElement(projects, options)
   }
 }

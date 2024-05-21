@@ -1,9 +1,9 @@
 import { type ProjectEntityDto, projectsTable } from '@shared/model/project'
-import type { Database, Transaction } from '@shared/database/types/database'
-import { type TaskEntityDto, tasksTable } from '@shared/model/task'
+import type { Database } from '@shared/database/types/database'
 import { asyncGetOrThrow } from '@shared/lib/utils/result'
 import { check, isNotEmpty, isNotNull } from '@shared/lib/utils/checks'
 import { firstOf } from '@shared/lib/utils/list'
+import { todo } from '@shared/lib/utils/todo'
 
 export interface ProjectPersistenceDependencies {
   database: Database
@@ -34,7 +34,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
 
   async getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>> {
     return await this.database.table(projectsTable).findMany({
-      where: projectsTable.deletedAt.isNotNull(),
+      where: projectsTable.deletedAt.isNull(),
       orderBy: projectsTable.displayName.asc(),
     })
   }
@@ -69,20 +69,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   async getProjectByTaskId(
     taskId: string,
   ): Promise<Readonly<ProjectEntityDto>> {
-    const res = await this.database
-      .table(projectsTable)
-      .leftJoin(tasksTable, {
-        on: projectsTable.id.equals(tasksTable.projectId),
-      })
-      .findFirst({
-        where: tasksTable.id
-          .equals(taskId)
-          .and(projectsTable.deletedAt.isNull()),
-      })
-
-    check(isNotNull(res), `Project with taskId "${taskId}" not found.`)
-
-    return res
+    todo()
   }
 
   async createProject(

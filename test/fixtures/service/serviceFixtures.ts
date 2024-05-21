@@ -13,39 +13,27 @@ import { createFixtures } from '@test/helpers/createFixtures'
 import { ProjectTestHelpers } from '@test/fixtures/service/projectTestHelpers'
 import { TaskTestHelpers } from '@test/fixtures/service/taskTestHelpers'
 import { createDatabase } from '@shared/database/factory/database'
-import { projectsTable } from '@shared/model/project'
-import { tasksTable } from '@shared/model/task'
 import { indexedDBAdapter } from '@shared/database/adapters/indexedDB/database'
 import fakeIndexedDB from 'fake-indexeddb'
+import config from '@shared/database.config'
+import { ServiceTestHelpers } from '@test/fixtures/service/serviceTestHelpers'
 
 export interface ServiceFixtures {
   database: Database
-  databaseHelpers: {
-    setup: () => Promise<void>
-    teardown: () => Promise<void>
-  }
   taskService: TaskService
   projectService: ProjectService
+  serviceHelpers: ServiceTestHelpers
   projectHelpers: ProjectTestHelpers
   taskHelpers: TaskTestHelpers
 }
 
 export const useServiceFixtures = createFixtures<ServiceFixtures>({
   database: () => {
-    return createDatabase(indexedDBAdapter(fakeIndexedDB))
+    return createDatabase(
+      indexedDBAdapter('services-test-db', fakeIndexedDB),
+      config,
+    )
   },
-  databaseHelpers: ({ database }) => ({
-    setup: async () => {
-      return await database.open('services-test-db', 1, async (transaction) => {
-        await transaction.createTable(projectsTable)
-        await transaction.createTable(tasksTable)
-      })
-    },
-    teardown: async () => {
-      await database.close()
-      await database.delete('services-test-db')
-    },
-  }),
   taskService: ({ database }) => {
     return createTaskService({
       taskPersistence: createTaskPersistence({
@@ -63,6 +51,9 @@ export const useServiceFixtures = createFixtures<ServiceFixtures>({
       }),
       taskService: taskService,
     })
+  },
+  serviceHelpers: ({ database }) => {
+    return new ServiceTestHelpers(database)
   },
   projectHelpers: ({ taskService, projectService }) => {
     return new ProjectTestHelpers(taskService, projectService)

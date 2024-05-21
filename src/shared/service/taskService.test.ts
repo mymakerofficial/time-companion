@@ -15,7 +15,7 @@ import { useServiceFixtures } from '@test/fixtures/service/serviceFixtures'
 
 describe.skip('taskService', () => {
   const {
-    databaseHelpers,
+    serviceHelpers,
     taskService,
     projectService,
     taskHelpers,
@@ -25,13 +25,13 @@ describe.skip('taskService', () => {
   const subscriber = vi.fn()
 
   beforeAll(async () => {
-    await databaseHelpers.setup()
+    await serviceHelpers.setup()
     await projectHelpers.createSampleProjects()
     taskService.subscribe({}, subscriber)
   })
 
   afterAll(async () => {
-    await databaseHelpers.teardown()
+    await serviceHelpers.teardown()
     taskService.unsubscribe({}, subscriber)
   })
 
