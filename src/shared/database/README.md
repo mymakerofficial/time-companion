@@ -65,20 +65,20 @@ You can define a table schema using `defineTable` and use the resulting value to
 **Note:** The table schema will not be used to create the table in the database, see [defineTable vs createTable](#definetable-vs-createtable).
 ```ts
 export const usersTable = defineTable<UserEntityDto>('users', {
-  id: t.uuid().primaryKey(),
-  name: t.string().indexed().unique(),
-  age: t.integer(),
-  favouriteColor: t.string().nullable(),
+  id: c.uuid().primaryKey(),
+  name: c.string().indexed().unique(),
+  age: c.integer(),
+  favouriteColor: c.string().nullable(),
 })
 ```
 
 Passing a generic type to `defineTable` is optional and if not given the row type will automatically be infered.
 ```ts
 const petsTable = defineTable('pets', {
-  id: t.uuid().primaryKey(),
-  name: t.string().indexed().unique(),
-  age: t.integer(),
-  favouriteFood: t.string().nullable(),
+  id: c.uuid().primaryKey(),
+  name: c.string().indexed().unique(),
+  age: c.integer(),
+  favouriteFood: c.string().nullable(),
 })
 
 expectTypeOf(petsTable).toBe<TableSchema<{
@@ -89,17 +89,58 @@ expectTypeOf(petsTable).toBe<TableSchema<{
 }>>()
 ```
 
+## Column building
+
+We provide a fluent API to build columns using the `c` object.
+
+The `c` object can be used to define columns in a [table schema](#table-schema)
+or to reference columns if you can't use a [table schema](#table-schema) directly (e.g. in a [migration](#migrations-1)).
+
+```ts
+const myTableSchema = defineTable('myTable', {
+  myColumn: c.string().nullable()
+})
+
+myTableSchema.myColumn
+
+// is the same as
+
+const myColumn = c('myColumn').string().nullable()
+```
+```ts
+database.table(myTableSchema).findMany({
+  where: myTableSchema.myColumn.equals('value')
+})
+
+// is the same as
+
+database.table('myTable').findMany({
+  where: c('myColumn').equals('value')
+  // you can also use c('myColumn').string().equals('value') to specify the type
+})
+```
+*learn more about how .equals works in the [filtering section](#filtering)*
+
 ### Column Types
 
-| Method  | JS Type | PostgreSQL Type  | Notes                  |
-|---------|---------|------------------|------------------------|
-| string  | string  | text             |                        |
-| number  | number  | double precision | shorthand for `double` |
-| boolean | boolean | boolean          |                        |
-| uuid    | string  | uuid             |                        |
-| double  | number  | double precision |                        |
-| integer | number  | integer          |                        |
-| json    | object  | json             |                        |
+| Method        | JS Type | PostgreSQL Type  | Notes                |
+|---------------|---------|------------------|----------------------|
+| `c.string()`  | string  | text             |                      |
+| `c.number()`  | number  | double precision | alias for `double()` |
+| `c.boolean()` | boolean | boolean          |                      |
+| `c.uuid()`    | string  | uuid             |                      |
+| `c.double()`  | number  | double precision |                      |
+| `c.integer()` | number  | integer          |                      |
+| `c.json()`    | object  | json             |                      |
+
+### Column Modifiers
+
+| Method                  | Description                               |
+|-------------------------|-------------------------------------------|
+| `c.type().primaryKey()` | sets the column as the primary key        |
+| `c.type().indexed()`    | creates an index on the column            |
+| `c.type().unique()`     | creates a unique constraint on the column |
+| `c.type().nullable()`   | allows the column to be null              |
 
 ## Table Operations
 
@@ -189,20 +230,20 @@ database.table(tableSchema).deleteAll()
 You can order, limit and offset the results of a query.
 **It is currently only possible to order by an indexed column.**
 
+You use a [column definition](#column-building) to specify the column to order by.
+
 ```ts
-const res = await database.table(usersTable).findMany({
-  // we can order the results
+  const res = await database.table(usersTable).findMany({
   orderBy: usersTable.name.asc(),
-  // we can limit the results
   limit: 10,
-  // we can offset the results
   offset: 10,
 })
 ```
 
+
 ### Filtering
 
-You can define complex filters using the `where` property.
+You can define complex filters using a [column definition](#column-building) and the available filter methods.
 
 ```ts
 usersTable.name.contains('John')
@@ -219,20 +260,20 @@ usersTable.name.contains('John')
 
 #### Available filter methods
 
-| Method              | Shorthand | Description            |
-|---------------------|-----------|------------------------|
-| equals              | eq        | equals                 |
-| notEquals           | neq       | not equals             |
-| greaterThan         | gt        | greater than           |
-| greaterThanOrEquals | gte       | greater than or equals |
-| lessThan            | lt        | less than              |
-| lessThanOrEquals    | lte       | less than or equals    |
-| inArray             | in        | in array               |
-| notInArray          | notIn     | not in array           |
-| contains            |           | contains               |
-| notContains         |           | not contains           |
-| isNull              |           | is null                |
-| isNotNull           |           | is not null            |
+| Method                | Shorthand | Description            |
+|-----------------------|-----------|------------------------|
+| `equals`              | eq        | equals                 |
+| `notEquals`           | neq       | not equals             |
+| `greaterThan`         | gt        | greater than           |
+| `greaterThanOrEquals` | gte       | greater than or equals |
+| `lessThan`            | lt        | less than              |
+| `lessThanOrEquals`    | lte       | less than or equals    |
+| `inArray`             | in        | in array               |
+| `notInArray`          | notIn     | not in array           |
+| `contains`            |           | contains               |
+| `notContains`         |           | not contains           |
+| `isNull`              |           | is null                |
+| `isNotNull`           |           | is not null            |
 
 ## Transactions
 
@@ -297,10 +338,10 @@ Instead, use table names and column names as a string.
 
 export default defineMigration(async (transaction) => {
   await transaction.createTable('users', {
-    id: t.uuid().primaryKey(),
-    name: t.string().indexed().unique(),
-    age: t.integer(),
-    favouriteColor: t.string().nullable(),
+    id: c.uuid().primaryKey(),
+    name: c.string().indexed().unique(),
+    age: c.integer(),
+    favouriteColor: c.string().nullable(),
   })
 })
 ```
@@ -315,7 +356,7 @@ export default defineMigration(async (transaction) => {
       data: {
         name: user.name.toUpperCase(),
       },
-      where: c('users', 'id').equals(user.id),
+      where: c('id').equals(user.id),
     })
   }
 })
@@ -329,10 +370,10 @@ To understand the difference see [defineTable vs createTable](#definetable-vs-cr
 ```ts
 export default defineMigration(async (transaction) => {
   await transaction.createTable('users', {
-    id: t.uuid().primaryKey(),
-    name: t.string().indexed().unique(),
-    age: t.integer(),
-    favouriteColor: t.string().nullable(),
+    id: c.uuid().primaryKey(),
+    name: c.string().indexed().unique(),
+    age: c.integer(),
+    favouriteColor: c.string().nullable(),
   })
 })
 ```

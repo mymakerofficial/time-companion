@@ -23,7 +23,7 @@ import type {
   Database,
   UpgradeTransaction,
 } from '@shared/database/types/database'
-import { t } from '@shared/database/schema/columnBuilder'
+import { c, t } from '@shared/database/schema/columnBuilder'
 import 'fake-indexeddb/auto'
 
 function byId(a: HasId, b: HasId) {
@@ -32,6 +32,10 @@ function byId(a: HasId, b: HasId) {
 
 function byFirstName(a: Person, b: Person) {
   return a.firstName.localeCompare(b.firstName)
+}
+
+function byAge(a: Person, b: Person) {
+  return b.age - a.age
 }
 
 describe.each([
@@ -665,6 +669,37 @@ describe.each([
 
           expect(personsInDatabase).toHaveLength(0)
         })
+      })
+    })
+
+    describe('complex query building', () => {
+      it('should work without using a table schema', async () => {
+        await helpers.insertSamplePersons(6, {
+          firstName: 'NotJohn',
+        })
+        // TODO make this inserting not so awful
+        const johns = await Promise.all([
+          await helpers.insertSamplePerson({
+            firstName: 'John',
+            age: 30,
+          }),
+          await helpers.insertSamplePerson({
+            firstName: 'John',
+            age: 20,
+          }),
+          await helpers.insertSamplePerson({
+            firstName: 'John',
+            age: 10,
+          }),
+        ])
+
+        const res = await database.table<Person>('persons').findMany({
+          where: c('firstName').string().equals('John'),
+          orderBy: c('age').asc(),
+          limit: 3,
+        })
+
+        expect(res.sort(byAge)).toEqual(johns)
       })
     })
   })

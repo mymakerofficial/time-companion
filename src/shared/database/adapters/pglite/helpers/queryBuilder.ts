@@ -1,8 +1,9 @@
 import type { AdapterBaseQueryProps } from '@shared/database/types/adapter'
 import type { Knex } from 'knex'
-import { isPresent } from '@shared/lib/utils/checks'
+import { check, isNotNull, isNull, isPresent } from '@shared/lib/utils/checks'
 import type { RawWhere } from '@shared/database/types/schema'
 import { genericOperatorToPgOperator } from '@shared/database/adapters/pglite/helpers/genericOperatorToPgOperator'
+import type { Nullable } from '@shared/lib/utils/types'
 
 export function buildQuery(
   knex: Knex,
@@ -25,7 +26,7 @@ export function buildQuery(
 
   if (isPresent(props.orderByTable) && isPresent(props.orderByColumn)) {
     builder.orderBy(
-      `${props.orderByTable}.${props.orderByColumn}`,
+      getColumnAccessor(props.orderByTable, props.orderByColumn),
       props.oderByDirection,
     )
   }
@@ -39,7 +40,7 @@ export function buildWhere(
   return (builder) => {
     if (where.type === 'condition') {
       builder.where(
-        `${where.column.tableName}.${where.column.columnName}`,
+        getColumnAccessor(where.column.tableName, where.column.columnName),
         genericOperatorToPgOperator(where.operator),
         where.value,
       )
@@ -55,4 +56,17 @@ export function buildWhere(
       })
     }
   }
+}
+
+function getColumnAccessor(
+  tableName: Nullable<string>,
+  columnName: Nullable<string>,
+) {
+  check(isNotNull(columnName), 'Column must have a column name')
+
+  if (isNull(tableName)) {
+    return columnName
+  }
+
+  return `${tableName}.${columnName}`
 }

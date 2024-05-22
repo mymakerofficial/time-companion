@@ -4,7 +4,7 @@ import type {
   ColumnDefinitionRaw,
   TableSchema,
 } from '@shared/database/types/schema'
-import { check, isDefined } from '@shared/lib/utils/checks'
+import { check, isDefined, isNull } from '@shared/lib/utils/checks'
 import { createTableSchema } from '@shared/database/schema/tableSchema'
 
 export function defineTable<TRow extends object>(
@@ -15,6 +15,15 @@ export function defineTable<TRow extends object>(
 ): TableSchema<TRow> {
   const columnsRaw = entriesOf(columns).reduce(
     (acc, [columnName, column]) => {
+      check(
+        isNull(column._.raw.tableName),
+        'Column definition may not have a table name',
+      )
+      check(
+        isNull(column._.raw.columnName),
+        'Setting a separate column name is not yet supported in defineTable',
+      )
+
       acc[columnName] = {
         ...column._.raw,
         tableName,
@@ -34,7 +43,7 @@ export function defineTable<TRow extends object>(
 
   return createTableSchema<TRow>({
     tableName,
-    primaryKey: primaryKey.columnName,
+    primaryKey: primaryKey.columnName!, // we know it has a column name because if it didn't we set it above
     columns: columnsRaw,
   })
 }

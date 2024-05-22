@@ -15,11 +15,11 @@ import {
 export class ColumnDefinitionImpl<TRow extends object, TColumn = unknown>
   implements ColumnDefinition<TRow, TColumn>
 {
-  constructor(protected rawDefinition: ColumnDefinitionRaw<TRow, TColumn>) {}
+  constructor(protected definition: ColumnDefinitionRaw<TRow, TColumn>) {}
 
   get _() {
     return {
-      raw: this.rawDefinition,
+      raw: this.definition,
     }
   }
 
@@ -27,12 +27,12 @@ export class ColumnDefinitionImpl<TRow extends object, TColumn = unknown>
     operator: WhereOperator,
     value?: unknown,
   ): WhereBuilder<TRow, TColumn> {
-    return new WhereConditionBuilderImpl(this.rawDefinition, operator, value)
+    return new WhereConditionBuilderImpl(this.definition, operator, value)
   }
 
   direction(direction: OrderByDirection): OrderBy<TRow, TColumn> {
     return {
-      column: this.rawDefinition,
+      column: this.definition,
       direction,
     }
   }

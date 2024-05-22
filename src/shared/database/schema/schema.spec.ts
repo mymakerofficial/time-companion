@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { number, string, t } from '@shared/database/schema/columnBuilder'
+import { c, string, t } from '@shared/database/schema/columnBuilder'
 import { defineTable } from '@shared/database/schema/defineTable'
 import { orderDirections } from '@shared/database/types/database'
 
@@ -7,8 +7,8 @@ describe('schema', () => {
   describe('columnBuilder', () => {
     it('should build a column', () => {
       expect(t.string().primaryKey()._.raw).toEqual({
-        tableName: '',
-        columnName: '',
+        tableName: null,
+        columnName: null,
         dataType: 'string',
         isPrimaryKey: true,
         isNullable: false,
@@ -18,20 +18,33 @@ describe('schema', () => {
     })
   })
 
+  describe('magic', () => {
+    it('should result in a correct builder', () => {
+      const res = c('foo', 'bar').string().nullable().equals('baz')
+
+      expect(res).toEqual({
+        column: {
+          tableName: 'foo',
+          columnName: 'bar',
+          dataType: 'string',
+          isPrimaryKey: false,
+          isNullable: true,
+          isIndexed: false,
+          isUnique: false,
+        },
+        operator: 'equals',
+        value: 'baz',
+      })
+    })
+  })
+
   describe('defineTable', () => {
     it('should define a table', () => {
       const foo = defineTable('foo', {
-        id: string().primaryKey(),
-        name: string().indexed(),
-        color: string().nullable(),
+        id: c.uuid().primaryKey(),
+        name: c.string().indexed(),
+        karma: c.integer().nullable(),
       })
-
-      const bar = defineTable('bar', {
-        id: string().primaryKey(),
-        number: number(),
-      })
-
-      const where = foo.name.equals('foo').and(bar.number.equals(12))
 
       expect(foo._.raw).toEqual({
         tableName: 'foo',
@@ -40,7 +53,7 @@ describe('schema', () => {
           id: {
             tableName: 'foo',
             columnName: 'id',
-            dataType: 'string',
+            dataType: 'uuid',
             isPrimaryKey: true,
             isNullable: false,
             isIndexed: false,
@@ -55,10 +68,10 @@ describe('schema', () => {
             isIndexed: true,
             isUnique: false,
           },
-          color: {
+          karma: {
             tableName: 'foo',
-            columnName: 'color',
-            dataType: 'string',
+            columnName: 'karma',
+            dataType: 'integer',
             isPrimaryKey: false,
             isNullable: true,
             isIndexed: false,

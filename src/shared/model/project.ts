@@ -4,7 +4,7 @@ import type { HasModifiedAt } from '@shared/model/helpers/hasModifiedAt'
 import type { HasDeletedAt } from '@shared/model/helpers/hasDeletedAt'
 import type { Nullable } from '@shared/lib/utils/types'
 import { defineTable } from '@shared/database/schema/defineTable'
-import { boolean, string, uuid } from '@shared/database/schema/columnBuilder'
+import { c } from '@shared/database/schema/columnBuilder'
 
 export type ProjectDto = {
   displayName: string
@@ -21,11 +21,11 @@ export type ProjectEntityDao = ProjectDto & {
 }
 
 export const projectsTable = defineTable<ProjectEntityDto>('projects', {
-  id: uuid().primaryKey(),
-  displayName: string().indexed(),
-  color: string().nullable(),
-  isBillable: boolean(),
-  createdAt: string(),
-  modifiedAt: string().nullable(),
-  deletedAt: string().nullable(),
+  id: c.uuid().primaryKey(),
+  displayName: c.string().indexed(),
+  color: c.string().nullable(),
+  isBillable: c.boolean(),
+  createdAt: c.string(),
+  modifiedAt: c.string().nullable(),
+  deletedAt: c.string().nullable(),
 })

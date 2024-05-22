@@ -9,7 +9,7 @@ import type {
 import { genericTypeToPgType } from '@shared/database/adapters/pglite/helpers/genericTypeToPgType'
 import { valuesOf } from '@shared/lib/utils/object'
 import type { Optional } from '@shared/lib/utils/types'
-import { isDefined } from '@shared/lib/utils/checks'
+import { check, isDefined, isNotNull } from '@shared/lib/utils/checks'
 
 export function buildCreateTable(knex: Knex, schema: TableSchemaRaw) {
   return knex.schema.createTable(schema.tableName, (tableBuilder) => {
@@ -97,6 +97,16 @@ function buildColumn(
   tableBuilder: Knex.CreateTableBuilder,
   columnDefinition: ColumnDefinitionRaw,
 ) {
+  check(
+    isNotNull(columnDefinition.columnName),
+    'Column must have a column name to be created',
+  )
+
+  check(
+    isNotNull(columnDefinition.dataType),
+    'Column must have a data type to be created',
+  )
+
   const columnBuilder = tableBuilder.specificType(
     columnDefinition.columnName,
     genericTypeToPgType(columnDefinition.dataType),

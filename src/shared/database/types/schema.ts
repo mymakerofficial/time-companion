@@ -169,9 +169,9 @@ export type ColumnDefinitionRaw<
   TRow extends object = object,
   TColumn = unknown,
 > = {
-  tableName: string
-  columnName: string
-  dataType: ColumnType
+  tableName: Nullable<string>
+  columnName: Nullable<string>
+  dataType: Nullable<ColumnType>
   isPrimaryKey: boolean
   isNullable: boolean
   isIndexed: boolean
@@ -184,36 +184,33 @@ export type ColumnDefinitionBase<TRow extends object, TColumn = unknown> = {
   }
 } & OrderByColumnFactory<TRow, TColumn>
 
-export type ColumnDefinition<
-  TRow extends object,
-  TColumn = unknown,
-> = ColumnDefinitionBase<TRow, TColumn> & WhereConditionFactory<TRow, TColumn>
+export interface ColumnDefinition<TRow extends object, TColumn = unknown>
+  extends ColumnDefinitionBase<TRow, TColumn>,
+    WhereConditionFactory<TRow, TColumn> {}
 
-export interface ColumnBuilder<TColumn> {
-  _: {
-    raw: ColumnDefinitionRaw<any, TColumn>
-  }
+export interface ColumnBuilder<TColumn, TRow extends object = object>
+  extends ColumnDefinition<TRow, TColumn> {
   /***
    * Set the column as the primary key
    *
    * **Note:** Only one column can be the primary key
    */
-  primaryKey: () => ColumnBuilder<TColumn>
+  primaryKey: () => ColumnBuilder<TColumn, TRow>
   /***
    * Set the column as nullable
    */
-  nullable: () => ColumnBuilder<Nullable<TColumn>>
+  nullable: () => ColumnBuilder<Nullable<TColumn>, TRow>
   /***
    * Create an index on the column
    */
-  indexed: () => ColumnBuilder<TColumn>
+  indexed: () => ColumnBuilder<TColumn, TRow>
   /***
    * Create a unique index on the column
    */
-  unique: () => ColumnBuilder<TColumn>
+  unique: () => ColumnBuilder<TColumn, TRow>
 }
 
-export interface ColumnBuilderFactory {
+export interface ColumnBuilderFactoryBase<TRow extends object = object> {
   /***
    * Create a column with the string data type.
    *
@@ -221,7 +218,7 @@ export interface ColumnBuilderFactory {
    * |-----------------|------------------|
    * | string          | text             |
    */
-  string: () => ColumnBuilder<string>
+  string: () => ColumnBuilder<string, TRow>
   /***
    * Create a column with the number data type.
    * This is an alias for {@link double}
@@ -230,7 +227,7 @@ export interface ColumnBuilderFactory {
    * |-----------------|------------------|
    * | number          | double precision |
    */
-  number: () => ColumnBuilder<number>
+  number: () => ColumnBuilder<number, TRow>
   /***
    * Create a column with the boolean data type.
    *
@@ -238,7 +235,7 @@ export interface ColumnBuilderFactory {
    * |-----------------|-----------------|
    * | boolean         | boolean         |
    */
-  boolean: () => ColumnBuilder<boolean>
+  boolean: () => ColumnBuilder<boolean, TRow>
   /***
    * Create a column with the uuid data type.
    *
@@ -246,7 +243,7 @@ export interface ColumnBuilderFactory {
    * |-----------------|-----------------|
    * | string          | uuid            |
    */
-  uuid: () => ColumnBuilder<string>
+  uuid: () => ColumnBuilder<string, TRow>
   /***
    * Create a column with the double data type.
    *
@@ -254,7 +251,7 @@ export interface ColumnBuilderFactory {
    * |-----------------|------------------|
    * | number          | double precision |
    */
-  double: () => ColumnBuilder<number>
+  double: () => ColumnBuilder<number, TRow>
   /***
    * Create a column with the integer data type.
    *
@@ -262,7 +259,7 @@ export interface ColumnBuilderFactory {
    * |-----------------|-----------------|
    * | number          | integer         |
    */
-  integer: () => ColumnBuilder<number>
+  integer: () => ColumnBuilder<number, TRow>
   /***
    * Create a column with the json data type.
    *
@@ -270,8 +267,42 @@ export interface ColumnBuilderFactory {
    * |-----------------|-----------------|
    * | object          | json            |
    */
-  json: <T extends object = object>() => ColumnBuilder<T>
+  json: <T extends object = object>() => ColumnBuilder<T, TRow>
 }
+
+export type MagicColumnBuilder = {
+  /***
+   * Create a column definition with an explicit column name.
+   *
+   * Can be used to generate a where condition without a table schema.
+   * @example
+   * ```ts
+   * tx.table('users').findMany({
+   *  where: c('name').equals('admin'),
+   * })
+   * ```
+   */
+  (columnName: string): ColumnBuilderFactory
+  /***
+   * Create a column definition for a column on a table.
+   *
+   * Can be used to generate a where condition without a table schema.
+   * @example
+   * ```ts
+   * tx.table('users').findMany({
+   *  where: c('users', 'name').equals('admin'),
+   * })
+   * ```
+   */
+  <TRow extends object>(
+    tableName: string,
+    columnName: string,
+  ): ColumnBuilderFactory<TRow>
+} & ColumnBuilderFactoryBase
+
+export interface ColumnBuilderFactory<TRow extends object = object>
+  extends ColumnBuilderFactoryBase<TRow>,
+    ColumnDefinition<TRow> {}
 
 export type AlterColumnSetNullableAction = {
   type: 'setNullable'

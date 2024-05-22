@@ -18,7 +18,7 @@ export class AlterTableBuilderImpl implements AlterTableBuilder {
   }
 
   addColumn(columnName: string): ColumnBuilderFactory {
-    return new ColumnBuilderFactoryImpl(columnName, (definition) => {
+    return new ColumnBuilderFactoryImpl({ columnName }, (definition) => {
       // remove previous addColumn action for this column if exists
       this._actions = this._actions.filter(
         (action) =>

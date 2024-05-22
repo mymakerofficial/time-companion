@@ -11,20 +11,36 @@ import { personsTable, petsTable } from '@test/fixtures/database/schema'
 export class DatabaseTestHelpers {
   constructor(private readonly database: Database) {}
 
-  samplePersons(amount: number): Array<Person> {
-    return Array.from({ length: amount }, () => ({
+  samplePerson(override: Partial<Person> = {}): Person {
+    return {
       id: uuid(),
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
       username: faker.internet.userName(),
       gender: faker.person.gender(),
       age: faker.number.int({ min: 18, max: 100 }),
-    }))
+      ...override,
+    }
+  }
+
+  samplePersons(amount: number, override: Partial<Person> = {}): Array<Person> {
+    return Array.from({ length: amount }, () => this.samplePerson(override))
+  }
+
+  samplePet(override: Partial<Pet> = {}): Pet {
+    return {
+      id: uuid(),
+      name: faker.person.firstName(),
+      age: faker.number.int({ min: 1, max: 20 }),
+      ownerId: uuid(),
+      ...override,
+    }
   }
 
   async samplePets(
     personsAmount: number,
     amountPerPerson: number,
+    override: Partial<Pet> = {},
   ): Promise<Array<Pet>> {
     const persons = await this.getAllPersonsInDatabase()
 
@@ -37,27 +53,13 @@ export class DatabaseTestHelpers {
     const randomPersons = randomElements(persons, personsAmount)
 
     return randomPersons.flatMap((person) =>
-      Array.from({ length: amountPerPerson }, () => ({
-        id: uuid(),
-        name: faker.person.firstName(),
-        age: faker.number.int({ min: 1, max: 20 }),
-        ownerId: person.id,
-      })),
+      Array.from({ length: amountPerPerson }, () =>
+        this.samplePet({
+          ownerId: person.id,
+          ...override,
+        }),
+      ),
     )
-  }
-
-  samplePerson(override: Partial<Person> = {}): Person {
-    return {
-      ...firstOf(this.samplePersons(1))!,
-      ...override,
-    }
-  }
-
-  async samplePet(override: Partial<Pet> = {}): Promise<Pet> {
-    return {
-      ...firstOf(await this.samplePets(1, 1))!,
-      ...override,
-    }
   }
 
   async insertPersons(persons: Array<Person>): Promise<Array<Person>> {
@@ -76,19 +78,35 @@ export class DatabaseTestHelpers {
     })
   }
 
-  async insertSamplePersons(amount: number): Promise<Array<Person>> {
-    const persons = this.samplePersons(amount)
+  async insertSamplePersons(
+    amount: number,
+    override: Partial<Person> = {},
+  ): Promise<Array<Person>> {
+    const persons = this.samplePersons(amount, override)
 
     return await this.insertPersons(persons)
+  }
+
+  async insertSamplePerson(override: Partial<Person> = {}): Promise<Person> {
+    const person = this.samplePerson(override)
+
+    return firstOf(await this.insertPersons([person]))
   }
 
   async insertSamplePets(
     personsAmount: number,
     amountPerPerson: number,
+    override: Partial<Pet> = {},
   ): Promise<Array<Pet>> {
-    const pets = await this.samplePets(personsAmount, amountPerPerson)
+    const pets = await this.samplePets(personsAmount, amountPerPerson, override)
 
     return await this.insertPets(pets)
+  }
+
+  async insertSamplePet(override: Partial<Pet> = {}): Promise<Pet> {
+    const pet = this.samplePet(override)
+
+    return firstOf(await this.insertPets([pet]))
   }
 
   async getAllPersonsInDatabase(): Promise<Array<Person>> {
