@@ -1,5 +1,9 @@
 # Database
 
+We use a custom build database interface to reuse the same code for accessing SQL databases like PostgreSQL and IndexedDB in the browser.
+
+Its build to make IndexedDB behave more like a traditional relational database, make migrations work across environments and query building easy.
+
 ## Database Connection
 
 ### Creating an Adapter Instance
@@ -27,7 +31,7 @@ If you are using an in memory database, all data will be lost when the database 
 await database.close()
 ```
 
-### Config
+## Config
 
 To create a database instance you need to pass a config object.
 You can just pass the config object directly or in a separate file.
