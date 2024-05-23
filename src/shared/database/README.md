@@ -329,7 +329,7 @@ You can [create tables](#create-table), [alter tables](#alter-table), [drop tabl
 
 **Note:** You should not use a [table schema](#table-schema) to access tables inside a migration
 as the schema represents the database state **after** the migrations have been executed.
-Instead, use table names and column names as a string.
+Instead, use table names as strings and creating [column definitions](#column-building) inline.
 
 **Note:** There is no manual way to run migrations, they are run automatically when the database is opened.
 
