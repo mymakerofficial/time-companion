@@ -41,7 +41,8 @@ class ProjectPersistenceImpl implements ProjectPersistence {
 
   async getProjectById(id: string): Promise<Readonly<ProjectEntityDto>> {
     const res = await this.database.table(projectsTable).findFirst({
-      where: projectsTable.id.equals(id).and(projectsTable.deletedAt.isNull()),
+      range: projectsTable.id.range.only(id),
+      where: projectsTable.deletedAt.isNull(),
     })
 
     check(isNotNull(res), `Project with id "${id}" not found.`)
@@ -88,7 +89,8 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     partialProject: Partial<Readonly<ProjectEntityDto>>,
   ): Promise<Readonly<ProjectEntityDto>> {
     const res = await this.database.table(projectsTable).update({
-      where: projectsTable.id.equals(id),
+      range: projectsTable.id.range.only(id),
+      where: projectsTable.deletedAt.isNull(),
       data: partialProject,
     })
 

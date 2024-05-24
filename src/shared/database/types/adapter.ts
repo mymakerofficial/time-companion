@@ -1,5 +1,5 @@
 import type { Nullable } from '@shared/lib/utils/types'
-import type { OrderByDirection } from '@shared/database/types/database'
+import type { KeyRange, OrderBy } from '@shared/database/types/database'
 import type {
   AlterTableAction,
   RawWhere,
@@ -12,16 +12,14 @@ export type DatabaseInfo = {
 
 export interface DatabaseCursor<TRow extends object> {
   value(): Nullable<TRow>
-  update(data: Partial<TData>): Promise<void>
+  update(data: Partial<TRow>): Promise<void>
   delete(): Promise<void>
   continue(): Promise<void>
   close(): void
 }
 
 type HasOrder = {
-  orderByTable: Nullable<string>
-  orderByColumn: Nullable<string>
-  oderByDirection: OrderByDirection
+  orderBy: Nullable<OrderBy>
 }
 
 type HasLimitAndOffset = HasOrder & {
@@ -29,19 +27,20 @@ type HasLimitAndOffset = HasOrder & {
   offset: Nullable<number>
 }
 
-type HasWhere = {
+type HasWhereAndRange = {
   where: Nullable<RawWhere>
+  range: Nullable<KeyRange>
 }
 
-export type AdapterBaseQueryProps = HasLimitAndOffset & HasWhere
+export type AdapterBaseQueryProps = HasLimitAndOffset & HasWhereAndRange
 
 export type AdapterSelectProps<TRow extends object> = AdapterBaseQueryProps
 
-export type AdapterUpdateProps<TRow extends object> = HasWhere & {
+export type AdapterUpdateProps<TRow extends object> = HasWhereAndRange & {
   data: Partial<TRow>
 }
 
-export type AdapterDeleteProps<TRow extends object> = HasWhere
+export type AdapterDeleteProps<TRow extends object> = HasWhereAndRange
 
 export type AdapterInsertProps<TRow extends object> = {
   data: TRow

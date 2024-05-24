@@ -5,7 +5,7 @@ import {
   buildCreateTable,
 } from '@shared/database/adapters/pglite/helpers/schemaBuilder'
 import { defineTable } from '@shared/database/schema/defineTable'
-import { t } from '@shared/database/schema/columnBuilder'
+import { c } from '@shared/database/schema/columnBuilder'
 import { AlterTableBuilderImpl } from '@shared/database/schema/alterTable'
 
 describe('Knex Schema Builder', () => {
@@ -16,9 +16,9 @@ describe('Knex Schema Builder', () => {
   describe('buildCreateTable', () => {
     it('should build a create table', () => {
       const schema = defineTable('table', {
-        id: t.uuid().primaryKey(),
-        stringColumn: t.string().indexed().unique().nullable(),
-        numberColumn: t.number(),
+        id: c.uuid().primaryKey(),
+        stringColumn: c.string().indexed().unique().nullable(),
+        numberColumn: c.number(),
       })
 
       const builder = buildCreateTable(knex, schema._.raw)

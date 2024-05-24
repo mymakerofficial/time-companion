@@ -47,17 +47,27 @@ export type WhereOperator = (typeof whereOperators)[number]
 export const orderDirections = ['asc', 'desc'] as const
 export type OrderByDirection = (typeof orderDirections)[number]
 
-export type OrderBy<TRow extends object, TColumn = unknown> = {
+export type OrderBy<TRow extends object = object, TColumn = unknown> = {
   column: ColumnDefinitionRaw<TRow, TColumn>
   direction: OrderByDirection
 }
 
+export type KeyRange<TRow extends object = object, TColumn = unknown> = {
+  column: ColumnDefinitionRaw<TRow, TColumn>
+  lower?: TColumn
+  lowerOpen: boolean
+  upper?: TColumn
+  upperOpen: boolean
+}
+
 export type FindProps<TRow extends object> = {
+  range?: KeyRange<TRow>
   where?: WhereBuilderOrRaw<TRow>
   orderBy?: OrderBy<TRow>
 }
 
 export type FindManyProps<TRow extends object> = {
+  range?: KeyRange<TRow>
   where?: WhereBuilderOrRaw<TRow>
   orderBy?: OrderBy<TRow>
   offset?: number
@@ -65,11 +75,13 @@ export type FindManyProps<TRow extends object> = {
 }
 
 export type UpdateProps<TRow extends object> = {
+  range?: KeyRange<TRow>
   where?: WhereBuilderOrRaw<TRow>
   data: Partial<TRow>
 }
 
 export type DeleteProps<TRow extends object> = {
+  range?: KeyRange<TRow>
   where?: WhereBuilderOrRaw<TRow>
 }
 

@@ -1,47 +1,74 @@
-import { describe, it, expect } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import createKnex from 'knex'
 import { buildQuery } from '@shared/database/adapters/pglite/helpers/queryBuilder'
-import { defineTable } from '@shared/database/schema/defineTable'
-import { number, string } from '@shared/database/schema/columnBuilder'
+import { c } from '@shared/database/schema/columnBuilder'
 
 describe('Knex Query Builder', () => {
   const knex = createKnex({
     client: 'pg',
   })
 
-  const table = defineTable('table', {
-    id: string().primaryKey(),
-    stringColumn: string(),
-    numberColumn: number(),
+  it('should build a query with orderBy', () => {
+    const sql = buildQuery(knex, 'table', {
+      orderBy: c('table', 'stringColumn').asc(),
+    }).toQuery()
+
+    expect(sql).toEqual(
+      'select * from "table" order by "table"."stringColumn" asc',
+    )
+  })
+
+  it('should build a query with limit', () => {
+    const sql = buildQuery(knex, 'table', {
+      limit: 10,
+    }).toQuery()
+
+    expect(sql).toEqual('select * from "table" limit 10')
+  })
+
+  it('should build a query with offset', () => {
+    const sql = buildQuery(knex, 'table', {
+      offset: 5,
+    }).toQuery()
+
+    expect(sql).toEqual('select * from "table" offset 5')
+  })
+
+  it('should build a query with where', () => {
+    const sql = buildQuery(knex, 'table', {
+      where: c('table', 'stringColumn').equals('testString')._.raw,
+    }).toQuery()
+
+    expect(sql).toEqual(
+      'select * from "table" where ("table"."stringColumn" = \'testString\')',
+    )
+  })
+
+  it('should combine range and where', () => {
+    const sql = buildQuery(knex, 'table', {
+      range: c('numberColumn').range.between(18, 99),
+      where: c('stringColumn').equals('testString')._.raw,
+    }).toQuery()
+
+    expect(sql).toEqual(
+      'select * from "table" where ((("stringColumn" = \'testString\') and ((("numberColumn" >= 18) and ("numberColumn" <= 99)))))',
+    )
   })
 
   it('should build a query with all options', () => {
-    const res = buildQuery(knex, table._.raw.tableName, {
-      orderByTable: table._.raw.tableName,
-      orderByColumn: table.stringColumn._.raw.columnName,
-      oderByDirection: 'asc',
+    const sql = buildQuery(knex, 'table', {
+      orderBy: c('stringColumn').asc(),
       limit: 10,
       offset: 5,
-      where: table.stringColumn
+      range: c('numberColumn').range.between(18, 99),
+      where: c('stringColumn')
         .equals('equalsString')
-        .and(table.stringColumn.in(['in1', 'in2']))
-        .and(table.stringColumn.contains('containsString'))
-        .or(table.numberColumn.gte(18))._.raw,
-    }).toSQL()
+        .and(c('stringColumn').in(['in1', 'in2']))
+        .or(c('stringColumn').contains('containsString'))._.raw,
+    }).toQuery()
 
-    expect(res).toEqual(
-      expect.objectContaining({
-        sql:
-          'select * from "table" ' +
-          'where ((((("table"."stringColumn" = ?) ' +
-          'and ("table"."stringColumn" in (?, ?)) ' +
-          'and ("table"."stringColumn" like ?))) ' +
-          'or ("table"."numberColumn" >= ?))) ' +
-          'order by "table"."stringColumn" asc ' +
-          'limit ? ' +
-          'offset ?',
-        bindings: ['equalsString', 'in1', 'in2', 'containsString', 18, 10, 5],
-      }),
+    expect(sql).toEqual(
+      'select * from "table" where ((((((("stringColumn" = \'equalsString\') and ("stringColumn" in (\'in1\', \'in2\')))) or ("stringColumn" like \'containsString\'))) and ((("numberColumn" >= 18) and ("numberColumn" <= 99))))) order by "stringColumn" asc limit 10 offset 5',
     )
   })
 })

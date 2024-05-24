@@ -23,7 +23,7 @@ import type {
   Database,
   UpgradeTransaction,
 } from '@shared/database/types/database'
-import { c, t } from '@shared/database/schema/columnBuilder'
+import { t } from '@shared/database/schema/columnBuilder'
 import 'fake-indexeddb/auto'
 
 function byId(a: HasId, b: HasId) {
@@ -35,7 +35,7 @@ function byFirstName(a: Person, b: Person) {
 }
 
 function byAge(a: Person, b: Person) {
-  return b.age - a.age
+  return a.age - b.age
 }
 
 describe.each([
@@ -351,6 +351,19 @@ describe.each([
           expect(res).toEqual(randomPerson)
         })
 
+        it('should find a unique entry using a range', async () => {
+          const samplePersons = await helpers.insertSamplePersons(6)
+          const randomPerson = randomElement(samplePersons, {
+            safetyOffset: 1,
+          })
+
+          const res = await database.table(personsTable).findFirst({
+            range: personsTable.id.range.only(randomPerson.id),
+          })
+
+          expect(res).toEqual(randomPerson)
+        })
+
         it('should find a single entry in a table with order ascending', async () => {
           const samplePersons = await helpers.insertSamplePersons(6)
 
@@ -424,6 +437,56 @@ describe.each([
           )
         })
 
+        it('should find all entries in a table with a range', async () => {
+          await helpers.insertSamplePersons(6, {
+            age: [10, 20, 30, 40, 50, 60],
+          })
+
+          const res = await database.table(personsTable).findMany({
+            range: personsTable.age.range.between(20, 40),
+          })
+
+          expect(res.sort(byAge)).toEqual([
+            expect.objectContaining({
+              age: 20,
+            }),
+            expect.objectContaining({
+              age: 30,
+            }),
+            expect.objectContaining({
+              age: 40,
+            }),
+          ])
+        })
+
+        it('should correctly combine where and range filters', async () => {
+          await helpers.insertSamplePersons(6, {
+            age: [10, 20, 30, 40, 50, 60],
+            firstName: ['John', 'Jane', 'Joe', 'Jim', 'Jill', 'Jack'],
+          })
+
+          const res = await database.table(personsTable).findMany({
+            range: personsTable.age.range.between(20, 50),
+            where: personsTable.firstName.inArray([
+              'John',
+              'Joe',
+              'Jill',
+              'Jack',
+            ]),
+          })
+
+          expect(res.sort(byAge)).toEqual([
+            expect.objectContaining({
+              age: 30,
+              firstName: 'Joe',
+            }),
+            expect.objectContaining({
+              age: 50,
+              firstName: 'Jill',
+            }),
+          ])
+        })
+
         it('should find all entries in a table ordered by indexed key ascending', async () => {
           const samplePersons = await helpers.insertSamplePersons(6)
 
@@ -445,18 +508,14 @@ describe.each([
         })
 
         it.todo('should fail when ordering by un-indexed key', async () => {
-          // TBD: this is required for IndexedDB, but not for Postgres
-
           await helpers.insertSamplePersons(6)
 
-          expect(async () => {
-            await database.withTransaction(async (transaction) => {
-              return await transaction.table(personsTable).findMany({
-                orderBy: personsTable.lastName.asc(),
-              })
-            })
-          }).rejects.toThrow(
-            'The index "lastName" does not exist. You can only order by existing indexes or primary key.',
+          expect(
+            database.table(personsTable).findMany({
+              orderBy: personsTable.lastName.asc(),
+            }),
+          ).rejects.toThrowError(
+            'Failed to order by column "lastName". Column must either be indexed or the primary key.',
           )
         })
 
@@ -669,37 +728,6 @@ describe.each([
 
           expect(personsInDatabase).toHaveLength(0)
         })
-      })
-    })
-
-    describe('complex query building', () => {
-      it('should work without using a table schema', async () => {
-        await helpers.insertSamplePersons(6, {
-          firstName: 'NotJohn',
-        })
-        // TODO make this inserting not so awful
-        const johns = await Promise.all([
-          await helpers.insertSamplePerson({
-            firstName: 'John',
-            age: 30,
-          }),
-          await helpers.insertSamplePerson({
-            firstName: 'John',
-            age: 20,
-          }),
-          await helpers.insertSamplePerson({
-            firstName: 'John',
-            age: 10,
-          }),
-        ])
-
-        const res = await database.table<Person>('persons').findMany({
-          where: c('firstName').string().equals('John'),
-          orderBy: c('age').asc(),
-          limit: 3,
-        })
-
-        expect(res.sort(byAge)).toEqual(johns)
       })
     })
   })

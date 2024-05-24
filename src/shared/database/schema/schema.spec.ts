@@ -171,7 +171,7 @@ describe('schema', () => {
     it.each(orderDirections)('should return an %s order by', (direction) => {
       const foo = defineTable('foo', {
         id: string().primaryKey(),
-        name: string(),
+        name: string().indexed(),
       })
 
       expect(foo.name[direction]()).toEqual({

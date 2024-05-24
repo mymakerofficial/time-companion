@@ -5,8 +5,24 @@ import { firstOf } from '@shared/lib/utils/list'
 import { uuid } from '@shared/lib/utils/uuid'
 import { randomElements } from '@shared/lib/utils/random'
 import { check } from '@renderer/lib/utils'
-import type { Nullable } from '@shared/lib/utils/types'
+import type { MaybeArray, Nullable } from '@shared/lib/utils/types'
 import { personsTable, petsTable } from '@test/fixtures/database/schema'
+
+type TestDataOverride<T> = {
+  [K in keyof T]: MaybeArray<T[K]>
+}
+
+function getOverrideAtIndex<T>(
+  override: Partial<TestDataOverride<T>>,
+  index: number,
+) {
+  return Object.fromEntries(
+    Object.entries(override).map(([key, value]) => [
+      key,
+      Array.isArray(value) ? value[index % value.length] : value,
+    ]),
+  ) as Partial<T>
+}
 
 export class DatabaseTestHelpers {
   constructor(private readonly database: Database) {}
@@ -23,8 +39,13 @@ export class DatabaseTestHelpers {
     }
   }
 
-  samplePersons(amount: number, override: Partial<Person> = {}): Array<Person> {
-    return Array.from({ length: amount }, () => this.samplePerson(override))
+  samplePersons(
+    amount: number,
+    override: Partial<TestDataOverride<Person>> = {},
+  ): Array<Person> {
+    return Array.from({ length: amount }, (_, index) =>
+      this.samplePerson(getOverrideAtIndex(override, index)),
+    )
   }
 
   samplePet(override: Partial<Pet> = {}): Pet {
@@ -80,7 +101,7 @@ export class DatabaseTestHelpers {
 
   async insertSamplePersons(
     amount: number,
-    override: Partial<Person> = {},
+    override: Partial<TestDataOverride<Person>> = {},
   ): Promise<Array<Person>> {
     const persons = this.samplePersons(amount, override)
 

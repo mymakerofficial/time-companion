@@ -1,16 +1,63 @@
 import type {
   ColumnDefinition,
   ColumnDefinitionRaw,
+  KeyRangeFactory,
   RawWhere,
   RawWhereBooleanGroup,
   WhereBuilder,
 } from '@shared/database/types/schema'
 import {
+  type KeyRange,
   type OrderBy,
   type OrderByDirection,
   type WhereBooleanOperator,
   type WhereOperator,
 } from '@shared/database/types/database'
+
+class KeyRangeFactoryImpl<TRow extends object, TColumn = unknown>
+  implements KeyRangeFactory<TRow, TColumn>
+{
+  constructor(protected definition: ColumnDefinitionRaw<TRow, TColumn>) {}
+
+  between(
+    lower?: TColumn,
+    upper?: TColumn,
+    lowerOpen: boolean = false,
+    upperOpen: boolean = false,
+  ): KeyRange<TRow, TColumn> {
+    return {
+      column: this.definition,
+      lower,
+      lowerOpen,
+      upper,
+      upperOpen,
+    }
+  }
+
+  betweenExclusive(lower: TColumn, upper: TColumn): KeyRange<TRow, TColumn> {
+    return this.between(lower, upper, true, true)
+  }
+
+  lowerBound(value: TColumn, open: boolean = false): KeyRange<TRow, TColumn> {
+    return this.between(value, undefined, open)
+  }
+
+  lowerBoundExclusive(value: TColumn): KeyRange<TRow, TColumn> {
+    return this.lowerBound(value, true)
+  }
+
+  only(value: TColumn): KeyRange<TRow, TColumn> {
+    return this.between(value, value, false, false)
+  }
+
+  upperBound(value: TColumn, open: boolean = false): KeyRange<TRow, TColumn> {
+    return this.between(undefined, value, false, open)
+  }
+
+  upperBoundExclusive(value: TColumn): KeyRange<TRow, TColumn> {
+    return this.upperBound(value, true)
+  }
+}
 
 export class ColumnDefinitionImpl<TRow extends object, TColumn = unknown>
   implements ColumnDefinition<TRow, TColumn>
@@ -21,6 +68,10 @@ export class ColumnDefinitionImpl<TRow extends object, TColumn = unknown>
     return {
       raw: this.definition,
     }
+  }
+
+  get range() {
+    return new KeyRangeFactoryImpl(this.definition)
   }
 
   protected where(

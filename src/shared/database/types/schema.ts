@@ -1,5 +1,6 @@
 import {
   type ColumnType,
+  type KeyRange,
   type OrderBy,
   type OrderByDirection,
   type WhereBooleanOperator,
@@ -123,11 +124,10 @@ export type WhereConditionFactory<TRow extends object, TColumn = unknown> = {
   isNotNull: () => WhereBuilder<TRow, TColumn>
 }
 
-export type WhereBuilder<TRow extends object, TColumn = unknown> = {
-  _: {
+export interface WhereBuilder<TRow extends object, TColumn = unknown> {
+  readonly _: {
     raw: RawWhere
   }
-} & {
   /***
    * Groups the previous condition with the next condition using the AND operator
    */
@@ -146,7 +146,25 @@ export type WhereBuilderOrRaw<TRow extends object, TColumn = unknown> =
   | WhereBuilder<TRow, TColumn>
   | RawWhere
 
-export type OrderByColumnFactory<TRow extends object, TColumn = unknown> = {
+export interface KeyRangeFactory<
+  TRow extends object = object,
+  TColumn = unknown,
+> {
+  lowerBound: (value: TColumn, open?: boolean) => KeyRange<TRow, TColumn>
+  lowerBoundExclusive: (value: TColumn) => KeyRange<TRow, TColumn>
+  upperBound: (value: TColumn, open?: boolean) => KeyRange<TRow, TColumn>
+  upperBoundExclusive: (value: TColumn) => KeyRange<TRow, TColumn>
+  between: (
+    lower?: TColumn,
+    upper?: TColumn,
+    lowerOpen?: boolean,
+    upperOpen?: boolean,
+  ) => KeyRange<TRow, TColumn>
+  betweenExclusive: (lower: TColumn, upper: TColumn) => KeyRange<TRow, TColumn>
+  only: (value: TColumn) => KeyRange<TRow, TColumn>
+}
+
+export interface OrderByColumnFactory<TRow extends object, TColumn = unknown> {
   /***
    * Order the results by this column in ascending order
    */
@@ -178,15 +196,14 @@ export type ColumnDefinitionRaw<
   isUnique: boolean
 }
 
-export type ColumnDefinitionBase<TRow extends object, TColumn = unknown> = {
-  _: {
+export interface ColumnDefinition<TRow extends object, TColumn = unknown>
+  extends OrderByColumnFactory<TRow, TColumn>,
+    WhereConditionFactory<TRow, TColumn> {
+  readonly _: {
     raw: ColumnDefinitionRaw<TRow, TColumn>
   }
-} & OrderByColumnFactory<TRow, TColumn>
-
-export interface ColumnDefinition<TRow extends object, TColumn = unknown>
-  extends ColumnDefinitionBase<TRow, TColumn>,
-    WhereConditionFactory<TRow, TColumn> {}
+  readonly range: KeyRangeFactory<TRow, TColumn>
+}
 
 export interface ColumnBuilder<TColumn, TRow extends object = object>
   extends ColumnDefinition<TRow, TColumn> {
@@ -396,7 +413,7 @@ export type AlterTableAction =
   | AlterTableRenameTableAction
 
 export interface AlterTableBuilder {
-  _: {
+  readonly _: {
     actions: Array<AlterTableAction>
   }
   /***
@@ -433,7 +450,7 @@ export type TableSchemaRaw<TRow extends object = object> = {
 }
 
 export type TableSchemaBase<TRow extends object> = {
-  _: {
+  readonly _: {
     raw: TableSchemaRaw<TRow>
   }
 }
