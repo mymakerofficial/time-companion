@@ -8,8 +8,8 @@ export class DatabaseTransactionImpl implements Transaction {
   constructor(protected readonly transactionAdapter: TransactionAdapter) {}
 
   table<
-    TData extends object = object,
-    TSchema extends TableSchema<TData> = TableSchema<TData>,
+    TRow extends object = object,
+    TSchema extends TableSchema<TRow> = TableSchema<TRow>,
   >(table: TSchema | string): Table<InferTable<TSchema>> {
     const tableName = isString(table) ? table : table._.raw.tableName
 

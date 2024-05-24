@@ -113,8 +113,8 @@ export interface TableFactory {
    * @returns The table.
    */
   table<
-    TData extends object = object,
-    TSchema extends TableSchema<TData> = TableSchema<TData>,
+    TRow extends object = object,
+    TSchema extends TableSchema<TRow> = TableSchema<TRow>,
   >(
     table: TSchema | string,
   ): Table<InferTable<TSchema>>

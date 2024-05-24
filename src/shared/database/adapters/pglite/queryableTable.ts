@@ -12,8 +12,8 @@ import type { Knex } from 'knex'
 import { firstOf } from '@shared/lib/utils/list'
 import { buildQuery } from '@shared/database/adapters/pglite/helpers/queryBuilder'
 
-export class PGLiteQueryableTableAdapter<TData extends object>
-  implements QueryableTableAdapter<TData>
+export class PGLiteQueryableTableAdapter<TRow extends object>
+  implements QueryableTableAdapter<TRow>
 {
   constructor(
     protected readonly knex: Knex,
@@ -28,7 +28,7 @@ export class PGLiteQueryableTableAdapter<TData extends object>
   protected query(builder: Knex.QueryBuilder) {
     const query = builder.toSQL().toNative()
 
-    return this.db.query<TData>(query.sql, [...query.bindings])
+    return this.db.query<TRow>(query.sql, [...query.bindings])
   }
 
   protected exec(builder: Knex.QueryBuilder) {
@@ -37,7 +37,7 @@ export class PGLiteQueryableTableAdapter<TData extends object>
     return this.db.exec(query)
   }
 
-  async select(props: AdapterSelectProps<TData>): Promise<Array<TData>> {
+  async select(props: AdapterSelectProps<TRow>): Promise<Array<TRow>> {
     const builder = this.build(props).select(`${this.tableName}.*`)
 
     const res = await this.query(builder)
@@ -45,7 +45,7 @@ export class PGLiteQueryableTableAdapter<TData extends object>
     return res.rows
   }
 
-  async update(props: AdapterUpdateProps<TData>): Promise<Array<TData>> {
+  async update(props: AdapterUpdateProps<TRow>): Promise<Array<TRow>> {
     const builder = this.build(props).update(props.data).returning('*')
 
     // TODO: make returning optional
@@ -55,7 +55,7 @@ export class PGLiteQueryableTableAdapter<TData extends object>
     return res.rows
   }
 
-  async delete(props: AdapterDeleteProps<TData>): Promise<void> {
+  async delete(props: AdapterDeleteProps<TRow>): Promise<void> {
     const builder = this.build(props).delete()
 
     await this.query(builder)
@@ -67,15 +67,13 @@ export class PGLiteQueryableTableAdapter<TData extends object>
     await this.query(builder)
   }
 
-  async insert(props: AdapterInsertProps<TData>): Promise<TData> {
+  async insert(props: AdapterInsertProps<TRow>): Promise<TRow> {
     const res = await this.insertMany({ data: [props.data] })
 
     return firstOf(res)
   }
 
-  async insertMany(
-    props: AdapterInsertManyProps<TData>,
-  ): Promise<Array<TData>> {
+  async insertMany(props: AdapterInsertManyProps<TRow>): Promise<Array<TRow>> {
     const builder = this.knex
       .insert(props.data)
       .into(this.tableName)
@@ -85,6 +83,6 @@ export class PGLiteQueryableTableAdapter<TData extends object>
 
     const res = await this.exec(builder)
 
-    return firstOf(res).rows as Array<TData>
+    return firstOf(res).rows as Array<TRow>
   }
 }

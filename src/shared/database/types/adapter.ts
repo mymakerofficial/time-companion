@@ -10,8 +10,8 @@ export type DatabaseInfo = {
   version: number
 }
 
-export interface DatabaseCursor<TData extends object> {
-  value(): Nullable<TData>
+export interface DatabaseCursor<TRow extends object> {
+  value(): Nullable<TRow>
   update(data: Partial<TData>): Promise<void>
   delete(): Promise<void>
   continue(): Promise<void>

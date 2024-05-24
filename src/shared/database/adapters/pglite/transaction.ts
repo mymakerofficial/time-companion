@@ -29,8 +29,8 @@ export class PGLiteDatabaseTransactionAdapter
     super(knex, tx)
   }
 
-  async createTable<TData extends object>(
-    schema: TableSchemaRaw<TData>,
+  async createTable<TRow extends object>(
+    schema: TableSchemaRaw<TRow>,
   ): Promise<void> {
     check(isNotNull(this.db), 'Database is not open.')
 

@@ -3,12 +3,12 @@ import { wherePredicate } from '@shared/database/helpers/wherePredicate'
 import type { RawWhere } from '@shared/database/types/schema'
 import type { Nullable } from '@shared/lib/utils/types'
 
-export async function* filteredIterator<TData extends object>(
-  iterator: AsyncGenerator<DatabaseIteratedCursor<TData>>,
+export async function* filteredIterator<TRow extends object>(
+  iterator: AsyncGenerator<DatabaseIteratedCursor<TRow>>,
   where: Nullable<RawWhere>,
   limit: number = Infinity,
   offset: number = 0,
-  predicate?: (value: TData) => boolean,
+  predicate?: (value: TRow) => boolean,
 ) {
   const matches = wherePredicate(where)
 

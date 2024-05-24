@@ -11,8 +11,8 @@ export class PGLiteTableAdapterFactory implements TableAdapterFactory {
     protected db: Nullable<Transaction | PGliteInterface>,
   ) {}
 
-  getTable<TData extends object>(tableName: string) {
+  getTable<TRow extends object>(tableName: string) {
     check(isNotNull(this.db), 'Database is not open.')
-    return new PGLiteTableAdapter<TData>(this.knex, this.db, tableName)
+    return new PGLiteTableAdapter<TRow>(this.knex, this.db, tableName)
   }
 }

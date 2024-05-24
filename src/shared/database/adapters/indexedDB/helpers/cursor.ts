@@ -5,14 +5,14 @@ import { toArray } from '@shared/lib/utils/list'
 import { keysOf } from '@shared/lib/utils/object'
 import { getOrNull } from '@shared/lib/utils/result'
 
-export class IndexedDBCursorImpl<TData extends object>
-  implements DatabaseCursor<TData>
+export class IndexedDBCursorImpl<TRow extends object>
+  implements DatabaseCursor<TRow>
 {
-  protected _value: Nullable<TData> = null
+  protected _value: Nullable<TRow> = null
 
   constructor(
     protected readonly request: IDBRequest<IDBCursorWithValue | null>,
-    protected readonly primaryKey: keyof TData,
+    protected readonly primaryKey: keyof TRow,
   ) {
     this._value = getOrNull(this.cursor?.value)
   }
@@ -21,11 +21,11 @@ export class IndexedDBCursorImpl<TData extends object>
     return this.request.result as IDBCursorWithValue
   }
 
-  value(): Nullable<TData> {
+  value(): Nullable<TRow> {
     return this._value
   }
 
-  update(data: Partial<TData>): Promise<void> {
+  update(data: Partial<TRow>): Promise<void> {
     return new Promise((resolve, reject) => {
       check(isNotNull(this.cursor), 'Cursor is not open.')
       const changedColumns = toArray(keysOf(data))
@@ -39,7 +39,7 @@ export class IndexedDBCursorImpl<TData extends object>
 
       check(isNotNull(value), 'Cursor value is null.')
 
-      const patched: TData = {
+      const patched: TRow = {
         ...value,
         ...data,
       }

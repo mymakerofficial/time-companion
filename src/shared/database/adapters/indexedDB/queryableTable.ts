@@ -17,14 +17,14 @@ import type { Nullable } from '@shared/lib/utils/types'
 import type { OrderByDirection } from '@shared/database/types/database'
 import { IndexedDBCursorImpl } from '@shared/database/adapters/indexedDB/helpers/cursor'
 
-export class IdbQueryableTableAdapter<TData extends object>
-  implements QueryableTableAdapter<TData>
+export class IdbQueryableTableAdapter<TRow extends object>
+  implements QueryableTableAdapter<TRow>
 {
   constructor(protected readonly objectStore: IDBObjectStore) {}
 
   protected async openIterator(
     props: Partial<AdapterBaseQueryProps>,
-    predicate?: (value: TData) => boolean,
+    predicate?: (value: TRow) => boolean,
   ) {
     const indexes = toArray(this.objectStore.indexNames)
 
@@ -51,7 +51,7 @@ export class IdbQueryableTableAdapter<TData extends object>
   protected openCursor(
     indexName: Nullable<string>,
     direction: OrderByDirection,
-  ): Promise<DatabaseCursor<TData>> {
+  ): Promise<DatabaseCursor<TRow>> {
     return new Promise((resolve, reject) => {
       const indexOrObjectStore = isNotNull(indexName)
         ? this.objectStore.index(indexName)
@@ -62,9 +62,9 @@ export class IdbQueryableTableAdapter<TData extends object>
       const request = indexOrObjectStore.openCursor(null, cursorDirection)
 
       request.onsuccess = () => {
-        const cursor = new IndexedDBCursorImpl<TData>(
+        const cursor = new IndexedDBCursorImpl<TRow>(
           request,
-          this.objectStore.keyPath as keyof TData,
+          this.objectStore.keyPath as keyof TRow,
         )
 
         resolve(cursor)
@@ -76,7 +76,7 @@ export class IdbQueryableTableAdapter<TData extends object>
     })
   }
 
-  async select(props: AdapterSelectProps<TData>): Promise<Array<TData>> {
+  async select(props: AdapterSelectProps<TRow>): Promise<Array<TRow>> {
     const iterator = await this.openIterator(props)
 
     const results = []
@@ -87,7 +87,7 @@ export class IdbQueryableTableAdapter<TData extends object>
     return results
   }
 
-  async update(props: AdapterUpdateProps<TData>): Promise<Array<TData>> {
+  async update(props: AdapterUpdateProps<TRow>): Promise<Array<TRow>> {
     const iterator = await this.openIterator(props)
 
     const results = []
@@ -99,7 +99,7 @@ export class IdbQueryableTableAdapter<TData extends object>
     return results
   }
 
-  async delete(props: AdapterDeleteProps<TData>): Promise<void> {
+  async delete(props: AdapterDeleteProps<TRow>): Promise<void> {
     const iterator = await this.openIterator(props)
 
     for await (const cursor of iterator) {
@@ -121,7 +121,7 @@ export class IdbQueryableTableAdapter<TData extends object>
     })
   }
 
-  insert(props: AdapterInsertProps<TData>): Promise<TData> {
+  insert(props: AdapterInsertProps<TRow>): Promise<TRow> {
     return new Promise((resolve, reject) => {
       const request = this.objectStore.add(props.data)
 
@@ -135,9 +135,7 @@ export class IdbQueryableTableAdapter<TData extends object>
     })
   }
 
-  async insertMany(
-    props: AdapterInsertManyProps<TData>,
-  ): Promise<Array<TData>> {
+  async insertMany(props: AdapterInsertManyProps<TRow>): Promise<Array<TRow>> {
     const promises = props.data.map((data) => this.insert({ data }))
     return await Promise.all(promises)
   }

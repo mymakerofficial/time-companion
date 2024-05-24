@@ -18,13 +18,13 @@ export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
     protected readonly mode: IDBTransactionMode,
   ) {}
 
-  getTable<TData extends object>(tableName: string): TableAdapter<TData> {
+  getTable<TRow extends object>(tableName: string): TableAdapter<TRow> {
     const objectStore = this.tx.objectStore(tableName)
-    return new IdbTableAdapter<TData>(objectStore)
+    return new IdbTableAdapter<TRow>(objectStore)
   }
 
-  createTable<TData extends object>(
-    schema: TableSchemaRaw<TData>,
+  createTable<TRow extends object>(
+    schema: TableSchemaRaw<TRow>,
   ): Promise<void> {
     return new Promise((resolve) => {
       check(
