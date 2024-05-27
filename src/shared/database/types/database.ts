@@ -203,12 +203,13 @@ export type DatabasePublisherEvent = {}
 
 export interface UnsafeDatabase<TSchema extends DatabaseSchema = {}> {
   /*
-   * Truncates the database, removing all data and resetting the version to 0.
+   * Truncates the database, removing all tables, all data and resetting the version to 0.
+   * Use {@link migrate} to recreate the database schema.
    * **This is not recommended for production use!**
    */
   truncate(): Promise<void>
   /***
-   * Migrates the database to the newest version. Behaves like `open` but does not open the database.
+   * Migrates the database to the newest version. Behaves like `open` but expects the database to already be open.
    * **This is not recommended for production use!**
    */
   migrate(): Promise<void>
@@ -218,7 +219,8 @@ export interface UnsafeDatabase<TSchema extends DatabaseSchema = {}> {
    */
   runMigration(migrationFn: MigrationFunction): Promise<void>
   /***
-   * Set the migrations to be used by the database when opened.
+   * Set the migrations to be used by the database when migrating.
+   * See {@link migrate} to run migrations after the database is opened.
    * **This is not recommended for production use!**
    */
   setMigrations(migrations: DatabaseConfig<TSchema>['migrations']): void
@@ -246,15 +248,16 @@ export interface Database<TSchema extends DatabaseSchema = {}>
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>
   /***
-   * Gain access to unsafe database operations.
-   * **This is not recommended for production use!**
-   */
-  readonly unsafe: UnsafeDatabase<TSchema>
-  /***
    * Gets the names of all tables that currently exist in the database.
    * **Note**: this might be out of sync with the provided schema.
    */
   getTableNames(): Promise<Array<string>>
+
+  /***
+   * Gain access to unsafe database operations.
+   * **This is not recommended for production use!**
+   */
+  readonly unsafe: UnsafeDatabase<TSchema>
 
   /***
    * Registers a callback to be called when the migrations are started.
