@@ -70,6 +70,19 @@ describe('Knex Schema Builder', () => {
       )
     })
 
+    it('should change a column type', () => {
+      const table = new AlterTableBuilderImpl()
+
+      table.alterColumn('name').setDataType('integer')
+
+      const builder = buildAlterTable(knex, 'table', table._.actions)
+
+      expect(builder.toQuery()).toEqual(
+        'alter table "table" alter column "name" drop default;\n' +
+          'alter table "table" alter column "name" type integer using ("name"::integer)',
+      )
+    })
+
     it('should drop a column', () => {
       const table = new AlterTableBuilderImpl()
 

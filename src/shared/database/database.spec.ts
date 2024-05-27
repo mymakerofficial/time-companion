@@ -46,7 +46,7 @@ describe.each([
         `${requirePersist ? 'idb' : 'memory'}://test-database-${uuid()}`,
       ),
   ],
-])('Adapter "%s"', (_, adapterFactory) => {
+])('Adapter "%s"', (adapterName, adapterFactory) => {
   describe('unsafe', () => {
     describe('truncate', () => {
       it('should reset the database', async () => {
@@ -271,9 +271,9 @@ describe.each([
         })
       })
 
-      describe('alterTable', () => {
+      describe.skipIf(adapterName === 'IndexedDB')('alterTable', () => {
         describe('renameTo', () => {
-          it.todo('should rename a table and retain its data', async () => {
+          it('should rename a table and retain its data', async () => {
             await database.unsafe.runMigration(async (transaction) => {
               await transaction.createTable('persons', {
                 id: c.uuid().primaryKey(),
@@ -290,11 +290,10 @@ describe.each([
               },
             })
 
-            expect(database.table('persons').findFirst()).resolves.toEqual(
-              expect.objectContaining({
-                username: 'johndoe',
-              }),
-            )
+            expect(database.table('persons').findFirst()).resolves.toEqual({
+              id: expect.any(String),
+              username: 'johndoe',
+            })
 
             await database.unsafe.runMigration(async (transaction) => {
               await transaction.alterTable('persons', (table) => {
@@ -304,25 +303,86 @@ describe.each([
 
             expect(await database.getTableNames()).toContain('users')
 
-            expect(database.table('users').findFirst()).resolves.toEqual(
-              expect.objectContaining({
-                username: 'johndoe',
-              }),
-            )
+            expect(database.table('users').findFirst()).resolves.toEqual({
+              id: expect.any(String),
+              username: 'johndoe',
+            })
           })
         })
 
         describe('addColumn', () => {
           it.todo('should add a column and fill it with a default value')
         })
+
         describe('renameColumn', () => {
-          it.todo('should rename a column and retain its data')
+          it('should rename a column and retain its data', async () => {
+            await database.unsafe.runMigration(async (transaction) => {
+              await transaction.createTable('users', {
+                id: c.uuid().primaryKey(),
+                name: c.string(),
+              })
+            })
+
+            await database.table('users').insert({
+              data: {
+                id: uuid(),
+                name: 'John Doe',
+              },
+            })
+
+            expect(database.table('users').findFirst()).resolves.toEqual({
+              id: expect.any(String),
+              name: 'John Doe',
+            })
+
+            await database.unsafe.runMigration(async (transaction) => {
+              await transaction.alterTable('users', (table) => {
+                table.renameColumn('name', 'userName')
+              })
+            })
+
+            expect(database.table('users').findFirst()).resolves.toEqual({
+              id: expect.any(String),
+              userName: 'John Doe',
+            })
+          })
         })
+
         describe('alterColumn', () => {
           it.todo('should change the data type of a column')
         })
+
         describe('dropColumn', () => {
-          it.todo('should drop a column and its data')
+          it('should drop a column and its data', async () => {
+            await database.unsafe.runMigration(async (transaction) => {
+              await transaction.createTable('users', {
+                id: c.uuid().primaryKey(),
+                name: c.string(),
+              })
+            })
+
+            await database.table('users').insert({
+              data: {
+                id: uuid(),
+                name: 'John Doe',
+              },
+            })
+
+            expect(database.table('users').findFirst()).resolves.toEqual({
+              id: expect.any(String),
+              name: 'John Doe',
+            })
+
+            await database.unsafe.runMigration(async (transaction) => {
+              await transaction.alterTable('users', (table) => {
+                table.dropColumn('name')
+              })
+            })
+
+            expect(database.table('users').findFirst()).resolves.toEqual({
+              id: expect.any(String),
+            })
+          })
         })
       })
     })
