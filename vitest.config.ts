@@ -4,11 +4,6 @@ import viteConfig from './vite.config'
 export default mergeConfig(
   viteConfig,
   defineConfig({
-    test: {
-      browser: {
-        enabled: false,
-        name: 'chrome',
-      },
-    },
+    test: {},
   }),
 )
