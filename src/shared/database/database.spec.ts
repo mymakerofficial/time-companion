@@ -81,10 +81,8 @@ describe.each([
 
     it('should open a new database and run all migration', async () => {
       const database = createDatabase(adapterFactory(), {
-        migrations: [],
+        migrations: [migration001, migration002],
       })
-
-      database.unsafe.setMigrations([migration001, migration002])
 
       expect(database.isOpen).toBe(false)
       expect(database.version).toBe(0)
