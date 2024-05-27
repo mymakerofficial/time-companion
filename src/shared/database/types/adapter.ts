@@ -90,6 +90,10 @@ export interface DatabaseAdapter extends TableAdapterFactory {
    */
   closeDatabase(): Promise<void>
   /***
+   * Truncates the database, removing all data and resetting the version to 1.
+   */
+  truncateDatabase(): Promise<void>
+  /***
    * Get a transaction that can be used to migrate the database to the target version.
    * Depending on the database system this may close and reopen the database.
    * @param targetVersion The version to migrate to.

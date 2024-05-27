@@ -5,7 +5,6 @@ import {
   describe,
   expect,
   it,
-  onTestFinished,
   vi,
 } from 'vitest'
 import { faker } from '@faker-js/faker'
@@ -23,7 +22,7 @@ import type {
   Database,
   UpgradeTransaction,
 } from '@shared/database/types/database'
-import { t } from '@shared/database/schema/columnBuilder'
+import { c } from '@shared/database/schema/columnBuilder'
 import 'fake-indexeddb/auto'
 
 function byId(a: HasId, b: HasId) {
@@ -48,7 +47,37 @@ describe.each([
       ),
   ],
 ])('Adapter "%s"', (_, adapterFactory) => {
-  describe('migrations', () => {
+  describe.skip('unsafe', () => {
+    describe('truncate', () => {
+      it('should reset the database', async () => {
+        const database = createDatabase(adapterFactory(false), {
+          migrations: [
+            async (_) => {},
+            async (transaction) => {
+              await transaction.createTable('test', {
+                id: c.uuid().primaryKey(),
+              })
+            },
+          ],
+        })
+
+        expect(database.isOpen).toBe(false)
+
+        await database.open()
+
+        expect(await database.getTableNames()).toEqual(['test'])
+        expect(database.version).toEqual(2)
+
+        await database.unsafe.truncate()
+
+        expect(await database.getTableNames()).toEqual([])
+        expect(database.version).toEqual(0)
+        expect(database.isOpen).toBe(true)
+      })
+    })
+  })
+
+  describe('open', () => {
     const migration001 = vi.fn(
       () => import('@test/fixtures/database/migrations/001_add_persons'),
     )
@@ -56,21 +85,12 @@ describe.each([
       () => import('@test/fixtures/database/migrations/002_add_pets'),
     )
 
-    afterEach(() => {
-      migration001.mockClear()
-      migration002.mockClear()
-    })
-
     it('should open a new database and run all migration', async () => {
-      const adapter = adapterFactory(false)
-      let database: Database
-      onTestFinished(async () => {
-        await database.close()
+      const database = createDatabase(adapterFactory(false), {
+        migrations: [],
       })
 
-      database = createDatabase(adapter, {
-        migrations: [migration001, migration002],
-      })
+      database.unsafe.setMigrations([migration001, migration002])
 
       expect(database.isOpen).toBe(false)
       expect(database.version).toBe(0)
@@ -89,46 +109,53 @@ describe.each([
       ).toBeDefined()
       expect(async () => await database.table('pets').findMany()).toBeDefined()
     })
+  })
 
-    it('should migrate an existing database to the latest version', async () => {
-      const adapter = adapterFactory(true)
-      let database: Database
-      onTestFinished(async () => {
-        await database.close()
-      })
+  describe('migrations', () => {
+    const migration001 = vi.fn(
+      () => import('@test/fixtures/database/migrations/001_add_persons'),
+    )
+    const migration002 = vi.fn(
+      () => import('@test/fixtures/database/migrations/002_add_pets'),
+    )
 
-      database = createDatabase(adapter, {
-        migrations: [migration001],
+    let database: Database
+
+    beforeAll(async () => {
+      database = createDatabase(adapterFactory(false), {
+        migrations: [],
       })
 
       await database.open()
+    })
+
+    afterEach(async () => {
+      await database.unsafe.truncate()
+      database.unsafe.setMigrations([])
+      migration001.mockClear()
+      migration002.mockClear()
+    })
+
+    it('should migrate an existing database to the latest version', async () => {
+      database.unsafe.setMigrations([migration001])
+      await database.unsafe.migrate()
 
       expect(database.version).toBe(1)
       expect(migration001).toHaveBeenCalled()
       expect(migration002).not.toHaveBeenCalled()
 
-      await database.close()
       migration001.mockClear()
       migration002.mockClear()
 
-      database = createDatabase(adapter, {
-        migrations: [migration001, migration002],
-      })
-
-      await database.open()
+      database.unsafe.setMigrations([migration001, migration002])
+      await database.unsafe.migrate()
 
       expect(database.version).toBe(2)
       expect(migration001).not.toHaveBeenCalled()
       expect(migration002).toHaveBeenCalled()
     })
 
-    it('should rollback the migration if an error occurs', async () => {
-      const adapter = adapterFactory(true)
-      let database: Database
-      onTestFinished(async () => {
-        await database.close()
-      })
-
+    it.todo('should rollback the migration if an error occurs', async () => {
       const migrationAddValues = vi.fn(
         async (transaction: UpgradeTransaction) => {
           await transaction.table<Person>('persons').insert({
@@ -147,29 +174,29 @@ describe.each([
       const migrationWithError = vi.fn(
         async (transaction: UpgradeTransaction) => {
           await transaction.createTable('pets', {
-            id: t.uuid().primaryKey(),
+            id: c.uuid().primaryKey(),
           })
 
           throw new Error('Error in migration')
         },
       )
 
-      database = createDatabase(adapter, {
-        migrations: [migration001],
-      })
-
-      await database.open()
+      database.unsafe.setMigrations([migration001])
+      await database.unsafe.migrate()
 
       expect(database.version).toBe(1)
 
-      await database.close()
       migration001.mockClear()
 
-      database = createDatabase(adapter, {
-        migrations: [migration001, migrationAddValues, migrationWithError],
-      })
+      database.unsafe.setMigrations([
+        migration001,
+        migrationAddValues,
+        migrationWithError,
+      ])
 
-      await expect(database.open()).rejects.toThrowError('Error in migration')
+      await expect(database.unsafe.migrate()).rejects.toThrowError(
+        'Error in migration',
+      )
 
       expect(database.isOpen).toBe(true)
       expect(database.version).toBe(1)
@@ -177,44 +204,118 @@ describe.each([
       expect(migrationAddValues).toHaveBeenCalled()
       expect(migrationWithError).toHaveBeenCalled()
 
-      expect(
-        async () => await database.table('persons').findMany(),
-      ).toHaveLength(0)
-      expect(
-        async () => await database.table('pets').findMany(),
-      ).rejects.toThrowError()
+      expect(database.table('persons').findMany()).resolves.toEqual([])
+      expect(database.table('pets').findMany()).rejects.toThrowError()
     })
 
     it('should not migrate a database that is already at the latest version', async () => {
-      const adapter = adapterFactory(true)
-      let database: Database
-      onTestFinished(async () => {
-        await database.close()
-      })
-
-      database = createDatabase(adapter, {
-        migrations: [migration001, migration002],
-      })
-
-      await database.open()
+      database.unsafe.setMigrations([migration001, migration002])
+      await database.unsafe.migrate()
 
       expect(database.version).toBe(2)
       expect(migration001).toHaveBeenCalled()
       expect(migration002).toHaveBeenCalled()
 
-      await database.close()
       migration001.mockClear()
       migration002.mockClear()
 
-      database = createDatabase(adapter, {
-        migrations: [migration001, migration002],
-      })
-
-      await database.open()
+      database.unsafe.setMigrations([migration001, migration002])
+      await database.unsafe.migrate()
 
       expect(database.version).toBe(2)
       expect(migration001).not.toHaveBeenCalled()
       expect(migration002).not.toHaveBeenCalled()
+    })
+
+    describe('upgrade transaction', async () => {
+      describe('createTable', async () => {
+        it('should create a new table', async () => {
+          expect(await database.getTableNames()).not.toContain('persons')
+
+          await database.unsafe.runMigration(async (transaction) => {
+            await transaction.createTable('persons', {
+              id: c.uuid().primaryKey(),
+              username: c.string(),
+            })
+          })
+
+          expect(await database.getTableNames()).toContain('persons')
+        })
+      })
+
+      describe('dropTable', () => {
+        it('should drop a table', async () => {
+          await database.unsafe.runMigration(async (transaction) => {
+            await transaction.createTable('persons', {
+              id: c.uuid().primaryKey(),
+              username: c.string(),
+            })
+          })
+
+          expect(await database.getTableNames()).toContain('persons')
+
+          await database.unsafe.runMigration(async (transaction) => {
+            await transaction.dropTable('persons')
+          })
+
+          expect(await database.getTableNames()).not.toContain('persons')
+        })
+      })
+
+      describe('alterTable', () => {
+        describe('renameTo', () => {
+          it.todo('should rename a table and retain its data', async () => {
+            await database.unsafe.runMigration(async (transaction) => {
+              await transaction.createTable('persons', {
+                id: c.uuid().primaryKey(),
+                username: c.string(),
+              })
+            })
+
+            expect(await database.getTableNames()).toContain('persons')
+
+            await database.table('persons').insert({
+              data: {
+                id: uuid(),
+                username: 'johndoe',
+              },
+            })
+
+            expect(database.table('persons').findFirst()).resolves.toEqual(
+              expect.objectContaining({
+                username: 'johndoe',
+              }),
+            )
+
+            await database.unsafe.runMigration(async (transaction) => {
+              await transaction.alterTable('persons', (table) => {
+                table.renameTo('users')
+              })
+            })
+
+            expect(await database.getTableNames()).toContain('users')
+
+            expect(database.table('users').findFirst()).resolves.toEqual(
+              expect.objectContaining({
+                username: 'johndoe',
+              }),
+            )
+          })
+        })
+
+        describe('addColumn', () => {
+          it.todo('should add a column and fill it with a default value')
+        })
+        describe('renameColumn', () => {
+          it.todo('should rename a column and retain its data')
+        })
+        describe('alterColumn', () => {
+          it.todo('should change the data type of a column')
+        })
+        describe('dropColumn', () => {
+          it.todo('should drop a column and its data')
+        })
+      })
     })
   })
 

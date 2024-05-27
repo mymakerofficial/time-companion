@@ -169,4 +169,11 @@ export class PGLiteDatabaseAdapter
       (name) => !name.startsWith('__') && !name.endsWith('__'),
     )
   }
+
+  async truncateDatabase(): Promise<void> {
+    check(isNotNull(this.db), 'Database is not open.')
+
+    await this.db.exec('DROP SCHEMA public CASCADE; CREATE SCHEMA public;')
+    await this.runInitialUpgrade()
+  }
 }

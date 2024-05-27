@@ -157,4 +157,19 @@ export class IdbDatabaseAdapter implements DatabaseAdapter {
       resolve(toArray(this.database.objectStoreNames))
     })
   }
+
+  truncateDatabase(): Promise<void> {
+    return new Promise(async (resolve) => {
+      check(isNotNull(this.database), 'Database is not open.')
+
+      await this.closeDatabase()
+
+      const request = this.indexedDB.deleteDatabase(this.databaseName)
+
+      request.onsuccess = async () => {
+        await this.openDatabase()
+        resolve()
+      }
+    })
+  }
 }

@@ -201,6 +201,29 @@ export type DatabasePublisherTopics = {
 
 export type DatabasePublisherEvent = {}
 
+export interface UnsafeDatabase<TSchema extends DatabaseSchema = {}> {
+  /*
+   * Truncates the database, removing all data and resetting the version to 0.
+   * **This is not recommended for production use!**
+   */
+  truncate(): Promise<void>
+  /***
+   * Migrates the database to the newest version. Behaves like `open` but does not open the database.
+   * **This is not recommended for production use!**
+   */
+  migrate(): Promise<void>
+  /***
+   * Adds a single migration and immediately runs it.
+   * **This is not recommended for production use!**
+   */
+  runMigration(migrationFn: MigrationFunction): Promise<void>
+  /***
+   * Set the migrations to be used by the database when opened.
+   * **This is not recommended for production use!**
+   */
+  setMigrations(migrations: DatabaseConfig<TSchema>['migrations']): void
+}
+
 export interface Database<TSchema extends DatabaseSchema = {}>
   extends TableFactory {
   readonly isOpen: boolean
@@ -223,7 +246,13 @@ export interface Database<TSchema extends DatabaseSchema = {}>
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>
   /***
-   * @deprecated will be removed in the future in favor of getting the schema
+   * Gain access to unsafe database operations.
+   * **This is not recommended for production use!**
+   */
+  readonly unsafe: UnsafeDatabase<TSchema>
+  /***
+   * Gets the names of all tables that currently exist in the database.
+   * **Note**: this might be out of sync with the provided schema.
    */
   getTableNames(): Promise<Array<string>>
 

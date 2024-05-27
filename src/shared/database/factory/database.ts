@@ -6,6 +6,7 @@ import type {
   MigrationFunction,
   Table,
   Transaction,
+  UnsafeDatabase,
   UpgradeTransaction,
 } from '@shared/database/types/database'
 import type { DatabaseAdapter } from '@shared/database/types/adapter'
@@ -81,16 +82,13 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
     }
   }
 
-  async open(): Promise<void> {
-    const info = await this.adapter.openDatabase()
+  protected async migrate(): Promise<void> {
+    const currentVersion = this.version + 1
 
-    // 1 is the default if the database does not exist or has not been migrated yet
-    const currentVersion = isNotNull(info) ? info.version : 1
-
-    // the user facing version is always one less than the actual version
-    this._version = currentVersion - 1
-
-    check(currentVersion <= this.targetVersion, 'Database version is too high.')
+    check(
+      currentVersion <= this.targetVersion,
+      `Database version is too high. Tried to migrate to version "${this.targetVersion - 1}" but current version is "${currentVersion - 1}".`,
+    )
 
     if (currentVersion < this.targetVersion) {
       this.publisher.notify({ type: 'migrationsStarted' }, {})
@@ -128,6 +126,18 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
     })
   }
 
+  async open(): Promise<void> {
+    const info = await this.adapter.openDatabase()
+
+    // 1 is the default if the database does not exist or has not been migrated yet
+    const currentVersion = isNotNull(info) ? info.version : 1
+
+    // the user facing version is always one less than the actual version
+    this._version = currentVersion - 1
+
+    await this.migrate()
+  }
+
   async close(): Promise<void> {
     return await this.adapter.closeDatabase().then(() => {
       this._version = 0
@@ -148,6 +158,28 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
         await transaction.commit()
         return result
       })
+  }
+
+  get unsafe(): UnsafeDatabase {
+    return {
+      truncate: async (): Promise<void> => {
+        await this.adapter.truncateDatabase()
+        this._version = 0
+      },
+
+      migrate: async (): Promise<void> => {
+        await this.migrate()
+      },
+
+      runMigration: async (migrationFn: MigrationFunction): Promise<void> => {
+        this.config.migrations.push(migrationFn)
+        await this.migrate()
+      },
+
+      setMigrations: (migrations: DatabaseConfig<TSchema>['migrations']) => {
+        this.config.migrations = migrations
+      },
+    }
   }
 
   table<
