@@ -39,18 +39,12 @@ function byAge(a: Person, b: Person) {
 
 describe.each([
   ['IndexedDB', () => indexedDBAdapter(`test-database-${uuid()}`)],
-  [
-    'PGLite',
-    (requirePersist: boolean) =>
-      pgliteAdapter(
-        `${requirePersist ? 'idb' : 'memory'}://test-database-${uuid()}`,
-      ),
-  ],
+  ['PGLite', () => pgliteAdapter(`memory://test-database-${uuid()}`)],
 ])('Adapter "%s"', (adapterName, adapterFactory) => {
   describe('unsafe', () => {
     describe('truncate', () => {
       it('should reset the database', async () => {
-        const database = createDatabase(adapterFactory(false), {
+        const database = createDatabase(adapterFactory(), {
           migrations: [
             async (_) => {},
             async (transaction) => {
@@ -86,7 +80,7 @@ describe.each([
     )
 
     it('should open a new database and run all migration', async () => {
-      const database = createDatabase(adapterFactory(false), {
+      const database = createDatabase(adapterFactory(), {
         migrations: [],
       })
 
@@ -122,7 +116,7 @@ describe.each([
     let database: Database
 
     beforeAll(async () => {
-      database = createDatabase(adapterFactory(false), {
+      database = createDatabase(adapterFactory(), {
         migrations: [],
       })
 
@@ -390,7 +384,7 @@ describe.each([
 
   describe('queries', () => {
     const { database, helpers, personsTable, petsTable } = useDatabaseFixtures({
-      database: createDatabase(adapterFactory(false), config),
+      database: createDatabase(adapterFactory(), config),
     })
 
     beforeAll(async () => {
