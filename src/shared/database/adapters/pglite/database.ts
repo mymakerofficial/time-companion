@@ -59,16 +59,20 @@ export class PGLiteDatabaseAdapter
   protected async getDatabaseVersion(): Promise<number> {
     check(isNotNull(this.db), 'Database is not open.')
 
-    const res = await this.db.query<{
-      version: number
-    }>(
-      this.knex
-        .select('version')
-        .from('__migrations__')
-        .orderBy('version', 'desc')
-        .limit(1)
-        .toQuery(),
-    )
+    const res = await this.db
+      .query<{
+        version: number
+      }>(
+        this.knex
+          .select('version')
+          .from('__migrations__')
+          .orderBy('version', 'desc')
+          .limit(1)
+          .toQuery(),
+      )
+      .catch(() => {
+        return { rows: [] }
+      })
 
     check(isNotEmpty(res.rows), 'Database version not found.')
 
@@ -156,8 +160,7 @@ export class PGLiteDatabaseAdapter
       `
         select "tablename" 
         from "pg_catalog"."pg_tables" 
-        where not "schemaname" = 'pg_catalog' 
-          and not "schemaname" = 'information_schema'
+        where "schemaname" = 'public' 
       `,
     )
 

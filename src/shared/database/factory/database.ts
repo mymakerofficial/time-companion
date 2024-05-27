@@ -108,15 +108,16 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
       const transaction: UpgradeTransaction =
         new DatabaseUpgradeTransactionImpl(transactionAdapter)
 
-      try {
-        await this.runMigrations(migrations, transaction)
-        await transactionAdapter.commit()
-        this.publisher.notify({ type: 'migrationsFinished' }, {})
-      } catch (error) {
-        await transactionAdapter.rollback()
-        this.publisher.notify({ type: 'migrationFailed' }, {})
-        throw error
-      }
+      await this.runMigrations(migrations, transaction)
+        .catch(async (error) => {
+          await transactionAdapter.rollback()
+          this.publisher.notify({ type: 'migrationFailed' }, {})
+          throw error
+        })
+        .then(async () => {
+          await transactionAdapter.commit()
+          this.publisher.notify({ type: 'migrationsFinished' }, {})
+        })
     } else {
       this.publisher.notify({ type: 'migrationsSkipped' }, {})
     }
@@ -127,6 +128,8 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
   }
 
   async open(): Promise<void> {
+    check(!this.isOpen, 'Database is already open.')
+
     const info = await this.adapter.openDatabase()
 
     // 1 is the default if the database does not exist or has not been migrated yet
@@ -167,8 +170,8 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
         this._version = 0
       },
 
-      migrate: async (): Promise<void> => {
-        await this.migrate()
+      migrate: (): Promise<void> => {
+        return this.migrate()
       },
 
       runMigration: async (migrationFn: MigrationFunction): Promise<void> => {

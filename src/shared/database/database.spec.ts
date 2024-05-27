@@ -47,7 +47,7 @@ describe.each([
       ),
   ],
 ])('Adapter "%s"', (_, adapterFactory) => {
-  describe.skip('unsafe', () => {
+  describe('unsafe', () => {
     describe('truncate', () => {
       it('should reset the database', async () => {
         const database = createDatabase(adapterFactory(false), {
@@ -155,8 +155,8 @@ describe.each([
       expect(migration002).toHaveBeenCalled()
     })
 
-    it.todo('should rollback the migration if an error occurs', async () => {
-      const migrationAddValues = vi.fn(
+    it('should rollback the migration if an error occurs', async () => {
+      const migrationWithInsert = vi.fn(
         async (transaction: UpgradeTransaction) => {
           await transaction.table<Person>('persons').insert({
             data: {
@@ -181,6 +181,14 @@ describe.each([
         },
       )
 
+      const migrationWithCreateTable = vi.fn(
+        async (transaction: UpgradeTransaction) => {
+          await transaction.createTable('foo', {
+            id: c.uuid().primaryKey(),
+          })
+        },
+      )
+
       database.unsafe.setMigrations([migration001])
       await database.unsafe.migrate()
 
@@ -190,8 +198,9 @@ describe.each([
 
       database.unsafe.setMigrations([
         migration001,
-        migrationAddValues,
+        migrationWithInsert,
         migrationWithError,
+        migrationWithCreateTable,
       ])
 
       await expect(database.unsafe.migrate()).rejects.toThrowError(
@@ -201,11 +210,11 @@ describe.each([
       expect(database.isOpen).toBe(true)
       expect(database.version).toBe(1)
       expect(migration001).not.toHaveBeenCalled()
-      expect(migrationAddValues).toHaveBeenCalled()
+      expect(migrationWithInsert).toHaveBeenCalled()
       expect(migrationWithError).toHaveBeenCalled()
+      expect(migrationWithCreateTable).not.toHaveBeenCalled()
 
-      expect(database.table('persons').findMany()).resolves.toEqual([])
-      expect(database.table('pets').findMany()).rejects.toThrowError()
+      expect(await database.getTableNames()).toEqual(['persons'])
     })
 
     it('should not migrate a database that is already at the latest version', async () => {
