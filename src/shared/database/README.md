@@ -457,6 +457,47 @@ export default defineMigration(async (transaction) => {
 })
 ```
 
+## Performance
+
+### Range
+
+**This is only relevant for IndexedDB.**
+
+To improve IndexedDB performance you can use the `range` property.
+
+Because `where` filters are only applied after a cursor has been opened, 
+we are forced to start the cursor at the beginning of the table and filter the results in memory.
+
+Using `range` we can specify a smaller range of values to search in.
+
+```ts
+const res = await this.database.table(personsTable).findFirst({
+  range: personsTable.id.range.only(id),
+  where: personsTable.deletedAt.isNull(),
+})
+```
+
+When not using IndexedDB the `range` and `where` properties are combined with an `AND` operator.
+
+### Range and Ordering
+
+**This is only relevant for IndexedDB.**
+
+Because sorting by an index and using a ranged query are essentially the same operation,
+we have to choose between using the range or the index.
+To avoid this problem we always prefer the range and sort the results in memory instead of using the index.
+
+**Note:** Using an orderBy column that is different from the range column will degrade performance 
+because the results needs to be sorted in memory.
+
+The following example will work but might be slow because the age index will not be used to sort the results.
+```ts
+const res = await this.database.table(personsTable).findMany({
+  range: personsTable.createdAt.range.greaterThanOrEquals(date),
+  orderBy: personsTable.age.desc(),
+})
+```
+
 ## `defineTable` vs `createTable`
 
 `defineTable` and `createTable` look the same but have different purposes.
