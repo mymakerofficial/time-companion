@@ -9,7 +9,7 @@ import type {
 } from '@shared/database/types/adapter'
 import type { DatabaseCursor } from '../../types/cursor'
 import { toArray } from '@shared/lib/utils/list'
-import { check, isAbsent, isNotNull } from '@shared/lib/utils/checks'
+import { isNotNull, isNull } from '@shared/lib/utils/checks'
 import { getOrDefault, getOrNull } from '@shared/lib/utils/result'
 import { filteredIterator } from '@shared/database/helpers/filteredIterator'
 import { cursorIterator } from '@shared/database/helpers/cursorIterator'
@@ -20,6 +20,11 @@ import type {
 } from '@shared/database/types/database'
 import { IndexedDBCursorImpl } from '@shared/database/adapters/indexedDB/helpers/cursor'
 import { IDBKeyRange } from 'fake-indexeddb'
+import { directionToIdbCursorDirection } from '@shared/database/adapters/indexedDB/helpers/directionToIdbCursorDirection'
+import {
+  iteratorToList,
+  iteratorToSortedList,
+} from '@shared/database/helpers/iteratorToList'
 
 export class IdbQueryableTableAdapter<TRow extends object>
   implements QueryableTableAdapter<TRow>
@@ -28,25 +33,14 @@ export class IdbQueryableTableAdapter<TRow extends object>
 
   protected async openIterator(props: Partial<AdapterBaseQueryProps>) {
     const indexes = toArray(this.objectStore.indexNames)
-    const primaryKey = this.objectStore.keyPath
-
-    check(
-      isAbsent(props.orderBy) ||
-        props.orderBy.column.columnName === primaryKey ||
-        indexes.includes(props.orderBy.column.columnName!),
-      `Failed to order by column "${props.orderBy?.column.columnName}". Column must either be indexed or the primary key.`,
-    )
-
-    check(
-      isAbsent(props.range) ||
-        props.range.column.columnName === primaryKey ||
-        indexes.includes(props.range.column.columnName!),
-      `Failed to apply range from column "${props.orderBy?.column.columnName}". Column must either be indexed or the primary key.`,
-    )
 
     const byColumn = getOrNull(
       props.orderBy?.column.columnName ?? props.range?.column.columnName,
     )
+
+    const isNotIndexed = isNull(byColumn) || !indexes.includes(byColumn)
+
+    const indexName = isNotIndexed ? null : byColumn
 
     const direction = getOrDefault(props.orderBy?.direction, 'asc')
 
@@ -55,13 +49,14 @@ export class IdbQueryableTableAdapter<TRow extends object>
     const limit = getOrDefault(props.limit, Infinity)
     const offset = getOrDefault(props.offset, 0)
 
-    const cursor = await this.openCursor(
-      byColumn === primaryKey ? null : byColumn,
-      direction,
-      range,
-    )
+    const cursor = await this.openCursor(indexName, direction, range)
 
-    return filteredIterator(cursorIterator(cursor), where, limit, offset)
+    return {
+      iterator: filteredIterator(cursorIterator(cursor), where, limit, offset),
+      byColumn: byColumn as Nullable<keyof TRow>,
+      direction,
+      isNotIndexed,
+    }
   }
 
   protected openCursor(
@@ -74,10 +69,6 @@ export class IdbQueryableTableAdapter<TRow extends object>
         ? this.objectStore.index(indexName)
         : this.objectStore
 
-      const cursorDirection = direction === 'desc' ? 'prev' : 'next'
-
-      this.objectStore.openKeyCursor()
-
       const query = isNotNull(keyRange)
         ? IDBKeyRange.bound(
             keyRange.lower,
@@ -86,6 +77,8 @@ export class IdbQueryableTableAdapter<TRow extends object>
             keyRange.upperOpen,
           )
         : null
+
+      const cursorDirection = directionToIdbCursorDirection(direction)
 
       const request = indexOrObjectStore.openCursor(query, cursorDirection)
 
@@ -105,18 +98,23 @@ export class IdbQueryableTableAdapter<TRow extends object>
   }
 
   async select(props: AdapterSelectProps<TRow>): Promise<Array<TRow>> {
-    const iterator = await this.openIterator(props)
+    const { iterator, isNotIndexed, byColumn, direction } =
+      await this.openIterator(props)
 
-    const results = []
-    for await (const cursor of iterator) {
-      results.push(cursor.value)
+    if (isNotIndexed && isNotNull(byColumn)) {
+      const compareFn =
+        direction === 'asc'
+          ? (a: TRow, b: TRow) => (a[byColumn] > b[byColumn] ? 1 : -1)
+          : (a: TRow, b: TRow) => (a[byColumn] < b[byColumn] ? 1 : -1)
+
+      return await iteratorToSortedList(iterator, compareFn)
+    } else {
+      return await iteratorToList(iterator)
     }
-
-    return results
   }
 
   async update(props: AdapterUpdateProps<TRow>): Promise<Array<TRow>> {
-    const iterator = await this.openIterator(props)
+    const { iterator } = await this.openIterator(props)
 
     const results = []
     for await (const cursor of iterator) {
@@ -128,7 +126,7 @@ export class IdbQueryableTableAdapter<TRow extends object>
   }
 
   async delete(props: AdapterDeleteProps<TRow>): Promise<void> {
-    const iterator = await this.openIterator(props)
+    const { iterator } = await this.openIterator(props)
 
     for await (const cursor of iterator) {
       await cursor.delete()

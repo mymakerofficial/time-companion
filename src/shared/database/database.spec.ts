@@ -33,8 +33,20 @@ function byFirstName(a: Person, b: Person) {
   return a.firstName.localeCompare(b.firstName)
 }
 
+function byLastName(a: Person, b: Person) {
+  return a.lastName.localeCompare(b.lastName)
+}
+
 function byAge(a: Person, b: Person) {
   return a.age - b.age
+}
+
+function whereFirstNameEquals(firstName: string) {
+  return (person: Person) => person.firstName === firstName
+}
+
+function whereAgeGreaterThanOrEqual(age: number) {
+  return (person: Person) => person.age >= age
 }
 
 describe.each([
@@ -649,7 +661,7 @@ describe.each([
           ])
         })
 
-        it('should find all entries in a table ordered by indexed key ascending', async () => {
+        it('should return all rows ordered by indexed column ascending', async () => {
           const samplePersons = await helpers.insertSamplePersons(6)
 
           const res = await database.table(personsTable).findMany({
@@ -659,7 +671,7 @@ describe.each([
           expect(res).toEqual(samplePersons.sort(byFirstName))
         })
 
-        it('should find all entries in a table ordered by indexed key descending', async () => {
+        it('should return all rows ordered by indexed column descending', async () => {
           const samplePersons = await helpers.insertSamplePersons(6)
 
           const res = await database.table(personsTable).findMany({
@@ -669,15 +681,55 @@ describe.each([
           expect(res).toEqual(samplePersons.sort(byFirstName).reverse())
         })
 
-        it.todo('should fail when ordering by un-indexed key', async () => {
-          await helpers.insertSamplePersons(6)
+        it('should return rows with filter ordered by indexed column', async () => {
+          const samplePersons = await helpers.insertSamplePersons(6, {
+            age: [10, 30, 40, 60],
+          })
 
-          expect(
-            database.table(personsTable).findMany({
-              orderBy: personsTable.lastName.asc(),
-            }),
-          ).rejects.toThrowError(
-            'Failed to order by column "lastName". Column must either be indexed or the primary key.',
+          const res = await database.table(personsTable).findMany({
+            where: personsTable.age.greaterThanOrEquals(36),
+            orderBy: personsTable.firstName.asc(),
+          })
+
+          expect(res).toEqual(
+            samplePersons
+              .filter(whereAgeGreaterThanOrEqual(36))
+              .sort(byFirstName),
+          )
+        })
+
+        it('should return all rows ordered by un-indexed column ascending', async () => {
+          const samplePersons = await helpers.insertSamplePersons(12)
+
+          const res = await database.table(personsTable).findMany({
+            orderBy: personsTable.lastName.asc(),
+          })
+
+          expect(res).toEqual(samplePersons.sort(byLastName))
+        })
+
+        it('should return all rows ordered by un-indexed column descending', async () => {
+          const samplePersons = await helpers.insertSamplePersons(12)
+
+          const res = await database.table(personsTable).findMany({
+            orderBy: personsTable.lastName.desc(),
+          })
+
+          expect(res).toEqual(samplePersons.sort(byLastName).reverse())
+        })
+
+        it('should return rows with filter ordered by un-indexed column', async () => {
+          const samplePersons = await helpers.insertSamplePersons(12, {
+            firstName: ['John', 'Jane'],
+          })
+
+          const res = await database.table(personsTable).findMany({
+            where: personsTable.firstName.equals('John'),
+            orderBy: personsTable.lastName.asc(),
+          })
+
+          expect(res).toEqual(
+            samplePersons.filter(whereFirstNameEquals('John')).sort(byLastName),
           )
         })
 

@@ -1,10 +1,10 @@
-import type { DatabaseIteratedCursor } from '@shared/database/helpers/cursorIterator'
 import { wherePredicate } from '@shared/database/helpers/wherePredicate'
 import type { RawWhere } from '@shared/database/types/schema'
 import type { Nullable } from '@shared/lib/utils/types'
+import type { DatabaseIterator } from '@shared/database/types/cursor'
 
 export async function* filteredIterator<TRow extends object>(
-  iterator: AsyncGenerator<DatabaseIteratedCursor<TRow>>,
+  iterator: DatabaseIterator<TRow>,
   where: Nullable<RawWhere>,
   limit: number = Infinity,
   offset: number = 0,

@@ -7,3 +7,14 @@ export interface DatabaseCursor<TRow extends object> {
   continue(): Promise<void>
   close(): void
 }
+
+export type DatabaseCursorWithValue<TRow extends object> = Omit<
+  DatabaseCursor<TRow>,
+  'continue' | 'value'
+> & {
+  readonly value: TRow
+}
+
+export type DatabaseIterator<TRow extends object> = AsyncGenerator<
+  DatabaseCursorWithValue<TRow>
+>
