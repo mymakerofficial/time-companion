@@ -9,7 +9,7 @@ import type {
 } from '@shared/database/types/adapter'
 import type { DatabaseCursor } from '../../types/cursor'
 import { toArray } from '@shared/lib/utils/list'
-import { isNotNull, isNull } from '@shared/lib/utils/checks'
+import { check, isNotNull, isNull, isUndefined } from '@shared/lib/utils/checks'
 import { getOrDefault, getOrNull } from '@shared/lib/utils/result'
 import { filteredIterator } from '@shared/database/helpers/filteredIterator'
 import { cursorIterator } from '@shared/database/helpers/cursorIterator'
@@ -33,14 +33,46 @@ export class IdbQueryableTableAdapter<TRow extends object>
 
   protected async openIterator(props: Partial<AdapterBaseQueryProps>) {
     const indexes = toArray(this.objectStore.indexNames)
+    const primaryKey = this.objectStore.keyPath
 
-    const byColumn = getOrNull(
-      props.orderBy?.column.columnName ?? props.range?.column.columnName,
+    // if the range or orderBy column is the primary key, make it null
+    //  we use null to indicate that we should not use an index
+    //  but use the object store itself
+
+    // undefined means there is actually no value
+
+    const rangeColumn =
+      props.range?.column.columnName !== primaryKey
+        ? props.range?.column.columnName
+        : null
+    const orderByColumn =
+      props.orderBy?.column.columnName !== primaryKey
+        ? props.orderBy?.column.columnName
+        : null
+
+    check(
+      isNull(rangeColumn) ||
+        isUndefined(rangeColumn) ||
+        indexes.includes(rangeColumn),
+      'Range column must be indexed or primary key.',
     )
 
-    const isNotIndexed = isNull(byColumn) || !indexes.includes(byColumn)
+    // we prefer the range column over the orderBy column
+    //  if both are given, we need to sort manually later
+    const keyPath = rangeColumn ?? orderByColumn ?? null
 
-    const indexName = isNotIndexed ? null : byColumn
+    const keyPathIsIndex = isNotNull(keyPath)
+      ? indexes.includes(keyPath)
+      : false
+
+    // we need to manually sort if a range is given that doesn't match the orderBy column
+    //  or if the orderBy column is not indexed
+    const requiresManualSort =
+      !keyPathIsIndex ||
+      (isNotNull(rangeColumn) && rangeColumn !== orderByColumn)
+
+    // null means we sort by primary key
+    const indexName = keyPathIsIndex ? keyPath : null
 
     const direction = getOrDefault(props.orderBy?.direction, 'asc')
 
@@ -49,13 +81,15 @@ export class IdbQueryableTableAdapter<TRow extends object>
     const limit = getOrDefault(props.limit, Infinity)
     const offset = getOrDefault(props.offset, 0)
 
+    // we have now planned the query and can finally open the cursor
+
     const cursor = await this.openCursor(indexName, direction, range)
 
     return {
       iterator: filteredIterator(cursorIterator(cursor), where, limit, offset),
-      byColumn: byColumn as Nullable<keyof TRow>,
+      byColumn: orderByColumn as Nullable<keyof TRow>,
       direction,
-      isNotIndexed,
+      requiresManualSort,
     }
   }
 
@@ -69,8 +103,9 @@ export class IdbQueryableTableAdapter<TRow extends object>
         ? this.objectStore.index(indexName)
         : this.objectStore
 
-      const query = isNotNull(keyRange)
+      const range = isNotNull(keyRange)
         ? IDBKeyRange.bound(
+            // turn the key range into a key range... but different
             keyRange.lower,
             keyRange.upper,
             keyRange.lowerOpen,
@@ -80,7 +115,7 @@ export class IdbQueryableTableAdapter<TRow extends object>
 
       const cursorDirection = directionToIdbCursorDirection(direction)
 
-      const request = indexOrObjectStore.openCursor(query, cursorDirection)
+      const request = indexOrObjectStore.openCursor(range, cursorDirection)
 
       request.onsuccess = () => {
         const cursor = new IndexedDBCursorImpl<TRow>(
@@ -98,10 +133,10 @@ export class IdbQueryableTableAdapter<TRow extends object>
   }
 
   async select(props: AdapterSelectProps<TRow>): Promise<Array<TRow>> {
-    const { iterator, isNotIndexed, byColumn, direction } =
+    const { iterator, requiresManualSort, byColumn, direction } =
       await this.openIterator(props)
 
-    if (isNotIndexed && isNotNull(byColumn)) {
+    if (requiresManualSort && isNotNull(byColumn)) {
       const compareFn =
         direction === 'asc'
           ? (a: TRow, b: TRow) => (a[byColumn] > b[byColumn] ? 1 : -1)

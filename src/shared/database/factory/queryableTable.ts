@@ -13,7 +13,7 @@ import type { QueryableTableAdapter } from '@shared/database/types/adapter'
 import { getOrNull } from '@shared/lib/utils/result'
 import type { RawWhere, WhereBuilder } from '@shared/database/types/schema'
 import { isNotDefined } from '@renderer/lib/utils'
-import { check, isDefined } from '@shared/lib/utils/checks'
+import { isDefined } from '@shared/lib/utils/checks'
 
 export class DatabaseQueryableTableImpl<TRow extends object>
   implements QueryableTable<TRow>
@@ -41,17 +41,6 @@ export class DatabaseQueryableTableImpl<TRow extends object>
   }
 
   async findMany(props?: FindManyProps<TRow>): Promise<Array<TRow>> {
-    if (isDefined(props?.orderBy) && isDefined(props?.range)) {
-      check(
-        props?.orderBy.column.columnName === props?.range.column.columnName,
-        `If 'range' and 'orderBy' are provided they must be on the same column.`,
-      )
-      check(
-        props?.orderBy.column.tableName === props?.range.column.tableName,
-        `If 'range' and 'orderBy' are provided they must be from the same table.`,
-      )
-    }
-
     return await this.tableAdapter.select({
       orderBy: getOrNull(props?.orderBy),
       range: getOrNull(props?.range),

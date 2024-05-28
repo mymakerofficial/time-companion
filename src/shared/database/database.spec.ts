@@ -661,6 +661,33 @@ describe.each([
           ])
         })
 
+        it('should sort by orderBy even if a range with a different column is provided', async () => {
+          await helpers.insertSamplePersons(6, {
+            firstName: ['Frank', 'Bob', 'Alice', 'Eve', 'David', 'Charlie'],
+            age: [10, 20, 30, 40, 50, 60],
+          })
+
+          const res = await database.table(personsTable).findMany({
+            orderBy: personsTable.firstName.asc(),
+            range: personsTable.age.range.between(20, 40),
+          })
+
+          expect(res).toEqual([
+            expect.objectContaining({
+              firstName: 'Alice',
+              age: 30,
+            }),
+            expect.objectContaining({
+              firstName: 'Bob',
+              age: 20,
+            }),
+            expect.objectContaining({
+              firstName: 'Eve',
+              age: 40,
+            }),
+          ])
+        })
+
         it('should return all rows ordered by indexed column ascending', async () => {
           const samplePersons = await helpers.insertSamplePersons(6)
 
@@ -719,7 +746,7 @@ describe.each([
         })
 
         it('should return all rows ordered by un-indexed column ascending', async () => {
-          const samplePersons = await helpers.insertSamplePersons(12)
+          const samplePersons = await helpers.insertSamplePersons(6)
 
           const res = await database.table(personsTable).findMany({
             orderBy: personsTable.lastName.asc(),
@@ -729,7 +756,7 @@ describe.each([
         })
 
         it('should return all rows ordered by un-indexed column descending', async () => {
-          const samplePersons = await helpers.insertSamplePersons(12)
+          const samplePersons = await helpers.insertSamplePersons(6)
 
           const res = await database.table(personsTable).findMany({
             orderBy: personsTable.lastName.desc(),
@@ -739,7 +766,7 @@ describe.each([
         })
 
         it('should return rows with filter ordered by un-indexed column', async () => {
-          const samplePersons = await helpers.insertSamplePersons(12, {
+          const samplePersons = await helpers.insertSamplePersons(6, {
             firstName: ['John', 'Jane'],
           })
 
@@ -751,6 +778,36 @@ describe.each([
           expect(res).toEqual(
             samplePersons.filter(whereFirstNameEquals('John')).sort(byLastName),
           )
+        })
+
+        it('should return rows ordered by un-indexed column with offset and filter', async () => {
+          await helpers.insertSamplePersons(6, {
+            age: [10, 20, 30, 40, 50, 60],
+            firstName: ['John', 'Jane', 'John', 'Jane', 'John', 'Jane'],
+            lastName: ['F', 'E', 'D', 'C', 'B', 'A'],
+          })
+
+          // going from A to F, skip everyone that is not John, then skip the first John
+          //  we are left with John D and John F
+
+          const res = await database.table(personsTable).findMany({
+            where: personsTable.firstName.equals('John'),
+            orderBy: personsTable.lastName.asc(),
+            offset: 1,
+          })
+
+          expect(res).toEqual([
+            expect.objectContaining({
+              age: 30,
+              firstName: 'John',
+              lastName: 'D',
+            }),
+            expect.objectContaining({
+              age: 10,
+              firstName: 'John',
+              lastName: 'F',
+            }),
+          ])
         })
 
         it('should only return the first n entries in a table', async () => {
