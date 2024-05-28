@@ -232,7 +232,6 @@ database.table(tableSchema).deleteAll()
 ### Odering and Limiting
 
 You can order, limit and offset the results of a query.
-**It is currently only possible to order by an indexed column.**
 
 You use a [column definition](#column-building) to specify the column to order by.
 
