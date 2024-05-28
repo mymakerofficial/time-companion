@@ -1,4 +1,4 @@
-import type { DatabaseCursor } from '@shared/database/types/adapter'
+import type { DatabaseCursor } from '@/shared/database/types/cursor'
 import type { Nullable } from '@shared/lib/utils/types'
 import { check, isNotNull } from '@shared/lib/utils/checks'
 import { toArray } from '@shared/lib/utils/list'
@@ -11,7 +11,7 @@ export class IndexedDBCursorImpl<TRow extends object>
   protected _value: Nullable<TRow> = null
 
   constructor(
-    protected readonly request: IDBRequest<IDBCursorWithValue | null>,
+    protected readonly request: IDBRequest<Nullable<IDBCursorWithValue>>,
     protected readonly primaryKey: keyof TRow,
   ) {
     this._value = getOrNull(this.cursor?.value)
@@ -21,7 +21,7 @@ export class IndexedDBCursorImpl<TRow extends object>
     return this.request.result as IDBCursorWithValue
   }
 
-  value(): Nullable<TRow> {
+  get value(): Nullable<TRow> {
     return this._value
   }
 
@@ -35,12 +35,10 @@ export class IndexedDBCursorImpl<TRow extends object>
         `Primary key cannot be changed. Tried to change columns: ${changedColumns}.`,
       )
 
-      const value = this.value()
-
-      check(isNotNull(value), 'Cursor value is null.')
+      check(isNotNull(this.value), 'Cursor value is null.')
 
       const patched: TRow = {
-        ...value,
+        ...this.value,
         ...data,
       }
 

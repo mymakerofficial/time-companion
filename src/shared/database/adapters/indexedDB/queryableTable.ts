@@ -5,9 +5,9 @@ import type {
   AdapterInsertProps,
   AdapterSelectProps,
   AdapterUpdateProps,
-  DatabaseCursor,
   QueryableTableAdapter,
 } from '@shared/database/types/adapter'
+import type { DatabaseCursor } from '../../types/cursor'
 import { toArray } from '@shared/lib/utils/list'
 import { check, isAbsent, isNotNull } from '@shared/lib/utils/checks'
 import { getOrDefault, getOrNull } from '@shared/lib/utils/result'
@@ -26,10 +26,7 @@ export class IdbQueryableTableAdapter<TRow extends object>
 {
   constructor(protected readonly objectStore: IDBObjectStore) {}
 
-  protected async openIterator(
-    props: Partial<AdapterBaseQueryProps>,
-    predicate?: (value: TRow) => boolean,
-  ) {
+  protected async openIterator(props: Partial<AdapterBaseQueryProps>) {
     const indexes = toArray(this.objectStore.indexNames)
     const primaryKey = this.objectStore.keyPath
 
@@ -63,13 +60,8 @@ export class IdbQueryableTableAdapter<TRow extends object>
       direction,
       range,
     )
-    return filteredIterator(
-      cursorIterator(cursor),
-      where,
-      limit,
-      offset,
-      predicate,
-    )
+
+    return filteredIterator(cursorIterator(cursor), where, limit, offset)
   }
 
   protected openCursor(
@@ -117,7 +109,7 @@ export class IdbQueryableTableAdapter<TRow extends object>
 
     const results = []
     for await (const cursor of iterator) {
-      results.push(cursor.value())
+      results.push(cursor.value)
     }
 
     return results
@@ -129,7 +121,7 @@ export class IdbQueryableTableAdapter<TRow extends object>
     const results = []
     for await (const cursor of iterator) {
       await cursor.update(props.data)
-      results.push(cursor.value())
+      results.push(cursor.value)
     }
 
     return results

@@ -1,4 +1,4 @@
-import { defineMigration } from '../database/schema/defineMigration'
+import { defineMigration } from '@shared/database/schema/defineMigration'
 import { t } from '@shared/database/schema/columnBuilder'
 
 export default defineMigration(async (transaction) => {

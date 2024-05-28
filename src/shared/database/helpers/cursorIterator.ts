@@ -1,11 +1,11 @@
 import { isNull } from '@shared/lib/utils/checks'
-import type { DatabaseCursor } from '@shared/database/types/adapter'
+import type { DatabaseCursor } from '@shared/database/types/cursor'
 
 export type DatabaseIteratedCursor<TRow extends object> = Omit<
   DatabaseCursor<TRow>,
   'continue' | 'value'
 > & {
-  value: () => TRow
+  readonly value: TRow
 }
 
 export async function* cursorIterator<TRow extends object>(
@@ -13,7 +13,7 @@ export async function* cursorIterator<TRow extends object>(
 ): AsyncGenerator<DatabaseIteratedCursor<TRow>> {
   try {
     while (true) {
-      if (isNull(cursor.value())) {
+      if (isNull(cursor.value)) {
         break
       }
 

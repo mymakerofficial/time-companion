@@ -8,7 +8,6 @@ export async function* filteredIterator<TRow extends object>(
   where: Nullable<RawWhere>,
   limit: number = Infinity,
   offset: number = 0,
-  predicate?: (value: TRow) => boolean,
 ) {
   const matches = wherePredicate(where)
 
@@ -23,11 +22,7 @@ export async function* filteredIterator<TRow extends object>(
       break
     }
 
-    if (predicate && !predicate(cursor.value())) {
-      continue
-    }
-
-    if (!matches(cursor.value())) {
+    if (!matches(cursor.value)) {
       continue
     }
 

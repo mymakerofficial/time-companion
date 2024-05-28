@@ -10,14 +10,6 @@ export type DatabaseInfo = {
   version: number
 }
 
-export interface DatabaseCursor<TRow extends object> {
-  value(): Nullable<TRow>
-  update(data: Partial<TRow>): Promise<void>
-  delete(): Promise<void>
-  continue(): Promise<void>
-  close(): void
-}
-
 type HasOrder = {
   orderBy: Nullable<OrderBy>
 }
