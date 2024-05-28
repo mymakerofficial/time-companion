@@ -13,16 +13,17 @@ export async function* filteredIterator<TRow extends object>(
 
   let count = 0
   for await (const cursor of iterator) {
-    if (count < offset) {
-      count++
-      continue
-    }
-
     if (count >= limit + offset) {
       break
     }
 
     if (!matches(cursor.value)) {
+      continue
+    }
+
+    // check the offset **after** filtering
+    if (count < offset) {
+      count++
       continue
     }
 

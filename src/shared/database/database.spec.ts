@@ -698,6 +698,26 @@ describe.each([
           )
         })
 
+        it('should return rows ordered by indexed column with offset and filter', async () => {
+          await helpers.insertSamplePersons(6, {
+            age: [10, 20, 30, 40, 50, 60],
+            firstName: ['John', 'Jane'],
+          })
+
+          const res = await database.table(personsTable).findMany({
+            where: personsTable.firstName.equals('John'),
+            orderBy: personsTable.age.asc(),
+            offset: 2,
+          })
+
+          expect(res).toEqual([
+            expect.objectContaining({
+              age: 50,
+              firstName: 'John',
+            }),
+          ])
+        })
+
         it('should return all rows ordered by un-indexed column ascending', async () => {
           const samplePersons = await helpers.insertSamplePersons(12)
 
