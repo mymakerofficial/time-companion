@@ -320,7 +320,7 @@ describe.each([
         })
       })
 
-      describe.skipIf(adapterName === 'IndexedDB')('alterTable', () => {
+      describe('alterTable', () => {
         describe('renameTo', () => {
           it('should rename a table and retain its data', async () => {
             await database.unsafe.runMigration(async (transaction) => {
@@ -363,6 +363,28 @@ describe.each([
               id: expect.any(String),
               username: 'johndoe',
             })
+          })
+
+          it.skip('should fail when trying to rename to a table that already exists', async () => {
+            // fails because migration fails but thats what we want
+
+            await database.unsafe.runMigration(async (transaction) => {
+              await transaction.createTable('foo', {
+                id: c.uuid().primaryKey(),
+              })
+
+              await transaction.createTable('bar', {
+                id: c.uuid().primaryKey(),
+              })
+            })
+
+            expect(
+              database.unsafe.runMigration(async (transaction) => {
+                await transaction.alterTable('foo', (table) => {
+                  table.renameTo('bar')
+                })
+              }),
+            ).rejects.toThrowError('Table "bar" already exists.')
           })
         })
 

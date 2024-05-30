@@ -104,3 +104,9 @@ export class DatabaseUniqueViolationError extends DatabaseError {
     )
   }
 }
+
+export class DatabaseDuplicateTableError extends DatabaseError {
+  constructor(public readonly tableName: string) {
+    super('DatabaseDuplicateTableError', `Table "${tableName}" already exists.`)
+  }
+}
