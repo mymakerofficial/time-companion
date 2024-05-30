@@ -27,6 +27,7 @@ export class IndexedDBCursorImpl<TRow extends object>
   async update(data: TRow): Promise<void> {
     check(isNotNull(this.cursor), 'Cursor is not open.')
     await promisedRequest(this.cursor.update(data))
+    this._value = data
   }
 
   delete(): Promise<void> {
