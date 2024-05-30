@@ -15,6 +15,7 @@ import {
   buildCreateTable,
 } from '@shared/database/adapters/pglite/helpers/schemaBuilder'
 import { DatabaseNotOpenError } from '@shared/database/types/errors'
+import { handlePGliteError } from '@shared/database/adapters/pglite/helpers/errors'
 
 export class PGLiteDatabaseTransactionAdapter
   extends PGLiteTableAdapterFactory
@@ -30,33 +31,37 @@ export class PGLiteDatabaseTransactionAdapter
     super(knex, tx)
   }
 
+  protected async exec(builder: Knex.SchemaBuilder) {
+    check(isNotNull(this.db), () => new DatabaseNotOpenError())
+
+    try {
+      await this.db.exec(builder.toQuery())
+    } catch (error) {
+      handlePGliteError(error)
+    }
+  }
+
   async createTable<TRow extends object>(
     schema: TableSchemaRaw<TRow>,
   ): Promise<void> {
-    check(isNotNull(this.db), () => new DatabaseNotOpenError())
-
     const builder = buildCreateTable(this.knex, schema)
 
-    await this.db.exec(builder.toQuery())
+    await this.exec(builder)
   }
 
   async dropTable(tableName: string): Promise<void> {
-    check(isNotNull(this.db), () => new DatabaseNotOpenError())
-
     const builder = this.knex.schema.dropTable(tableName)
 
-    await this.db.exec(builder.toQuery())
+    await this.exec(builder)
   }
 
   async alterTable(
     tableName: string,
     actions: Array<AlterTableAction>,
   ): Promise<void> {
-    check(isNotNull(this.db), () => new DatabaseNotOpenError())
-
     const builder = buildAlterTable(this.knex, tableName, actions)
 
-    await this.db.exec(builder.toQuery())
+    await this.exec(builder)
   }
 
   async commit(): Promise<void> {
