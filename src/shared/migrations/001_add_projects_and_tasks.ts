@@ -1,24 +1,24 @@
 import { defineMigration } from '@shared/database/schema/defineMigration'
-import { t } from '@shared/database/schema/columnBuilder'
+import { c } from '@shared/database/schema/columnBuilder'
 
 export default defineMigration(async (transaction) => {
   await transaction.createTable('projects', {
-    id: t.uuid().primaryKey(),
-    displayName: t.string().indexed(),
-    color: t.string().nullable(),
-    isBillable: t.boolean(),
-    createdAt: t.string(),
-    modifiedAt: t.string().nullable(),
-    deletedAt: t.string().nullable(),
+    id: c.uuid().primaryKey(),
+    displayName: c.string().indexed(),
+    color: c.string().nullable(),
+    isBillable: c.boolean(),
+    createdAt: c.string(),
+    modifiedAt: c.string().nullable(),
+    deletedAt: c.string().nullable(),
   })
 
   await transaction.createTable('tasks', {
-    id: t.uuid().primaryKey(),
-    projectId: t.uuid(),
-    displayName: t.string().indexed(),
-    color: t.string().nullable(),
-    createdAt: t.string(),
-    modifiedAt: t.string().nullable(),
-    deletedAt: t.string().nullable(),
+    id: c.uuid().primaryKey(),
+    projectId: c.uuid(),
+    displayName: c.string().indexed(),
+    color: c.string().nullable(),
+    createdAt: c.string(),
+    modifiedAt: c.string().nullable(),
+    deletedAt: c.string().nullable(),
   })
 })
