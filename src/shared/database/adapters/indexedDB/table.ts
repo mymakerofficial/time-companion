@@ -11,6 +11,7 @@ import type { Nullable } from '@shared/lib/utils/types'
 import { check, isNotNull, isNull, isUndefined } from '@shared/lib/utils/checks'
 import {
   DatabaseInvalidRangeColumnError,
+  DatabaseUndefinedColumnError,
   DatabaseUndefinedTableError,
   DatabaseUniqueViolationError,
 } from '@shared/database/types/errors'
@@ -180,6 +181,7 @@ export class IdbTableAdapter<TRow extends object>
 
   async update(props: AdapterUpdateProps<TRow>): Promise<Array<TRow>> {
     await this.checkUniqueConstraints(props.data)
+    await this.checkColumnsExist(props.data)
 
     const { iterator } = await this.openIterator(props)
 
@@ -206,6 +208,7 @@ export class IdbTableAdapter<TRow extends object>
 
   async insert(props: AdapterInsertProps<TRow>): Promise<TRow> {
     await this.checkUniqueConstraints(props.data)
+    await this.checkColumnsExist(props.data)
     await promisedRequest(this.objectStore.add(props.data))
     return props.data
   }
@@ -244,6 +247,25 @@ export class IdbTableAdapter<TRow extends object>
           column as string,
           value,
         )
+      }
+    }
+  }
+
+  protected async checkColumnsExist(data: Partial<TRow>): Promise<void> {
+    if (isUndefined(this.tableSchema)) {
+      // if we are not given a schema, we just hope for the best
+      return
+    }
+
+    const columnsOnTable = keysOf(this.tableSchema.columns)
+    const columnsInData = keysOf(data)
+
+    // check if all columns in data are in the table schema
+    for (const column of columnsInData) {
+      const columnExists = columnsOnTable.includes(column)
+
+      if (!columnExists) {
+        throw new DatabaseUndefinedColumnError(this.tableName, column as string)
       }
     }
   }
