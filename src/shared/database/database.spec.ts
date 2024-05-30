@@ -410,6 +410,10 @@ describe.each([
         await helpers.clearDatabase()
       })
 
+      it('only getting the table should not throw', () => {
+        expect(() => database.table('non_existent_table')).not.toThrow()
+      })
+
       describe('insert', () => {
         it('should insert data', async () => {
           const samplePerson = helpers.samplePerson()

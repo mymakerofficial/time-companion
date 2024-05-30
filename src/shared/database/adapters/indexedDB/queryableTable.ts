@@ -25,12 +25,36 @@ import {
   iteratorToList,
   iteratorToSortedList,
 } from '@shared/database/helpers/iteratorToList'
-import { DatabaseInvalidRangeColumnError } from '@shared/database/types/errors'
+import {
+  DatabaseInvalidRangeColumnError,
+  DatabaseUndefinedTableError,
+} from '@shared/database/types/errors'
 
 export class IdbQueryableTableAdapter<TRow extends object>
   implements QueryableTableAdapter<TRow>
 {
-  constructor(protected readonly objectStore: IDBObjectStore) {}
+  constructor(
+    protected readonly tx: IDBTransaction,
+    protected readonly tableName: string,
+  ) {}
+
+  private _objectStore: Nullable<IDBObjectStore> = null
+
+  protected get objectStore(): IDBObjectStore {
+    // only create the object store once we need it
+    //  this is because if this operation fails, we want it to fail as late as possible
+    //  when the user actually wants to execute a query
+
+    // ensure object store is only created once
+    if (isNull(this._objectStore)) {
+      try {
+        this._objectStore = this.tx.objectStore(this.tableName)
+      } catch (error) {
+        throw new DatabaseUndefinedTableError(this.tableName)
+      }
+    }
+    return this._objectStore
+  }
 
   protected async openIterator(props: Partial<AdapterBaseQueryProps>) {
     const indexes = toArray(this.objectStore.indexNames)

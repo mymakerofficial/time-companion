@@ -8,7 +8,6 @@ import type {
 import { IdbDatabaseTransactionAdapter } from '@shared/database/adapters/indexedDB/transaction'
 import { check, isNotNull, isUndefined } from '@shared/lib/utils/checks'
 import { toArray } from '@shared/lib/utils/list'
-import { IdbTableAdapter } from '@shared/database/adapters/indexedDB/table'
 import {
   DatabaseNotOpenError,
   DatabaseVersionTooHighError,
@@ -95,7 +94,7 @@ export class IdbDatabaseAdapter implements DatabaseAdapter {
 
         const transactionAdapter: TransactionAdapter =
           new IdbDatabaseTransactionAdapter(
-            request.result,
+            transaction.db,
             transaction,
             'versionchange',
           )
@@ -115,26 +114,7 @@ export class IdbDatabaseAdapter implements DatabaseAdapter {
     })
   }
 
-  openTransaction(): Promise<TransactionAdapter> {
-    return new Promise((resolve) => {
-      check(isNotNull(this.database), () => new DatabaseNotOpenError())
-
-      const transaction = this.database.transaction(
-        this.database.objectStoreNames,
-        'readwrite',
-      )
-
-      resolve(
-        new IdbDatabaseTransactionAdapter(
-          this.database,
-          transaction,
-          'readwrite',
-        ),
-      )
-    })
-  }
-
-  getTable<TRow extends object>(tableName: string): TableAdapter<TRow> {
+  protected openTransactionSync(): TransactionAdapter {
     check(isNotNull(this.database), () => new DatabaseNotOpenError())
 
     const transaction = this.database.transaction(
@@ -142,9 +122,19 @@ export class IdbDatabaseAdapter implements DatabaseAdapter {
       'readwrite',
     )
 
-    const objectStore = transaction.objectStore(tableName)
+    return new IdbDatabaseTransactionAdapter(
+      this.database,
+      transaction,
+      'readwrite',
+    )
+  }
 
-    return new IdbTableAdapter<TRow>(objectStore)
+  openTransaction(): Promise<TransactionAdapter> {
+    return Promise.resolve(this.openTransactionSync())
+  }
+
+  getTable<TRow extends object>(tableName: string): TableAdapter<TRow> {
+    return this.openTransactionSync().getTable(tableName)
   }
 
   async getDatabaseInfo(): Promise<Nullable<DatabaseInfo>> {

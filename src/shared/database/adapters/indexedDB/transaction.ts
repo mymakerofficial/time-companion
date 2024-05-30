@@ -7,7 +7,7 @@ import type {
   AlterTableAction,
   TableSchemaRaw,
 } from '@shared/database/types/schema'
-import { check } from '@shared/lib/utils/checks'
+import { check, isNotNull } from '@shared/lib/utils/checks'
 import { valuesOf } from '@shared/lib/utils/object'
 import { todo } from '@shared/lib/utils/todo'
 import { DatabaseInvalidTransactionError } from '@shared/database/types/errors'
@@ -20,8 +20,7 @@ export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
   ) {}
 
   getTable<TRow extends object>(tableName: string): TableAdapter<TRow> {
-    const objectStore = this.tx.objectStore(tableName)
-    return new IdbTableAdapter<TRow>(objectStore)
+    return new IdbTableAdapter<TRow>(this.tx, tableName)
   }
 
   createTable<TRow extends object>(
@@ -39,6 +38,8 @@ export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
       })
 
       valuesOf(schema.columns).forEach((column) => {
+        check(isNotNull(column.columnName), 'Column name may not be null')
+
         if (column.isIndexed) {
           objectStore.createIndex(column.columnName, column.columnName, {
             unique: column.isUnique,

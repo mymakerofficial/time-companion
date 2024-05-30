@@ -1,10 +1,11 @@
 export class DatabaseError extends Error {
   constructor(
+    name: string = 'DatabaseError',
     message: string,
     public readonly detail?: string,
   ) {
     super(message)
-    this.name = 'DatabaseError'
+    this.name = name
   }
 }
 
@@ -13,15 +14,13 @@ export class DatabaseError extends Error {
  */
 export class DatabaseNotOpenError extends DatabaseError {
   constructor() {
-    super('Database is not open.')
-    this.name = 'DatabaseNotOpenError'
+    super('DatabaseNotOpenError', 'Database is not open.')
   }
 }
 
 export class DatabaseAlreadyOpenError extends DatabaseError {
   constructor() {
-    super('Database is already open.')
-    this.name = 'DatabaseAlreadyOpenError'
+    super('DatabaseAlreadyOpenError', 'Database is already open.')
   }
 }
 
@@ -34,9 +33,9 @@ export class DatabaseVersionTooHighError extends DatabaseError {
     public readonly targetVersion: number,
   ) {
     super(
+      'DatabaseVersionTooHighError',
       `Database version is too high. Tried to migrate to version "${targetVersion}" but current version is "${currentVersion}".`,
     )
-    this.name = 'DatabaseVersionTooHighError'
   }
 }
 
@@ -45,8 +44,10 @@ export class DatabaseVersionTooHighError extends DatabaseError {
  */
 export class DatabaseVersionMissingError extends DatabaseError {
   constructor() {
-    super('Database version could not be accessed.')
-    this.name = 'DatabaseVersionMissingError'
+    super(
+      'DatabaseVersionMissingError',
+      'Database version could not be accessed.',
+    )
   }
 }
 
@@ -55,25 +56,26 @@ export class DatabaseVersionMissingError extends DatabaseError {
  */
 export class DatabaseInvalidTransactionError extends DatabaseError {
   constructor() {
-    super('Transaction is not a versionchange transaction.')
-    this.name = 'DatabaseInvalidTransactionError'
+    super(
+      'DatabaseInvalidTransactionError',
+      'Transaction is not a versionchange transaction.',
+    )
   }
 }
 
 export class DatabaseInvalidRangeColumnError extends DatabaseError {
   constructor(public readonly columnName: string) {
     super(
+      'DatabaseInvalidRangeColumnError',
       'Range column must be indexed or primary key.',
       `Column "${columnName}" is neither indexed or primary key.`,
     )
-    this.name = 'DatabaseInvalidRangeColumnError'
   }
 }
 
 export class DatabaseUndefinedTableError extends DatabaseError {
   constructor(public readonly tableName: string) {
-    super(`Table "${tableName}" does not exist.`)
-    this.name = 'DatabaseUndefinedTableError'
+    super('DatabaseUndefinedTableError', `Table "${tableName}" does not exist.`)
   }
 }
 
@@ -82,8 +84,10 @@ export class DatabaseUndefinedColumnError extends DatabaseError {
     public readonly tableName: string,
     public readonly columnName: string,
   ) {
-    super(`Column "${columnName}" of table "${tableName}" does not exist.`)
-    this.name = 'DatabaseUndefinedColumnError'
+    super(
+      'DatabaseUndefinedColumnError',
+      `Column "${columnName}" of table "${tableName}" does not exist.`,
+    )
   }
 }
 
@@ -94,9 +98,9 @@ export class DatabaseUniqueViolationError extends DatabaseError {
     public readonly value: string,
   ) {
     super(
+      'DatabaseUniqueViolationError',
       `Unique constraint violated on column "${columnName}".`,
       `${tableName}.${columnName}=${value} already exists.`,
     )
-    this.name = 'DatabaseUniqueViolationError'
   }
 }
