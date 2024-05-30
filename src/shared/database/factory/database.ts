@@ -199,8 +199,8 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
 
   get unsafe(): UnsafeDatabase {
     return {
-      truncate: async (): Promise<void> => {
-        await this.adapter.truncateDatabase()
+      dropSchema: async (): Promise<void> => {
+        await this.adapter.dropSchema()
         this.runtimeSchema.clear()
         this._version = 0
       },
@@ -216,6 +216,11 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
 
       setMigrations: (migrations: DatabaseConfig<TSchema>['migrations']) => {
         this.config.migrations = migrations
+      },
+
+      setConfigSchema: (schema: DatabaseConfig<DatabaseSchema>['schema']) => {
+        // @ts-expect-error
+        this.config.schema = schema
       },
 
       getRuntimeSchema: (): Map<string, TableSchemaRaw> => {

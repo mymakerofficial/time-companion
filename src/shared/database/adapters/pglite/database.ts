@@ -177,7 +177,7 @@ export class PGLiteDatabaseAdapter
     )
   }
 
-  async truncateDatabase(): Promise<void> {
+  async dropSchema(): Promise<void> {
     check(isNotNull(this.db), () => new DatabaseNotOpenError())
 
     await this.db.exec('DROP SCHEMA public CASCADE; CREATE SCHEMA public;')

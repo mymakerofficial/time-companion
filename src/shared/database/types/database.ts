@@ -203,11 +203,11 @@ export type DatabasePublisherEvent = {}
 
 export interface UnsafeDatabase<TSchema extends DatabaseSchema = {}> {
   /*
-   * Truncates the database, removing all tables, all data and resetting the version to 0.
+   * Drops the database schema, removing all tables, all data and resetting the version to 0.
    * Use {@link migrate} to recreate the database schema.
    * **This is not recommended for production use!**
    */
-  truncate(): Promise<void>
+  dropSchema(): Promise<void>
   /***
    * Migrates the database to the newest version. Behaves like `open` but expects the database to already be open.
    * **This is not recommended for production use!**
@@ -224,6 +224,12 @@ export interface UnsafeDatabase<TSchema extends DatabaseSchema = {}> {
    * **This is not recommended for production use!**
    */
   setMigrations(migrations: DatabaseConfig<TSchema>['migrations']): void
+  /***
+   * Set the schema.
+   */
+  setConfigSchema(
+    schema: DatabaseConfig<DatabaseSchema>['schema'] | undefined,
+  ): void
   /***
    * Get a deep clone of the current internal schema built up during the migrations.
    */

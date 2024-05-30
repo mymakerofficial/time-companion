@@ -160,7 +160,7 @@ export class IdbDatabaseAdapter implements DatabaseAdapter {
     })
   }
 
-  truncateDatabase(): Promise<void> {
+  dropSchema(): Promise<void> {
     return new Promise(async (resolve) => {
       check(isNotNull(this.database), () => new DatabaseNotOpenError())
 
