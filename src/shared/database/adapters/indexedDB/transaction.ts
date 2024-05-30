@@ -94,10 +94,43 @@ export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
         case 'dropColumn':
           todo()
         case 'renameColumn':
-          todo()
+          await this.renameColumn(
+            tableName,
+            action.columnName,
+            action.newColumnName,
+          )
+          break
         case 'renameTable':
           await this.renameTable(tableName, action.newTableName)
+          break
       }
+    }
+  }
+
+  protected async renameColumn(
+    tableName: string,
+    oldColumnName: string,
+    newColumnName: string,
+  ): Promise<void> {
+    check(
+      this.db.objectStoreNames.contains(tableName),
+      () => new DatabaseUndefinedTableError(tableName),
+    )
+
+    // we can't check if the old column exists, but id like to
+
+    const objectStore = this.tx.objectStore(tableName)
+
+    const iterator = cursorIterator(await openCursor(objectStore))
+
+    for await (const cursor of iterator) {
+      const newValue = {
+        ...cursor.value,
+        [newColumnName]: cursor.value[oldColumnName as keyof object], // lol
+      }
+      delete newValue[oldColumnName]
+
+      await cursor.update(newValue)
     }
   }
 
