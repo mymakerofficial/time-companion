@@ -136,7 +136,7 @@ export class IdbDatabaseAdapter implements DatabaseAdapter {
 
   getTable<TRow extends object>(
     tableName: string,
-    tableSchema: TableSchemaRaw<TRow>,
+    tableSchema?: TableSchemaRaw<TRow>,
   ): TableAdapter<TRow> {
     return this.openTransactionSync().getTable(tableName, tableSchema)
   }

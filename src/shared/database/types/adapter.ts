@@ -58,7 +58,7 @@ export interface TableAdapterFactory {
    */
   getTable<TRow extends object>(
     tableName: string,
-    tableSchema: TableSchemaRaw<TRow>,
+    tableSchema?: TableSchemaRaw<TRow>,
   ): TableAdapter<TRow>
 }
 

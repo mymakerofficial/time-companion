@@ -15,7 +15,7 @@ import type {
 } from '@shared/database/types/schema'
 import type { Nullable } from '@shared/lib/utils/types'
 import { isNotDefined } from '@renderer/lib/utils'
-import { isDefined } from '@shared/lib/utils/checks'
+import { isDefined, isUndefined } from '@shared/lib/utils/checks'
 import { firstOfOrNull } from '@shared/lib/utils/list'
 import { getOrNull } from '@shared/lib/utils/result'
 import { keysOf } from '@shared/lib/utils/object'
@@ -23,7 +23,7 @@ import { keysOf } from '@shared/lib/utils/object'
 export class DatabaseTableImpl<TRow extends object> implements Table<TRow> {
   constructor(
     protected readonly tableAdapter: TableAdapter<TRow>,
-    protected readonly tableSchema: TableSchemaRaw<TRow>,
+    protected readonly tableSchema?: TableSchemaRaw<TRow>,
   ) {}
 
   protected getWhere(props?: {
@@ -88,6 +88,10 @@ export class DatabaseTableImpl<TRow extends object> implements Table<TRow> {
   }
 
   getColumnNames(): Array<string> {
+    if (isUndefined(this.tableSchema)) {
+      return []
+    }
+
     return keysOf(this.tableSchema.columns) as Array<string>
   }
 }

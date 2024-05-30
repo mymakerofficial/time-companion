@@ -21,7 +21,7 @@ export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
 
   getTable<TRow extends object>(
     tableName: string,
-    tableSchema: TableSchemaRaw<TRow>,
+    tableSchema?: TableSchemaRaw<TRow>,
   ): TableAdapter<TRow> {
     return new IdbTableAdapter<TRow>(this.tx, tableName, tableSchema)
   }

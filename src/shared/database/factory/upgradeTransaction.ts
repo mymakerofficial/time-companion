@@ -43,6 +43,8 @@ export class DatabaseUpgradeTransactionImpl
 
     const newSchema = applyAlterActions(
       this.runtimeSchema.get(tableName)!,
+      // we know that the table exists because if it didn't,
+      //  alterTable would have failed
       alterTableBuilder._.actions,
     )
 

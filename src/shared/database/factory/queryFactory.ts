@@ -7,6 +7,7 @@ import type {
 import { isString } from '@shared/lib/utils/checks'
 import { DatabaseTableImpl } from '@shared/database/factory/table'
 import type { TableAdapterFactory } from '@shared/database/types/adapter'
+import type { Optional } from '@shared/lib/utils/types'
 
 export class DatabaseQuertyFactoryImpl implements QueryFactory {
   constructor(
@@ -19,9 +20,9 @@ export class DatabaseQuertyFactoryImpl implements QueryFactory {
     TSchema extends TableSchema<TRow> = TableSchema<TRow>,
   >(table: TSchema | string): Table<InferTable<TSchema>> {
     const tableName = isString(table) ? table : table._.raw.tableName
-    const tableSchema = this.runtimeSchema.get(tableName) as TableSchemaRaw<
-      InferTable<TSchema>
-    > // let's just assume this is correct
+    const tableSchema = this.runtimeSchema.get(tableName) as Optional<
+      TableSchemaRaw<InferTable<TSchema>>
+    >
 
     const tableAdapter = this.tableAdapter.getTable<InferTable<TSchema>>(
       tableName,

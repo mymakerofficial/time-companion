@@ -12,8 +12,9 @@ import { check, isNotNull, isNull, isUndefined } from '@shared/lib/utils/checks'
 import {
   DatabaseInvalidRangeColumnError,
   DatabaseUndefinedTableError,
+  DatabaseUniqueViolationError,
 } from '@shared/database/types/errors'
-import { toArray } from '@shared/lib/utils/list'
+import { arraysHaveOverlap, toArray } from '@shared/lib/utils/list'
 import { getOrDefault, getOrNull } from '@shared/lib/utils/result'
 import { filteredIterator } from '@shared/database/helpers/filteredIterator'
 import { cursorIterator } from '@shared/database/helpers/cursorIterator'
@@ -30,6 +31,8 @@ import {
   iteratorToSortedList,
 } from '@shared/database/helpers/iteratorToList'
 import type { TableSchemaRaw } from '@shared/database/types/schema'
+import { keysOf, valuesOf } from '@shared/lib/utils/object'
+import { promisedRequest } from '@shared/database/adapters/indexedDB/helpers/promisedRequest'
 
 export class IdbTableAdapter<TRow extends object>
   implements TableAdapter<TRow>
@@ -37,7 +40,7 @@ export class IdbTableAdapter<TRow extends object>
   constructor(
     protected readonly tx: IDBTransaction,
     protected readonly tableName: string,
-    protected readonly tableSchema: TableSchemaRaw<TRow>,
+    protected readonly tableSchema?: TableSchemaRaw<TRow>,
   ) {}
 
   private _objectStore: Nullable<IDBObjectStore> = null
@@ -176,6 +179,8 @@ export class IdbTableAdapter<TRow extends object>
   }
 
   async update(props: AdapterUpdateProps<TRow>): Promise<Array<TRow>> {
+    await this.checkUniqueConstraints(props.data)
+
     const { iterator } = await this.openIterator(props)
 
     const results = []
@@ -196,35 +201,50 @@ export class IdbTableAdapter<TRow extends object>
   }
 
   deleteAll(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const request = this.objectStore.clear()
-
-      request.onsuccess = () => {
-        resolve()
-      }
-
-      request.onerror = () => {
-        reject(request.error)
-      }
-    })
+    return promisedRequest(this.objectStore.clear())
   }
 
-  insert(props: AdapterInsertProps<TRow>): Promise<TRow> {
-    return new Promise((resolve, reject) => {
-      const request = this.objectStore.add(props.data)
-
-      request.onsuccess = () => {
-        resolve(props.data)
-      }
-
-      request.onerror = () => {
-        reject(request.error)
-      }
-    })
+  async insert(props: AdapterInsertProps<TRow>): Promise<TRow> {
+    await this.checkUniqueConstraints(props.data)
+    await promisedRequest(this.objectStore.add(props.data))
+    return props.data
   }
 
   async insertMany(props: AdapterInsertManyProps<TRow>): Promise<Array<TRow>> {
     const promises = props.data.map((data) => this.insert({ data }))
     return await Promise.all(promises)
+  }
+
+  protected async checkUniqueConstraints(data: Partial<TRow>): Promise<void> {
+    if (isUndefined(this.tableSchema)) {
+      // if we are not given a schema, we just hope for the best
+      return
+    }
+
+    const uniqueColumns = valuesOf(this.tableSchema.columns)
+      .filter((column) => column.isUnique)
+      .map((column) => column.columnName) as Array<keyof TRow>
+
+    const changedColumns = keysOf(data)
+
+    if (!arraysHaveOverlap(changedColumns, uniqueColumns)) {
+      return
+    }
+
+    for (const column of uniqueColumns) {
+      const value = data[column] as any
+
+      const count = await promisedRequest(
+        this.objectStore.index(column as string).count(value),
+      )
+
+      if (count > 0) {
+        throw new DatabaseUniqueViolationError(
+          this.tableName,
+          column as string,
+          value,
+        )
+      }
+    }
   }
 }
