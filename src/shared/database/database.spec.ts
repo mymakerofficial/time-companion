@@ -556,9 +556,18 @@ describe.each([
           )
         })
 
-        it.todo(
-          'should fail when trying to insert a row with missing required columns',
-        )
+        it('should fail when trying to insert a row with missing required columns', async () => {
+          await expect(
+            database.table(personsTable).insert({
+              // @ts-expect-error
+              data: {
+                id: uuid(), // a missing primaryKey would be another error
+              },
+            }),
+          ).rejects.toThrowError(
+            'Column "firstName" of table "persons" cannot be null.',
+          )
+        })
       })
 
       describe('insertMany', () => {

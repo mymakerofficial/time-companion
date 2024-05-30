@@ -110,3 +110,15 @@ export class DatabaseDuplicateTableError extends DatabaseError {
     super('DatabaseDuplicateTableError', `Table "${tableName}" already exists.`)
   }
 }
+
+export class DatabaseNotNullViolationError extends DatabaseError {
+  constructor(
+    public readonly tableName: string,
+    public readonly columnName: string,
+  ) {
+    super(
+      'DatabaseNotNullViolationError',
+      `Column "${columnName}" of table "${tableName}" cannot be null.`,
+    )
+  }
+}

@@ -8,8 +8,14 @@ import type {
   TableAdapter,
 } from '@shared/database/types/adapter'
 import type { Nullable } from '@shared/lib/utils/types'
-import { isNotNull, isNull, isUndefined } from '@shared/lib/utils/checks'
 import {
+  isAbsent,
+  isNotNull,
+  isNull,
+  isUndefined,
+} from '@shared/lib/utils/checks'
+import {
+  DatabaseNotNullViolationError,
   DatabaseUndefinedColumnError,
   DatabaseUndefinedTableError,
   DatabaseUniqueViolationError,
@@ -104,6 +110,7 @@ export class IdbTableAdapter<TRow extends object>
   async insert(props: AdapterInsertProps<TRow>): Promise<TRow> {
     await this.checkUniqueConstraints(props.data)
     await this.checkColumnsExist(props.data)
+    await this.checkRequiredColumns(props.data)
     await promisedRequest(this.objectStore.add(props.data))
     return props.data
   }
@@ -146,6 +153,9 @@ export class IdbTableAdapter<TRow extends object>
     }
   }
 
+  /***
+   * Check if all columns in the data are in the table schema
+   */
   protected async checkColumnsExist(data: Partial<TRow>): Promise<void> {
     if (isUndefined(this.tableSchema)) {
       // if we are not given a schema, we just hope for the best
@@ -161,6 +171,28 @@ export class IdbTableAdapter<TRow extends object>
 
       if (!columnExists) {
         throw new DatabaseUndefinedColumnError(this.tableName, column as string)
+      }
+    }
+  }
+
+  protected async checkRequiredColumns(data: Partial<TRow>): Promise<void> {
+    if (isUndefined(this.tableSchema)) {
+      // if we are not given a schema, we just hope for the best
+      return
+    }
+
+    const requiredColumns = valuesOf(this.tableSchema.columns)
+      .filter((column) => !column.isNullable)
+      .map((column) => column.columnName) as Array<keyof TRow>
+
+    for (const column of requiredColumns) {
+      const value = data[column] as any
+
+      if (isAbsent(value)) {
+        throw new DatabaseNotNullViolationError(
+          this.tableName,
+          column as string,
+        )
       }
     }
   }

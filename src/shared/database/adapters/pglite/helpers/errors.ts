@@ -1,6 +1,7 @@
 import { check } from '@shared/lib/utils/checks'
 import {
   DatabaseDuplicateTableError,
+  DatabaseNotNullViolationError,
   DatabaseUndefinedColumnError,
   DatabaseUndefinedTableError,
   DatabaseUniqueViolationError,
@@ -66,6 +67,13 @@ export function handlePGliteError(error: unknown): never {
     const [, tableName] = error.message.split('"')
 
     throw new DatabaseDuplicateTableError(tableName)
+  }
+
+  if (error.code === '23502') {
+    throw new DatabaseNotNullViolationError(
+      error.table ?? '',
+      error.column ?? '',
+    )
   }
 
   throw error
