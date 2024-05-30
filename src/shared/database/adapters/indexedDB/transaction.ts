@@ -92,7 +92,8 @@ export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
         case 'alterColumn':
           todo()
         case 'dropColumn':
-          todo()
+          await this.dropColumn(tableName, action.columnName)
+          break
         case 'renameColumn':
           await this.renameColumn(
             tableName,
@@ -104,6 +105,27 @@ export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
           await this.renameTable(tableName, action.newTableName)
           break
       }
+    }
+  }
+
+  protected async dropColumn(
+    tableName: string,
+    columnName: string,
+  ): Promise<void> {
+    check(
+      this.db.objectStoreNames.contains(tableName),
+      () => new DatabaseUndefinedTableError(tableName),
+    )
+
+    const objectStore = this.tx.objectStore(tableName)
+
+    const iterator = cursorIterator(await openCursor(objectStore))
+
+    for await (const cursor of iterator) {
+      const newValue = { ...cursor.value }
+      delete newValue[columnName as keyof object]
+
+      await cursor.update(newValue)
     }
   }
 
