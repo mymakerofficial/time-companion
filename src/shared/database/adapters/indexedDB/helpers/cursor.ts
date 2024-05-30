@@ -1,9 +1,8 @@
 import type { DatabaseCursor } from '@/shared/database/types/cursor'
 import type { Nullable } from '@shared/lib/utils/types'
 import { check, isNotNull } from '@shared/lib/utils/checks'
-import { toArray } from '@shared/lib/utils/list'
-import { keysOf } from '@shared/lib/utils/object'
 import { getOrNull } from '@shared/lib/utils/result'
+import { promisedRequest } from '@shared/database/adapters/indexedDB/helpers/promisedRequest'
 
 export class IndexedDBCursorImpl<TRow extends object>
   implements DatabaseCursor<TRow>
@@ -25,50 +24,14 @@ export class IndexedDBCursorImpl<TRow extends object>
     return this._value
   }
 
-  update(data: Partial<TRow>): Promise<void> {
-    return new Promise((resolve, reject) => {
-      check(isNotNull(this.cursor), 'Cursor is not open.')
-      const changedColumns = toArray(keysOf(data))
-
-      check(
-        !changedColumns.includes(this.primaryKey),
-        `Primary key cannot be changed. Tried to change columns: ${changedColumns}.`,
-      )
-
-      check(isNotNull(this.value), 'Cursor value is null.')
-
-      const patched: TRow = {
-        ...this.value,
-        ...data,
-      }
-
-      const updateRequest = this.cursor.update(patched)
-
-      updateRequest.onsuccess = () => {
-        this._value = patched
-        resolve()
-      }
-
-      updateRequest.onerror = () => {
-        reject(updateRequest.error)
-      }
-    })
+  async update(data: TRow): Promise<void> {
+    check(isNotNull(this.cursor), 'Cursor is not open.')
+    await promisedRequest(this.cursor.update(data))
   }
 
   delete(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      check(isNotNull(this.cursor), 'Cursor is not open.')
-
-      const deleteRequest = this.cursor.delete()
-
-      deleteRequest.onsuccess = () => {
-        resolve()
-      }
-
-      deleteRequest.onerror = () => {
-        reject(deleteRequest.error)
-      }
-    })
+    check(isNotNull(this.cursor), 'Cursor is not open.')
+    return promisedRequest(this.cursor.delete())
   }
 
   continue(): Promise<void> {

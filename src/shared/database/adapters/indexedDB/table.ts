@@ -79,7 +79,10 @@ export class IdbTableAdapter<TRow extends object>
 
     const results = []
     for await (const cursor of iterator) {
-      await cursor.update(props.data)
+      await cursor.update({
+        ...cursor.value,
+        ...props.data,
+      })
       results.push(cursor.value)
     }
 
