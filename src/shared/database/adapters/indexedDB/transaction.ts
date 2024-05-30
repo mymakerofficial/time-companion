@@ -10,7 +10,13 @@ import type {
 import { check, isNotNull } from '@shared/lib/utils/checks'
 import { valuesOf } from '@shared/lib/utils/object'
 import { todo } from '@shared/lib/utils/todo'
-import { DatabaseInvalidTransactionError } from '@shared/database/types/errors'
+import {
+  DatabaseDuplicateTableError,
+  DatabaseInvalidTransactionError,
+  DatabaseUndefinedTableError,
+} from '@shared/database/types/errors'
+import { promisedRequest } from '@shared/database/adapters/indexedDB/helpers/promisedRequest'
+import { toArray } from '@shared/lib/utils/list'
 
 export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
   constructor(
@@ -68,11 +74,63 @@ export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
     })
   }
 
-  alterTable(
+  async alterTable(
     tableName: string,
     actions: Array<AlterTableAction>,
   ): Promise<void> {
-    todo()
+    check(
+      this.mode === 'versionchange',
+      () => new DatabaseInvalidTransactionError(),
+    )
+
+    for await (const action of actions) {
+      switch (action.type) {
+        case 'addColumn':
+          todo()
+        case 'alterColumn':
+          todo()
+        case 'dropColumn':
+          todo()
+        case 'renameColumn':
+          todo()
+        case 'renameTable':
+          await this.renameTable(tableName, action.newTableName)
+      }
+    }
+  }
+
+  protected async renameTable(oldName: string, newName: string): Promise<void> {
+    check(
+      this.db.objectStoreNames.contains(oldName),
+      () => new DatabaseUndefinedTableError(oldName),
+    )
+
+    check(
+      !this.db.objectStoreNames.contains(newName),
+      () => new DatabaseDuplicateTableError(newName),
+    )
+
+    const oldObjectStore = this.tx.objectStore(oldName)
+
+    this.db.createObjectStore(newName, {
+      keyPath: oldObjectStore.keyPath,
+    })
+
+    const newObjectStore = this.tx.objectStore(newName)
+
+    // copy all indexes
+    toArray(oldObjectStore.indexNames).forEach((indexName) => {
+      const index = oldObjectStore.index(indexName)
+      newObjectStore.createIndex(index.name, index.keyPath)
+    })
+
+    // copy all rows
+    const oldRows = await promisedRequest(oldObjectStore.getAll())
+    oldRows.forEach((row) => {
+      newObjectStore.add(row)
+    })
+
+    this.db.deleteObjectStore(oldName)
   }
 
   commit(): Promise<void> {
