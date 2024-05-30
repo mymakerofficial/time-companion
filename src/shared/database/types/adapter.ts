@@ -42,7 +42,7 @@ export type AdapterInsertManyProps<TRow extends object> = {
   data: Array<TRow>
 }
 
-export interface QueryableTableAdapter<TRow extends object> {
+export interface TableAdapter<TRow extends object> {
   select(props: AdapterSelectProps<TRow>): Promise<Array<TRow>>
   update(props: AdapterUpdateProps<TRow>): Promise<Array<TRow>>
   delete(props: AdapterDeleteProps<TRow>): Promise<void>
@@ -50,9 +50,6 @@ export interface QueryableTableAdapter<TRow extends object> {
   insert(props: AdapterInsertProps<TRow>): Promise<TRow>
   insertMany(props: AdapterInsertManyProps<TRow>): Promise<Array<TRow>>
 }
-
-export interface TableAdapter<TData extends object>
-  extends QueryableTableAdapter<TData> {}
 
 export interface TableAdapterFactory {
   getTable<TData extends object>(tableName: string): TableAdapter<TData>

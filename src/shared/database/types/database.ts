@@ -93,7 +93,7 @@ export type InsertManyProps<TRow extends object> = {
   data: Array<TRow>
 }
 
-export interface QueryableTable<TRow extends object> {
+export interface Table<TRow extends object> {
   findFirst(props?: FindProps<TRow>): Promise<Nullable<TRow>>
   findMany(props?: FindManyProps<TRow>): Promise<Array<TRow>>
   update(props: UpdateProps<TRow>): Promise<Array<TRow>>
@@ -102,8 +102,6 @@ export interface QueryableTable<TRow extends object> {
   insert(props: InsertProps<TRow>): Promise<TRow>
   insertMany(props: InsertManyProps<TRow>): Promise<Array<TRow>>
 }
-
-export interface Table<TRow extends object> extends QueryableTable<TRow> {}
 
 export const columnTypes = [
   'string',
@@ -116,7 +114,7 @@ export const columnTypes = [
 ] as const
 export type ColumnType = (typeof columnTypes)[number]
 
-export interface TableFactory {
+export interface QueryFactory {
   /***
    * Used to access the table for performing operations on it.
    * You can either pass the table schema to infer all types automatically,
@@ -132,7 +130,7 @@ export interface TableFactory {
   ): Table<InferTable<TSchema>>
 }
 
-export interface Transaction extends TableFactory {}
+export interface Transaction extends QueryFactory {}
 
 export interface UpgradeTransaction extends Transaction {
   /***
@@ -227,7 +225,7 @@ export interface UnsafeDatabase<TSchema extends DatabaseSchema = {}> {
 }
 
 export interface Database<TSchema extends DatabaseSchema = {}>
-  extends TableFactory {
+  extends QueryFactory {
   readonly isOpen: boolean
   readonly version: number
 
