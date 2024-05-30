@@ -44,9 +44,8 @@ export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
         check(isNotNull(column.columnName), 'Column name may not be null')
 
         if (column.isIndexed) {
-          objectStore.createIndex(column.columnName, column.columnName, {
-            unique: column.isUnique,
-          })
+          objectStore.createIndex(column.columnName, column.columnName)
+          // normally we would set unique here, but we check for unique violations ourselves
         }
       })
 
