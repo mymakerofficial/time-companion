@@ -24,6 +24,8 @@ import type {
 } from '@shared/database/types/database'
 import { c } from '@shared/database/schema/columnBuilder'
 import 'fake-indexeddb/auto'
+import { defineConfig } from '@shared/database/schema/defineConfig'
+import { personsTable, petsTable } from '@test/fixtures/database/schema'
 
 function byId(a: HasId, b: HasId) {
   return a.id.localeCompare(b.id)
@@ -51,7 +53,11 @@ function whereAgeGreaterThanOrEqual(age: number) {
 
 describe.each([
   ['IndexedDB', () => indexedDBAdapter(`test-database-${uuid()}`)],
-  ['PGLite', () => pgliteAdapter(`memory://test-database-${uuid()}`)],
+  [
+    'PGLite',
+    (persist: boolean = false) =>
+      pgliteAdapter(`${persist ? 'idb' : 'memory'}://test-database-${uuid()}`),
+  ],
 ])('Adapter "%s"', (adapterName, adapterFactory) => {
   describe('unsafe', () => {
     describe('truncate', () => {
@@ -112,6 +118,36 @@ describe.each([
         async () => await database.table('persons').findMany(),
       ).toBeDefined()
       expect(async () => await database.table('pets').findMany()).toBeDefined()
+    })
+
+    it('should generate runtime schema on a new and existing database', async () => {
+      const adapter = adapterFactory(true)
+
+      const config = defineConfig({
+        migrations: [migration001, migration002],
+        schema: {
+          persons: personsTable,
+          pets: petsTable,
+        },
+      })
+
+      const database1 = createDatabase(adapter, config)
+
+      await database1.open()
+
+      const originalRuntimeSchema = database1.unsafe.getRuntimeSchema()
+
+      await database1.close()
+
+      const database2 = createDatabase(adapter, config)
+
+      await database2.open()
+
+      const newRuntimeSchema = database2.unsafe.getRuntimeSchema()
+
+      expect(newRuntimeSchema).toEqual(originalRuntimeSchema)
+
+      await database2.close()
     })
   })
 

@@ -225,7 +225,7 @@ export interface UnsafeDatabase<TSchema extends DatabaseSchema = {}> {
    */
   setMigrations(migrations: DatabaseConfig<TSchema>['migrations']): void
   /***
-   * Get the current internal schema built up during the migrations.
+   * Get a deep clone of the current internal schema built up during the migrations.
    */
   getRuntimeSchema(): Map<string, TableSchemaRaw>
 }
