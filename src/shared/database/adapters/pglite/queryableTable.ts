@@ -7,10 +7,11 @@ import type {
   AdapterUpdateProps,
   QueryableTableAdapter,
 } from '@shared/database/types/adapter'
-import type { PGliteInterface, Transaction } from '@electric-sql/pglite'
+import { type PGliteInterface, type Transaction } from '@electric-sql/pglite'
 import type { Knex } from 'knex'
 import { firstOf } from '@shared/lib/utils/list'
 import { buildQuery } from '@shared/database/adapters/pglite/helpers/queryBuilder'
+import { handlePGliteError } from '@shared/database/adapters/pglite/helpers/errors'
 
 export class PGLiteQueryableTableAdapter<TRow extends object>
   implements QueryableTableAdapter<TRow>
@@ -25,16 +26,14 @@ export class PGLiteQueryableTableAdapter<TRow extends object>
     return buildQuery(this.knex, this.tableName, props)
   }
 
-  protected query(builder: Knex.QueryBuilder) {
+  protected async query(builder: Knex.QueryBuilder) {
     const query = builder.toSQL().toNative()
 
-    return this.db.query<TRow>(query.sql, [...query.bindings])
-  }
-
-  protected exec(builder: Knex.QueryBuilder) {
-    const query = builder.toQuery()
-
-    return this.db.exec(query)
+    try {
+      return await this.db.query<TRow>(query.sql, [...query.bindings])
+    } catch (error) {
+      handlePGliteError(error)
+    }
   }
 
   async select(props: AdapterSelectProps<TRow>): Promise<Array<TRow>> {
@@ -81,8 +80,8 @@ export class PGLiteQueryableTableAdapter<TRow extends object>
 
     // TODO: make returning optional
 
-    const res = await this.exec(builder)
+    const res = await this.query(builder)
 
-    return firstOf(res).rows as Array<TRow>
+    return res.rows
   }
 }

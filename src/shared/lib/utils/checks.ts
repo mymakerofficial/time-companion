@@ -1,15 +1,21 @@
-import type { Nullable } from '@shared/lib/utils/types'
+import type { Nullable, ValueOrGetter } from '@shared/lib/utils/types'
+import { toValue } from '@shared/lib/utils/result'
 
 export class IllegalStateError extends Error {
-  constructor(message: string) {
+  constructor(message: string = 'Illegal state') {
     super(message)
     this.name = 'IllegalStateError'
   }
 }
 
-export function check(predicate: boolean, message: string): asserts predicate {
+export function check(
+  predicate: boolean,
+  otherwise?: string | ValueOrGetter<Error> | (() => never),
+): asserts predicate {
   if (!predicate) {
-    throw new IllegalStateError(message)
+    throw isString(otherwise)
+      ? new IllegalStateError(otherwise)
+      : toValue(otherwise)
   }
 }
 

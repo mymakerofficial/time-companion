@@ -10,6 +10,7 @@ import type {
 import { check } from '@shared/lib/utils/checks'
 import { valuesOf } from '@shared/lib/utils/object'
 import { todo } from '@shared/lib/utils/todo'
+import { DatabaseInvalidTransactionError } from '@shared/database/types/errors'
 
 export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
   constructor(
@@ -29,7 +30,7 @@ export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
     return new Promise((resolve) => {
       check(
         this.mode === 'versionchange',
-        'Transaction is not a versionchange transaction.',
+        () => new DatabaseInvalidTransactionError(),
       )
 
       const objectStore = this.db.createObjectStore(schema.tableName, {
@@ -54,7 +55,7 @@ export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
     return new Promise((resolve) => {
       check(
         this.mode === 'versionchange',
-        'Transaction is not a versionchange transaction.',
+        () => new DatabaseInvalidTransactionError(),
       )
 
       this.db.deleteObjectStore(tableName)

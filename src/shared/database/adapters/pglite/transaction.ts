@@ -14,6 +14,7 @@ import {
   buildAlterTable,
   buildCreateTable,
 } from '@shared/database/adapters/pglite/helpers/schemaBuilder'
+import { DatabaseNotOpenError } from '@shared/database/types/errors'
 
 export class PGLiteDatabaseTransactionAdapter
   extends PGLiteTableAdapterFactory
@@ -32,7 +33,7 @@ export class PGLiteDatabaseTransactionAdapter
   async createTable<TRow extends object>(
     schema: TableSchemaRaw<TRow>,
   ): Promise<void> {
-    check(isNotNull(this.db), 'Database is not open.')
+    check(isNotNull(this.db), () => new DatabaseNotOpenError())
 
     const builder = buildCreateTable(this.knex, schema)
 
@@ -40,7 +41,7 @@ export class PGLiteDatabaseTransactionAdapter
   }
 
   async dropTable(tableName: string): Promise<void> {
-    check(isNotNull(this.db), 'Database is not open.')
+    check(isNotNull(this.db), () => new DatabaseNotOpenError())
 
     const builder = this.knex.schema.dropTable(tableName)
 
@@ -51,7 +52,7 @@ export class PGLiteDatabaseTransactionAdapter
     tableName: string,
     actions: Array<AlterTableAction>,
   ): Promise<void> {
-    check(isNotNull(this.db), 'Database is not open.')
+    check(isNotNull(this.db), () => new DatabaseNotOpenError())
 
     const builder = buildAlterTable(this.knex, tableName, actions)
 

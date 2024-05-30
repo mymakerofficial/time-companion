@@ -10,6 +10,10 @@ import { PGLiteDatabaseTransactionAdapter } from '@shared/database/adapters/pgli
 import { PGLiteTableAdapterFactory } from '@shared/database/adapters/pglite/tableFactory'
 import { asArray, firstOf } from '@shared/lib/utils/list'
 import type { MaybePromise } from '@shared/lib/utils/types'
+import {
+  DatabaseNotOpenError,
+  DatabaseVersionMissingError,
+} from '@shared/database/types/errors'
 
 // TODO: PGlite is an ES module, but electron doesn't support ES modules
 
@@ -40,7 +44,7 @@ export class PGLiteDatabaseAdapter
   }
 
   protected async runInitialUpgrade(): Promise<void> {
-    check(isNotNull(this.db), 'Database is not open.')
+    check(isNotNull(this.db), () => new DatabaseNotOpenError())
 
     await this.db.query(
       this.knex.schema
@@ -57,7 +61,7 @@ export class PGLiteDatabaseAdapter
   }
 
   protected async getDatabaseVersion(): Promise<number> {
-    check(isNotNull(this.db), 'Database is not open.')
+    check(isNotNull(this.db), () => new DatabaseNotOpenError())
 
     const res = await this.db
       .query<{
@@ -74,7 +78,7 @@ export class PGLiteDatabaseAdapter
         return { rows: [] }
       })
 
-    check(isNotEmpty(res.rows), 'Database version not found.')
+    check(isNotEmpty(res.rows), () => new DatabaseVersionMissingError())
 
     return firstOf(res.rows).version
   }
@@ -96,7 +100,7 @@ export class PGLiteDatabaseAdapter
   }
 
   async closeDatabase(): Promise<void> {
-    check(isNotNull(this.db), 'Database is not open.')
+    check(isNotNull(this.db), () => new DatabaseNotOpenError())
     await (this.db as PGliteInterface).close()
   }
 
@@ -105,7 +109,7 @@ export class PGLiteDatabaseAdapter
     onRollback?: () => MaybePromise<void>,
   ): Promise<TransactionAdapter> {
     return new Promise((resolveAdapter) => {
-      check(isNotNull(this.db), 'Database is not open.')
+      check(isNotNull(this.db), () => new DatabaseNotOpenError())
       ;(this.db as PGliteInterface).transaction((tx) => {
         return new Promise((resolveTransaction) => {
           const adapter = new PGLiteDatabaseTransactionAdapter(
@@ -124,7 +128,7 @@ export class PGLiteDatabaseAdapter
 
   openMigration(targetVersion: number): Promise<TransactionAdapter> {
     return this.getTransaction(async () => {
-      check(isNotNull(this.db), 'Database is not open.')
+      check(isNotNull(this.db), () => new DatabaseNotOpenError())
 
       await this.db.query(
         this.knex
@@ -148,7 +152,7 @@ export class PGLiteDatabaseAdapter
   }
 
   protected async getAllTables(): Promise<Array<string>> {
-    check(isNotNull(this.db), 'Database is not open.')
+    check(isNotNull(this.db), () => new DatabaseNotOpenError())
     check(
       this.knex.client.config.client === 'pg',
       'Getting all table names is currently only supported in PostgreSQL.',
@@ -174,7 +178,7 @@ export class PGLiteDatabaseAdapter
   }
 
   async truncateDatabase(): Promise<void> {
-    check(isNotNull(this.db), 'Database is not open.')
+    check(isNotNull(this.db), () => new DatabaseNotOpenError())
 
     await this.db.exec('DROP SCHEMA public CASCADE; CREATE SCHEMA public;')
     await this.runInitialUpgrade()

@@ -25,6 +25,7 @@ import {
   iteratorToList,
   iteratorToSortedList,
 } from '@shared/database/helpers/iteratorToList'
+import { DatabaseInvalidRangeColumnError } from '@shared/database/types/errors'
 
 export class IdbQueryableTableAdapter<TRow extends object>
   implements QueryableTableAdapter<TRow>
@@ -54,7 +55,7 @@ export class IdbQueryableTableAdapter<TRow extends object>
       isNull(rangeColumn) ||
         isUndefined(rangeColumn) ||
         indexes.includes(rangeColumn),
-      'Range column must be indexed or primary key.',
+      () => new DatabaseInvalidRangeColumnError(rangeColumn!),
     )
 
     // we prefer the range column over the orderBy column

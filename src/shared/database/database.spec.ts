@@ -424,67 +424,52 @@ describe.each([
           expect(personsInDatabase).toEqual(asArray(samplePerson))
         })
 
+        it('should fail when the table does not exist', async () => {
+          const samplePerson = helpers.samplePerson()
+
+          await expect(
+            database.table('non_existent_table').insert({
+              data: samplePerson,
+            }),
+          ).rejects.toThrowError('Table "non_existent_table" does not exist.')
+        })
+
+        it('should fail when trying to insert a row with a column that does not exist on table', async () => {
+          const personWithWrongColumn = {
+            ...helpers.samplePerson(),
+            foo: 'bar',
+          }
+
+          await expect(
+            database.table(personsTable).insert({
+              data: personWithWrongColumn,
+            }),
+          ).rejects.toThrowError(
+            `Column "foo" of table "persons" does not exist.`,
+          )
+        })
+
+        it('should fail when trying to insert a value that violates a unique constraint', async () => {
+          await helpers.insertSamplePersons(6)
+          await helpers.insertSamplePerson({
+            username: 'johndoe',
+          })
+
+          const newPersonWithSameUsername = helpers.samplePerson({
+            username: 'johndoe',
+          })
+
+          await expect(
+            database.table(personsTable).insert({
+              data: newPersonWithSameUsername,
+            }),
+          ).rejects.toThrowError(
+            `Unique constraint violated on column "username".`,
+          )
+        })
+
         it.todo(
-          'should fail when trying to insert an entry with a key that is not part of the schema',
-          async () => {
-            const samplePerson = helpers.samplePerson()
-            const wrongPerson = {
-              ...samplePerson,
-              wrongKey: 'wrong value',
-            }
-
-            await expect(
-              database.withTransaction(async (transaction) => {
-                return await transaction.table(personsTable).insert({
-                  data: wrongPerson,
-                })
-              }),
-            ).rejects.toThrowError(
-              `The key "wrongKey" is not part of the schema of table "persons".`,
-            )
-          },
-        )
-
-        it.todo(
-          'should fail when trying to insert an entry with missing fields',
-          async () => {
-            const missingPerson = {
-              id: uuid(),
-            }
-
-            await expect(
-              database.withTransaction(async (transaction) => {
-                return await transaction.table(personsTable).insert({
-                  // @ts-expect-error
-                  data: missingPerson,
-                })
-              }),
-            ).rejects.toThrowError(
-              `The key "firstName" is required but missing in the data.`,
-            )
-          },
-        )
-
-        it.todo(
-          'should fail when trying to insert a value that already exists on a unique column',
-          async () => {
-            const samplePersons = await helpers.insertSamplePersons(6)
-            const randomPerson = randomElement(samplePersons)
-
-            const newPersonWithSameUsername = helpers.samplePerson({
-              username: randomPerson.username,
-            })
-
-            await expect(
-              database.withTransaction(async (transaction) => {
-                return await transaction.table(personsTable).insert({
-                  data: newPersonWithSameUsername,
-                })
-              }),
-            ).rejects.toThrowError(
-              `Unique constraint failed on column "username".`,
-            )
-          },
+          'should fail when trying to insert a row with missing required columns',
         )
       })
 

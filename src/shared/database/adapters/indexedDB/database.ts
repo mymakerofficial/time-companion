@@ -9,6 +9,10 @@ import { IdbDatabaseTransactionAdapter } from '@shared/database/adapters/indexed
 import { check, isNotNull, isUndefined } from '@shared/lib/utils/checks'
 import { toArray } from '@shared/lib/utils/list'
 import { IdbTableAdapter } from '@shared/database/adapters/indexedDB/table'
+import {
+  DatabaseNotOpenError,
+  DatabaseVersionTooHighError,
+} from '@shared/database/types/errors'
 
 export function indexedDBAdapter(
   databaseName: string,
@@ -58,10 +62,14 @@ export class IdbDatabaseAdapter implements DatabaseAdapter {
 
   async openMigration(targetVersion: number): Promise<TransactionAdapter> {
     return new Promise(async (resolve, reject) => {
-      check(isNotNull(this.database), 'Database is not open.')
+      check(isNotNull(this.database), () => new DatabaseNotOpenError())
       check(
         this.database.version < targetVersion,
-        'The target version must be greater than the current version.',
+        () =>
+          new DatabaseVersionTooHighError(
+            this.database!.version - 1,
+            targetVersion - 1,
+          ),
       )
 
       this.database.close()
@@ -99,7 +107,7 @@ export class IdbDatabaseAdapter implements DatabaseAdapter {
 
   closeDatabase(): Promise<void> {
     return new Promise((resolve) => {
-      check(isNotNull(this.database), 'Database is not open.')
+      check(isNotNull(this.database), () => new DatabaseNotOpenError())
 
       this.database.close()
       this.database = null
@@ -109,7 +117,7 @@ export class IdbDatabaseAdapter implements DatabaseAdapter {
 
   openTransaction(): Promise<TransactionAdapter> {
     return new Promise((resolve) => {
-      check(isNotNull(this.database), 'Database is not open.')
+      check(isNotNull(this.database), () => new DatabaseNotOpenError())
 
       const transaction = this.database.transaction(
         this.database.objectStoreNames,
@@ -127,7 +135,7 @@ export class IdbDatabaseAdapter implements DatabaseAdapter {
   }
 
   getTable<TRow extends object>(tableName: string): TableAdapter<TRow> {
-    check(isNotNull(this.database), 'Database is not open.')
+    check(isNotNull(this.database), () => new DatabaseNotOpenError())
 
     const transaction = this.database.transaction(
       this.database.objectStoreNames,
@@ -152,7 +160,7 @@ export class IdbDatabaseAdapter implements DatabaseAdapter {
 
   getTableNames(): Promise<Array<string>> {
     return new Promise((resolve) => {
-      check(isNotNull(this.database), 'Database is not open.')
+      check(isNotNull(this.database), () => new DatabaseNotOpenError())
 
       resolve(toArray(this.database.objectStoreNames))
     })
@@ -160,7 +168,7 @@ export class IdbDatabaseAdapter implements DatabaseAdapter {
 
   truncateDatabase(): Promise<void> {
     return new Promise(async (resolve) => {
-      check(isNotNull(this.database), 'Database is not open.')
+      check(isNotNull(this.database), () => new DatabaseNotOpenError())
 
       await this.closeDatabase()
 

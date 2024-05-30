@@ -24,6 +24,10 @@ import {
   OpenPublisherImpl,
   type SubscriberCallback,
 } from '@shared/events/publisher'
+import {
+  DatabaseAlreadyOpenError,
+  DatabaseVersionTooHighError,
+} from '@shared/database/types/errors'
 
 export function createDatabase<TSchema extends DatabaseSchema>(
   adapter: DatabaseAdapter,
@@ -87,7 +91,11 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
 
     check(
       currentVersion <= this.targetVersion,
-      `Database version is too high. Tried to migrate to version "${this.targetVersion - 1}" but current version is "${currentVersion - 1}".`,
+      () =>
+        new DatabaseVersionTooHighError(
+          currentVersion - 1,
+          this.targetVersion - 1,
+        ),
     )
 
     if (currentVersion < this.targetVersion) {
@@ -128,7 +136,7 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
   }
 
   async open(): Promise<void> {
-    check(!this.isOpen, 'Database is already open.')
+    check(!this.isOpen, () => new DatabaseAlreadyOpenError())
 
     const info = await this.adapter.openDatabase()
 
