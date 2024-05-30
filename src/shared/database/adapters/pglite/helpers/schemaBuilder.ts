@@ -118,6 +118,8 @@ function buildColumn(
 
   if (columnDefinition.isNullable) {
     columnBuilder.nullable()
+  } else {
+    columnBuilder.notNullable()
   }
 
   if (columnDefinition.isIndexed) {

@@ -24,7 +24,7 @@ describe('Knex Schema Builder', () => {
       const builder = buildCreateTable(knex, schema._.raw)
 
       expect(builder.toQuery()).toEqual(
-        'create table "table" ("id" uuid, "stringColumn" text null, "numberColumn" double precision, constraint "table_pkey" primary key ("id"));\n' +
+        'create table "table" ("id" uuid not null, "stringColumn" text null, "numberColumn" double precision not null, constraint "table_pkey" primary key ("id"));\n' +
           'create index "table_stringcolumn_index" on "table" ("stringColumn");\n' +
           'alter table "table" add constraint "table_stringcolumn_unique" unique ("stringColumn")',
       )
