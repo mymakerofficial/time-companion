@@ -17,6 +17,8 @@ import {
 } from '@shared/database/types/errors'
 import { promisedRequest } from '@shared/database/adapters/indexedDB/helpers/promisedRequest'
 import { toArray } from '@shared/lib/utils/list'
+import { openCursor } from '@shared/database/adapters/indexedDB/helpers/openCursor'
+import { cursorIterator } from '@shared/database/helpers/cursorIterator'
 
 export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
   constructor(
@@ -125,10 +127,14 @@ export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
     })
 
     // copy all rows
-    const oldRows = await promisedRequest(oldObjectStore.getAll())
-    oldRows.forEach((row) => {
-      newObjectStore.add(row)
-    })
+    //  we use a cursor, so we don't have to load all rows into memory
+
+    const cursor = await openCursor(oldObjectStore)
+    const iterator = cursorIterator(cursor)
+
+    for await (const { value } of iterator) {
+      await promisedRequest(newObjectStore.add(value))
+    }
 
     this.db.deleteObjectStore(oldName)
   }

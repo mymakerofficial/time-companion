@@ -11,9 +11,9 @@ import { IndexedDBCursorImpl } from '@shared/database/adapters/indexedDB/helpers
 
 export function openCursor<TRow extends object>(
   objectStore: IDBObjectStore,
-  indexName: Nullable<string>,
-  direction: OrderByDirection,
-  keyRange: Nullable<KeyRange>,
+  indexName: Nullable<string> = null,
+  direction: OrderByDirection = 'asc',
+  keyRange: Nullable<KeyRange> = null,
 ): Promise<DatabaseCursor<TRow>> {
   return new Promise((resolve, reject) => {
     const indexOrObjectStore = isNotNull(indexName)
