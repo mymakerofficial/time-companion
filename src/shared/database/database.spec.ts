@@ -71,12 +71,12 @@ describe.each([
 
         await database.open()
 
-        expect(await database.getTableNames()).toEqual(['test'])
+        expect(await database.getActualTableNames()).toEqual(['test'])
         expect(database.version).toEqual(2)
 
         await database.unsafe.truncate()
 
-        expect(await database.getTableNames()).toEqual([])
+        expect(await database.getActualTableNames()).toEqual([])
         expect(database.version).toEqual(0)
         expect(database.isOpen).toBe(true)
       })
@@ -218,7 +218,7 @@ describe.each([
       expect(migrationWithError).toHaveBeenCalled()
       expect(migrationWithCreateTable).not.toHaveBeenCalled()
 
-      expect(await database.getTableNames()).toEqual(['persons'])
+      expect(await database.getActualTableNames()).toEqual(['persons'])
     })
 
     it('should not migrate a database that is already at the latest version', async () => {
@@ -243,7 +243,8 @@ describe.each([
     describe('upgrade transaction', async () => {
       describe('createTable', async () => {
         it('should create a new table', async () => {
-          expect(await database.getTableNames()).not.toContain('persons')
+          expect(database.getTableNames()).not.toContain('persons')
+          expect(await database.getActualTableNames()).not.toContain('persons')
 
           await database.unsafe.runMigration(async (transaction) => {
             await transaction.createTable('persons', {
@@ -252,7 +253,13 @@ describe.each([
             })
           })
 
-          expect(await database.getTableNames()).toContain('persons')
+          expect(database.getTableNames()).toContain('persons')
+          expect(await database.getActualTableNames()).toContain('persons')
+
+          expect(database.table('persons').getColumnNames()).toEqual([
+            'id',
+            'username',
+          ])
         })
       })
 
@@ -265,13 +272,15 @@ describe.each([
             })
           })
 
-          expect(await database.getTableNames()).toContain('persons')
+          expect(database.getTableNames()).toContain('persons')
+          expect(await database.getActualTableNames()).toContain('persons')
 
           await database.unsafe.runMigration(async (transaction) => {
             await transaction.dropTable('persons')
           })
 
-          expect(await database.getTableNames()).not.toContain('persons')
+          expect(database.getTableNames()).not.toContain('persons')
+          expect(await database.getActualTableNames()).not.toContain('persons')
         })
       })
 
@@ -285,7 +294,8 @@ describe.each([
               })
             })
 
-            expect(await database.getTableNames()).toContain('persons')
+            expect(database.getTableNames()).toContain('persons')
+            expect(await database.getActualTableNames()).toContain('persons')
 
             await database.table('persons').insert({
               data: {
@@ -305,7 +315,13 @@ describe.each([
               })
             })
 
-            expect(await database.getTableNames()).toContain('users')
+            expect(database.getTableNames()).toContain('users')
+            expect(await database.getActualTableNames()).toContain('users')
+
+            expect(database.table('users').getColumnNames()).toEqual([
+              'id',
+              'username',
+            ])
 
             expect(database.table('users').findFirst()).resolves.toEqual({
               id: expect.any(String),
@@ -326,6 +342,11 @@ describe.each([
                 name: c.string(),
               })
             })
+
+            expect(database.table('users').getColumnNames()).toEqual([
+              'id',
+              'name',
+            ])
 
             await database.table('users').insert({
               data: {
@@ -349,6 +370,11 @@ describe.each([
               id: expect.any(String),
               userName: 'John Doe',
             })
+
+            expect(database.table('users').getColumnNames()).toEqual([
+              'id',
+              'userName',
+            ])
           })
         })
 

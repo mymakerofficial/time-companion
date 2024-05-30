@@ -6,6 +6,7 @@ import type {
   DatabaseSchema,
   InferTable,
   TableSchema,
+  TableSchemaRaw,
   WhereBuilderOrRaw,
 } from '@shared/database/types/schema'
 import type { SubscriberCallback } from '@shared/events/publisher'
@@ -101,6 +102,7 @@ export interface Table<TRow extends object> {
   deleteAll(): Promise<void>
   insert(props: InsertProps<TRow>): Promise<TRow>
   insertMany(props: InsertManyProps<TRow>): Promise<Array<TRow>>
+  getColumnNames(): Array<string>
 }
 
 export const columnTypes = [
@@ -222,6 +224,10 @@ export interface UnsafeDatabase<TSchema extends DatabaseSchema = {}> {
    * **This is not recommended for production use!**
    */
   setMigrations(migrations: DatabaseConfig<TSchema>['migrations']): void
+  /***
+   * Get the current internal schema built up during the migrations.
+   */
+  getRuntimeSchema(): Map<string, TableSchemaRaw>
 }
 
 export interface Database<TSchema extends DatabaseSchema = {}>
@@ -246,10 +252,14 @@ export interface Database<TSchema extends DatabaseSchema = {}>
     block: (transaction: Transaction) => Promise<TResult>,
   ): Promise<TResult>
   /***
+   * Gets the names of all tables.
+   */
+  getTableNames(): Array<string>
+  /***
    * Gets the names of all tables that currently exist in the database.
    * **Note**: this might be out of sync with the provided schema.
    */
-  getTableNames(): Promise<Array<string>>
+  getActualTableNames(): Promise<Array<string>>
 
   /***
    * Gain access to unsafe database operations.

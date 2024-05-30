@@ -12,6 +12,7 @@ import {
   DatabaseNotOpenError,
   DatabaseVersionTooHighError,
 } from '@shared/database/types/errors'
+import type { TableSchemaRaw } from '@shared/database/types/schema'
 
 export function indexedDBAdapter(
   databaseName: string,
@@ -133,8 +134,11 @@ export class IdbDatabaseAdapter implements DatabaseAdapter {
     return Promise.resolve(this.openTransactionSync())
   }
 
-  getTable<TRow extends object>(tableName: string): TableAdapter<TRow> {
-    return this.openTransactionSync().getTable(tableName)
+  getTable<TRow extends object>(
+    tableName: string,
+    tableSchema: TableSchemaRaw<TRow>,
+  ): TableAdapter<TRow> {
+    return this.openTransactionSync().getTable(tableName, tableSchema)
   }
 
   async getDatabaseInfo(): Promise<Nullable<DatabaseInfo>> {

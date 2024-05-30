@@ -52,13 +52,18 @@ export interface TableAdapter<TRow extends object> {
 }
 
 export interface TableAdapterFactory {
-  getTable<TData extends object>(tableName: string): TableAdapter<TData>
+  /***
+   * Returns a table adapter for the given table.
+   * **This method should never throw.** All errors should be thrown in the following async methods.
+   */
+  getTable<TRow extends object>(
+    tableName: string,
+    tableSchema: TableSchemaRaw<TRow>,
+  ): TableAdapter<TRow>
 }
 
 export interface TransactionAdapter extends TableAdapterFactory {
-  createTable<TData extends object>(
-    schema: TableSchemaRaw<TData>,
-  ): Promise<void>
+  createTable<TRow extends object>(schema: TableSchemaRaw<TRow>): Promise<void>
   dropTable(tableName: string): Promise<void>
   alterTable(tableName: string, actions: Array<AlterTableAction>): Promise<void>
   commit(): Promise<void>
@@ -75,7 +80,6 @@ export interface DatabaseAdapter extends TableAdapterFactory {
   openDatabase(): Promise<DatabaseInfo>
   /***
    * Closes the currently open database.
-   * @throws IllegalStateError If no database is open.
    */
   closeDatabase(): Promise<void>
   /***
@@ -86,7 +90,6 @@ export interface DatabaseAdapter extends TableAdapterFactory {
    * Get a transaction that can be used to migrate the database to the target version.
    * Depending on the database system this may close and reopen the database.
    * @param targetVersion The version to migrate to.
-   * @throws IllegalStateError If no database is open.
    */
   openMigration(targetVersion: number): Promise<TransactionAdapter>
   /***

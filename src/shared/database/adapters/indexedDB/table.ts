@@ -29,6 +29,7 @@ import {
   iteratorToList,
   iteratorToSortedList,
 } from '@shared/database/helpers/iteratorToList'
+import type { TableSchemaRaw } from '@shared/database/types/schema'
 
 export class IdbTableAdapter<TRow extends object>
   implements TableAdapter<TRow>
@@ -36,6 +37,7 @@ export class IdbTableAdapter<TRow extends object>
   constructor(
     protected readonly tx: IDBTransaction,
     protected readonly tableName: string,
+    protected readonly tableSchema: TableSchemaRaw<TRow>,
   ) {}
 
   private _objectStore: Nullable<IDBObjectStore> = null

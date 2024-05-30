@@ -441,7 +441,11 @@ export interface AlterTableBuilder {
   alterColumn: (columnName: string) => AlterColumnBuilder
 }
 
-export type TableSchemaRaw<TRow extends object = object> = {
+export type TableSchemaRaw<
+  TRow extends object = {
+    [key: string]: any
+  },
+> = {
   tableName: string
   primaryKey: string
   columns: {
@@ -455,9 +459,10 @@ export type TableSchemaBase<TRow extends object> = {
   }
 }
 
-export type TableSchema<TRow extends object> = TableSchemaBase<TRow> & {
-  [K in keyof TRow]: ColumnDefinition<TRow, TRow[K]>
-}
+export type TableSchema<TRow extends object = object> =
+  TableSchemaBase<TRow> & {
+    [K in keyof TRow]: ColumnDefinition<TRow, TRow[K]>
+  }
 
 export type DatabaseSchema = {
   [key: string]: object

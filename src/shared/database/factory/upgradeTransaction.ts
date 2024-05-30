@@ -6,6 +6,7 @@ import type {
 } from '@shared/database/types/schema'
 import { defineTable } from '@shared/database/schema/defineTable'
 import { AlterTableBuilderImpl } from '@shared/database/schema/alterTable'
+import { applyAlterActions } from '@shared/database/schema/alterTableSchema'
 
 export class DatabaseUpgradeTransactionImpl
   extends DatabaseTransactionImpl
@@ -19,21 +20,37 @@ export class DatabaseUpgradeTransactionImpl
   ): Promise<void> {
     const schema = defineTable(tableName, columns)
     await this.transactionAdapter.createTable(schema._.raw)
+    this.runtimeSchema.set(tableName, schema._.raw)
   }
 
   async dropTable(tableName: string): Promise<void> {
     await this.transactionAdapter.dropTable(tableName)
+    this.runtimeSchema.delete(tableName)
   }
 
-  alterTable(
+  async alterTable(
     tableName: string,
     block: (builder: AlterTableBuilder) => void,
   ): Promise<void> {
     const alterTableBuilder = new AlterTableBuilderImpl()
+
     block(alterTableBuilder)
-    return this.transactionAdapter.alterTable(
+
+    await this.transactionAdapter.alterTable(
       tableName,
       alterTableBuilder._.actions,
     )
+
+    const newSchema = applyAlterActions(
+      this.runtimeSchema.get(tableName)!,
+      alterTableBuilder._.actions,
+    )
+
+    if (newSchema.tableName !== tableName) {
+      this.runtimeSchema.delete(tableName)
+      tableName = newSchema.tableName
+    }
+
+    this.runtimeSchema.set(tableName, newSchema)
   }
 }

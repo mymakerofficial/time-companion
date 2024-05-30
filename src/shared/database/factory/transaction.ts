@@ -1,20 +1,16 @@
-import type { Table, Transaction } from '@shared/database/types/database'
+import type { Transaction } from '@shared/database/types/database'
 import type { TransactionAdapter } from '@shared/database/types/adapter'
-import { DatabaseTableImpl } from '@shared/database/factory/table'
-import type { InferTable, TableSchema } from '@shared/database/types/schema'
-import { isString } from '@shared/lib/utils/checks'
+import type { TableSchemaRaw } from '@shared/database/types/schema'
+import { DatabaseQuertyFactoryImpl } from '@shared/database/factory/queryFactory'
 
-export class DatabaseTransactionImpl implements Transaction {
-  constructor(protected readonly transactionAdapter: TransactionAdapter) {}
-
-  table<
-    TRow extends object = object,
-    TSchema extends TableSchema<TRow> = TableSchema<TRow>,
-  >(table: TSchema | string): Table<InferTable<TSchema>> {
-    const tableName = isString(table) ? table : table._.raw.tableName
-
-    const tableAdapter =
-      this.transactionAdapter.getTable<InferTable<TSchema>>(tableName)
-    return new DatabaseTableImpl(tableAdapter)
+export class DatabaseTransactionImpl
+  extends DatabaseQuertyFactoryImpl
+  implements Transaction
+{
+  constructor(
+    protected readonly transactionAdapter: TransactionAdapter,
+    protected readonly runtimeSchema: Map<string, TableSchemaRaw>,
+  ) {
+    super(transactionAdapter, runtimeSchema)
   }
 }

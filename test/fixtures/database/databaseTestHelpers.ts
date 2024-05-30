@@ -152,7 +152,7 @@ export class DatabaseTestHelpers {
 
   // deletes all data from all tables, but keeps the tables
   async clearDatabase(): Promise<void> {
-    const tableNames = await this.database.getTableNames()
+    const tableNames = await this.database.getActualTableNames()
 
     await this.database.withTransaction(async (transaction) => {
       for (const table of tableNames) {
@@ -175,7 +175,7 @@ export class DatabaseTestHelpers {
       return
     }
 
-    const tables = await this.database.getTableNames()
+    const tables = await this.database.getActualTableNames()
 
     await this.database.withTransaction(async (transaction) => {
       for (const table of tables) {

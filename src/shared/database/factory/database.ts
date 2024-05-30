@@ -4,21 +4,18 @@ import type {
   DatabasePublisherEvent,
   DatabasePublisherTopics,
   MigrationFunction,
-  Table,
   Transaction,
   UnsafeDatabase,
   UpgradeTransaction,
 } from '@shared/database/types/database'
 import type { DatabaseAdapter } from '@shared/database/types/adapter'
-import { check, isNotNull, isString } from '@shared/lib/utils/checks'
+import { check, isNotNull } from '@shared/lib/utils/checks'
 import { DatabaseTransactionImpl } from '@shared/database/factory/transaction'
 import { DatabaseUpgradeTransactionImpl } from '@shared/database/factory/upgradeTransaction'
 import type {
   DatabaseSchema,
-  InferTable,
-  TableSchema,
+  TableSchemaRaw,
 } from '@shared/database/types/schema'
-import { DatabaseTableImpl } from '@shared/database/factory/table'
 import { getOrDefault } from '@shared/lib/utils/result'
 import {
   OpenPublisherImpl,
@@ -28,6 +25,8 @@ import {
   DatabaseAlreadyOpenError,
   DatabaseVersionTooHighError,
 } from '@shared/database/types/errors'
+import { emptyMap, toArray } from '@shared/lib/utils/list'
+import { DatabaseQuertyFactoryImpl } from '@shared/database/factory/queryFactory'
 
 export function createDatabase<TSchema extends DatabaseSchema>(
   adapter: DatabaseAdapter,
@@ -37,6 +36,7 @@ export function createDatabase<TSchema extends DatabaseSchema>(
 }
 
 export class DatabaseImpl<TSchema extends DatabaseSchema>
+  extends DatabaseQuertyFactoryImpl
   implements Database<TSchema>
 {
   protected _version: number = 0
@@ -48,7 +48,9 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
   constructor(
     protected readonly adapter: DatabaseAdapter,
     protected readonly config: DatabaseConfig<TSchema>,
-  ) {}
+  ) {
+    super(adapter, emptyMap())
+  }
 
   get isOpen(): boolean {
     return this.adapter.isOpen
@@ -114,7 +116,10 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
       )
 
       const transaction: UpgradeTransaction =
-        new DatabaseUpgradeTransactionImpl(transactionAdapter)
+        new DatabaseUpgradeTransactionImpl(
+          transactionAdapter,
+          this.runtimeSchema,
+        )
 
       await this.runMigrations(migrations, transaction)
         .catch(async (error) => {
@@ -151,6 +156,7 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
 
   async close(): Promise<void> {
     return await this.adapter.closeDatabase().then(() => {
+      this.runtimeSchema.clear()
       this._version = 0
     })
   }
@@ -160,7 +166,9 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
   ): Promise<TResult> {
     const transaction = await this.adapter.openTransaction()
 
-    return await block(new DatabaseTransactionImpl(transaction))
+    return await block(
+      new DatabaseTransactionImpl(transaction, this.runtimeSchema),
+    )
       .catch(async (error) => {
         await transaction.rollback()
         throw error
@@ -175,6 +183,7 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
     return {
       truncate: async (): Promise<void> => {
         await this.adapter.truncateDatabase()
+        this.runtimeSchema.clear()
         this._version = 0
       },
 
@@ -190,20 +199,18 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
       setMigrations: (migrations: DatabaseConfig<TSchema>['migrations']) => {
         this.config.migrations = migrations
       },
+
+      getRuntimeSchema: (): Map<string, TableSchemaRaw> => {
+        return this.runtimeSchema
+      },
     }
   }
 
-  table<
-    TRow extends object = object,
-    TSchema extends TableSchema<TRow> = TableSchema<TRow>,
-  >(table: TSchema | string): Table<InferTable<TSchema>> {
-    const tableName = isString(table) ? table : table._.raw.tableName
-
-    const tableAdapter = this.adapter.getTable<InferTable<TSchema>>(tableName)
-    return new DatabaseTableImpl(tableAdapter)
+  getTableNames(): Array<string> {
+    return toArray(this.runtimeSchema.keys())
   }
 
-  async getTableNames(): Promise<Array<string>> {
+  async getActualTableNames(): Promise<Array<string>> {
     return await this.adapter.getTableNames()
   }
 

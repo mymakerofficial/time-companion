@@ -19,8 +19,11 @@ export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
     protected readonly mode: IDBTransactionMode,
   ) {}
 
-  getTable<TRow extends object>(tableName: string): TableAdapter<TRow> {
-    return new IdbTableAdapter<TRow>(this.tx, tableName)
+  getTable<TRow extends object>(
+    tableName: string,
+    tableSchema: TableSchemaRaw<TRow>,
+  ): TableAdapter<TRow> {
+    return new IdbTableAdapter<TRow>(this.tx, tableName, tableSchema)
   }
 
   createTable<TRow extends object>(
