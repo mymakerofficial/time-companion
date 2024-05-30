@@ -1,5 +1,6 @@
 import type { Nullable, ValueOrGetter } from '@shared/lib/utils/types'
 import { toValue } from '@shared/lib/utils/result'
+import { keysOf } from '@shared/lib/utils/object'
 
 export class IllegalStateError extends Error {
   constructor(message: string = 'Illegal state') {
@@ -77,13 +78,23 @@ export function isSymbol(value: unknown): value is symbol {
   return typeof value === 'symbol'
 }
 
-export function isEmpty(value: unknown): value is null | undefined | '' | [] {
+export function isObject(value: unknown): value is object {
+  return typeof value === 'object' && value !== null && !isArray(value)
+}
+
+export function isEmpty(
+  value: unknown,
+): value is null | undefined | '' | [] | {} {
   if (isString(value)) {
     return value.length === 0
   }
 
   if (isArray(value)) {
     return value.length === 0
+  }
+
+  if (isObject(value)) {
+    return keysOf(value).length === 0
   }
 
   return isAbsent(value)
