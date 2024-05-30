@@ -4,7 +4,7 @@ import { c } from '@shared/database/schema/columnBuilder'
 export default defineMigration(async (transaction) => {
   await transaction.createTable('projects', {
     id: c.uuid().primaryKey(),
-    displayName: c.string().indexed(),
+    displayName: c.string().indexed().unique(),
     color: c.string().nullable(),
     isBillable: c.boolean(),
     createdAt: c.string(),
