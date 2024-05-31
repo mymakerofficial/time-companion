@@ -80,7 +80,7 @@ describe.each([
         expect(await database.getActualTableNames()).toEqual(['test'])
         expect(database.version).toEqual(2)
 
-        await database.unsafe.truncate()
+        await database.unsafe.dropSchema()
 
         expect(await database.getActualTableNames()).toEqual([])
         expect(database.version).toEqual(0)
@@ -170,7 +170,8 @@ describe.each([
     })
 
     afterEach(async () => {
-      await database.unsafe.truncate()
+      await database.unsafe.dropSchema()
+      database.unsafe.setConfigSchema({})
       database.unsafe.setMigrations([])
       migration001.mockClear()
       migration002.mockClear()
