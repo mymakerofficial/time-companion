@@ -21,10 +21,7 @@ import {
   DatabaseUniqueViolationError,
 } from '@shared/database/types/errors'
 import { arraysHaveOverlap } from '@shared/lib/utils/list'
-import {
-  iteratorToList,
-  iteratorToSortedList,
-} from '@shared/database/helpers/iteratorToList'
+import { iteratorToList } from '@shared/database/helpers/iteratorToList'
 import type { TableSchemaRaw } from '@shared/database/types/schema'
 import { keysOf, valuesOf } from '@shared/lib/utils/object'
 import { promisedRequest } from '@shared/database/adapters/indexedDB/helpers/promisedRequest'
@@ -65,16 +62,18 @@ export class IdbTableAdapter<TRow extends object>
     const { iterator, requiresManualSort, byColumn, direction } =
       await this.openIterator(props)
 
+    const list = await iteratorToList(iterator)
+
     if (requiresManualSort && isNotNull(byColumn)) {
       const compareFn =
         direction === 'asc'
           ? (a: TRow, b: TRow) => (a[byColumn] > b[byColumn] ? 1 : -1)
           : (a: TRow, b: TRow) => (a[byColumn] < b[byColumn] ? 1 : -1)
 
-      return await iteratorToSortedList(iterator, compareFn)
-    } else {
-      return await iteratorToList(iterator)
+      list.sort(compareFn)
     }
+
+    return list
   }
 
   async update(props: AdapterUpdateProps<TRow>): Promise<Array<TRow>> {
