@@ -10,10 +10,6 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['@electric-sql/pglite'],
   },
-  define: {
-    // knex tries to access process for some reason
-    process: {},
-  },
   plugins: [
     tsconfigPaths(),
     vue(),
