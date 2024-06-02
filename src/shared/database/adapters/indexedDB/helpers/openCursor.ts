@@ -5,7 +5,6 @@ import type {
 } from '@shared/database/types/database'
 import type { DatabaseCursor } from '@shared/database/types/cursor'
 import { isNotNull } from '@shared/lib/utils/checks'
-import { IDBKeyRange } from 'fake-indexeddb'
 import { directionToIdbCursorDirection } from '@shared/database/adapters/indexedDB/helpers/directionToIdbCursorDirection'
 import { IndexedDBCursorImpl } from '@shared/database/adapters/indexedDB/helpers/cursor'
 

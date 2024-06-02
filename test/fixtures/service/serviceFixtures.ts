@@ -18,6 +18,8 @@ import fakeIndexedDB from 'fake-indexeddb'
 import config from '@shared/database.config'
 import { ServiceTestHelpers } from '@test/fixtures/service/serviceTestHelpers'
 
+import 'fake-indexeddb/auto'
+
 export interface ServiceFixtures {
   database: Database
   taskService: TaskService
