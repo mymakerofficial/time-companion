@@ -2,6 +2,7 @@ import './assets/index.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import { VueQueryPlugin as query } from '@tanstack/vue-query'
 
 import App from './App.vue'
 import router from './router'
@@ -17,6 +18,9 @@ const app = createApp(App)
 app.use(createPinia())
 app.use(router)
 app.use(i18n)
+app.use(query, {
+  enableDevtoolsV6Plugin: true,
+})
 
 app.mount('#app')
 
