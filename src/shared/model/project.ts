@@ -5,6 +5,7 @@ import type { HasDeletedAt } from '@shared/model/helpers/hasDeletedAt'
 import type { Nullable } from '@shared/lib/utils/types'
 import { defineTable } from '@shared/database/schema/defineTable'
 import { c } from '@shared/database/schema/columnBuilder'
+import { z } from 'zod'
 
 export type ProjectDto = {
   displayName: string
@@ -28,4 +29,10 @@ export const projectsTable = defineTable<ProjectEntityDto>('projects', {
   createdAt: c.string(),
   modifiedAt: c.string().nullable(),
   deletedAt: c.string().nullable(),
+})
+
+export const projectSchema = z.object({
+  displayName: z.string(),
+  color: z.string().nullable(),
+  isBillable: z.boolean(),
 })
