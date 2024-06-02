@@ -9,8 +9,6 @@ const pgOperatorMap: Record<WhereOperator, string> = {
   lessThanOrEquals: '<=',
   inArray: 'in',
   notInArray: 'not in',
-  isNull: 'is null',
-  isNotNull: 'is not null',
   contains: 'like',
   notContains: 'not like',
 }

@@ -31,16 +31,11 @@ export const whereNumberOperators = [
 ] as const
 export type WhereNumberOperator = (typeof whereNumberOperators)[number]
 
-export const whereNullabilityOperators = ['isNull', 'isNotNull'] as const
-export type WhereNullabilityOperator =
-  (typeof whereNullabilityOperators)[number]
-
 export const whereOperators = [
   ...whereEqualityOperators,
   ...whereStringOperators,
   ...whereListOperators,
   ...whereNumberOperators,
-  ...whereNullabilityOperators,
 ] as const
 
 export type WhereOperator = (typeof whereOperators)[number]

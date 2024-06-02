@@ -147,11 +147,11 @@ export class ColumnDefinitionImpl<TRow extends object, TColumn = unknown>
   }
 
   isNotNull(): WhereBuilder<TRow, TColumn> {
-    return this.where('isNotNull')
+    return this.where('notEquals', null)
   }
 
   isNull(): WhereBuilder<TRow, TColumn> {
-    return this.where('isNull')
+    return this.where('equals', null)
   }
 
   lessThan(value: number): WhereBuilder<TRow, TColumn> {
