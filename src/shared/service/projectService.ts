@@ -17,22 +17,18 @@ export interface ProjectServiceDependencies {
 
 export interface ProjectService extends EntityService<ProjectEntityDto> {
   // get all non-deleted projects ordered by displayName
-  getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>>
+  getProjects(): Promise<Array<ProjectEntityDto>>
   // get a project by its id. returns null if the project does not exist
-  getProjectById(id: string): Promise<Nullable<Readonly<ProjectEntityDto>>>
+  getProjectById(id: string): Promise<Nullable<ProjectEntityDto>>
   // get a project by a task id. returns null if the project does not exist
-  getProjectByTaskId(
-    taskId: string,
-  ): Promise<Nullable<Readonly<ProjectEntityDto>>>
+  getProjectByTaskId(taskId: string): Promise<Nullable<ProjectEntityDto>>
   // create a new project and return the created project
-  createProject(
-    project: Readonly<ProjectDto>,
-  ): Promise<Readonly<ProjectEntityDto>>
+  createProject(project: ProjectDto): Promise<ProjectEntityDto>
   // patches a project by its id, updates the modifiedAt field and returns the updated project
   patchProjectById(
     id: string,
-    partialProject: Partial<Readonly<ProjectDto>>,
-  ): Promise<Readonly<ProjectEntityDto>>
+    partialProject: Partial<ProjectDto>,
+  ): Promise<ProjectEntityDto>
   // soft deletes a project by its id,
   //  this does not delete the project from the database but sets the deletedAt field
   softDeleteProject(id: string): Promise<void>
@@ -57,25 +53,21 @@ class ProjectServiceImpl
     this.taskService = deps.taskService
   }
 
-  async getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>> {
+  async getProjects(): Promise<Array<ProjectEntityDto>> {
     return await this.projectPersistence.getProjects()
   }
 
-  async getProjectById(
-    id: string,
-  ): Promise<Nullable<Readonly<ProjectEntityDto>>> {
+  async getProjectById(id: string): Promise<Nullable<ProjectEntityDto>> {
     return await this.projectPersistence.getProjectById(id)
   }
 
   async getProjectByTaskId(
     taskId: string,
-  ): Promise<Nullable<Readonly<ProjectEntityDto>>> {
+  ): Promise<Nullable<ProjectEntityDto>> {
     return await this.projectPersistence.getProjectByTaskId(taskId)
   }
 
-  async createProject(
-    project: Readonly<ProjectDto>,
-  ): Promise<Readonly<ProjectEntityDto>> {
+  async createProject(project: ProjectDto): Promise<ProjectEntityDto> {
     const newProject = await this.projectPersistence.createProject({
       id: uuid(),
       ...project,
@@ -91,8 +83,8 @@ class ProjectServiceImpl
 
   async patchProjectById(
     id: string,
-    partialProject: Partial<Readonly<ProjectDto>>,
-  ): Promise<Readonly<ProjectEntityDto>> {
+    partialProject: Partial<ProjectDto>,
+  ): Promise<ProjectEntityDto> {
     const changedFields = keysOf(partialProject)
 
     assertOnlyValidFieldsChanged(changedFields, [

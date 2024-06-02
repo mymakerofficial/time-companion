@@ -1,28 +1,27 @@
 import { type ProjectEntityDto, projectsTable } from '@shared/model/project'
 import type { Database } from '@shared/database/types/database'
-import { asyncGetOrThrow } from '@shared/lib/utils/result'
 import { check, isNotEmpty, isNotNull } from '@shared/lib/utils/checks'
 import { firstOf } from '@shared/lib/utils/list'
 import { todo } from '@shared/lib/utils/todo'
+import {
+  type DatabaseError,
+  errorIsUniqueViolation,
+} from '@shared/database/types/errors'
 
 export interface ProjectPersistenceDependencies {
   database: Database
 }
 
 export interface ProjectPersistence {
-  getProjects(): Promise<ReadonlyArray<ProjectEntityDto>>
-  getProjectById(id: string): Promise<Readonly<ProjectEntityDto>>
-  getProjectByDisplayName(
-    displayName: string,
-  ): Promise<Readonly<ProjectEntityDto>>
-  getProjectByTaskId(taskId: string): Promise<Readonly<ProjectEntityDto>>
-  createProject(
-    project: Readonly<ProjectEntityDto>,
-  ): Promise<Readonly<ProjectEntityDto>>
+  getProjects(): Promise<Array<ProjectEntityDto>>
+  getProjectById(id: string): Promise<ProjectEntityDto>
+  getProjectByDisplayName(displayName: string): Promise<ProjectEntityDto>
+  getProjectByTaskId(taskId: string): Promise<ProjectEntityDto>
+  createProject(project: ProjectEntityDto): Promise<ProjectEntityDto>
   patchProjectById(
     id: string,
-    partialProject: Partial<Readonly<ProjectEntityDto>>,
-  ): Promise<Readonly<ProjectEntityDto>>
+    partialProject: Partial<ProjectEntityDto>,
+  ): Promise<ProjectEntityDto>
 }
 
 class ProjectPersistenceImpl implements ProjectPersistence {
@@ -32,14 +31,14 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     this.database = deps.database
   }
 
-  async getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>> {
+  async getProjects(): Promise<Array<ProjectEntityDto>> {
     return await this.database.table(projectsTable).findMany({
       where: projectsTable.deletedAt.isNull(),
       orderBy: projectsTable.displayName.asc(),
     })
   }
 
-  async getProjectById(id: string): Promise<Readonly<ProjectEntityDto>> {
+  async getProjectById(id: string): Promise<ProjectEntityDto> {
     const res = await this.database.table(projectsTable).findFirst({
       range: projectsTable.id.range.only(id),
       where: projectsTable.deletedAt.isNull(),
@@ -52,7 +51,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
 
   async getProjectByDisplayName(
     displayName: string,
-  ): Promise<Readonly<ProjectEntityDto>> {
+  ): Promise<ProjectEntityDto> {
     const res = await this.database.table(projectsTable).findFirst({
       where: projectsTable.displayName
         .equals(displayName)
@@ -67,27 +66,31 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     return res
   }
 
-  async getProjectByTaskId(
-    taskId: string,
-  ): Promise<Readonly<ProjectEntityDto>> {
+  async getProjectByTaskId(taskId: string): Promise<ProjectEntityDto> {
     todo()
   }
 
-  async createProject(
-    project: Readonly<ProjectEntityDto>,
-  ): Promise<Readonly<ProjectEntityDto>> {
-    return await asyncGetOrThrow(
-      this.database.table(projectsTable).insert({
+  async createProject(project: ProjectEntityDto): Promise<ProjectEntityDto> {
+    return await this.database
+      .table(projectsTable)
+      .insert({
         data: project,
-      }),
-      `Project with displayName "${project.displayName}" already exists.`,
-    )
+      })
+      .catch((error: DatabaseError) => {
+        if (errorIsUniqueViolation(error)) {
+          throw new Error(
+            `Project with ${error.columnName} "${error.value}" already exists.`,
+          )
+        }
+
+        throw error
+      })
   }
 
   async patchProjectById(
     id: string,
-    partialProject: Partial<Readonly<ProjectEntityDto>>,
-  ): Promise<Readonly<ProjectEntityDto>> {
+    partialProject: Partial<ProjectEntityDto>,
+  ): Promise<ProjectEntityDto> {
     const res = await this.database.table(projectsTable).update({
       range: projectsTable.id.range.only(id),
       where: projectsTable.deletedAt.isNull(),

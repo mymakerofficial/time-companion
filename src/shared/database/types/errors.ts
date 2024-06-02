@@ -114,6 +114,12 @@ export class DatabaseUniqueViolationError extends DatabaseError {
   }
 }
 
+export function errorIsUniqueViolation(
+  error: Error,
+): error is DatabaseUniqueViolationError {
+  return error.name === 'DatabaseUniqueViolationError'
+}
+
 export class DatabaseDuplicateTableError extends DatabaseError {
   constructor(public readonly tableName: string) {
     super('DatabaseDuplicateTableError', `Table "${tableName}" already exists.`)
