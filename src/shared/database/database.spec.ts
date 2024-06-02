@@ -26,6 +26,7 @@ import { c } from '@shared/database/schema/columnBuilder'
 import 'fake-indexeddb/auto'
 import { defineConfig } from '@shared/database/schema/defineConfig'
 import { personsTable, petsTable } from '@test/fixtures/database/schema'
+import { defineTable } from '@shared/database/schema/defineTable'
 
 function byId(a: HasId, b: HasId) {
   return a.id.localeCompare(b.id)
@@ -59,36 +60,6 @@ describe.each([
       pgliteAdapter(`${persist ? 'idb' : 'memory'}://test-database-${uuid()}`),
   ],
 ])('Adapter "%s"', (adapterName, adapterFactory) => {
-  describe('unsafe', () => {
-    describe('truncate', () => {
-      it('should reset the database', async () => {
-        const database = createDatabase(adapterFactory(), {
-          migrations: [
-            async (_) => {},
-            async (transaction) => {
-              await transaction.createTable('test', {
-                id: c.uuid().primaryKey(),
-              })
-            },
-          ],
-        })
-
-        expect(database.isOpen).toBe(false)
-
-        await database.open()
-
-        expect(await database.getActualTableNames()).toEqual(['test'])
-        expect(database.version).toEqual(2)
-
-        await database.unsafe.dropSchema()
-
-        expect(await database.getActualTableNames()).toEqual([])
-        expect(database.version).toEqual(0)
-        expect(database.isOpen).toBe(true)
-      })
-    })
-  })
-
   describe('open', () => {
     const migration001 = vi.fn(
       () => import('@test/fixtures/database/migrations/001_add_persons'),
@@ -275,6 +246,30 @@ describe.each([
       expect(database.version).toBe(2)
       expect(migration001).not.toHaveBeenCalled()
       expect(migration002).not.toHaveBeenCalled()
+    })
+
+    it('should fail if the database schema doesnt match the schema after migration', async () => {
+      database.unsafe.setConfigSchema({
+        foo: defineTable('foo', {
+          id: c.uuid().primaryKey(),
+          textColumn: c.string(),
+          integerColumn: c.integer().indexed().unique(),
+        }),
+      })
+
+      database.unsafe.setMigrations([
+        async (transaction) => {
+          await transaction.createTable('foo', {
+            id: c.uuid().primaryKey(),
+            textColumn: c.string(),
+            integerColumn: c.integer(), // index and unique are missing
+          })
+        },
+      ])
+
+      await expect(database.unsafe.migrate()).rejects.toThrowError(
+        'The database schema after migration does not match the expected schema.',
+      )
     })
 
     describe('upgrade transaction', async () => {

@@ -51,6 +51,15 @@ export class DatabaseVersionMissingError extends DatabaseError {
   }
 }
 
+export class DatabaseSchemaMismatchError extends DatabaseError {
+  constructor() {
+    super(
+      'DatabaseSchemaMismatchError',
+      'The database schema after migration does not match the expected schema.',
+    )
+  }
+}
+
 /***
  * This error is thrown when trying to perform schema alterations on with a transaction that is not a versionchange transaction.
  */

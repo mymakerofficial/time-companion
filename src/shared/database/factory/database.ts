@@ -9,7 +9,12 @@ import type {
   UpgradeTransaction,
 } from '@shared/database/types/database'
 import type { DatabaseAdapter } from '@shared/database/types/adapter'
-import { check, isEmpty, isNotNull } from '@shared/lib/utils/checks'
+import {
+  check,
+  isEmpty,
+  isNotNull,
+  isUndefined,
+} from '@shared/lib/utils/checks'
 import { DatabaseTransactionImpl } from '@shared/database/factory/transaction'
 import { DatabaseUpgradeTransactionImpl } from '@shared/database/factory/upgradeTransaction'
 import type {
@@ -24,11 +29,13 @@ import {
 } from '@shared/events/publisher'
 import {
   DatabaseAlreadyOpenError,
+  DatabaseSchemaMismatchError,
   DatabaseVersionTooHighError,
 } from '@shared/database/types/errors'
 import { emptyMap, toArray } from '@shared/lib/utils/list'
 import { DatabaseQuertyFactoryImpl } from '@shared/database/factory/queryFactory'
 import { entriesOf } from '@shared/lib/utils/object'
+import { rawTableSchemasMatch } from '@shared/database/schema/schemasMatch'
 
 export function createDatabase<TSchema extends DatabaseSchema>(
   adapter: DatabaseAdapter,
@@ -133,6 +140,8 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
           await transactionAdapter.commit()
           this.publisher.notify({ type: 'migrationsFinished' }, {})
         })
+
+      this.checkRuntimeSchemaMatchesConfig()
     } else {
       this.setRuntimeSchemaFromConfig()
       this.publisher.notify({ type: 'migrationsSkipped' }, {})
@@ -140,6 +149,26 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
 
     this._version = await this.adapter.getDatabaseInfo().then((info) => {
       return getOrDefault(info?.version, 1) - 1
+    })
+  }
+
+  protected checkRuntimeSchemaMatchesConfig(): void {
+    if (isEmpty(this.config.schema)) {
+      return
+    }
+
+    entriesOf(this.config.schema).forEach(([tableName, tableSchema]) => {
+      const runtimeTableSchema = this.runtimeSchema.get(tableName as string)
+
+      if (
+        isUndefined(runtimeTableSchema) ||
+        !rawTableSchemasMatch(
+          runtimeTableSchema,
+          (tableSchema as TableSchema)._.raw,
+        )
+      ) {
+        throw new DatabaseSchemaMismatchError()
+      }
     })
   }
 
