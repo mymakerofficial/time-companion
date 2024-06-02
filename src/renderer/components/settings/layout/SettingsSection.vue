@@ -3,7 +3,7 @@ import { Separator } from '@renderer/components/ui/separator'
 import { Badge } from '@renderer/components/ui/badge'
 
 defineProps<{
-  title: string
+  title?: string
   description?: string
   isNew?: boolean
 }>()
@@ -18,7 +18,10 @@ defineSlots<{
   <section class="mb-8 flex flex-col gap-8">
     <div class="flex gap-4 justify-between">
       <div class="space-y-1">
-        <h2 class="text-sm font-medium text-primary tracking-tight">
+        <h2
+          v-if="title"
+          class="text-sm font-medium text-primary tracking-tight"
+        >
           {{ title }}
           <Badge v-if="isNew" class="ml-2" size="xs" color="lime">{{
             $t('common.labels.new')
