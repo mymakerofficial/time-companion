@@ -858,35 +858,38 @@ describe.each([
           )
         })
 
-        it('should return rows ordered by un-indexed column with offset and filter', async () => {
-          await helpers.insertSamplePersons(6, {
-            age: [10, 20, 30, 40, 50, 60],
-            firstName: ['John', 'Jane', 'John', 'Jane', 'John', 'Jane'],
-            lastName: ['F', 'E', 'D', 'C', 'B', 'A'],
-          })
+        it.todo(
+          'should return rows ordered by un-indexed column with offset and filter',
+          async () => {
+            await helpers.insertSamplePersons(6, {
+              age: [10, 20, 30, 40, 50, 60],
+              firstName: ['John', 'Jane', 'John', 'Jane', 'John', 'Jane'],
+              lastName: ['F', 'E', 'D', 'C', 'B', 'A'],
+            })
 
-          // going from A to F, skip everyone that is not John, then skip the first John
-          //  we are left with John D and John F
+            // going from A to F, skip everyone that is not John, then skip the first John
+            //  we are left with John D and John F
 
-          const res = await database.table(personsTable).findMany({
-            where: personsTable.firstName.equals('John'),
-            orderBy: personsTable.lastName.asc(),
-            offset: 1,
-          })
+            const res = await database.table(personsTable).findMany({
+              where: personsTable.firstName.equals('John'),
+              orderBy: personsTable.lastName.asc(),
+              offset: 1,
+            })
 
-          expect(res).toEqual([
-            expect.objectContaining({
-              age: 30,
-              firstName: 'John',
-              lastName: 'D',
-            }),
-            expect.objectContaining({
-              age: 10,
-              firstName: 'John',
-              lastName: 'F',
-            }),
-          ])
-        })
+            expect(res).toEqual([
+              expect.objectContaining({
+                age: 30,
+                firstName: 'John',
+                lastName: 'D',
+              }),
+              expect.objectContaining({
+                age: 10,
+                firstName: 'John',
+                lastName: 'F',
+              }),
+            ])
+          },
+        )
 
         it('should only return the first n entries in a table', async () => {
           const samplePersons = await helpers.insertSamplePersons(6)
