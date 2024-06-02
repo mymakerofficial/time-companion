@@ -143,8 +143,8 @@ describe('schema', () => {
                   {
                     type: 'condition',
                     column: expect.objectContaining({ columnName: 'color' }),
-                    operator: 'isNotNull',
-                    value: undefined,
+                    operator: 'notEquals',
+                    value: null,
                   },
                   {
                     type: 'condition',
