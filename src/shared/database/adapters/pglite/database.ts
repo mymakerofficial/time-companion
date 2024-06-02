@@ -3,7 +3,7 @@ import type {
   DatabaseInfo,
   TransactionAdapter,
 } from '@shared/database/types/adapter'
-import createKnex from 'knex'
+import { knex as createKnex } from 'knex'
 import { PGlite, type PGliteInterface } from '@electric-sql/pglite'
 import { check, isNotEmpty, isNotNull } from '@shared/lib/utils/checks'
 import { PGLiteDatabaseTransactionAdapter } from '@shared/database/adapters/pglite/transaction'

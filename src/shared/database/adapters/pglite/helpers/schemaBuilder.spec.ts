@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import createKnex from 'knex'
+import { knex as createKnex } from 'knex'
 import {
   buildAlterTable,
   buildCreateTable,
