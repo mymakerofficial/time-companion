@@ -1,6 +1,7 @@
-import { createInMemoryDatabase } from '@shared/database/inMemory/database'
-import type { Database } from '@shared/database/database'
+import { createDatabase } from '@shared/database/factory/database'
+import config from '@shared/database.config'
+import { indexedDBAdapter } from '@shared/database/adapters/indexedDB/database'
 
-export const database: Database = (() => {
-  return createInMemoryDatabase()
+export const database = (() => {
+  return createDatabase(indexedDBAdapter('time-companion'), config)
 })()

@@ -1,8 +1,8 @@
-import type { Database } from '@shared/database/database'
-import type { TaskEntityDto } from '@shared/model/task'
-import { asyncGetOrThrow } from '@shared/lib/utils/result'
-import type { ProjectEntityDto } from '@shared/model/project'
-import { check, isDefined } from '@shared/lib/utils/checks'
+import type { Database, Transaction } from '@shared/database/types/database'
+import { type TaskEntityDto, tasksTable } from '@shared/model/task'
+import { projectsTable } from '@shared/model/project'
+import { check, isNotEmpty, isNotNull, isNull } from '@shared/lib/utils/checks'
+import { firstOf } from '@shared/lib/utils/list'
 
 export interface TaskPersistenceDependencies {
   database: Database
@@ -35,85 +35,91 @@ export class TaskPersistenceImpl implements TaskPersistence {
   }
 
   async getTasks(): Promise<ReadonlyArray<TaskEntityDto>> {
-    return await this.database.table<TaskEntityDto>('tasks').findMany({
-      where: {
-        deletedAt: { equals: null },
-      },
-      orderBy: { displayName: 'asc' },
+    return await this.database.table(tasksTable).findMany({
+      where: tasksTable.deletedAt.isNull(),
+      orderBy: tasksTable.displayName.asc(),
     })
   }
 
   async getTaskById(id: string): Promise<Readonly<TaskEntityDto>> {
-    return await asyncGetOrThrow(
-      this.database.table<TaskEntityDto>('tasks').findFirst({
-        where: {
-          AND: [{ id: { equals: id } }, { deletedAt: { equals: null } }],
-        },
-      }),
-      `Task with id "${id}" not found.`,
-    )
+    const res = await this.database.table(tasksTable).findFirst({
+      where: tasksTable.id.equals(id).and(tasksTable.deletedAt.isNull()),
+    })
+
+    check(isNotNull(res), `Task with id "${id}" not found.`)
+
+    return res
   }
 
   async getTaskByDisplayNameAndProjectId(
     displayName: string,
     projectId: string,
   ): Promise<Readonly<TaskEntityDto>> {
-    return await asyncGetOrThrow(
-      this.database.table<TaskEntityDto>('tasks').findFirst({
-        where: {
-          AND: [
-            { displayName: { equals: displayName } },
-            { projectId: { equals: projectId } },
-            { deletedAt: { equals: null } },
-          ],
-        },
-      }),
+    const res = await this.database.table(tasksTable).findFirst({
+      where: tasksTable.displayName
+        .equals(displayName)
+        .and(tasksTable.projectId.equals(projectId))
+        .and(tasksTable.deletedAt.isNull()),
+    })
+
+    check(
+      isNotNull(res),
       `Task with displayName "${displayName}" and projectId "${projectId}" not found.`,
     )
+
+    return res
   }
 
   async getTasksByProjectId(
     projectId: string,
   ): Promise<ReadonlyArray<TaskEntityDto>> {
-    const project = await this.database
-      .table<ProjectEntityDto>('projects')
-      .findFirst({
-        where: {
-          AND: [{ id: { equals: projectId } }, { deletedAt: { equals: null } }],
-        },
+    return await this.database.withTransaction(async (transaction) => {
+      const project = await transaction.table(projectsTable).findFirst({
+        where: projectsTable.id
+          .equals(projectId)
+          .and(projectsTable.deletedAt.isNull()),
       })
 
-    check(isDefined(project), `Project with id "${projectId}" not found.`)
+      check(isNotNull(project), `Project with id "${projectId}" not found.`)
 
-    return await this.database.table<TaskEntityDto>('tasks').findMany({
-      where: {
-        AND: [
-          { projectId: { equals: projectId } },
-          { deletedAt: { equals: null } },
-        ],
-      },
-      orderBy: { displayName: 'asc' },
+      return await transaction.table(tasksTable).findMany({
+        where: tasksTable.projectId
+          .equals(projectId)
+          .and(tasksTable.deletedAt.isNull()),
+        orderBy: tasksTable.displayName.asc(),
+      })
     })
   }
-
   async createTask(
     task: Readonly<TaskEntityDto>,
   ): Promise<Readonly<TaskEntityDto>> {
-    const project = await this.database
-      .table<ProjectEntityDto>('projects')
-      .findFirst({
-        where: {
-          AND: [
-            { id: { equals: task.projectId } },
-            { deletedAt: { equals: null } },
-          ],
-        },
+    return await this.database.withTransaction(async (transaction) => {
+      const existingTask = await transaction.table(tasksTable).findFirst({
+        where: tasksTable.displayName
+          .equals(task.displayName)
+          .and(tasksTable.projectId.equals(task.projectId))
+          .and(tasksTable.deletedAt.isNull()),
       })
 
-    check(isDefined(project), `Project with id "${task.projectId}" not found.`)
+      check(
+        isNull(existingTask),
+        `Task with displayName "${task.displayName}" already exists in project "${task.projectId}".`,
+      )
 
-    return await this.database.table<TaskEntityDto>('tasks').create({
-      data: task,
+      const project = await transaction.table(projectsTable).findFirst({
+        where: projectsTable.id
+          .equals(task.projectId)
+          .and(projectsTable.deletedAt.isNull()),
+      })
+
+      check(
+        isNotNull(project),
+        `Project with id "${task.projectId}" not found.`,
+      )
+
+      return await transaction.table(tasksTable).insert({
+        data: task,
+      })
     })
   }
 
@@ -121,17 +127,14 @@ export class TaskPersistenceImpl implements TaskPersistence {
     id: string,
     partialTask: Partial<Readonly<TaskEntityDto>>,
   ): Promise<Readonly<TaskEntityDto>> {
-    const originalProject = await this.getTaskById(id)
-
-    const patchedTask: TaskEntityDto = {
-      ...originalProject,
-      ...partialTask,
-    }
-
-    return await this.database.table<TaskEntityDto>('tasks').update({
-      where: { id: { equals: id } },
-      data: patchedTask,
+    const res = await this.database.table(tasksTable).update({
+      where: tasksTable.id.equals(id),
+      data: partialTask,
     })
+
+    check(isNotEmpty(res), `Task with id "${id}" not found.`)
+
+    return firstOf(res)
   }
 }
 

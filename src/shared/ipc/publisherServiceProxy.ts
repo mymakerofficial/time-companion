@@ -4,10 +4,7 @@ import type {
   SubscriberCallback,
 } from '@shared/events/publisher'
 import { PublisherImpl } from '@shared/events/publisher'
-import {
-  asyncResolveResult,
-  resolveResult,
-} from '@shared/lib/helpers/resulting'
+import { asyncResolveResult } from '@shared/lib/helpers/resulting'
 
 // notify is a protected method, but we need to call it, so we expose it
 class OpenPublisher<

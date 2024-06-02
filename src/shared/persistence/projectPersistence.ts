@@ -1,7 +1,9 @@
-import type { ProjectEntityDto } from '@shared/model/project'
-import type { Database } from '@shared/database/database'
-import type { TaskEntityDto } from '@shared/model/task'
+import { type ProjectEntityDto, projectsTable } from '@shared/model/project'
+import type { Database } from '@shared/database/types/database'
 import { asyncGetOrThrow } from '@shared/lib/utils/result'
+import { check, isNotEmpty, isNotNull } from '@shared/lib/utils/checks'
+import { firstOf } from '@shared/lib/utils/list'
+import { todo } from '@shared/lib/utils/todo'
 
 export interface ProjectPersistenceDependencies {
   database: Database
@@ -31,79 +33,70 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   }
 
   async getProjects(): Promise<ReadonlyArray<Readonly<ProjectEntityDto>>> {
-    return await this.database.table<ProjectEntityDto>('projects').findMany({
-      where: { deletedAt: { equals: null } },
-      orderBy: { displayName: 'asc' },
+    return await this.database.table(projectsTable).findMany({
+      where: projectsTable.deletedAt.isNull(),
+      orderBy: projectsTable.displayName.asc(),
     })
   }
 
   async getProjectById(id: string): Promise<Readonly<ProjectEntityDto>> {
-    return await asyncGetOrThrow(
-      this.database.table<ProjectEntityDto>('projects').findFirst({
-        where: {
-          AND: [{ id: { equals: id } }, { deletedAt: { equals: null } }],
-        },
-      }),
-      `Project with id "${id}" not found.`,
-    )
+    const res = await this.database.table(projectsTable).findFirst({
+      range: projectsTable.id.range.only(id),
+      where: projectsTable.deletedAt.isNull(),
+    })
+
+    check(isNotNull(res), `Project with id "${id}" not found.`)
+
+    return res
   }
 
   async getProjectByDisplayName(
     displayName: string,
   ): Promise<Readonly<ProjectEntityDto>> {
-    return await asyncGetOrThrow(
-      this.database.table<ProjectEntityDto>('projects').findFirst({
-        where: {
-          AND: [
-            { displayName: { equals: displayName } },
-            { deletedAt: { equals: null } },
-          ],
-        },
-      }),
+    const res = await this.database.table(projectsTable).findFirst({
+      where: projectsTable.displayName
+        .equals(displayName)
+        .and(projectsTable.deletedAt.isNull()),
+    })
+
+    check(
+      isNotNull(res),
       `Project with displayName "${displayName}" not found.`,
     )
+
+    return res
   }
 
   async getProjectByTaskId(
     taskId: string,
   ): Promise<Readonly<ProjectEntityDto>> {
-    return await asyncGetOrThrow(
-      this.database
-        .join<ProjectEntityDto, TaskEntityDto>('projects', 'tasks')
-        .left({
-          on: { id: 'projectId' },
-          where: { id: { equals: taskId } },
-        })
-        .findFirst({
-          where: { deletedAt: { equals: null } },
-        }),
-      `Project with taskId "${taskId}" not found.`,
-    )
+    todo()
   }
 
   async createProject(
     project: Readonly<ProjectEntityDto>,
   ): Promise<Readonly<ProjectEntityDto>> {
-    return await this.database.table<ProjectEntityDto>('projects').create({
-      data: project,
-    })
+    return await asyncGetOrThrow(
+      this.database.table(projectsTable).insert({
+        data: project,
+      }),
+      `Project with displayName "${project.displayName}" already exists.`,
+    )
   }
 
   async patchProjectById(
     id: string,
     partialProject: Partial<Readonly<ProjectEntityDto>>,
   ): Promise<Readonly<ProjectEntityDto>> {
-    const originalProject = await this.getProjectById(id)
-
-    const patchedProject: ProjectEntityDto = {
-      ...originalProject,
-      ...partialProject,
-    }
-
-    return await this.database.table<ProjectEntityDto>('projects').update({
-      where: { id: { equals: id } },
-      data: patchedProject,
+    const res = await this.database.table(projectsTable).update({
+      range: projectsTable.id.range.only(id),
+      where: projectsTable.deletedAt.isNull(),
+      data: partialProject,
     })
+
+    check(isNotEmpty(res), `Project with id "${id}" not found.`)
+
+    return firstOf(res)
   }
 }
 

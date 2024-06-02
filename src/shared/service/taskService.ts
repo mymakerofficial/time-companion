@@ -4,8 +4,8 @@ import type { Nullable } from '@shared/lib/utils/types'
 import { keysOf } from '@shared/lib/utils/object'
 import { assertOnlyValidFieldsChanged } from '@shared/service/helpers/assertOnlyValidFieldsChanged'
 import type { ProjectPersistence } from '@shared/persistence/projectPersistence'
-import { check, isAbsent, isPresent } from '@shared/lib/utils/checks'
-import { asyncGetOrNull, asyncGetOrThrow } from '@shared/lib/utils/result'
+import { isPresent } from '@shared/lib/utils/checks'
+import { asyncGetOrThrow } from '@shared/lib/utils/result'
 import {
   type EntityService,
   EntityServiceImpl,
@@ -40,6 +40,10 @@ export interface TaskService extends EntityService<TaskEntityDto> {
   softDeleteTasksByProjectId: (projectId: string) => Promise<void>
 }
 
+export function createTaskService(deps: TaskServiceDependencies): TaskService {
+  return new TaskServiceImpl(deps)
+}
+
 class TaskServiceImpl
   extends EntityServiceImpl<TaskEntityDto>
   implements TaskService
@@ -68,18 +72,6 @@ class TaskServiceImpl
   }
 
   async createTask(task: Readonly<TaskDto>): Promise<Readonly<TaskEntityDto>> {
-    const existingTask = await asyncGetOrNull(
-      this.taskPersistence.getTaskByDisplayNameAndProjectId(
-        task.displayName,
-        task.projectId,
-      ),
-    )
-
-    check(
-      isAbsent(existingTask),
-      `Task with displayName "${task.displayName}" already exists in project "${task.projectId}".`,
-    )
-
     const newTask = await this.taskPersistence.createTask({
       id: uuid(),
       ...task,
@@ -137,8 +129,4 @@ class TaskServiceImpl
       await this.softDeleteTask(task.id)
     }
   }
-}
-
-export function createTaskService(deps: TaskServiceDependencies): TaskService {
-  return new TaskServiceImpl(deps)
 }

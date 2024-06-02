@@ -10,3 +10,7 @@ export type ErrorOrString = Error | string
 export type MaybeArray<T> = T | Array<T>
 
 export type MaybePromise<T> = T | Promise<T>
+
+type Required<T> = {
+  [P in keyof T]-?: T[P]
+}

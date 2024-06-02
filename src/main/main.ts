@@ -1,6 +1,5 @@
 import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'path'
-import { database } from '@main/factory/database/database'
 import { projectService } from '@main/factory/service/projectService'
 import { registerIpcHandler } from '@main/ipc/handler'
 import { taskService } from '@main/factory/service/taskService'
@@ -9,6 +8,7 @@ import {
   serviceInvokeChannel,
   servicePublishChannel,
 } from '@shared/ipc/helpers/channels'
+import { preflightService } from '@main/factory/service/preflightService'
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -57,34 +57,8 @@ function createMainWindow() {
   return mainWindow
 }
 
-function initialize() {
-  // TODO this is a hack to create the tables
-
-  database.createTable({
-    name: 'projects',
-    schema: {
-      id: 'string',
-      displayName: 'string',
-      color: 'string',
-      isBillable: 'boolean',
-      createdAt: 'string',
-      modifiedAt: 'string',
-      deletedAt: 'string',
-    },
-  })
-
-  database.createTable({
-    name: 'tasks',
-    schema: {
-      id: 'string',
-      projectId: 'string',
-      displayName: 'string',
-      color: 'string',
-      createdAt: 'string',
-      modifiedAt: 'string',
-      deletedAt: 'string',
-    },
-  })
+async function initialize() {
+  preflightService.start()
 }
 
 function handleSetTitleBarColors(event: Electron.IpcMainEvent, colors: any) {
@@ -110,11 +84,17 @@ function registerIpcHandlers() {
     registerIpcPublishers(mainWindow)
   })
 
+  registerIpcHandler(serviceInvokeChannel('preflight'), preflightService)
   registerIpcHandler(serviceInvokeChannel('project'), projectService)
   registerIpcHandler(serviceInvokeChannel('task'), taskService)
 }
 
 function registerIpcPublishers(window: BrowserWindow) {
+  registerIpcPublisher(
+    servicePublishChannel('preflight'),
+    preflightService,
+    window,
+  )
   registerIpcPublisher(servicePublishChannel('project'), projectService, window)
   registerIpcPublisher(servicePublishChannel('task'), taskService, window)
 }
@@ -122,8 +102,8 @@ function registerIpcPublishers(window: BrowserWindow) {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', () => {
-  initialize()
+app.on('ready', async () => {
+  await initialize()
   registerIpcHandlers()
   createMainWindow()
 })

@@ -17,11 +17,21 @@ export function toError(errorOrMessage: Error | string): Error {
   return isString(errorOrMessage) ? new Error(errorOrMessage) : errorOrMessage
 }
 
-// Returns the value if present and doesn't throw, otherwise returns the value returned by the getter.
-export function getOrElse<T>(
-  valueOrGetter: ValueOrGetter<Maybe<T>>,
-  elseValueOrGetter: ValueOrGetter<T>,
+// Runs the function with the arguments and returns the result or the value.
+export function getOrRun<T>(
+  valueOrFunction: T | ((...args: any[]) => T),
+  ...args: any[]
 ): T {
+  return isFunction(valueOrFunction)
+    ? valueOrFunction(...args)
+    : valueOrFunction
+}
+
+// Returns the value if present and doesn't throw, otherwise returns the value returned by the getter.
+export function getOrElse<T, G = T>(
+  valueOrGetter: ValueOrGetter<Maybe<T>>,
+  elseValueOrGetter: ValueOrGetter<G>,
+): Exclude<T, null | undefined> | G {
   try {
     const value = toValue(valueOrGetter)
     if (isPresent(value)) {
@@ -36,17 +46,17 @@ export function getOrElse<T>(
 export function getOrThrow<T>(
   valueOrGetter: ValueOrGetter<Maybe<T>>,
   errorOrMessage: ErrorOrString,
-): T {
+): Exclude<T, null | undefined> {
   return getOrElse(valueOrGetter, () => {
     throw toError(errorOrMessage)
   })
 }
 
 // Returns the value if present and doesn't throw, otherwise returns the default value.
-export function getOrDefault<T>(
+export function getOrDefault<T, G = T>(
   valueOrGetter: ValueOrGetter<Maybe<T>>,
-  defaultValue: T,
-): T {
+  defaultValue: G,
+): Exclude<T, null | undefined> | G {
   return getOrElse(toValue(valueOrGetter), defaultValue)
 }
 
@@ -58,10 +68,10 @@ export function getOrNull<T>(
 }
 
 // Returns the value if present and doesn't throw, otherwise returns the value returned by the getter.
-export async function asyncGetOrElse<T>(
+export async function asyncGetOrElse<T, G = T>(
   valueOrGetter: ValueOrGetter<Promise<Maybe<T>>>,
-  elseValueOrGetter: ValueOrGetter<T>,
-): Promise<T> {
+  elseValueOrGetter: ValueOrGetter<G>,
+): Promise<Exclude<T, null | undefined> | G> {
   try {
     const value = await toValue(valueOrGetter)
     if (isPresent(value)) {
@@ -75,17 +85,17 @@ export async function asyncGetOrElse<T>(
 export async function asyncGetOrThrow<T>(
   valueOrGetter: ValueOrGetter<Promise<Maybe<T>>>,
   errorOrMessage: ErrorOrString,
-): Promise<T> {
+): Promise<Exclude<T, null | undefined>> {
   return asyncGetOrElse(valueOrGetter, () => {
     throw toError(errorOrMessage)
   })
 }
 
 // Returns the value if present and doesn't throw, otherwise returns the default value.
-export async function asyncGetOrDefault<T>(
+export async function asyncGetOrDefault<T, G = T>(
   valueOrGetter: ValueOrGetter<Promise<Maybe<T>>>,
-  defaultValue: T,
-): Promise<T> {
+  defaultValue: G,
+): Promise<Exclude<T, null | undefined> | G> {
   return asyncGetOrElse(toValue(valueOrGetter), defaultValue)
 }
 

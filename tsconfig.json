@@ -3,7 +3,7 @@
     "@tsconfig/node18/tsconfig.json",
     "@vue/tsconfig/tsconfig.dom.json"
   ],
-  "include": ["src", "*.config.ts", "*.env.d.ts"],
+  "include": ["src", "test", "*.config.ts", "*.env.d.ts"],
   "compilerOptions": {
     "target": "es2017",
     "module": "esnext",
@@ -26,7 +26,8 @@
       "@shared/*": ["src/shared/*"],
       "@main/*": ["src/main/*"],
       "@preload/*": ["src/preload/*"],
-      "@renderer/*": ["src/renderer/*"]
+      "@renderer/*": ["src/renderer/*"],
+      "@test/*": ["test/*"]
     }
   }
 }

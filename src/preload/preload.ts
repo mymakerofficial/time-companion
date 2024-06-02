@@ -19,5 +19,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     task: {
       ...createServiceApi('task'),
     },
+    preflight: {
+      ...createServiceApi('preflight'),
+    },
   },
 })

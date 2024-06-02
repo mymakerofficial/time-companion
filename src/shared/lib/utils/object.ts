@@ -8,6 +8,10 @@ export function keysOf<T extends unknown>(obj: T) {
   return Object.keys(obj as object) as Array<keyof T>
 }
 
+export function valuesOf<T extends unknown>(obj: T) {
+  return Object.values(obj as object) as Array<T[keyof T]>
+}
+
 export function propertiesOf<T extends unknown>(obj: T) {
   return Object.getOwnPropertyNames(
     Object.getPrototypeOf(obj as object),

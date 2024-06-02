@@ -55,6 +55,11 @@ export interface Publisher<TTopics extends object, TEvent extends object> {
   ): void
 }
 
+export interface OpenPublisher<TTopics extends object, TEvent extends object>
+  extends Publisher<TTopics, TEvent> {
+  notify(topics: PublisherTopics<TTopics>, event: TEvent): void
+}
+
 export class PublisherImpl<TTopics extends object, TEvent extends object>
   implements Publisher<TTopics, TEvent>
 {
@@ -118,5 +123,14 @@ export class PublisherImpl<TTopics extends object, TEvent extends object>
     const subscribers = this.getTopicSubscribers(topics)
 
     subscribers.forEach((callback) => callback(event, topics))
+  }
+}
+
+export class OpenPublisherImpl<TTopics extends object, TEvent extends object>
+  extends PublisherImpl<TTopics, TEvent>
+  implements OpenPublisher<TTopics, TEvent>
+{
+  notify(topics: PublisherTopics<TTopics>, event: TEvent) {
+    super.notify(topics, event)
   }
 }

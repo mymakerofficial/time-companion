@@ -14,6 +14,8 @@ import { useRemindersService } from '@renderer/services/remindersService'
 import { useLocaleService } from '@renderer/services/localeService'
 import { useThemeService } from '@renderer/services/themeService'
 import { Toaster } from '@renderer/components/ui/sonner'
+import AppLoader from '@renderer/components/common/layout/AppLoader.vue'
+import { usePreflight } from '@renderer/composables/preflight/usePreflight'
 
 // initialize appearance settings
 useLocaleService()
@@ -54,6 +56,8 @@ const links = computed<NavLink[]>(() => {
 
   return links
 })
+
+const { isReady } = usePreflight()
 </script>
 
 <template>
@@ -61,7 +65,12 @@ const links = computed<NavLink[]>(() => {
   <Toaster />
   <TooltipProvider>
     <AppNavigation :links="links">
-      <RouterView />
+      <RouterView v-slot="{ Component }">
+        <Transition>
+          <component v-if="isReady" :is="Component" />
+          <AppLoader v-else />
+        </Transition>
+      </RouterView>
     </AppNavigation>
   </TooltipProvider>
 </template>

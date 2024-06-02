@@ -1,13 +1,14 @@
 import type { ConfigEnv, UserConfig } from 'vite'
 import { defineConfig, mergeConfig } from 'vite'
 import {
+  external,
   getBuildConfig,
   getBuildDefine,
-  external,
   pluginHotRestart,
 } from './vite.base.config'
 import path from 'path'
 import tsconfigPaths from 'vite-tsconfig-paths'
+import viteConfig from './vite.config'
 
 // https://vitejs.dev/config
 export default defineConfig((env) => {
@@ -25,6 +26,7 @@ export default defineConfig((env) => {
         external,
       },
     },
+    optimizeDeps: viteConfig.optimizeDeps,
     plugins: [pluginHotRestart('restart'), tsconfigPaths()],
     define,
     resolve: {
