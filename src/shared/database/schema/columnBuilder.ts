@@ -7,8 +7,8 @@ import type {
 import type { Nullable } from '@shared/lib/utils/types'
 import { ColumnDefinitionImpl } from '@shared/database/schema/columnDefinition'
 
-class ColumnBuilderImpl<TColumn, TRow extends object = object>
-  extends ColumnDefinitionImpl<TRow>
+class ColumnBuilderImpl<TColumn = unknown, TRow extends object = object>
+  extends ColumnDefinitionImpl<TRow, TColumn>
   implements ColumnBuilder<TColumn, TRow>
 {
   constructor(

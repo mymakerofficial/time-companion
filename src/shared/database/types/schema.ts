@@ -150,17 +150,41 @@ export interface KeyRangeFactory<
   TRow extends object = object,
   TColumn = unknown,
 > {
-  lowerBound: (value: TColumn, open?: boolean) => KeyRange<TRow, TColumn>
-  lowerBoundExclusive: (value: TColumn) => KeyRange<TRow, TColumn>
-  upperBound: (value: TColumn, open?: boolean) => KeyRange<TRow, TColumn>
-  upperBoundExclusive: (value: TColumn) => KeyRange<TRow, TColumn>
+  /***
+   * column >= value
+   */
+  greaterThanOrEquals: (
+    value: TColumn,
+    open?: boolean,
+  ) => KeyRange<TRow, TColumn>
+  /***
+   * value > column
+   */
+  greaterThan: (value: TColumn) => KeyRange<TRow, TColumn>
+  /***
+   * column <= value
+   */
+  lowerThanOrEquals: (value: TColumn, open?: boolean) => KeyRange<TRow, TColumn>
+  /***
+   * value < column
+   */
+  lowerThan: (value: TColumn) => KeyRange<TRow, TColumn>
+  /***
+   * lower <= column <= upper
+   */
   between: (
     lower?: TColumn,
     upper?: TColumn,
     lowerOpen?: boolean,
     upperOpen?: boolean,
   ) => KeyRange<TRow, TColumn>
+  /***
+   * lower < column < upper
+   */
   betweenExclusive: (lower: TColumn, upper: TColumn) => KeyRange<TRow, TColumn>
+  /***
+   * column == value
+   */
   only: (value: TColumn) => KeyRange<TRow, TColumn>
 }
 
@@ -205,7 +229,7 @@ export interface ColumnDefinition<TRow extends object, TColumn = unknown>
   readonly range: KeyRangeFactory<TRow, TColumn>
 }
 
-export interface ColumnBuilder<TColumn, TRow extends object = object>
+export interface ColumnBuilder<TColumn = unknown, TRow extends object = object>
   extends ColumnDefinition<TRow, TColumn> {
   /***
    * Set the column as the primary key

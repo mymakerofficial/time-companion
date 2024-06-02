@@ -14,7 +14,7 @@ import {
   type WhereOperator,
 } from '@shared/database/types/database'
 
-class KeyRangeFactoryImpl<TRow extends object, TColumn = unknown>
+class KeyRangeFactoryImpl<TRow extends object = object, TColumn = unknown>
   implements KeyRangeFactory<TRow, TColumn>
 {
   constructor(protected definition: ColumnDefinitionRaw<TRow, TColumn>) {}
@@ -38,24 +38,30 @@ class KeyRangeFactoryImpl<TRow extends object, TColumn = unknown>
     return this.between(lower, upper, true, true)
   }
 
-  lowerBound(value: TColumn, open: boolean = false): KeyRange<TRow, TColumn> {
+  greaterThanOrEquals(
+    value: TColumn,
+    open: boolean = false,
+  ): KeyRange<TRow, TColumn> {
     return this.between(value, undefined, open)
   }
 
-  lowerBoundExclusive(value: TColumn): KeyRange<TRow, TColumn> {
-    return this.lowerBound(value, true)
+  greaterThan(value: TColumn): KeyRange<TRow, TColumn> {
+    return this.greaterThanOrEquals(value, true)
   }
 
   only(value: TColumn): KeyRange<TRow, TColumn> {
     return this.between(value, value, false, false)
   }
 
-  upperBound(value: TColumn, open: boolean = false): KeyRange<TRow, TColumn> {
+  lowerThanOrEquals(
+    value: TColumn,
+    open: boolean = false,
+  ): KeyRange<TRow, TColumn> {
     return this.between(undefined, value, false, open)
   }
 
-  upperBoundExclusive(value: TColumn): KeyRange<TRow, TColumn> {
-    return this.upperBound(value, true)
+  lowerThan(value: TColumn): KeyRange<TRow, TColumn> {
+    return this.lowerThanOrEquals(value, true)
   }
 }
 
@@ -71,7 +77,7 @@ export class ColumnDefinitionImpl<TRow extends object, TColumn = unknown>
   }
 
   get range() {
-    return new KeyRangeFactoryImpl(this.definition)
+    return new KeyRangeFactoryImpl<TRow, TColumn>(this.definition)
   }
 
   protected where(
