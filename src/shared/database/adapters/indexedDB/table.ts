@@ -12,6 +12,7 @@ import {
   isAbsent,
   isNotNull,
   isNull,
+  isPresent,
   isUndefined,
 } from '@shared/lib/utils/checks'
 import {
@@ -20,7 +21,7 @@ import {
   DatabaseUndefinedTableError,
   DatabaseUniqueViolationError,
 } from '@shared/database/types/errors'
-import { arraysHaveOverlap } from '@shared/lib/utils/list'
+import { arraysHaveOverlap, firstOfOrNull } from '@shared/lib/utils/list'
 import { iteratorToList } from '@shared/database/helpers/iteratorToList'
 import type { TableSchemaRaw } from '@shared/database/types/schema'
 import { keysOf, valuesOf } from '@shared/lib/utils/object'
@@ -77,13 +78,31 @@ export class IdbTableAdapter<TRow extends object>
   }
 
   async update(props: AdapterUpdateProps<TRow>): Promise<Array<TRow>> {
-    await this.checkUniqueConstraints(props.data)
+    const possibleUniqueViolations =
+      await this.getPossibleUniqueConstraintViolations(props.data)
     await this.checkColumnsExist(props.data)
 
     const { iterator } = await this.openIterator(props)
 
     const results = []
     for await (const cursor of iterator) {
+      // if the violation is on the same row we are updating, we can ignore it
+      const violation = firstOfOrNull(
+        possibleUniqueViolations.filter(
+          (violation) =>
+            violation.key !==
+            cursor.value[this.objectStore.keyPath as keyof TRow],
+        ),
+      )
+
+      if (isNotNull(violation)) {
+        throw new DatabaseUniqueViolationError(
+          this.tableName,
+          violation.column as string,
+          violation.value,
+        )
+      }
+
       await cursor.update({
         ...cursor.value,
         ...props.data,
@@ -119,10 +138,10 @@ export class IdbTableAdapter<TRow extends object>
     return await Promise.all(promises)
   }
 
-  protected async checkUniqueConstraints(data: Partial<TRow>): Promise<void> {
+  protected async getPossibleUniqueConstraintViolations(data: Partial<TRow>) {
     if (isUndefined(this.tableSchema)) {
       // if we are not given a schema, we just hope for the best
-      return
+      return []
     }
 
     const uniqueColumns = valuesOf(this.tableSchema.columns)
@@ -132,23 +151,37 @@ export class IdbTableAdapter<TRow extends object>
     const changedColumns = keysOf(data)
 
     if (!arraysHaveOverlap(changedColumns, uniqueColumns)) {
-      return
+      return []
     }
+
+    const list = []
 
     for (const column of uniqueColumns) {
       const value = data[column] as any
 
-      const count = await promisedRequest(
-        this.objectStore.index(column as string).count(value),
+      const res = await promisedRequest(
+        this.objectStore.index(column as string).getKey(value),
       )
 
-      if (count > 0) {
-        throw new DatabaseUniqueViolationError(
-          this.tableName,
-          column as string,
-          value,
-        )
+      if (isPresent(res)) {
+        list.push({ column, value, key: res })
       }
+    }
+
+    return list
+  }
+
+  protected async checkUniqueConstraints(data: Partial<TRow>): Promise<void> {
+    const violation = firstOfOrNull(
+      await this.getPossibleUniqueConstraintViolations(data),
+    )
+
+    if (isNotNull(violation)) {
+      throw new DatabaseUniqueViolationError(
+        this.tableName,
+        violation.column as string,
+        violation.value,
+      )
     }
   }
 

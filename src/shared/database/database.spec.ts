@@ -1008,6 +1008,43 @@ describe.each([
           expect(res).toEqual(emptyArray())
         })
 
+        it('should fail when trying to update to a value that violates a unique constraint', async () => {
+          await helpers.insertSamplePersons(6)
+          await helpers.insertSamplePerson({
+            username: 'johndoe',
+          })
+          const { id } = await helpers.insertSamplePerson({
+            username: 'notjohndoe',
+          })
+
+          await expect(
+            database.table(personsTable).update({
+              where: personsTable.id.equals(id),
+              data: {
+                username: 'johndoe',
+              },
+            }),
+          ).rejects.toThrowError(
+            `Unique constraint violated on column "username".`,
+          )
+        })
+
+        it('should not fail when changing a unique column to the same value', async () => {
+          await helpers.insertSamplePersons(6)
+          const { id } = await helpers.insertSamplePerson({
+            username: 'johndoe',
+          })
+
+          await expect(
+            database.table(personsTable).update({
+              where: personsTable.id.equals(id),
+              data: {
+                username: 'johndoe',
+              },
+            }),
+          ).resolves.not.toThrow()
+        })
+
         it.todo('should fail when trying to update a primary key', async () => {
           // TBD
 
