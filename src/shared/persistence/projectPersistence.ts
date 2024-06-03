@@ -5,6 +5,7 @@ import { firstOf } from '@shared/lib/utils/list'
 import { todo } from '@shared/lib/utils/todo'
 import {
   type DatabaseError,
+  errorIsUndefinedColumn,
   errorIsUniqueViolation,
 } from '@shared/database/types/errors'
 
@@ -29,6 +30,22 @@ class ProjectPersistenceImpl implements ProjectPersistence {
 
   constructor(deps: ProjectPersistenceDependencies) {
     this.database = deps.database
+  }
+
+  protected resolveError(error: DatabaseError): never {
+    if (errorIsUniqueViolation(error)) {
+      throw new Error(
+        `Project with ${error.columnName} "${error.value}" already exists.`,
+      )
+    }
+
+    if (errorIsUndefinedColumn(error)) {
+      throw new Error(
+        `Tried to set value for undefined field "${error.columnName}" on project.`,
+      )
+    }
+
+    throw error
   }
 
   async getProjects(): Promise<Array<ProjectEntityDto>> {
@@ -76,26 +93,21 @@ class ProjectPersistenceImpl implements ProjectPersistence {
       .insert({
         data: project,
       })
-      .catch((error: DatabaseError) => {
-        if (errorIsUniqueViolation(error)) {
-          throw new Error(
-            `Project with ${error.columnName} "${error.value}" already exists.`,
-          )
-        }
-
-        throw error
-      })
+      .catch(this.resolveError)
   }
 
   async patchProjectById(
     id: string,
     partialProject: Partial<ProjectEntityDto>,
   ): Promise<ProjectEntityDto> {
-    const res = await this.database.table(projectsTable).update({
-      range: projectsTable.id.range.only(id),
-      where: projectsTable.deletedAt.isNull(),
-      data: partialProject,
-    })
+    const res = await this.database
+      .table(projectsTable)
+      .update({
+        range: projectsTable.id.range.only(id),
+        where: projectsTable.deletedAt.isNull(),
+        data: partialProject,
+      })
+      .catch(this.resolveError)
 
     check(isNotEmpty(res), `Project with id "${id}" not found.`)
 

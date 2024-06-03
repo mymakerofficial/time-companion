@@ -100,6 +100,12 @@ export class DatabaseUndefinedColumnError extends DatabaseError {
   }
 }
 
+export function errorIsUndefinedColumn(
+  error: Error,
+): error is DatabaseUndefinedColumnError {
+  return error.name === 'DatabaseUndefinedColumnError'
+}
+
 export class DatabaseUniqueViolationError extends DatabaseError {
   constructor(
     public readonly tableName: string,

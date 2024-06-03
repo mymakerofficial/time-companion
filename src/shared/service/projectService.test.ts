@@ -166,7 +166,7 @@ describe('projectService', () => {
           invalidField: 'invalid',
         }),
       ).rejects.toThrowError(
-        `Tried to patch entity using illegal fields: "id", "createdAt", "invalidField".`,
+        `Tried to set value for undefined field "invalidField" on project.`,
       )
     })
 

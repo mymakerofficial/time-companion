@@ -2,7 +2,6 @@ import type { ProjectDto, ProjectEntityDto } from '@shared/model/project'
 import { type ProjectPersistence } from '@shared/persistence/projectPersistence'
 import type { Nullable } from '@shared/lib/utils/types'
 import { keysOf } from '@shared/lib/utils/object'
-import { assertOnlyValidFieldsChanged } from '@shared/service/helpers/assertOnlyValidFieldsChanged'
 import {
   type EntityService,
   EntityServiceImpl,
@@ -86,12 +85,6 @@ class ProjectServiceImpl
     partialProject: Partial<ProjectDto>,
   ): Promise<ProjectEntityDto> {
     const changedFields = keysOf(partialProject)
-
-    assertOnlyValidFieldsChanged(changedFields, [
-      'displayName',
-      'color',
-      'isBillable',
-    ])
 
     const patchedProject = await this.projectPersistence.patchProjectById(id, {
       ...partialProject,
