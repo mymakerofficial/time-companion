@@ -35,6 +35,7 @@ const project = computed(() => {
       displayName: 'Test Project',
       color: 'red',
       isBillable: true,
+      isBreak: false,
     }
   )
 })
@@ -78,6 +79,14 @@ const onSubmit = form.handleSubmit((values) => {
     <FormField v-slot="{ componentField }" name="isBillable">
       <FormItem class="grid grid-cols-4 items-center gap-4">
         <FormLabel>Billable</FormLabel>
+        <FormControl class="col-span-3">
+          <Switch v-model:checked="componentField.modelValue" />
+        </FormControl>
+      </FormItem>
+    </FormField>
+    <FormField v-slot="{ componentField }" name="isBreak">
+      <FormItem class="grid grid-cols-4 items-center gap-4">
+        <FormLabel>Break</FormLabel>
         <FormControl class="col-span-3">
           <Switch v-model:checked="componentField.modelValue" />
         </FormControl>

@@ -7,6 +7,7 @@ export default defineMigration(async (transaction) => {
     displayName: c.string().indexed().unique(),
     color: c.string().nullable(),
     isBillable: c.boolean(),
+    isBreak: c.boolean(),
     createdAt: c.string(),
     modifiedAt: c.string().nullable(),
     deletedAt: c.string().nullable(),

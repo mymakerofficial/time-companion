@@ -18,6 +18,7 @@ export class ProjectTestHelpers {
       displayName: faker.company.name(),
       color: faker.color.human(),
       isBillable: faker.datatype.boolean(),
+      isBreak: faker.datatype.boolean(),
       ...override,
     }
   }

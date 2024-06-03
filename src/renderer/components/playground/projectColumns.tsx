@@ -19,6 +19,9 @@ export function createProjectColumns(onEdit: (row: ProjectEntityDto) => void) {
     columnHelper.accessor('isBillable', {
       header: () => 'isBillable',
     }),
+    columnHelper.accessor('isBreak', {
+      header: () => 'isBreak',
+    }),
     columnHelper.accessor('createdAt', {
       header: () => 'createdAt',
     }),

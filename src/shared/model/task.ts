@@ -16,12 +16,6 @@ type TaskEntityBase = HasId & HasCreatedAt & HasModifiedAt & HasDeletedAt
 
 export type TaskEntityDto = TaskDto & TaskEntityBase
 
-export type TaskEntityDao = Omit<TaskDto, 'projectId'> & {
-  readonly projectId: Nullable<string>
-} & {
-  readonly [K in keyof TaskEntityBase]: Nullable<TaskEntityBase[K]>
-}
-
 export const tasksTable = defineTable<TaskEntityDto>('tasks', {
   id: c.uuid().primaryKey(),
   projectId: c.uuid(),

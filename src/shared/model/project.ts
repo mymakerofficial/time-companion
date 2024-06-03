@@ -11,21 +11,19 @@ export type ProjectDto = {
   displayName: string
   color: Nullable<string>
   isBillable: boolean
+  isBreak: boolean
 }
 
 type ProjectEntityBase = HasId & HasCreatedAt & HasModifiedAt & HasDeletedAt
 
 export type ProjectEntityDto = ProjectDto & ProjectEntityBase
 
-export type ProjectEntityDao = ProjectDto & {
-  readonly [K in keyof ProjectEntityBase]: Nullable<ProjectEntityBase[K]>
-}
-
 export const projectsTable = defineTable<ProjectEntityDto>('projects', {
   id: c.uuid().primaryKey(),
   displayName: c.string().indexed().unique(),
   color: c.string().nullable(),
   isBillable: c.boolean(),
+  isBreak: c.boolean(),
   createdAt: c.string(),
   modifiedAt: c.string().nullable(),
   deletedAt: c.string().nullable(),
@@ -35,4 +33,5 @@ export const projectSchema = z.object({
   displayName: z.string(),
   color: z.string().nullable(),
   isBillable: z.boolean(),
+  isBreak: z.boolean(),
 })
