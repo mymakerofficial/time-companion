@@ -4,21 +4,14 @@ import ProjectsTable from '@renderer/components/settings/projects/table/Projects
 import { Button } from '@renderer/components/ui/button'
 import TableActions from '@renderer/components/common/table/TableActions.vue'
 import NewProjectDialog from '@renderer/components/settings/projects/projectDialog/NewProjectDialog.vue'
-import NewActivityDialog from '@renderer/components/settings/projects/activityDialog/NewActivityDialog.vue'
 import { useDialogStore } from '@renderer/stores/dialogStore'
-import { PlusCircle } from 'lucide-vue-next'
-import { useProjectsService } from '@renderer/services/projectsService'
+import { Plus } from 'lucide-vue-next'
 import { h } from 'vue'
 
-const projectsService = useProjectsService()
 const dialogStore = useDialogStore()
 
 function openNewProjectDialog() {
   dialogStore.openDialog(h(NewProjectDialog))
-}
-
-function openNewActivityDialog() {
-  dialogStore.openDialog(h(NewActivityDialog))
 }
 </script>
 
@@ -29,20 +22,11 @@ function openNewActivityDialog() {
       :description="$t('settings.projects.description')"
     />
     <TableActions>
-      <Button
-        @click="openNewActivityDialog"
-        variant="secondary"
-        size="sm"
-        class="gap-2"
-      >
-        <PlusCircle class="size-4" />
-        <span>{{ $t('settings.projects.controls.createActivity') }}</span>
-      </Button>
       <Button @click="openNewProjectDialog" size="sm" class="gap-2">
-        <PlusCircle class="size-4" />
+        <Plus class="size-4" />
         <span>{{ $t('settings.projects.controls.createProject') }}</span>
       </Button>
     </TableActions>
-    <ProjectsTable :projects="projectsService.projects" />
+    <ProjectsTable />
   </div>
 </template>
