@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { Separator } from '@renderer/components/ui/separator'
-import { Badge } from '@renderer/components/ui/badge'
 
 defineProps<{
   title?: string
   description?: string
-  isNew?: boolean
 }>()
 
 defineSlots<{
@@ -23,9 +21,6 @@ defineSlots<{
           class="text-sm font-medium text-primary tracking-tight"
         >
           {{ title }}
-          <Badge v-if="isNew" class="ml-2" size="xs" color="lime">{{
-            $t('common.labels.new')
-          }}</Badge>
         </h2>
         <p v-if="description" class="text-sm text-muted-foreground">
           {{ description }}
