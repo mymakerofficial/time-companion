@@ -1,5 +1,5 @@
-<script setup lang="tsx">
-import { computed, ref } from 'vue'
+<script setup lang="ts">
+import { computed, h, ref } from 'vue'
 import type { ReactiveProject } from '@renderer/model/project/types'
 import type { ProjectRow } from '@renderer/components/settings/projects/table/types'
 import { createProjectsColumns } from '@renderer/components/settings/projects/table/projectsColumns'
@@ -45,10 +45,10 @@ const projectsColumns = createProjectsColumns({
     }
   },
   onOpenEditProjectDialog: (id) => {
-    dialogStore.openDialog(<EditProjectDialog id={id} />)
+    dialogStore.openDialog(h(EditProjectDialog, { id }))
   },
   onOpenEditActivityDialog: (id) => {
-    dialogStore.openDialog(<EditActivityDialog id={id} />)
+    dialogStore.openDialog(h(EditActivityDialog, { id }))
   },
 })
 

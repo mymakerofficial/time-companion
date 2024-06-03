@@ -1,4 +1,4 @@
-<script setup lang="tsx">
+<script setup lang="ts">
 import SettingsHeader from '@renderer/components/settings/layout/SettingsHeader.vue'
 import ProjectsTable from '@renderer/components/settings/projects/table/ProjectsTable.vue'
 import { Button } from '@renderer/components/ui/button'
@@ -8,16 +8,17 @@ import NewActivityDialog from '@renderer/components/settings/projects/activityDi
 import { useDialogStore } from '@renderer/stores/dialogStore'
 import { PlusCircle } from 'lucide-vue-next'
 import { useProjectsService } from '@renderer/services/projectsService'
+import { h } from 'vue'
 
 const projectsService = useProjectsService()
 const dialogStore = useDialogStore()
 
 function openNewProjectDialog() {
-  dialogStore.openDialog(<NewProjectDialog />)
+  dialogStore.openDialog(h(NewProjectDialog))
 }
 
 function openNewActivityDialog() {
-  dialogStore.openDialog(<NewActivityDialog />)
+  dialogStore.openDialog(h(NewActivityDialog))
 }
 </script>
 
