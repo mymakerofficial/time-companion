@@ -2,24 +2,14 @@
 import SettingsSection from '@renderer/components/settings/layout/SettingsSection.vue'
 import { Button } from '@renderer/components/ui/button'
 import ProjectsTable from '@renderer/components/playground/ProjectsTable.vue'
-import { useQuery } from '@tanstack/vue-query'
-import { projectService } from '@renderer/factory/service/projectService'
 import type { ProjectEntityDto } from '@shared/model/project'
+import { useGetProjects } from '@renderer/composables/queries/useGetProjects'
 
 const emit = defineEmits<{
   edit: [project: ProjectEntityDto]
 }>()
 
-const {
-  data: projects,
-  isPending,
-  isError,
-  error,
-  refetch,
-} = useQuery({
-  queryKey: ['projects'],
-  queryFn: () => projectService.getProjects(),
-})
+const { data: projects, isPending, isError, error, refetch } = useGetProjects()
 </script>
 
 <template>

@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import BaseDialog from '@renderer/components/common/dialog/BaseDialog.vue'
-import { reactive, ref } from 'vue'
+import { ref } from 'vue'
 import { Button } from '@renderer/components/ui/button'
 import ProjectForm from '@renderer/components/settings/projects/projectDialog/ProjectForm.vue'
-import {
-  createProjectForm,
-  createProjectFromForm,
-} from '@renderer/components/settings/projects/projectDialog/helpers'
-import { useProjectsService } from '@renderer/services/projectsService'
+import { useCreateProject } from '@renderer/composables/mutations/useCreateProject'
+import type { ProjectDto } from '@shared/model/project'
 
 const emit = defineEmits<{
   close: []
@@ -19,12 +16,10 @@ function close() {
   emit('close')
 }
 
-const projectsService = useProjectsService()
+const { mutateAsync: createProject } = useCreateProject()
 
-const form = reactive(createProjectForm())
-
-function handleSubmit() {
-  projectsService.addProject(createProjectFromForm(form))
+async function handleSubmit(values: ProjectDto) {
+  await createProject(values)
   close()
 }
 </script>
@@ -35,16 +30,16 @@ function handleSubmit() {
     :title="$t('dialog.project.new.title')"
     :description="$t('dialog.project.new.description')"
   >
-    <ProjectForm :form="form" />
+    <ProjectForm @submit="handleSubmit" #actions>
+      <Button type="button" @click="close()" variant="ghost">
+        {{ $t('dialog.project.controls.cancel') }}
+      </Button>
+      <Button type="submit">
+        {{ $t('dialog.project.controls.create') }}
+      </Button>
+    </ProjectForm>
     <template #footer>
-      <div class="flex flex-row justify-end gap-4">
-        <Button variant="ghost" @click="close()">{{
-          $t('dialog.project.controls.cancel')
-        }}</Button>
-        <Button @click="handleSubmit">{{
-          $t('dialog.project.controls.create')
-        }}</Button>
-      </div>
+      <!-- TODO: put actions in footer -->
     </template>
   </BaseDialog>
 </template>

@@ -1,53 +1,76 @@
 <script setup lang="ts">
-import Switch from '@renderer/components/ui/switch/Switch.vue'
-import Label from '@renderer/components/ui/label/Label.vue'
-import type { ProjectForm } from '@renderer/components/settings/projects/projectDialog/helpers'
-import ColorTextInput from '@renderer/components/common/inputs/colorTextInput/ColorTextInput.vue'
-import { Info } from 'lucide-vue-next'
+import ColorSelect from '@renderer/components/common/inputs/colorSelect/ColorSelect.vue'
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from '@renderer/components/ui/form'
+import { Input } from '@renderer/components/ui/input'
+import { toTypedSchema } from '@vee-validate/zod'
+import { type ProjectDto, projectSchema } from '@shared/model/project'
+import { useForm } from 'vee-validate'
+import { Switch } from '@renderer/components/ui/switch'
 
-defineProps<{
-  form: ProjectForm
-  isBreak?: boolean
+const props = defineProps<{
+  project?: ProjectDto
 }>()
+
+const emit = defineEmits<{
+  submit: [values: ProjectDto]
+}>()
+
+const formSchema = toTypedSchema(projectSchema)
+
+const form = useForm({
+  validationSchema: formSchema,
+  initialValues: props.project ?? {
+    displayName: '',
+    color: 'red',
+    isBillable: true,
+    isBreak: false,
+  },
+})
+
+const onSubmit = form.handleSubmit((values) => {
+  emit('submit', values)
+})
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
-    <ColorTextInput
-      v-model:color="form.color"
-      v-model:text="form.displayName"
-      :placeholder="$t('dialog.project.form.displayName.placeholder')"
-    />
-    <div
-      class="flex flex-row items-center justify-between rounded-lg border p-4"
-    >
-      <div class="space-y-0.5">
-        <Label class="text-base">{{
-          $t('dialog.project.form.isBillable.label')
-        }}</Label>
-        <p class="text-sm text-muted-foreground">
-          {{ $t('dialog.project.form.isBillable.description') }}
-        </p>
-      </div>
-      <div>
-        <Switch v-model:checked="form.isBillable" />
-      </div>
+  <form @submit="onSubmit" class="flex flex-col gap-4">
+    <FormField v-slot="{ componentField }" name="displayName">
+      <FormItem class="grid grid-cols-4 items-center gap-4">
+        <FormLabel
+          class="text-right"
+          v-t="'dialog.project.form.displayName.label'"
+        />
+        <FormControl class="col-span-3">
+          <Input v-bind="componentField" />
+        </FormControl>
+      </FormItem>
+    </FormField>
+    <FormField v-slot="{ componentField }" name="color">
+      <FormItem class="grid grid-cols-4 items-center gap-4">
+        <FormLabel class="text-right" v-t="'dialog.project.form.color.label'" />
+        <FormControl class="col-span-3">
+          <ColorSelect v-bind="componentField" />
+        </FormControl>
+      </FormItem>
+    </FormField>
+    <FormField v-slot="{ field }" name="isBillable">
+      <FormItem class="grid grid-cols-4 items-center gap-4">
+        <FormLabel
+          class="text-right"
+          v-t="'dialog.project.form.isBillable.label'"
+        />
+        <FormControl class="col-span-3">
+          <Switch v-bind="field" />
+        </FormControl>
+      </FormItem>
+    </FormField>
+    <div class="flex flex-row justify-end gap-4">
+      <slot name="actions" />
     </div>
-    <div
-      v-if="isBreak"
-      class="flex flex-row items-center justify-between -mx-6 p-4 px-8 bg-muted/50"
-    >
-      <div class="space-y-0.5">
-        <h2 class="font-medium">
-          {{ $t('dialog.project.form.isBreak.label') }}
-        </h2>
-        <p class="text-sm text-muted-foreground">
-          {{ $t('dialog.project.form.isBreak.description') }}
-        </p>
-      </div>
-      <div class="mx-4">
-        <Info class="size-6" />
-      </div>
-    </div>
-  </div>
+  </form>
 </template>

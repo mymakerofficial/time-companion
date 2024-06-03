@@ -28,6 +28,7 @@ function insertTestProjects() {
       displayName: faker.company.name(),
       color: randomTailwindColor(),
       isBillable: true,
+      isBreak: false,
     })
   }
 }

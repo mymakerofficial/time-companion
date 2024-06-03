@@ -25,7 +25,7 @@ export const projectsTable = defineTable<ProjectEntityDto>('projects', {
 })
 
 export const projectSchema = z.object({
-  displayName: z.string(),
+  displayName: z.string().min(1),
   color: z.string().nullable(),
   isBillable: z.boolean(),
   isBreak: z.boolean(),

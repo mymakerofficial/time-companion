@@ -1,20 +1,15 @@
 <script setup lang="ts">
 import BaseDialog from '@renderer/components/common/dialog/BaseDialog.vue'
-import { isNotDefined, type Nullable } from '@renderer/lib/utils'
 import { ref } from 'vue'
 import { Button } from '@renderer/components/ui/button'
 import ProjectForm from '@renderer/components/settings/projects/projectDialog/ProjectForm.vue'
-import {
-  createProjectForm,
-  patchProjectWithForm,
-} from '@renderer/components/settings/projects/projectDialog/helpers'
-import { useProjectsService } from '@renderer/services/projectsService'
-import { useGetFrom } from '@renderer/composables/useGetFrom'
-import { whereId } from '@renderer/lib/listUtils'
-import { reactiveComputed } from '@vueuse/core'
+import { useGetProjectById } from '@renderer/composables/queries/useGetProjectById'
+import { usePatchProjectById } from '@renderer/composables/mutations/usePatchProjectById'
+import type { ProjectDto } from '@shared/model/project'
+import { useSoftDeleteProject } from '@renderer/composables/mutations/useSoftDeleteProject'
 
 const props = defineProps<{
-  id: Nullable<string>
+  id: string
 }>()
 
 const emit = defineEmits<{
@@ -27,27 +22,20 @@ function close() {
   emit('close')
 }
 
-const projectsService = useProjectsService()
-const project = useGetFrom(projectsService.projects, whereId(props.id))
-const form = reactiveComputed(() => createProjectForm(project.value))
+const { data: project, isPending, isError, error } = useGetProjectById(props.id)
+const { mutateAsync: patchProject } = usePatchProjectById()
+const { mutateAsync: deleteProject } = useSoftDeleteProject()
 
-function handleRemove() {
-  if (isNotDefined(project.value)) {
-    return
-  }
-
-  projectsService.removeProject(project.value)
-
+async function handleSubmit(project: ProjectDto) {
+  await patchProject({
+    id: props.id,
+    project,
+  })
   close()
 }
 
-function handleSubmit() {
-  if (isNotDefined(project.value)) {
-    return
-  }
-
-  patchProjectWithForm(project.value, form)
-
+async function handleDelete() {
+  await deleteProject(props.id)
   close()
 }
 </script>
@@ -58,23 +46,31 @@ function handleSubmit() {
     :title="$t('dialog.project.edit.title')"
     :description="$t('dialog.project.edit.description')"
   >
-    <ProjectForm :form="form" :is-break="project?.isBreak ?? false" />
+    <div v-if="isPending">Loading...</div>
+    <div v-else-if="isError">Error: {{ error }}</div>
+    <ProjectForm
+      v-else-if="project"
+      :project="project"
+      @submit="handleSubmit"
+      #actions
+    >
+      <Button
+        type="button"
+        @click="handleDelete"
+        variant="destructive"
+        class="mr-auto"
+      >
+        {{ $t('dialog.project.controls.delete') }}
+      </Button>
+      <Button type="button" @click="close" variant="ghost">
+        {{ $t('dialog.project.controls.cancel') }}
+      </Button>
+      <Button type="submit">
+        {{ $t('dialog.project.controls.save') }}
+      </Button>
+    </ProjectForm>
     <template #footer>
-      <div class="flex flex-row gap-4 justify-between">
-        <div class="flex flex-row gap-4">
-          <Button variant="destructive" @click="handleRemove">{{
-            $t('dialog.project.controls.delete')
-          }}</Button>
-        </div>
-        <div class="flex flex-row gap-4">
-          <Button variant="ghost" @click="close()">{{
-            $t('dialog.project.controls.cancel')
-          }}</Button>
-          <Button @click="handleSubmit">{{
-            $t('dialog.project.controls.save')
-          }}</Button>
-        </div>
-      </div>
+      <!-- TODO: put actions in footer -->
     </template>
   </BaseDialog>
 </template>
