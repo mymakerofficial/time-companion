@@ -10,7 +10,6 @@ import { computed } from 'vue'
 import { today } from '@renderer/lib/neoTime'
 import { useActiveDayService } from '@renderer/services/activeDayService'
 import { useCalendarService } from '@renderer/services/calendarService'
-import { useRemindersService } from '@renderer/services/remindersService'
 import { useLocaleService } from '@renderer/services/localeService'
 import { useThemeService } from '@renderer/services/themeService'
 import { Toaster } from '@renderer/components/ui/sonner'
@@ -22,10 +21,8 @@ useLocaleService()
 useThemeService()
 
 const calendarService = useCalendarService()
-const remindersService = useRemindersService()
 const activeDayService = useActiveDayService()
 
-remindersService.init()
 calendarService.init()
 activeDayService.setByDate(today())
 

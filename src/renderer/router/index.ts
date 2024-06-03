@@ -28,12 +28,6 @@ const router = createRouter({
             import('../views/app/settings/SettingsProjectsView.vue'),
         },
         {
-          path: 'reminders',
-          name: 'app-settings-reminders',
-          component: () =>
-            import('../views/app/settings/SettingsRemindersView.vue'),
-        },
-        {
           path: 'preferences',
           name: 'app-settings-general',
           component: () =>

@@ -90,25 +90,6 @@ export default {
       lastUsed: '@:common.properties.lastUsed',
     },
   },
-  reminder: {
-    title: 'Herinnering | Herinneringen',
-    description: 'Gebruik herinneringen voor opkomende evenementen',
-    properties: {
-      displayText: '@:common.properties.displayName',
-      color: '@:common.properties.color',
-      startAt: 'Tijd',
-      remindBefore: 'Herinner voor',
-      remindAfter: 'Herinner na',
-      repeatOn: 'Herhaal op',
-      actionType: 'Actie',
-    },
-    actionType: {
-      NO_ACTION: 'Geen actie',
-      START_EVENT: 'Start Evenement',
-      CONTINUE_PREVIOUS_EVENT: 'Ga verder met het vorige evenement',
-      STOP_CURRENT_EVENT: 'Stop het huidige evenement',
-    },
-  },
   dashboard: {
     header: {
       greeting: {
@@ -160,21 +141,6 @@ export default {
           color: '@:project.properties.color',
           isBillable: '@:project.properties.isBillable',
           lastUsed: '@:project.properties.lastUsed',
-        },
-      },
-    },
-    reminders: {
-      title: 'Herinneringen',
-      description: 'Hou je herinneringen bij',
-      controls: {
-        createReminder: 'Voeg een herinnering toe',
-      },
-      table: {
-        columns: {
-          name: '@:reminder.properties.displayText',
-          startAt: '@:reminder.properties.startAt',
-          repeatOn: '@:reminder.properties.repeatOn',
-          action: '@:reminder.properties.actionType',
         },
       },
     },
@@ -286,48 +252,6 @@ export default {
         color: {
           label: '@:activity.properties.color',
           description: 'Voeg wat kleur toe aan je leven',
-        },
-      },
-    },
-    reminder: {
-      new: {
-        title: 'Nieuwe Herinnering',
-        description: '@:reminder.description',
-      },
-      edit: {
-        title: 'Weizig Reminder',
-        description: '@:reminder.description',
-      },
-      controls: {
-        create: '@:common.controls.create',
-        save: '@:common.controls.save',
-        cancel: '@:common.controls.cancel',
-        delete: '@:common.controls.delete',
-      },
-      form: {
-        displayText: {
-          label: '@:reminder.properties.displayText',
-        },
-        actionType: {
-          label: '@:reminder.properties.actionType',
-        },
-        actionTarget: {
-          label: 'Start project',
-        },
-        color: {
-          label: '@:reminder.properties.color',
-        },
-        startAt: {
-          label: '@:reminder.properties.startAt',
-        },
-        repeatOn: {
-          label: '@:reminder.properties.repeatOn',
-        },
-        remindBefore: {
-          label: '@:reminder.properties.remindBefore',
-        },
-        remindAfter: {
-          label: '@:reminder.properties.remindAfter',
         },
       },
     },

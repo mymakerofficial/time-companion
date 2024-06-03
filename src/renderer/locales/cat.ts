@@ -90,25 +90,6 @@ export default {
       lastUsed: '@:common.properties.lastUsed',
     },
   },
-  reminder: {
-    title: 'Meow | Meeoow',
-    description: 'Meow mrrrp meow',
-    properties: {
-      displayText: '@:common.properties.displayName',
-      color: '@:common.properties.color',
-      startAt: 'prrr',
-      remindBefore: 'Meow',
-      remindAfter: 'Meow',
-      repeatOn: 'Meooow',
-      actionType: 'Meow',
-    },
-    actionType: {
-      NO_ACTION: '*hiss*',
-      START_EVENT: 'Meow',
-      CONTINUE_PREVIOUS_EVENT: 'Meoow',
-      STOP_CURRENT_EVENT: 'Meooow',
-    },
-  },
   dashboard: {
     header: {
       greeting: {
@@ -160,21 +141,6 @@ export default {
           color: '@:project.properties.color',
           isBillable: '@:project.properties.isBillable',
           lastUsed: '@:project.properties.lastUsed',
-        },
-      },
-    },
-    reminders: {
-      title: 'Meow',
-      description: 'Mouw mrrrp prrr',
-      controls: {
-        createReminder: 'Meooow Meow Meoow',
-      },
-      table: {
-        columns: {
-          name: '@:reminder.properties.displayText',
-          startAt: '@:reminder.properties.startAt',
-          repeatOn: '@:reminder.properties.repeatOn',
-          action: '@:reminder.properties.actionType',
         },
       },
     },
@@ -284,48 +250,6 @@ export default {
         color: {
           label: '@:activity.properties.color',
           description: 'Meow',
-        },
-      },
-    },
-    reminder: {
-      new: {
-        title: 'Meow',
-        description: '@:reminder.description',
-      },
-      edit: {
-        title: 'Meow',
-        description: '@:reminder.description',
-      },
-      controls: {
-        create: '@:common.controls.create',
-        save: '@:common.controls.save',
-        cancel: '@:common.controls.cancel',
-        delete: '@:common.controls.delete',
-      },
-      form: {
-        displayText: {
-          label: '@:reminder.properties.displayText',
-        },
-        actionType: {
-          label: '@:reminder.properties.actionType',
-        },
-        actionTarget: {
-          label: 'Meow meow',
-        },
-        color: {
-          label: '@:reminder.properties.color',
-        },
-        startAt: {
-          label: '@:reminder.properties.startAt',
-        },
-        repeatOn: {
-          label: '@:reminder.properties.repeatOn',
-        },
-        remindBefore: {
-          label: '@:reminder.properties.remindBefore',
-        },
-        remindAfter: {
-          label: '@:reminder.properties.remindAfter',
         },
       },
     },
