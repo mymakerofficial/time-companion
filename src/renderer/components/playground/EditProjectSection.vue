@@ -60,7 +60,7 @@ const { mutate: deleteProject } = useMutation({
       submit-text="Update Project"
       #action
     >
-      <Button @click="deleteProject" variant="destructive">
+      <Button type="button" @click="deleteProject" variant="destructive">
         Delete Project
       </Button>
     </ProjectForm>
