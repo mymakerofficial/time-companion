@@ -26,5 +26,5 @@ const columns = createProjectsColumns({
 </script>
 
 <template>
-  <Table v-if="projects" :data="projects" :columns="columns" />
+  <Table :data="projects" :columns="columns" />
 </template>

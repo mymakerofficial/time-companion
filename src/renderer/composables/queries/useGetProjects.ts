@@ -15,5 +15,6 @@ export function useGetProjects() {
   return useQuery({
     queryKey,
     queryFn: () => projectService.getProjects(),
+    initialData: [],
   })
 }
