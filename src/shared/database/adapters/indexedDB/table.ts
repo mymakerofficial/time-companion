@@ -10,6 +10,7 @@ import type {
 import type { Nullable } from '@shared/lib/utils/types'
 import {
   isAbsent,
+  isDefined,
   isNotNull,
   isNull,
   isPresent,
@@ -86,16 +87,13 @@ export class IdbTableAdapter<TRow extends object>
 
     const results = []
     for await (const cursor of iterator) {
-      // if the violation is on the same row we are updating, we can ignore it
-      const violation = firstOfOrNull(
-        possibleUniqueViolations.filter(
-          (violation) =>
-            violation.key !==
-            cursor.value[this.objectStore.keyPath as keyof TRow],
-        ),
+      // assuming no duplicates got in the table somehow
+      //  only a violation that is not the current row is a problem
+      const violation = possibleUniqueViolations.find(
+        (violation) => violation.value !== cursor.value[violation.column],
       )
 
-      if (isNotNull(violation)) {
+      if (isDefined(violation)) {
         throw new DatabaseUniqueViolationError(
           this.tableName,
           violation.column as string,
@@ -164,7 +162,7 @@ export class IdbTableAdapter<TRow extends object>
       )
 
       if (isPresent(res)) {
-        list.push({ column, value, key: res })
+        list.push({ column, value })
       }
     }
 
