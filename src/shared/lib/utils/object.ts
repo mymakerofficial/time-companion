@@ -17,3 +17,9 @@ export function propertiesOf<T extends unknown>(obj: T) {
     Object.getPrototypeOf(obj as object),
   ) as Array<keyof T>
 }
+
+export function objectFromEntries<T extends unknown>(
+  entries: Array<Pair<keyof T, T[keyof T]>>,
+) {
+  return Object.fromEntries(entries) as T
+}
