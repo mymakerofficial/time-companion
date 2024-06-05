@@ -12,6 +12,10 @@ const links = computed<NavLink[]>(() => [
     label: t('settings.projects.title'),
     to: { name: 'app-settings-projects' },
   },
+  {
+    label: 'Tasks',
+    to: { name: 'app-settings-tasks' },
+  },
   { label: t('settings.general.title'), to: { name: 'app-settings-general' } },
   {
     label: t('settings.appearance.title'),

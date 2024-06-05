@@ -28,6 +28,12 @@ const router = createRouter({
             import('../views/app/settings/SettingsProjectsView.vue'),
         },
         {
+          path: 'tasks',
+          name: 'app-settings-tasks',
+          component: () =>
+            import('../views/app/settings/SettingsTasksView.vue'),
+        },
+        {
           path: 'preferences',
           name: 'app-settings-general',
           component: () =>

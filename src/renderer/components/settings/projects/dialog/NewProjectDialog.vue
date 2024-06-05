@@ -2,7 +2,7 @@
 import BaseDialog from '@renderer/components/common/dialog/BaseDialog.vue'
 import { ref } from 'vue'
 import { Button } from '@renderer/components/ui/button'
-import ProjectForm from '@renderer/components/settings/projects/projectDialog/ProjectForm.vue'
+import ProjectForm from '@renderer/components/settings/projects/dialog/ProjectForm.vue'
 import { useCreateProject } from '@renderer/composables/mutations/useCreateProject'
 import type { ProjectDto } from '@shared/model/project'
 
@@ -16,11 +16,12 @@ function close() {
   emit('close')
 }
 
-const { mutateAsync: createProject } = useCreateProject()
+const { mutate: createProject } = useCreateProject()
 
-async function handleSubmit(values: ProjectDto) {
-  await createProject(values)
-  close()
+function handleSubmit(values: ProjectDto) {
+  createProject(values, {
+    onSuccess: close,
+  })
 }
 </script>
 

@@ -11,6 +11,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { type ProjectDto, projectSchema } from '@shared/model/project'
 import { useForm } from 'vee-validate'
 import { Switch } from '@renderer/components/ui/switch'
+import { getSchemaDefaults } from '@shared/lib/helpers/getSchemaDefaults'
 
 const props = defineProps<{
   project?: ProjectDto
@@ -20,16 +21,9 @@ const emit = defineEmits<{
   submit: [values: ProjectDto]
 }>()
 
-const formSchema = toTypedSchema(projectSchema)
-
 const form = useForm({
-  validationSchema: formSchema,
-  initialValues: props.project ?? {
-    displayName: '',
-    color: 'red',
-    isBillable: true,
-    isBreak: false,
-  },
+  validationSchema: toTypedSchema(projectSchema),
+  initialValues: props.project ?? getSchemaDefaults(projectSchema),
 })
 
 const onSubmit = form.handleSubmit((values) => {
@@ -54,18 +48,21 @@ const onSubmit = form.handleSubmit((values) => {
       <FormItem class="grid grid-cols-4 items-center gap-4">
         <FormLabel class="text-right" v-t="'dialog.project.form.color.label'" />
         <FormControl class="col-span-3">
-          <ColorSelect v-bind="componentField" />
+          <ColorSelect
+            :model-value="componentField.modelValue"
+            @update:model-value="componentField['onUpdate:modelValue']"
+          />
         </FormControl>
       </FormItem>
     </FormField>
-    <FormField v-slot="{ field }" name="isBillable">
+    <FormField v-slot="{ componentField }" name="isBillable">
       <FormItem class="grid grid-cols-4 items-center gap-4">
         <FormLabel
           class="text-right"
           v-t="'dialog.project.form.isBillable.label'"
         />
         <FormControl class="col-span-3">
-          <Switch v-bind="field" />
+          <Switch v-bind="componentField" />
         </FormControl>
       </FormItem>
     </FormField>

@@ -2,7 +2,7 @@
 import BaseDialog from '@renderer/components/common/dialog/BaseDialog.vue'
 import { ref } from 'vue'
 import { Button } from '@renderer/components/ui/button'
-import ProjectForm from '@renderer/components/settings/projects/projectDialog/ProjectForm.vue'
+import ProjectForm from '@renderer/components/settings/projects/dialog/ProjectForm.vue'
 import { useGetProjectById } from '@renderer/composables/queries/useGetProjectById'
 import { usePatchProjectById } from '@renderer/composables/mutations/usePatchProjectById'
 import type { ProjectDto } from '@shared/model/project'

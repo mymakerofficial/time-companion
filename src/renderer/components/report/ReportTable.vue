@@ -14,7 +14,7 @@ import TableVisibilitySelect from '@renderer/components/common/table/TableVisibi
 import { isNotEmpty } from '@renderer/lib/listUtils'
 import { Button } from '@renderer/components/ui/button'
 import { useOpenDialog } from '@renderer/composables/useOpenDialog'
-import NewProjectDialog from '@renderer/components/settings/projects/projectDialog/NewProjectDialog.vue'
+import NewProjectDialog from '@renderer/components/settings/projects/dialog/NewProjectDialog.vue'
 import { createReportColumns } from '@renderer/components/report/reportColumns'
 import {
   currentMonth,

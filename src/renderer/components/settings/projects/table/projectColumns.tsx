@@ -44,7 +44,7 @@ function getActionsCell(
   options: ProjectColumnsOptions,
 ) {
   function handleClick() {
-    options.onEditProject(row.original.id)
+    options.onEdit(row.original.id)
   }
 
   return (
@@ -60,10 +60,10 @@ const columnHelper = createColumnHelper<ProjectEntityDto>()
 
 interface ProjectColumnsOptions {
   updateData: DataUpdater<ProjectEntityDto>
-  onEditProject: (id: string) => void
+  onEdit: (id: string) => void
 }
 
-export function createProjectsColumns(options: ProjectColumnsOptions) {
+export function createProjectColumns(options: ProjectColumnsOptions) {
   const { updateData } = options
   const { t } = useI18n()
 
