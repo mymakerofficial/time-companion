@@ -3,7 +3,6 @@ import { isDefined } from '@shared/lib/utils/checks'
 import type { TaskService } from '@shared/service/taskService'
 import { createTaskService } from '@shared/service/taskService'
 import { createTaskPersistence } from '@shared/persistence/taskPersistence'
-import { createProjectPersistence } from '@shared/persistence/projectPersistence'
 import { createPublisherServiceProxy } from '@shared/ipc/publisherServiceProxy'
 import type {
   EntityPublisherEvent,
@@ -22,9 +21,6 @@ export const taskService: TaskService = (() => {
 
   return createTaskService({
     taskPersistence: createTaskPersistence({
-      database,
-    }),
-    projectPersistence: createProjectPersistence({
       database,
     }),
   })

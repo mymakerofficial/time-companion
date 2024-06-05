@@ -1,30 +1,25 @@
-import type { Database, Transaction } from '@shared/database/types/database'
+import type { Database } from '@shared/database/types/database'
 import { type TaskEntityDto, tasksTable } from '@shared/model/task'
-import { projectsTable } from '@shared/model/project'
-import { check, isNotEmpty, isNotNull, isNull } from '@shared/lib/utils/checks'
+import { check, isNotEmpty, isNotNull } from '@shared/lib/utils/checks'
 import { firstOf } from '@shared/lib/utils/list'
+import {
+  type DatabaseError,
+  errorIsUndefinedColumn,
+  errorIsUniqueViolation,
+} from '@shared/database/types/errors'
 
 export interface TaskPersistenceDependencies {
   database: Database
 }
 
 export interface TaskPersistence {
-  getTasks: () => Promise<ReadonlyArray<TaskEntityDto>>
-  getTaskById: (id: string) => Promise<Readonly<TaskEntityDto>>
-  getTaskByDisplayNameAndProjectId: (
-    displayName: string,
-    projectId: string,
-  ) => Promise<Readonly<TaskEntityDto>>
-  getTasksByProjectId: (
-    projectId: string,
-  ) => Promise<ReadonlyArray<TaskEntityDto>>
-  createTask: (
-    task: Readonly<TaskEntityDto>,
-  ) => Promise<Readonly<TaskEntityDto>>
+  getTasks: () => Promise<Array<TaskEntityDto>>
+  getTaskById: (id: string) => Promise<TaskEntityDto>
+  createTask: (task: TaskEntityDto) => Promise<TaskEntityDto>
   patchTaskById: (
     id: string,
-    partialTask: Partial<Readonly<TaskEntityDto>>,
-  ) => Promise<Readonly<TaskEntityDto>>
+    partialTask: Partial<TaskEntityDto>,
+  ) => Promise<TaskEntityDto>
 }
 
 export class TaskPersistenceImpl implements TaskPersistence {
@@ -34,92 +29,49 @@ export class TaskPersistenceImpl implements TaskPersistence {
     this.database = deps.database
   }
 
-  async getTasks(): Promise<ReadonlyArray<TaskEntityDto>> {
-    return await this.database.table(tasksTable).findMany({
-      where: tasksTable.deletedAt.isNull(),
-      orderBy: tasksTable.displayName.asc(),
-    })
+  protected resolveError(error: DatabaseError): never {
+    if (errorIsUniqueViolation(error)) {
+      throw new Error(
+        `Task with ${error.columnName} "${error.value}" already exists.`,
+      )
+    }
+
+    if (errorIsUndefinedColumn(error)) {
+      throw new Error(
+        `Tried to set value for undefined field "${error.columnName}" on task.`,
+      )
+    }
+
+    throw error
   }
 
-  async getTaskById(id: string): Promise<Readonly<TaskEntityDto>> {
-    const res = await this.database.table(tasksTable).findFirst({
-      where: tasksTable.id.equals(id).and(tasksTable.deletedAt.isNull()),
-    })
+  async getTasks(): Promise<Array<TaskEntityDto>> {
+    return await this.database
+      .table(tasksTable)
+      .findMany({
+        where: tasksTable.deletedAt.isNull(),
+        orderBy: tasksTable.displayName.asc(),
+      })
+      .catch(this.resolveError)
+  }
+
+  async getTaskById(id: string): Promise<TaskEntityDto> {
+    const res = await this.database
+      .table(tasksTable)
+      .findFirst({
+        range: tasksTable.id.range.only(id),
+        where: tasksTable.deletedAt.isNull(),
+      })
+      .catch(this.resolveError)
 
     check(isNotNull(res), `Task with id "${id}" not found.`)
 
     return res
   }
 
-  async getTaskByDisplayNameAndProjectId(
-    displayName: string,
-    projectId: string,
-  ): Promise<Readonly<TaskEntityDto>> {
-    const res = await this.database.table(tasksTable).findFirst({
-      where: tasksTable.displayName
-        .equals(displayName)
-        .and(tasksTable.projectId.equals(projectId))
-        .and(tasksTable.deletedAt.isNull()),
-    })
-
-    check(
-      isNotNull(res),
-      `Task with displayName "${displayName}" and projectId "${projectId}" not found.`,
-    )
-
-    return res
-  }
-
-  async getTasksByProjectId(
-    projectId: string,
-  ): Promise<ReadonlyArray<TaskEntityDto>> {
-    return await this.database.withTransaction(async (transaction) => {
-      const project = await transaction.table(projectsTable).findFirst({
-        where: projectsTable.id
-          .equals(projectId)
-          .and(projectsTable.deletedAt.isNull()),
-      })
-
-      check(isNotNull(project), `Project with id "${projectId}" not found.`)
-
-      return await transaction.table(tasksTable).findMany({
-        where: tasksTable.projectId
-          .equals(projectId)
-          .and(tasksTable.deletedAt.isNull()),
-        orderBy: tasksTable.displayName.asc(),
-      })
-    })
-  }
-  async createTask(
-    task: Readonly<TaskEntityDto>,
-  ): Promise<Readonly<TaskEntityDto>> {
-    return await this.database.withTransaction(async (transaction) => {
-      const existingTask = await transaction.table(tasksTable).findFirst({
-        where: tasksTable.displayName
-          .equals(task.displayName)
-          .and(tasksTable.projectId.equals(task.projectId))
-          .and(tasksTable.deletedAt.isNull()),
-      })
-
-      check(
-        isNull(existingTask),
-        `Task with displayName "${task.displayName}" already exists in project "${task.projectId}".`,
-      )
-
-      const project = await transaction.table(projectsTable).findFirst({
-        where: projectsTable.id
-          .equals(task.projectId)
-          .and(projectsTable.deletedAt.isNull()),
-      })
-
-      check(
-        isNotNull(project),
-        `Project with id "${task.projectId}" not found.`,
-      )
-
-      return await transaction.table(tasksTable).insert({
-        data: task,
-      })
+  async createTask(task: TaskEntityDto): Promise<TaskEntityDto> {
+    return await this.database.table(tasksTable).insert({
+      data: task,
     })
   }
 
@@ -127,10 +79,14 @@ export class TaskPersistenceImpl implements TaskPersistence {
     id: string,
     partialTask: Partial<Readonly<TaskEntityDto>>,
   ): Promise<Readonly<TaskEntityDto>> {
-    const res = await this.database.table(tasksTable).update({
-      where: tasksTable.id.equals(id),
-      data: partialTask,
-    })
+    const res = await this.database
+      .table(tasksTable)
+      .update({
+        range: tasksTable.id.range.only(id),
+        where: tasksTable.deletedAt.isNull(),
+        data: partialTask,
+      })
+      .catch(this.resolveError)
 
     check(isNotEmpty(res), `Task with id "${id}" not found.`)
 

@@ -41,17 +41,13 @@ export const useServiceFixtures = createFixtures<ServiceFixtures>({
       taskPersistence: createTaskPersistence({
         database: database,
       }),
-      projectPersistence: createProjectPersistence({
-        database: database,
-      }),
     })
   },
-  projectService: ({ database, taskService }) => {
+  projectService: ({ database }) => {
     return createProjectService({
       projectPersistence: createProjectPersistence({
         database: database,
       }),
-      taskService: taskService,
     })
   },
   serviceHelpers: ({ database }) => {

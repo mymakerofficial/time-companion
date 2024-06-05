@@ -6,12 +6,10 @@ import {
   type EntityService,
   EntityServiceImpl,
 } from '@shared/service/helpers/entityService'
-import type { TaskService } from '@shared/service/taskService'
 import { uuid } from '@shared/lib/utils/uuid'
 
 export interface ProjectServiceDependencies {
   projectPersistence: ProjectPersistence
-  taskService: TaskService
 }
 
 export interface ProjectService extends EntityService<ProjectEntityDto> {
@@ -19,8 +17,6 @@ export interface ProjectService extends EntityService<ProjectEntityDto> {
   getProjects(): Promise<Array<ProjectEntityDto>>
   // get a project by its id. returns null if the project does not exist
   getProjectById(id: string): Promise<Nullable<ProjectEntityDto>>
-  // get a project by a task id. returns null if the project does not exist
-  getProjectByTaskId(taskId: string): Promise<Nullable<ProjectEntityDto>>
   // create a new project and return the created project
   createProject(project: ProjectDto): Promise<ProjectEntityDto>
   // patches a project by its id, updates the modifiedAt field and returns the updated project
@@ -44,12 +40,10 @@ class ProjectServiceImpl
   implements ProjectService
 {
   private readonly projectPersistence: ProjectPersistence
-  private readonly taskService: TaskService
 
   constructor(deps: ProjectServiceDependencies) {
     super()
     this.projectPersistence = deps.projectPersistence
-    this.taskService = deps.taskService
   }
 
   async getProjects(): Promise<Array<ProjectEntityDto>> {
@@ -58,12 +52,6 @@ class ProjectServiceImpl
 
   async getProjectById(id: string): Promise<Nullable<ProjectEntityDto>> {
     return await this.projectPersistence.getProjectById(id)
-  }
-
-  async getProjectByTaskId(
-    taskId: string,
-  ): Promise<Nullable<ProjectEntityDto>> {
-    return await this.projectPersistence.getProjectByTaskId(taskId)
   }
 
   async createProject(project: ProjectDto): Promise<ProjectEntityDto> {
@@ -97,8 +85,6 @@ class ProjectServiceImpl
   }
 
   async softDeleteProject(id: string): Promise<void> {
-    await this.taskService.softDeleteTasksByProjectId(id)
-
     await this.projectPersistence.patchProjectById(id, {
       deletedAt: new Date().toISOString(),
     })

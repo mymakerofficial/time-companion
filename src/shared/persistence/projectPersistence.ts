@@ -2,7 +2,6 @@ import { type ProjectEntityDto, projectsTable } from '@shared/model/project'
 import type { Database } from '@shared/database/types/database'
 import { check, isNotEmpty, isNotNull } from '@shared/lib/utils/checks'
 import { firstOf } from '@shared/lib/utils/list'
-import { todo } from '@shared/lib/utils/todo'
 import {
   type DatabaseError,
   errorIsUndefinedColumn,
@@ -17,7 +16,6 @@ export interface ProjectPersistence {
   getProjects(): Promise<Array<ProjectEntityDto>>
   getProjectById(id: string): Promise<ProjectEntityDto>
   getProjectByDisplayName(displayName: string): Promise<ProjectEntityDto>
-  getProjectByTaskId(taskId: string): Promise<ProjectEntityDto>
   createProject(project: ProjectEntityDto): Promise<ProjectEntityDto>
   patchProjectById(
     id: string,
@@ -49,17 +47,23 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   }
 
   async getProjects(): Promise<Array<ProjectEntityDto>> {
-    return await this.database.table(projectsTable).findMany({
-      where: projectsTable.deletedAt.isNull(),
-      orderBy: projectsTable.displayName.asc(),
-    })
+    return await this.database
+      .table(projectsTable)
+      .findMany({
+        where: projectsTable.deletedAt.isNull(),
+        orderBy: projectsTable.displayName.asc(),
+      })
+      .catch(this.resolveError)
   }
 
   async getProjectById(id: string): Promise<ProjectEntityDto> {
-    const res = await this.database.table(projectsTable).findFirst({
-      range: projectsTable.id.range.only(id),
-      where: projectsTable.deletedAt.isNull(),
-    })
+    const res = await this.database
+      .table(projectsTable)
+      .findFirst({
+        range: projectsTable.id.range.only(id),
+        where: projectsTable.deletedAt.isNull(),
+      })
+      .catch(this.resolveError)
 
     check(isNotNull(res), `Project with id "${id}" not found.`)
 
@@ -69,11 +73,14 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   async getProjectByDisplayName(
     displayName: string,
   ): Promise<ProjectEntityDto> {
-    const res = await this.database.table(projectsTable).findFirst({
-      where: projectsTable.displayName
-        .equals(displayName)
-        .and(projectsTable.deletedAt.isNull()),
-    })
+    const res = await this.database
+      .table(projectsTable)
+      .findFirst({
+        where: projectsTable.displayName
+          .equals(displayName)
+          .and(projectsTable.deletedAt.isNull()),
+      })
+      .catch(this.resolveError)
 
     check(
       isNotNull(res),
@@ -81,10 +88,6 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     )
 
     return res
-  }
-
-  async getProjectByTaskId(taskId: string): Promise<ProjectEntityDto> {
-    todo()
   }
 
   async createProject(project: ProjectEntityDto): Promise<ProjectEntityDto> {
