@@ -3,6 +3,7 @@ import { defineTable } from '@shared/database/schema/defineTable'
 import { c } from '@shared/database/schema/columnBuilder'
 import { z } from 'zod'
 import type { Entity } from '@shared/model/helpers/entity'
+import { randomTailwindColor } from '@renderer/lib/colorUtils'
 
 export type ProjectDto = {
   displayName: string
@@ -26,7 +27,7 @@ export const projectsTable = defineTable<ProjectEntityDto>('projects', {
 
 export const projectSchema = z.object({
   displayName: z.string().min(1),
-  color: z.string().nullable(),
-  isBillable: z.boolean(),
-  isBreak: z.boolean(),
+  color: z.string().nullable().default(randomTailwindColor),
+  isBillable: z.boolean().default(true),
+  isBreak: z.boolean().default(false),
 })
