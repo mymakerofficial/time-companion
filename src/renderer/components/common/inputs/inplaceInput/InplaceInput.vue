@@ -12,6 +12,8 @@ watch(model, (newValue) => {
 })
 
 async function handleChange(newValue: string) {
+  newValue = newValue.replace(/^\s+|^\n+|\s+$|\n+$/, '')
+
   if (isEmpty(newValue)) {
     inputValue.value = model.value
     return
