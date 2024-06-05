@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/vue-query'
 import type { ProjectDto } from '@shared/model/project'
 import { projectService } from '@renderer/factory/service/projectService'
-import { toast } from 'vue-sonner'
+import { handleMutationError } from '@renderer/composables/mutations/helpers/handleMutationError'
 
 export function usePatchProjectById() {
   return useMutation({
@@ -12,9 +12,6 @@ export function usePatchProjectById() {
       project: Partial<ProjectDto>
       id: string
     }) => projectService.patchProjectById(id, project),
-    onError: (error) => {
-      console.error(error)
-      toast.error(error.message)
-    },
+    onError: handleMutationError,
   })
 }
