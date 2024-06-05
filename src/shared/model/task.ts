@@ -20,3 +20,8 @@ export const tasksTable = defineTable<TaskEntityDto>('tasks', {
   modifiedAt: c.string().nullable(),
   deletedAt: c.string().nullable(),
 })
+
+export const taskSchema = z.object({
+  displayName: z.string().min(1),
+  color: z.string().nullable().default(randomTailwindColor),
+})
