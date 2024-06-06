@@ -2,11 +2,11 @@
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from '@renderer/components/ui/dialog'
-import { isDefined } from '@renderer/lib/utils'
+import { isDefined } from '@shared/lib/utils/checks'
 
 const open = defineModel<boolean>('open', { required: true })
 
@@ -19,18 +19,21 @@ defineProps<{
 <template>
   <Dialog v-model:open="open">
     <DialogContent>
-      <DialogHeader v-if="isDefined(title) || $slots.title" class="mb-4">
+      <DialogHeader v-if="isDefined(title ?? $slots.title)" class="mb-4">
         <DialogTitle
-          v-if="isDefined(title) || $slots.title"
+          v-if="isDefined(title ?? $slots.title)"
           class="flex items-center gap-2"
-          ><slot name="title">{{ title }}</slot></DialogTitle
         >
-        <DialogDescription v-if="isDefined(description) || $slots.description"
-          ><slot name="description">{{ description }}</slot></DialogDescription
+          <slot name="title">{{ title }}</slot>
+        </DialogTitle>
+        <DialogDescription
+          v-if="isDefined(description ?? $slots.descriptionisDefined)"
         >
+          <slot name="description">{{ description }}</slot>
+        </DialogDescription>
       </DialogHeader>
       <slot />
-      <div class="mt-1.5">
+      <div v-if="isDefined($slots.footer)" class="mt-1.5">
         <slot name="footer" />
       </div>
     </DialogContent>
