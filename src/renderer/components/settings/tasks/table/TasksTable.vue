@@ -7,17 +7,22 @@ import { useGetTasks } from '@renderer/composables/queries/tasks/useGetTasks'
 import { createTaskColumns } from '@renderer/components/settings/tasks/table/taskColumns'
 import CreateTaskDialog from '@renderer/components/settings/tasks/dialog/CreateTaskDialog.vue'
 import { useDialog } from '@renderer/composables/dialog/useDialog'
+import { usePatchTaskById } from '@renderer/composables/mutations/tasks/usePatchTaskById'
+import EditTaskDialog from '@renderer/components/settings/tasks/dialog/EditTaskDialog.vue'
 
 const { data: tasks } = useGetTasks()
+const { mutate: patchTask } = usePatchTaskById()
 const { open: openCreateTask } = useDialog(CreateTaskDialog)
+const { open: openEditTask } = useDialog(EditTaskDialog)
 
 const columns = createTaskColumns({
   updateData: (original, columnAccessor, value) => {
-    // ...
+    patchTask({
+      id: original.id,
+      task: { [columnAccessor]: value },
+    })
   },
-  onEdit: (id) => {
-    // ...
-  },
+  onEdit: (id) => openEditTask({ id }),
 })
 </script>
 

@@ -13,7 +13,7 @@ import { getSchemaDefaults } from '@shared/lib/helpers/getSchemaDefaults'
 import { type TaskDto, taskSchema } from '@shared/model/task'
 
 const props = defineProps<{
-  project?: TaskDto
+  task?: TaskDto
 }>()
 
 const emit = defineEmits<{
@@ -22,7 +22,7 @@ const emit = defineEmits<{
 
 const form = useForm({
   validationSchema: toTypedSchema(taskSchema),
-  initialValues: props.project ?? getSchemaDefaults(taskSchema),
+  initialValues: props.task ?? getSchemaDefaults(taskSchema),
 })
 
 const onSubmit = form.handleSubmit((values) => {

@@ -22,9 +22,7 @@ const columns = createProjectColumns({
       project: { [columnAccessor]: value },
     })
   },
-  onEdit: (id) => {
-    openEditProject({ id })
-  },
+  onEdit: (id) => openEditProject({ id }),
 })
 </script>
 
