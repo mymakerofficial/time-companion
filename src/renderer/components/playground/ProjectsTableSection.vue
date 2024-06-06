@@ -3,7 +3,7 @@ import SettingsSection from '@renderer/components/settings/layout/SettingsSectio
 import { Button } from '@renderer/components/ui/button'
 import ProjectsTable from '@renderer/components/playground/ProjectsTable.vue'
 import type { ProjectEntityDto } from '@shared/model/project'
-import { useGetProjects } from '@renderer/composables/queries/useGetProjects'
+import { useGetProjects } from '@renderer/composables/queries/projects/useGetProjects'
 
 const emit = defineEmits<{
   edit: [project: ProjectEntityDto]

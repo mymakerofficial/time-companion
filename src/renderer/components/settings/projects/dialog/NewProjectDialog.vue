@@ -3,7 +3,7 @@ import BaseDialog from '@renderer/components/common/dialog/BaseDialog.vue'
 import { ref } from 'vue'
 import { Button } from '@renderer/components/ui/button'
 import ProjectForm from '@renderer/components/settings/projects/dialog/ProjectForm.vue'
-import { useCreateProject } from '@renderer/composables/mutations/useCreateProject'
+import { useCreateProject } from '@renderer/composables/mutations/projects/useCreateProject'
 import type { ProjectDto } from '@shared/model/project'
 
 const emit = defineEmits<{

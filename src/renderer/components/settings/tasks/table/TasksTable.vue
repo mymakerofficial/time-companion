@@ -5,7 +5,7 @@ import { useDialogStore } from '@renderer/stores/dialogStore'
 import { Button } from '@renderer/components/ui/button'
 import { Plus } from 'lucide-vue-next'
 import TableActions from '@renderer/components/common/table/TableActions.vue'
-import { useGetTasks } from '@renderer/composables/queries/useGetTasks'
+import { useGetTasks } from '@renderer/composables/queries/tasks/useGetTasks'
 import { createTaskColumns } from '@renderer/components/settings/tasks/table/taskColumns'
 import CreateTaskDialog from '@renderer/components/settings/tasks/dialog/CreateTaskDialog.vue'
 

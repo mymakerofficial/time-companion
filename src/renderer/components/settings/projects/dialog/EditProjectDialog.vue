@@ -3,10 +3,10 @@ import BaseDialog from '@renderer/components/common/dialog/BaseDialog.vue'
 import { ref } from 'vue'
 import { Button } from '@renderer/components/ui/button'
 import ProjectForm from '@renderer/components/settings/projects/dialog/ProjectForm.vue'
-import { useGetProjectById } from '@renderer/composables/queries/useGetProjectById'
-import { usePatchProjectById } from '@renderer/composables/mutations/usePatchProjectById'
+import { useGetProjectById } from '@renderer/composables/queries/projects/useGetProjectById'
+import { usePatchProjectById } from '@renderer/composables/mutations/projects/usePatchProjectById'
 import type { ProjectDto } from '@shared/model/project'
-import { useSoftDeleteProject } from '@renderer/composables/mutations/useSoftDeleteProject'
+import { useSoftDeleteProject } from '@renderer/composables/mutations/projects/useSoftDeleteProject'
 
 const props = defineProps<{
   id: string
