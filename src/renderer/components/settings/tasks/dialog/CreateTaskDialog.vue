@@ -1,21 +1,12 @@
 <script setup lang="ts">
 import BaseDialog from '@renderer/components/common/dialog/BaseDialog.vue'
-import { ref } from 'vue'
 import { Button } from '@renderer/components/ui/button'
 import { useCreateTask } from '@renderer/composables/mutations/tasks/useCreateTask'
 import type { TaskDto } from '@shared/model/task'
 import TaskForm from '@renderer/components/settings/tasks/dialog/TaskForm.vue'
+import { useDialogContext } from '@renderer/composables/dialog/useDialog'
 
-const emit = defineEmits<{
-  close: []
-}>()
-
-const open = ref(true)
-function close() {
-  open.value = false
-  emit('close')
-}
-
+const { close, open } = useDialogContext()
 const { mutate: createTask } = useCreateTask()
 
 function handleSubmit(values: TaskDto) {

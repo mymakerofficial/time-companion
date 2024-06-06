@@ -1,42 +1,38 @@
 <script setup lang="ts">
 import BaseDialog from '@renderer/components/common/dialog/BaseDialog.vue'
-import { ref } from 'vue'
 import { Button } from '@renderer/components/ui/button'
 import ProjectForm from '@renderer/components/settings/projects/dialog/ProjectForm.vue'
 import { useGetProjectById } from '@renderer/composables/queries/projects/useGetProjectById'
 import { usePatchProjectById } from '@renderer/composables/mutations/projects/usePatchProjectById'
 import type { ProjectDto } from '@shared/model/project'
 import { useSoftDeleteProject } from '@renderer/composables/mutations/projects/useSoftDeleteProject'
+import { useDialogContext } from '@renderer/composables/dialog/useDialog'
 
 const props = defineProps<{
   id: string
 }>()
 
-const emit = defineEmits<{
-  close: []
-}>()
-
-const open = ref(true)
-function close() {
-  open.value = false
-  emit('close')
-}
-
+const { close, open } = useDialogContext()
 const { data: project, isPending, isError, error } = useGetProjectById(props.id)
-const { mutateAsync: patchProject } = usePatchProjectById()
-const { mutateAsync: deleteProject } = useSoftDeleteProject()
+const { mutate: patchProject } = usePatchProjectById()
+const { mutate: deleteProject } = useSoftDeleteProject()
 
-async function handleSubmit(project: ProjectDto) {
-  await patchProject({
-    id: props.id,
-    project,
-  })
-  close()
+function handleSubmit(project: ProjectDto) {
+  patchProject(
+    {
+      id: props.id,
+      project,
+    },
+    {
+      onSuccess: close,
+    },
+  )
 }
 
-async function handleDelete() {
-  await deleteProject(props.id)
-  close()
+function handleDelete() {
+  deleteProject(props.id, {
+    onSuccess: close,
+  })
 }
 </script>
 

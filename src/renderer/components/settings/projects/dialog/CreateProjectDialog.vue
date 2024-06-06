@@ -1,21 +1,12 @@
 <script setup lang="ts">
 import BaseDialog from '@renderer/components/common/dialog/BaseDialog.vue'
-import { ref } from 'vue'
 import { Button } from '@renderer/components/ui/button'
 import ProjectForm from '@renderer/components/settings/projects/dialog/ProjectForm.vue'
 import { useCreateProject } from '@renderer/composables/mutations/projects/useCreateProject'
 import type { ProjectDto } from '@shared/model/project'
+import { useDialogContext } from '@renderer/composables/dialog/useDialog'
 
-const emit = defineEmits<{
-  close: []
-}>()
-
-const open = ref(true)
-function close() {
-  open.value = false
-  emit('close')
-}
-
+const { close, open } = useDialogContext()
 const { mutate: createProject } = useCreateProject()
 
 function handleSubmit(values: ProjectDto) {

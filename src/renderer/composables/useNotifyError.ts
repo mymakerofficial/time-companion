@@ -1,7 +1,6 @@
-import { useDialogStore } from '@renderer/stores/dialogStore'
-import { h } from 'vue'
 import ErrorDialog from '@renderer/components/common/dialog/ErrorDialog.vue'
 import { isDefined } from '@renderer/lib/utils'
+import { useDialog } from '@renderer/composables/dialog/useDialog'
 
 export interface ErrorProps {
   title: string
@@ -13,20 +12,21 @@ export interface ErrorProps {
   }[]
 }
 
-export function useNotifyError(props: any) {
-  const dialogStore = useDialogStore()
+const { open: openErrorDialog } = useDialog(ErrorDialog)
 
-  dialogStore.openDialog(
-    h(ErrorDialog, {
-      actions: [
-        {
-          label: 'Confirm',
-          handler: () => {},
-        },
-      ],
-      ...props,
-    }),
-  )
+/***
+ * @deprecated
+ */
+export function useNotifyError(props: any) {
+  openErrorDialog({
+    actions: [
+      {
+        label: 'Confirm',
+        handler: () => {},
+      },
+    ],
+    ...props,
+  })
 
   if (isDefined(props.error)) {
     console.error(props.error)

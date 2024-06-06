@@ -1,19 +1,14 @@
 <script setup lang="ts">
-import { useDialogStore } from '@renderer/stores/dialogStore'
-import type { VNode } from '@vue/runtime-dom'
+import { useDialogState } from '@renderer/composables/dialog/useDialog'
+import DialogContextProvider from '@renderer/components/common/dialog/DialogContextProvider.vue'
 
-const dialogStore = useDialogStore()
-
-function handleClose(dialog: VNode) {
-  setTimeout(() => {
-    dialogStore.closeDialog(dialog)
-  }, 200)
-}
+const { dialogs } = useDialogState()
 </script>
 
 <template>
-  <template v-for="(dialog, index) in dialogStore.dialogs" :key="index">
-    <!-- @vue-ignore -->
-    <Component :is="dialog" @close="() => handleClose(dialog)" />
+  <template v-for="[id, node] in dialogs" :key="id">
+    <DialogContextProvider :id="id">
+      <Component :is="node" />
+    </DialogContextProvider>
   </template>
 </template>
