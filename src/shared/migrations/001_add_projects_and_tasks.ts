@@ -15,7 +15,6 @@ export default defineMigration(async (transaction) => {
 
   await transaction.createTable('tasks', {
     id: c.uuid().primaryKey(),
-    projectId: c.uuid(),
     displayName: c.string().indexed(),
     color: c.string().nullable(),
     createdAt: c.string(),
