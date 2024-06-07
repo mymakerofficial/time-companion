@@ -119,12 +119,6 @@ describe('projectService', () => {
     })
   })
 
-  describe.todo('getProjectByTaskId', () => {
-    it.todo('should get a project by task id')
-
-    it.todo('should throw if project with taskId is not found')
-  })
-
   describe('patchProjectById', () => {
     it('should patch a project by id', async () => {
       await projectHelpers.createSampleProjects()
