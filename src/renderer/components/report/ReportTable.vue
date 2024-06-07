@@ -26,6 +26,7 @@ import { useTimeReportService } from '@renderer/services/timeReportService'
 import { useProjectsService } from '@renderer/services/projectsService'
 import type { DayTimeReport } from '@renderer/lib/timeReport/types'
 import { useNow } from '@renderer/composables/useNow'
+import CreateProjectDialog from '@renderer/components/settings/projects/dialog/CreateProjectDialog.vue'
 
 const projectsService = useProjectsService()
 const timeReportService = useTimeReportService()
@@ -99,7 +100,7 @@ const tableOptions: Partial<TableOptions<DayTimeReport>> = {
         <p class="text-muted-foreground">
           <i18n-t keypath="report.empty.noProjects.description.term">
             <Button
-              @click="useOpenDialog(NewProjectDialog)"
+              @click="useOpenDialog(CreateProjectDialog)"
               variant="link"
               class="p-0"
               >{{
