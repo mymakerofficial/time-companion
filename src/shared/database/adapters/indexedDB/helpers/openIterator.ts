@@ -1,6 +1,12 @@
 import type { AdapterBaseQueryProps } from '@shared/database/types/adapter'
 import { toArray } from '@shared/lib/utils/list'
-import { check, isNotNull, isNull, isUndefined } from '@shared/lib/utils/checks'
+import {
+  check,
+  isNotNull,
+  isNull,
+  isPresent,
+  isUndefined,
+} from '@shared/lib/utils/checks'
 import { DatabaseInvalidRangeColumnError } from '@shared/database/types/errors'
 import { getOrDefault, getOrNull } from '@shared/lib/utils/result'
 import { filteredIterator } from '@shared/database/helpers/filteredIterator'
@@ -46,7 +52,7 @@ export async function openIterator<TRow extends object>(
   // we need to manually sort if a range is given that doesn't match the orderBy column
   //  or if the orderBy column is not indexed
   const requiresManualSort =
-    !keyPathIsIndex || (isNotNull(rangeColumn) && rangeColumn !== orderByColumn)
+    !keyPathIsIndex || (isPresent(rangeColumn) && rangeColumn !== orderByColumn)
 
   // null means we sort by primary key
   const indexName = keyPathIsIndex ? keyPath : null
