@@ -15,7 +15,7 @@ export function valuesOf<T extends unknown>(obj: T) {
 export function propertiesOf<T extends unknown>(obj: T) {
   return Object.getOwnPropertyNames(
     Object.getPrototypeOf(obj as object),
-  ) as Array<keyof T>
+  ).filter((p) => p !== 'constructor') as Array<keyof T>
 }
 
 export function objectFromEntries<T extends unknown>(
