@@ -1,5 +1,4 @@
 import type {
-  AdapterBaseQueryProps,
   AdapterDeleteProps,
   AdapterInsertManyProps,
   AdapterInsertProps,
@@ -9,6 +8,7 @@ import type {
 } from '@shared/database/types/adapter'
 import type { Nullable } from '@shared/lib/utils/types'
 import {
+  check,
   isAbsent,
   isDefined,
   isNotNull,
@@ -32,6 +32,8 @@ import {
   deserializeRow,
   serializeRow,
 } from '@shared/database/adapters/indexedDB/helpers/mappers'
+import { compareFn } from '@shared/database/adapters/indexedDB/helpers/compareFunction'
+import { planQuery } from '@shared/database/adapters/indexedDB/helpers/planQuery'
 
 export class IdbTableAdapter<TRow extends object>
   implements TableAdapter<TRow>
@@ -60,24 +62,28 @@ export class IdbTableAdapter<TRow extends object>
     return this._objectStore
   }
 
-  protected openIterator(props: Partial<AdapterBaseQueryProps>) {
-    return openIterator<TRow>(this.objectStore, props)
-  }
-
   async select(props: AdapterSelectProps<TRow>): Promise<Array<TRow>> {
-    const { iterator, requiresManualSort, byColumn, direction } =
-      await this.openIterator(props)
+    const queryPlan = planQuery<TRow>(this.objectStore, props)
+    const iterator = await openIterator<TRow>(this.objectStore, queryPlan)
 
     const list = await iteratorToList(iterator)
 
-    if (requiresManualSort && isNotNull(byColumn)) {
-      // TODO: sort interval and time types
-      const compareFn =
-        direction === 'asc'
-          ? (a: TRow, b: TRow) => (a[byColumn] > b[byColumn] ? 1 : -1)
-          : (a: TRow, b: TRow) => (a[byColumn] < b[byColumn] ? 1 : -1)
-
-      list.sort(compareFn)
+    if (queryPlan.requiresManualSort) {
+      check(
+        isNotNull(queryPlan.orderByColumnName),
+        'orderByColumnName must not be null',
+      )
+      check(
+        isNotNull(queryPlan.orderByColumnType),
+        'orderByColumnType must not be null',
+      )
+      list.sort(
+        compareFn(
+          queryPlan.orderByColumnName,
+          queryPlan.orderByColumnType,
+          queryPlan.direction,
+        ),
+      )
     }
 
     // deserialize after sorting because we only serialize to make sorting easier
@@ -89,7 +95,8 @@ export class IdbTableAdapter<TRow extends object>
       await this.getPossibleUniqueConstraintViolations(props.data)
     await this.checkColumnsExist(props.data)
 
-    const { iterator } = await this.openIterator(props)
+    const queryPlan = planQuery<TRow>(this.objectStore, props)
+    const iterator = await openIterator<TRow>(this.objectStore, queryPlan)
 
     const results = []
     for await (const cursor of iterator) {
@@ -118,7 +125,8 @@ export class IdbTableAdapter<TRow extends object>
   }
 
   async delete(props: AdapterDeleteProps<TRow>): Promise<void> {
-    const { iterator } = await this.openIterator(props)
+    const queryPlan = planQuery<TRow>(this.objectStore, props)
+    const iterator = await openIterator<TRow>(this.objectStore, queryPlan)
 
     for await (const cursor of iterator) {
       await cursor.delete()

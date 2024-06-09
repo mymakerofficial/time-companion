@@ -1188,6 +1188,36 @@ describe.each([
             }),
           ])
         })
+
+        it('should sort by un-indexed datetime', async () => {
+          await helpers.insertSampleTestRows(4, {
+            datetime: [
+              new Date('2024-06-09T08:00:00Z'),
+              new Date('2024-05-09T08:00:00Z'),
+              new Date('2025-05-09T08:00:00Z'),
+              new Date('2024-06-09T04:00:00Z'),
+            ],
+          })
+
+          const res = await database.table(testTable).findMany({
+            orderBy: testTable.datetime.asc(),
+          })
+
+          expect(res).toEqual([
+            expect.objectContaining({
+              datetime: new Date('2024-05-09T08:00:00Z'),
+            }),
+            expect.objectContaining({
+              datetime: new Date('2024-06-09T04:00:00Z'),
+            }),
+            expect.objectContaining({
+              datetime: new Date('2024-06-09T08:00:00Z'),
+            }),
+            expect.objectContaining({
+              datetime: new Date('2025-05-09T08:00:00Z'),
+            }),
+          ])
+        })
       })
 
       describe('time', () => {
@@ -1207,6 +1237,23 @@ describe.each([
             expect.objectContaining({ timeIndexed: '12:00:00' }),
           ])
         })
+
+        it('should sort by un-indexed time', async () => {
+          await helpers.insertSampleTestRows(4, {
+            time: ['08:00:00', '03:00:00', '12:00:00', '05:00:00'],
+          })
+
+          const res = await database.table(testTable).findMany({
+            orderBy: testTable.time.asc(),
+          })
+
+          expect(res).toEqual([
+            expect.objectContaining({ time: '03:00:00' }),
+            expect.objectContaining({ time: '05:00:00' }),
+            expect.objectContaining({ time: '08:00:00' }),
+            expect.objectContaining({ time: '12:00:00' }),
+          ])
+        })
       })
 
       describe('interval', () => {
@@ -1224,6 +1271,23 @@ describe.each([
             expect.objectContaining({ intervalIndexed: 'PT2H' }),
             expect.objectContaining({ intervalIndexed: 'PT3H' }),
             expect.objectContaining({ intervalIndexed: 'PT4H' }),
+          ])
+        })
+
+        it('should sort by un-indexed interval', async () => {
+          await helpers.insertSampleTestRows(4, {
+            interval: ['PT3H', 'PT1H', 'PT4H', 'PT2H'],
+          })
+
+          const res = await database.table(testTable).findMany({
+            orderBy: testTable.interval.asc(),
+          })
+
+          expect(res).toEqual([
+            expect.objectContaining({ interval: 'PT1H' }),
+            expect.objectContaining({ interval: 'PT2H' }),
+            expect.objectContaining({ interval: 'PT3H' }),
+            expect.objectContaining({ interval: 'PT4H' }),
           ])
         })
       })
