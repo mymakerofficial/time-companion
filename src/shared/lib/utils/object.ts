@@ -23,3 +23,13 @@ export function objectFromEntries<T extends unknown>(
 ) {
   return Object.fromEntries(entries) as T
 }
+
+export function assignProperties<T extends object, G extends object>(
+  target: T,
+  source: G,
+): T & G {
+  return Object.assign(
+    target,
+    objectFromEntries(propertiesOf(source).map((key) => [key, source[key]])),
+  )
+}
