@@ -1,5 +1,4 @@
 import { isArray } from '@shared/lib/utils/checks'
-import type { Nullable, Optional } from '@shared/lib/utils/types'
 
 export function firstOf<T extends ReadonlyArray<unknown>>(
   values: T,
