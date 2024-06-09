@@ -184,13 +184,3 @@ function createMagicColumnBuilder() {
 }
 
 export const c = createMagicColumnBuilder()
-
-export const t = new ColumnBuilderFactoryImpl() as ColumnBuilderFactory
-
-export const string = t.string
-export const number = t.number
-export const boolean = t.boolean
-export const uuid = t.uuid
-export const double = t.double
-export const integer = t.integer
-export const json = t.json

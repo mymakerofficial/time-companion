@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import { wherePredicate } from '@shared/database/helpers/wherePredicate'
 import { defineTable } from '@shared/database/schema/defineTable'
-import { number, string } from '@shared/database/schema/columnBuilder'
+import { c } from '@shared/database/schema/columnBuilder'
 import { uuid } from '@shared/lib/utils/uuid'
 import type { WhereBuilder } from '@shared/database/types/schema'
 
@@ -14,11 +14,11 @@ interface Person {
 }
 
 const personsTable = defineTable<Person>('persons', {
-  id: string().primaryKey(),
-  name: string(),
-  favouriteColor: string(),
-  favouriteSport: string(),
-  age: number(),
+  id: c.string().primaryKey(),
+  name: c.string(),
+  favouriteColor: c.string(),
+  favouriteSport: c.string(),
+  age: c.number(),
 })
 
 const whereComplicated = personsTable.name

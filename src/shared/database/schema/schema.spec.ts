@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest'
-import { c, string, t } from '@shared/database/schema/columnBuilder'
+import { c } from '@shared/database/schema/columnBuilder'
 import { defineTable } from '@shared/database/schema/defineTable'
 import { orderDirections } from '@shared/database/types/database'
 
 describe('schema', () => {
   describe('columnBuilder', () => {
     it('should build a column', () => {
-      expect(t.string().primaryKey()._.raw).toEqual({
+      expect(c.string().primaryKey()._.raw).toEqual({
         tableName: null,
         columnName: null,
         dataType: 'string',
@@ -85,9 +85,9 @@ describe('schema', () => {
   describe('whereBuilder', () => {
     it('should build a where clause', () => {
       const foo = defineTable('foo', {
-        id: string().primaryKey(),
-        name: string(),
-        color: string().nullable(),
+        id: c.string().primaryKey(),
+        name: c.string(),
+        color: c.string().nullable(),
       })
 
       const where = foo.name
@@ -170,8 +170,8 @@ describe('schema', () => {
   describe('orderBy', () => {
     it.each(orderDirections)('should return an %s order by', (direction) => {
       const foo = defineTable('foo', {
-        id: string().primaryKey(),
-        name: string().indexed(),
+        id: c.string().primaryKey(),
+        name: c.string().indexed(),
       })
 
       expect(foo.name[direction]()).toEqual({
