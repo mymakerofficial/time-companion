@@ -8,7 +8,7 @@ describe('applyAlterActions', () => {
   it('should apply addColumn action', () => {
     const table = defineTable('foo', {
       id: c.uuid().primaryKey(),
-      name: c.string(),
+      name: c.text(),
     })._.raw
 
     const builder = new AlterTableBuilderImpl()

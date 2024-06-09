@@ -14,11 +14,11 @@ export type TaskEntityDto = TaskDto & Entity
 
 export const tasksTable = defineTable<TaskEntityDto>('tasks', {
   id: c.uuid().primaryKey(),
-  displayName: c.string().indexed(),
-  color: c.string().nullable(),
-  createdAt: c.string(),
-  modifiedAt: c.string().nullable(),
-  deletedAt: c.string().nullable(),
+  displayName: c.text().indexed(),
+  color: c.text().nullable(),
+  createdAt: c.text(),
+  modifiedAt: c.text().nullable(),
+  deletedAt: c.text().nullable(),
 })
 
 export const taskSchema = z.object({

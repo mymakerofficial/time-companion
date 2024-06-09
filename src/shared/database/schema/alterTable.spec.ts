@@ -5,12 +5,12 @@ describe('alterTable', () => {
   it('should record the correct actions', async () => {
     const table = new AlterTableBuilderImpl()
 
-    table.addColumn('name').string().nullable()
+    table.addColumn('name').text().nullable()
     table.dropColumn('age')
     table.renameColumn('email', 'emailAddress')
     table
       .alterColumn('emailAddress')
-      .setDataType('string')
+      .setDataType('text')
       .dropNullable()
       .setIndexed()
     table.renameTo('newTable')
@@ -20,7 +20,7 @@ describe('alterTable', () => {
         type: 'addColumn',
         definition: expect.objectContaining({
           columnName: 'name',
-          dataType: 'string',
+          dataType: 'text',
           isPrimaryKey: false,
           isNullable: true,
           isIndexed: false,
@@ -36,7 +36,7 @@ describe('alterTable', () => {
       {
         type: 'alterColumn',
         columnName: 'emailAddress',
-        action: { type: 'setDataType', dataType: 'string' },
+        action: { type: 'setDataType', dataType: 'text' },
       },
       {
         type: 'alterColumn',

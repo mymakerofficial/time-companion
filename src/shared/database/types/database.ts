@@ -26,12 +26,11 @@ export const orderByDirections = ['asc', 'desc'] as const
 export type OrderByDirection = (typeof orderByDirections)[number]
 
 export const columnTypes = [
-  'string',
-  'number',
+  'text',
+  'integer',
+  'double',
   'boolean',
   'uuid',
-  'double',
-  'integer',
   'json',
 ] as const
 export type ColumnType = (typeof columnTypes)[number]

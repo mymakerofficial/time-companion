@@ -14,10 +14,10 @@ interface Person {
 }
 
 const personsTable = defineTable<Person>('persons', {
-  id: c.string().primaryKey(),
-  name: c.string(),
-  favouriteColor: c.string(),
-  favouriteSport: c.string(),
+  id: c.text().primaryKey(),
+  name: c.text(),
+  favouriteColor: c.text(),
+  favouriteSport: c.text(),
   age: c.number(),
 })
 

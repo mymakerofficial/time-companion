@@ -17,7 +17,7 @@ describe('Knex Schema Builder', () => {
     it('should build a create table', () => {
       const schema = defineTable('table', {
         id: c.uuid().primaryKey(),
-        stringColumn: c.string().indexed().unique().nullable(),
+        stringColumn: c.text().indexed().unique().nullable(),
         numberColumn: c.number(),
       })
 
@@ -47,7 +47,7 @@ describe('Knex Schema Builder', () => {
     it('should add a column', () => {
       const table = new AlterTableBuilderImpl()
 
-      table.addColumn('name').string().nullable()
+      table.addColumn('name').text().nullable()
 
       const builder = buildAlterTable(knex, 'table', table._.actions)
 
@@ -59,7 +59,7 @@ describe('Knex Schema Builder', () => {
     it('should add a column with index and unique', () => {
       const table = new AlterTableBuilderImpl()
 
-      table.addColumn('name').string().nullable().unique().indexed()
+      table.addColumn('name').text().nullable().unique().indexed()
 
       const builder = buildAlterTable(knex, 'table', table._.actions)
 
@@ -110,7 +110,7 @@ describe('Knex Schema Builder', () => {
 
       table
         .alterColumn('emailAddress')
-        .setDataType('string')
+        .setDataType('text')
         .dropNullable()
         .setIndexed()
         .setUnique()

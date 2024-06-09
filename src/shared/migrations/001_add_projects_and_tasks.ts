@@ -4,21 +4,21 @@ import { c } from '@shared/database/schema/columnBuilder'
 export default defineMigration(async (transaction) => {
   await transaction.createTable('projects', {
     id: c.uuid().primaryKey(),
-    displayName: c.string().indexed().unique(),
-    color: c.string().nullable(),
+    displayName: c.text().indexed().unique(),
+    color: c.text().nullable(),
     isBillable: c.boolean(),
     isBreak: c.boolean(),
-    createdAt: c.string(),
-    modifiedAt: c.string().nullable(),
-    deletedAt: c.string().nullable(),
+    createdAt: c.text(),
+    modifiedAt: c.text().nullable(),
+    deletedAt: c.text().nullable(),
   })
 
   await transaction.createTable('tasks', {
     id: c.uuid().primaryKey(),
-    displayName: c.string().indexed(),
-    color: c.string().nullable(),
-    createdAt: c.string(),
-    modifiedAt: c.string().nullable(),
-    deletedAt: c.string().nullable(),
+    displayName: c.text().indexed(),
+    color: c.text().nullable(),
+    createdAt: c.text(),
+    modifiedAt: c.text().nullable(),
+    deletedAt: c.text().nullable(),
   })
 })

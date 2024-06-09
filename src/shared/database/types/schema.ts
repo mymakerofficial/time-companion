@@ -253,20 +253,35 @@ export interface ColumnBuilder<TColumn = unknown, TRow extends object = object>
 
 export interface ColumnBuilderFactoryBase<TRow extends object = object> {
   /***
-   * Create a column with the string data type.
+   * Create a column with the text data type.
    *
    * | JavaScript Type | PostgreSQL Type  |
    * |-----------------|------------------|
    * | string          | text             |
    */
+  text: () => ColumnBuilder<string, TRow>
+  /***
+   * alias for {@link text}
+   */
   string: () => ColumnBuilder<string, TRow>
   /***
-   * Create a column with the number data type.
-   * This is an alias for {@link double}
+   * Create a column with the double data type.
    *
    * | JavaScript Type | PostgreSQL Type  |
    * |-----------------|------------------|
    * | number          | double precision |
+   */
+  double: () => ColumnBuilder<number, TRow>
+  /***
+   * Create a column with the integer data type.
+   *
+   * | JavaScript Type | PostgreSQL Type |
+   * |-----------------|-----------------|
+   * | number          | integer         |
+   */
+  integer: () => ColumnBuilder<number, TRow>
+  /***
+   * alias for {@link double}
    */
   number: () => ColumnBuilder<number, TRow>
   /***
@@ -285,22 +300,6 @@ export interface ColumnBuilderFactoryBase<TRow extends object = object> {
    * | string          | uuid            |
    */
   uuid: () => ColumnBuilder<string, TRow>
-  /***
-   * Create a column with the double data type.
-   *
-   * | JavaScript Type | PostgreSQL Type  |
-   * |-----------------|------------------|
-   * | number          | double precision |
-   */
-  double: () => ColumnBuilder<number, TRow>
-  /***
-   * Create a column with the integer data type.
-   *
-   * | JavaScript Type | PostgreSQL Type |
-   * |-----------------|-----------------|
-   * | number          | integer         |
-   */
-  integer: () => ColumnBuilder<number, TRow>
   /***
    * Create a column with the json data type.
    *

@@ -252,7 +252,7 @@ describe.each([
       database.unsafe.setConfigSchema({
         foo: defineTable('foo', {
           id: c.uuid().primaryKey(),
-          textColumn: c.string(),
+          textColumn: c.text(),
           integerColumn: c.integer().indexed().unique(),
         }),
       })
@@ -261,7 +261,7 @@ describe.each([
         async (transaction) => {
           await transaction.createTable('foo', {
             id: c.uuid().primaryKey(),
-            textColumn: c.string(),
+            textColumn: c.text(),
             integerColumn: c.integer(), // index and unique are missing
           })
         },
@@ -281,7 +281,7 @@ describe.each([
           await database.unsafe.runMigration(async (transaction) => {
             await transaction.createTable('persons', {
               id: c.uuid().primaryKey(),
-              username: c.string(),
+              username: c.text(),
             })
           })
 
@@ -300,7 +300,7 @@ describe.each([
           await database.unsafe.runMigration(async (transaction) => {
             await transaction.createTable('persons', {
               id: c.uuid().primaryKey(),
-              username: c.string(),
+              username: c.text(),
             })
           })
 
@@ -322,7 +322,7 @@ describe.each([
             await database.unsafe.runMigration(async (transaction) => {
               await transaction.createTable('persons', {
                 id: c.uuid().primaryKey(),
-                username: c.string(),
+                username: c.text(),
               })
             })
 
@@ -393,7 +393,7 @@ describe.each([
             await database.unsafe.runMigration(async (transaction) => {
               await transaction.createTable('users', {
                 id: c.uuid().primaryKey(),
-                name: c.string(),
+                name: c.text(),
               })
             })
 
@@ -441,7 +441,7 @@ describe.each([
             await database.unsafe.runMigration(async (transaction) => {
               await transaction.createTable('users', {
                 id: c.uuid().primaryKey(),
-                name: c.string(),
+                name: c.text(),
               })
             })
 

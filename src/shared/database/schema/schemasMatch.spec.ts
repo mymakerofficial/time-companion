@@ -7,7 +7,7 @@ describe('rawTableSchemasMatch', () => {
   it('should return true if everything matches', () => {
     const table = defineTable('table', {
       id: c.uuid().primaryKey(),
-      textColumn: c.string().nullable(),
+      textColumn: c.text().nullable(),
       numberColumn: c.number().indexed().unique(),
     })
 
@@ -17,13 +17,13 @@ describe('rawTableSchemasMatch', () => {
   it('should return false if the table name doesnt match', () => {
     const tableA = defineTable('table_a', {
       id: c.uuid().primaryKey(),
-      textColumn: c.string().nullable(),
+      textColumn: c.text().nullable(),
       numberColumn: c.number().indexed().unique(),
     })
 
     const tableB = defineTable('table_b', {
       id: c.uuid().primaryKey(),
-      textColumn: c.string().nullable(),
+      textColumn: c.text().nullable(),
       numberColumn: c.number().indexed().unique(),
     })
 
@@ -33,13 +33,13 @@ describe('rawTableSchemasMatch', () => {
   it('should return false if the attribute is missing', () => {
     const tableA = defineTable('table', {
       id: c.uuid().primaryKey(),
-      textColumn: c.string().nullable(),
+      textColumn: c.text().nullable(),
       numberColumn: c.number().indexed().unique(),
     })
 
     const tableB = defineTable('table', {
       id: c.uuid().primaryKey(),
-      textColumn: c.string(),
+      textColumn: c.text(),
       numberColumn: c.number().indexed().unique(),
     })
 
@@ -49,13 +49,13 @@ describe('rawTableSchemasMatch', () => {
   it('should return false if column is missing', () => {
     const tableA = defineTable('table', {
       id: c.uuid().primaryKey(),
-      textColumn: c.string().nullable(),
+      textColumn: c.text().nullable(),
       numberColumn: c.number().indexed().unique(),
     })
 
     const tableB = defineTable('table', {
       id: c.uuid().primaryKey(),
-      textColumn: c.string().nullable(),
+      textColumn: c.text().nullable(),
     })
 
     expect(rawTableSchemasMatch(tableA._.raw, tableB._.raw)).toBe(false)
@@ -64,12 +64,12 @@ describe('rawTableSchemasMatch', () => {
   it('should return false if column is extra', () => {
     const tableA = defineTable('table', {
       id: c.uuid().primaryKey(),
-      textColumn: c.string().nullable(),
+      textColumn: c.text().nullable(),
     })
 
     const tableB = defineTable('table', {
       id: c.uuid().primaryKey(),
-      textColumn: c.string().nullable(),
+      textColumn: c.text().nullable(),
       numberColumn: c.number().indexed().unique(),
     })
 

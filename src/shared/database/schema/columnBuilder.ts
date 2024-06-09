@@ -6,6 +6,8 @@ import type {
 } from '@shared/database/types/schema'
 import type { Nullable } from '@shared/lib/utils/types'
 import { ColumnDefinitionImpl } from '@shared/database/schema/columnDefinition'
+import { assignProperties } from '@shared/lib/utils/object'
+import type { ColumnType } from '@shared/database/types/database'
 
 class ColumnBuilderImpl<TColumn = unknown, TRow extends object = object>
   extends ColumnDefinitionImpl<TRow, TColumn>
@@ -85,78 +87,46 @@ export class ColumnBuilderFactoryImpl<TRow extends object = object>
     })
   }
 
-  named(columnName: string) {
-    return new ColumnBuilderFactoryImpl({ columnName }, this.reporter)
+  private setType<TColumn>(dataType: ColumnType) {
+    return new ColumnBuilderImpl<TColumn, TRow>(
+      {
+        ...this.definition,
+        dataType,
+      },
+      this.reporter,
+    ) as ColumnBuilder<TColumn, TRow>
+  }
+
+  text() {
+    return this.setType<string>('text')
   }
 
   string() {
-    return new ColumnBuilderImpl(
-      {
-        ...this.definition,
-        dataType: 'string',
-      },
-      this.reporter,
-    ) as ColumnBuilder<string>
-  }
-
-  number() {
-    return new ColumnBuilderImpl(
-      {
-        ...this.definition,
-        dataType: 'number',
-      },
-      this.reporter,
-    ) as ColumnBuilder<number>
-  }
-
-  boolean() {
-    return new ColumnBuilderImpl(
-      {
-        ...this.definition,
-        dataType: 'boolean',
-      },
-      this.reporter,
-    ) as ColumnBuilder<boolean>
-  }
-
-  uuid() {
-    return new ColumnBuilderImpl(
-      {
-        ...this.definition,
-        dataType: 'uuid',
-      },
-      this.reporter,
-    ) as ColumnBuilder<string>
-  }
-
-  double() {
-    return new ColumnBuilderImpl(
-      {
-        ...this.definition,
-        dataType: 'double',
-      },
-      this.reporter,
-    ) as ColumnBuilder<number>
+    return this.text()
   }
 
   integer() {
-    return new ColumnBuilderImpl(
-      {
-        ...this.definition,
-        dataType: 'integer',
-      },
-      this.reporter,
-    ) as ColumnBuilder<number>
+    return this.setType<number>('integer')
+  }
+
+  double() {
+    return this.setType<number>('double')
+  }
+
+  number() {
+    return this.double()
+  }
+
+  boolean() {
+    return this.setType<boolean>('boolean')
+  }
+
+  uuid() {
+    return this.setType<string>('uuid')
   }
 
   json<T extends object = object>() {
-    return new ColumnBuilderImpl(
-      {
-        ...this.definition,
-        dataType: 'json',
-      },
-      this.reporter,
-    ) as ColumnBuilder<T>
+    return this.setType<T>('json')
   }
 }
 
@@ -170,17 +140,7 @@ function createMagicColumnBuilder() {
     }) as ColumnBuilderFactory
   }
 
-  Object.assign(c, {
-    string: builder.string,
-    number: builder.number,
-    boolean: builder.boolean,
-    uuid: builder.uuid,
-    double: builder.double,
-    integer: builder.integer,
-    json: builder.json,
-  })
-
-  return c as MagicColumnBuilder
+  return assignProperties(c, builder) as MagicColumnBuilder
 }
 
 export const c = createMagicColumnBuilder()

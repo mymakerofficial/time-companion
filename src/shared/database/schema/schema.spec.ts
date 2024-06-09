@@ -6,10 +6,10 @@ import { orderByDirections } from '@shared/database/types/database'
 describe('schema', () => {
   describe('columnBuilder', () => {
     it('should build a column', () => {
-      expect(c.string().primaryKey()._.raw).toEqual({
+      expect(c.text().primaryKey()._.raw).toEqual({
         tableName: null,
         columnName: null,
-        dataType: 'string',
+        dataType: 'text',
         isPrimaryKey: true,
         isNullable: false,
         isIndexed: false,
@@ -20,13 +20,13 @@ describe('schema', () => {
 
   describe('magic', () => {
     it('should result in a correct builder', () => {
-      const res = c('foo', 'bar').string().nullable().equals('baz')
+      const res = c('foo', 'bar').text().nullable().equals('baz')
 
       expect(res).toEqual({
         column: {
           tableName: 'foo',
           columnName: 'bar',
-          dataType: 'string',
+          dataType: 'text',
           isPrimaryKey: false,
           isNullable: true,
           isIndexed: false,
@@ -42,7 +42,7 @@ describe('schema', () => {
     it('should define a table', () => {
       const foo = defineTable('foo', {
         id: c.uuid().primaryKey(),
-        name: c.string().indexed(),
+        name: c.text().indexed(),
         karma: c.integer().nullable(),
       })
 
@@ -62,7 +62,7 @@ describe('schema', () => {
           name: {
             tableName: 'foo',
             columnName: 'name',
-            dataType: 'string',
+            dataType: 'text',
             isPrimaryKey: false,
             isNullable: false,
             isIndexed: true,
@@ -85,9 +85,9 @@ describe('schema', () => {
   describe('whereBuilder', () => {
     it('should build a where clause', () => {
       const foo = defineTable('foo', {
-        id: c.string().primaryKey(),
-        name: c.string(),
-        color: c.string().nullable(),
+        id: c.text().primaryKey(),
+        name: c.text(),
+        color: c.text().nullable(),
       })
 
       const where = foo.name
@@ -170,8 +170,8 @@ describe('schema', () => {
   describe('orderBy', () => {
     it.each(orderByDirections)('should return an %s order by', (direction) => {
       const foo = defineTable('foo', {
-        id: c.string().primaryKey(),
-        name: c.string().indexed(),
+        id: c.text().primaryKey(),
+        name: c.text().indexed(),
       })
 
       expect(foo.name[direction]()).toEqual({

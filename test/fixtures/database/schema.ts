@@ -4,16 +4,16 @@ import { c } from '@shared/database/schema/columnBuilder'
 
 export const personsTable = defineTable<Person>('persons', {
   id: c.uuid().primaryKey(),
-  firstName: c.string().indexed(),
-  lastName: c.string(),
-  username: c.string().indexed().unique(),
-  gender: c.string(),
+  firstName: c.text().indexed(),
+  lastName: c.text(),
+  username: c.text().indexed().unique(),
+  gender: c.text(),
   age: c.number().indexed(),
 })
 
 export const petsTable = defineTable<Pet>('pets', {
   id: c.uuid().primaryKey(),
-  name: c.string().indexed(),
+  name: c.text().indexed(),
   age: c.number(),
   ownerId: c.uuid(),
 })
