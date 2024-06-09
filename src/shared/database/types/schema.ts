@@ -297,7 +297,7 @@ export interface ColumnBuilderFactoryBase<TRow extends object = object> {
    *
    * | JavaScript Type    | PostgreSQL Type   |
    * |--------------------|-------------------|
-   * | string (ISO 8601)  | timestamp         |
+   * | Date               | timestamp         |
    */
   datetime: () => ColumnBuilder<Date, TRow>
   /***
@@ -305,7 +305,7 @@ export interface ColumnBuilderFactoryBase<TRow extends object = object> {
    *
    * | JavaScript Type    | PostgreSQL Type   |
    * |--------------------|-------------------|
-   * | string (ISO 8601)  | date              |
+   * | Date               | date              |
    */
   date: () => ColumnBuilder<Date, TRow>
   /***
@@ -321,7 +321,7 @@ export interface ColumnBuilderFactoryBase<TRow extends object = object> {
    *
    * | JavaScript Type    | PostgreSQL Type   |
    * |--------------------|-------------------|
-   * | number             | interval          |
+   * | string (ISO 8601)  | interval          |
    */
   interval: () => ColumnBuilder<string, TRow>
   /***

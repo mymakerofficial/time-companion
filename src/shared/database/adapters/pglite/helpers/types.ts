@@ -33,6 +33,7 @@ export const pgColumnTypes = [
   'text',
   'time',
   'timestamp',
+  'timestamp with time zone',
   'tsquery',
   'tsvector',
   'txid_snapshot',

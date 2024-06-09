@@ -1153,8 +1153,8 @@ describe.each([
             datetimeIndexed: new Date('2024-06-09T08:43:25Z'),
             date: new Date('2024-06-09'),
             dateIndexed: new Date('2024-06-09'),
-            time: '08:43:25Z',
-            timeIndexed: '08:43:25Z',
+            time: '08:43:25',
+            timeIndexed: '08:43:25',
             interval: 'P23DT23H',
             intervalIndexed: 'P23DT23H',
           }

@@ -41,6 +41,9 @@ export class PGLiteDatabaseAdapter
   protected async init(): Promise<void> {
     this.db = new PGlite(this.dataDir)
     await this.db.waitReady
+    await this.db.exec(`
+      SET intervalstyle = 'iso_8601';
+    `)
   }
 
   protected async runInitialUpgrade(): Promise<void> {

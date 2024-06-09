@@ -14,19 +14,19 @@ describe('Knex Schema Builder', () => {
   })
 
   describe('buildCreateTable', () => {
-    it('should build a create table', () => {
+    it('should build a create table statement', () => {
       const schema = defineTable('table', {
         id: c.uuid().primaryKey(),
-        stringColumn: c.text().indexed().unique().nullable(),
-        numberColumn: c.number(),
+        textColumn: c.text().indexed().unique().nullable(),
+        doubleColumn: c.double(),
       })
 
       const builder = buildCreateTable(knex, schema._.raw)
 
       expect(builder.toQuery()).toEqual(
-        'create table "table" ("id" uuid not null, "stringColumn" text null, "numberColumn" double precision not null, constraint "table_pkey" primary key ("id"));\n' +
-          'create index "table_stringcolumn_index" on "table" ("stringColumn");\n' +
-          'alter table "table" add constraint "table_stringcolumn_unique" unique ("stringColumn")',
+        'create table "table" ("id" uuid not null, "textColumn" text null, "doubleColumn" double precision not null, constraint "table_pkey" primary key ("id"));\n' +
+          'create index "table_textcolumn_index" on "table" ("textColumn");\n' +
+          'alter table "table" add constraint "table_textcolumn_unique" unique ("textColumn")',
       )
     })
   })
