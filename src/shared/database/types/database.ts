@@ -14,34 +14,27 @@ import type { SubscriberCallback } from '@shared/events/publisher'
 export const whereBooleanOperators = ['and', 'or'] as const
 export type WhereBooleanOperator = (typeof whereBooleanOperators)[number]
 
-export const whereEqualityOperators = ['equals', 'notEquals'] as const
-export type WhereEqualityOperator = (typeof whereEqualityOperators)[number]
-
-export const whereStringOperators = ['contains', 'notContains'] as const
-export type WhereStringOperator = (typeof whereStringOperators)[number]
-
-export const whereListOperators = ['inArray', 'notInArray'] as const
-export type WhereListOperator = (typeof whereListOperators)[number]
-
-export const whereNumberOperators = [
-  'lessThan',
-  'lessThanOrEquals',
-  'greaterThan',
-  'greaterThanOrEquals',
-] as const
-export type WhereNumberOperator = (typeof whereNumberOperators)[number]
-
 export const whereOperators = [
-  ...whereEqualityOperators,
-  ...whereStringOperators,
-  ...whereListOperators,
-  ...whereNumberOperators,
+  ...['equals', 'notEquals'],
+  ...['contains', 'notContains'],
+  ...['inArray', 'notInArray'],
+  ...['lessThan', 'lessThanOrEquals', 'greaterThan', 'greaterThanOrEquals'],
 ] as const
-
 export type WhereOperator = (typeof whereOperators)[number]
 
-export const orderDirections = ['asc', 'desc'] as const
-export type OrderByDirection = (typeof orderDirections)[number]
+export const orderByDirections = ['asc', 'desc'] as const
+export type OrderByDirection = (typeof orderByDirections)[number]
+
+export const columnTypes = [
+  'string',
+  'number',
+  'boolean',
+  'uuid',
+  'double',
+  'integer',
+  'json',
+] as const
+export type ColumnType = (typeof columnTypes)[number]
 
 export type OrderBy<TRow extends object = object, TColumn = unknown> = {
   column: ColumnDefinitionRaw<TRow, TColumn>
@@ -99,17 +92,6 @@ export interface Table<TRow extends object> {
   insertMany(props: InsertManyProps<TRow>): Promise<Array<TRow>>
   getColumnNames(): Array<string>
 }
-
-export const columnTypes = [
-  'string',
-  'number',
-  'boolean',
-  'uuid',
-  'double',
-  'integer',
-  'json',
-] as const
-export type ColumnType = (typeof columnTypes)[number]
 
 export interface QueryFactory {
   /***

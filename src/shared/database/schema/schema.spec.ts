@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { c } from '@shared/database/schema/columnBuilder'
 import { defineTable } from '@shared/database/schema/defineTable'
-import { orderDirections } from '@shared/database/types/database'
+import { orderByDirections } from '@shared/database/types/database'
 
 describe('schema', () => {
   describe('columnBuilder', () => {
@@ -168,7 +168,7 @@ describe('schema', () => {
   })
 
   describe('orderBy', () => {
-    it.each(orderDirections)('should return an %s order by', (direction) => {
+    it.each(orderByDirections)('should return an %s order by', (direction) => {
       const foo = defineTable('foo', {
         id: c.string().primaryKey(),
         name: c.string().indexed(),
