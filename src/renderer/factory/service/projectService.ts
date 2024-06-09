@@ -10,14 +10,14 @@ import type {
   EntityPublisherEvent,
   EntityPublisherTopics,
 } from '@shared/events/entityPublisher'
-import type { ProjectEntityDto } from '@shared/model/project'
+import type { ProjectDto } from '@shared/model/project'
 
 export const projectService: ProjectService = (() => {
   if (isDefined(window.electronAPI)) {
     return createPublisherServiceProxy<
       ProjectService,
-      EntityPublisherTopics<ProjectEntityDto>,
-      EntityPublisherEvent<ProjectEntityDto>
+      EntityPublisherTopics<ProjectDto>,
+      EntityPublisherEvent<ProjectDto>
     >(window.electronAPI.service.project)
   }
 

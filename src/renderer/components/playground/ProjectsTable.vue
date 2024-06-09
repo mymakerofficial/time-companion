@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import Table from '@renderer/components/common/table/Table.vue'
-import type { ProjectEntityDto } from '@shared/model/project'
+import type { ProjectDto } from '@shared/model/project'
 import { createProjectColumns } from '@renderer/components/playground/projectColumns'
 
 defineProps<{
-  projects: Array<ProjectEntityDto>
+  projects: Array<ProjectDto>
 }>()
 
 const emit = defineEmits<{
-  edit: [project: ProjectEntityDto]
+  edit: [project: ProjectDto]
 }>()
 
-function handleEmit(project: ProjectEntityDto) {
+function handleEmit(project: ProjectDto) {
   emit('edit', project)
 }
 

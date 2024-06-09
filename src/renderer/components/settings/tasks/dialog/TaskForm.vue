@@ -10,14 +10,14 @@ import { Input } from '@renderer/components/ui/input'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import { getSchemaDefaults } from '@shared/lib/helpers/getSchemaDefaults'
-import { type TaskDto, taskSchema } from '@shared/model/task'
+import { taskSchema, type UpdateTask } from '@shared/model/task'
 
 const props = defineProps<{
-  task?: TaskDto
+  task?: UpdateTask
 }>()
 
 const emit = defineEmits<{
-  submit: [values: TaskDto]
+  submit: [values: UpdateTask]
 }>()
 
 const form = useForm({

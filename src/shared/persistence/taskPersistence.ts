@@ -1,5 +1,10 @@
 import type { Database } from '@shared/database/types/database'
-import { type TaskEntityDto, tasksTable } from '@shared/model/task'
+import {
+  type CreateTask,
+  type TaskDto,
+  tasksTable,
+  type UpdateTask,
+} from '@shared/model/task'
 import { check, isNotEmpty, isNotNull } from '@shared/lib/utils/checks'
 import { firstOf } from '@shared/lib/utils/list'
 import {
@@ -7,19 +12,22 @@ import {
   errorIsUndefinedColumn,
   errorIsUniqueViolation,
 } from '@shared/database/types/errors'
+import { toTaskDto } from '@shared/model/mappers/task'
+import { uuid } from '@shared/lib/utils/uuid'
 
 export interface TaskPersistenceDependencies {
   database: Database
 }
 
 export interface TaskPersistence {
-  getTasks: () => Promise<Array<TaskEntityDto>>
-  getTaskById: (id: string) => Promise<TaskEntityDto>
-  createTask: (task: TaskEntityDto) => Promise<TaskEntityDto>
+  getTasks: () => Promise<Array<TaskDto>>
+  getTaskById: (id: string) => Promise<TaskDto>
+  createTask: (task: CreateTask) => Promise<TaskDto>
   patchTaskById: (
     id: string,
-    partialTask: Partial<TaskEntityDto>,
-  ) => Promise<TaskEntityDto>
+    partialTask: Partial<UpdateTask>,
+  ) => Promise<TaskDto>
+  softDeleteTask: (id: string) => Promise<void>
 }
 
 export class TaskPersistenceImpl implements TaskPersistence {
@@ -45,22 +53,24 @@ export class TaskPersistenceImpl implements TaskPersistence {
     throw error
   }
 
-  async getTasks(): Promise<Array<TaskEntityDto>> {
+  async getTasks(): Promise<Array<TaskDto>> {
     return await this.database
       .table(tasksTable)
       .findMany({
         where: tasksTable.deletedAt.isNull(),
         orderBy: tasksTable.displayName.asc(),
+        map: toTaskDto,
       })
       .catch(this.resolveError)
   }
 
-  async getTaskById(id: string): Promise<TaskEntityDto> {
+  async getTaskById(id: string): Promise<TaskDto> {
     const res = await this.database
       .table(tasksTable)
       .findFirst({
         range: tasksTable.id.range.only(id),
         where: tasksTable.deletedAt.isNull(),
+        map: toTaskDto,
       })
       .catch(this.resolveError)
 
@@ -69,28 +79,50 @@ export class TaskPersistenceImpl implements TaskPersistence {
     return res
   }
 
-  async createTask(task: TaskEntityDto): Promise<TaskEntityDto> {
+  async createTask(task: CreateTask): Promise<TaskDto> {
     return await this.database.table(tasksTable).insert({
-      data: task,
+      data: {
+        id: uuid(),
+        ...task,
+        createdAt: new Date(),
+        modifiedAt: null,
+        deletedAt: null,
+      },
+      map: toTaskDto,
     })
   }
 
   async patchTaskById(
     id: string,
-    partialTask: Partial<Readonly<TaskEntityDto>>,
-  ): Promise<Readonly<TaskEntityDto>> {
+    partialTask: Partial<Readonly<UpdateTask>>,
+  ): Promise<Readonly<TaskDto>> {
     const res = await this.database
       .table(tasksTable)
       .update({
         range: tasksTable.id.range.only(id),
         where: tasksTable.deletedAt.isNull(),
-        data: partialTask,
+        data: {
+          ...partialTask,
+          modifiedAt: new Date(),
+        },
+        map: toTaskDto,
       })
       .catch(this.resolveError)
 
     check(isNotEmpty(res), `Task with id "${id}" not found.`)
 
     return firstOf(res)
+  }
+
+  async softDeleteTask(id: string): Promise<void> {
+    const res = await this.database.table(tasksTable).update({
+      range: tasksTable.id.range.only(id),
+      data: {
+        deletedAt: new Date(),
+      },
+    })
+
+    check(isNotEmpty(res), `Task with id "${id}" not found.`)
   }
 }
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { projectService } from '@renderer/factory/service/projectService'
-import type { ProjectDto } from '@shared/model/project'
+import type { CreateProject } from '@shared/model/project'
 import { toast } from 'vue-sonner'
 import SettingsSection from '@renderer/components/settings/layout/SettingsSection.vue'
 import ProjectForm from '@renderer/components/playground/ProjectForm.vue'
@@ -26,7 +26,7 @@ const { data, isPending, isError, error } = useQuery({
 })
 
 const { mutate: patchProject } = useMutation({
-  mutationFn: (project: ProjectDto) =>
+  mutationFn: (project: CreateProject) =>
     projectService.patchProjectById(toString(projectId.value), project),
   onSuccess: () => {
     queryClient.invalidateQueries({ queryKey: ['projects'] })

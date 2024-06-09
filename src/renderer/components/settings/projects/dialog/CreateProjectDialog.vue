@@ -3,13 +3,13 @@ import BaseDialog from '@renderer/components/common/dialog/BaseDialog.vue'
 import { Button } from '@renderer/components/ui/button'
 import ProjectForm from '@renderer/components/settings/projects/dialog/ProjectForm.vue'
 import { useCreateProject } from '@renderer/composables/mutations/projects/useCreateProject'
-import type { ProjectDto } from '@shared/model/project'
+import type { CreateProject } from '@shared/model/project'
 import { useDialogContext } from '@renderer/composables/dialog/useDialog'
 
 const { close, open } = useDialogContext()
 const { mutate: createProject } = useCreateProject()
 
-function handleSubmit(values: ProjectDto) {
+function handleSubmit(values: CreateProject) {
   createProject(values, {
     onSuccess: close,
   })

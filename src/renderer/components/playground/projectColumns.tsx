@@ -1,11 +1,11 @@
 import { createColumnHelper } from '@tanstack/vue-table'
-import type { ProjectEntityDto } from '@shared/model/project'
+import type { ProjectDto } from '@shared/model/project'
 import { Button } from '@renderer/components/ui/button'
 import { Pencil } from 'lucide-vue-next'
 
-const columnHelper = createColumnHelper<ProjectEntityDto>()
+const columnHelper = createColumnHelper<ProjectDto>()
 
-export function createProjectColumns(onEdit: (row: ProjectEntityDto) => void) {
+export function createProjectColumns(onEdit: (row: ProjectDto) => void) {
   return [
     columnHelper.accessor('id', {
       header: () => 'id',

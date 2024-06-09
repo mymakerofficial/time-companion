@@ -1,4 +1,8 @@
-import type { ProjectDto, ProjectEntityDto } from '@shared/model/project'
+import type {
+  CreateProject,
+  ProjectDto,
+  UpdateProject,
+} from '@shared/model/project'
 import { type ProjectPersistence } from '@shared/persistence/projectPersistence'
 import type { Nullable } from '@shared/lib/utils/types'
 import { keysOf } from '@shared/lib/utils/object'
@@ -6,24 +10,24 @@ import {
   type EntityService,
   EntityServiceImpl,
 } from '@shared/service/helpers/entityService'
-import { uuid } from '@shared/lib/utils/uuid'
+import type { UpdateTask } from '@shared/model/task'
 
 export interface ProjectServiceDependencies {
   projectPersistence: ProjectPersistence
 }
 
-export interface ProjectService extends EntityService<ProjectEntityDto> {
+export interface ProjectService extends EntityService<ProjectDto> {
   // get all non-deleted projects ordered by displayName
-  getProjects(): Promise<Array<ProjectEntityDto>>
+  getProjects(): Promise<Array<ProjectDto>>
   // get a project by its id. returns null if the project does not exist
-  getProjectById(id: string): Promise<Nullable<ProjectEntityDto>>
+  getProjectById(id: string): Promise<Nullable<ProjectDto>>
   // create a new project and return the created project
-  createProject(project: ProjectDto): Promise<ProjectEntityDto>
+  createProject(project: CreateProject): Promise<ProjectDto>
   // patches a project by its id, updates the modifiedAt field and returns the updated project
   patchProjectById(
     id: string,
-    partialProject: Partial<ProjectDto>,
-  ): Promise<ProjectEntityDto>
+    partialProject: Partial<UpdateTask>,
+  ): Promise<ProjectDto>
   // soft deletes a project by its id,
   //  this does not delete the project from the database but sets the deletedAt field
   softDeleteProject(id: string): Promise<void>
@@ -36,7 +40,7 @@ export function createProjectService(
 }
 
 class ProjectServiceImpl
-  extends EntityServiceImpl<ProjectEntityDto>
+  extends EntityServiceImpl<ProjectDto>
   implements ProjectService
 {
   private readonly projectPersistence: ProjectPersistence
@@ -46,22 +50,16 @@ class ProjectServiceImpl
     this.projectPersistence = deps.projectPersistence
   }
 
-  async getProjects(): Promise<Array<ProjectEntityDto>> {
+  async getProjects(): Promise<Array<ProjectDto>> {
     return await this.projectPersistence.getProjects()
   }
 
-  async getProjectById(id: string): Promise<Nullable<ProjectEntityDto>> {
+  async getProjectById(id: string): Promise<Nullable<ProjectDto>> {
     return await this.projectPersistence.getProjectById(id)
   }
 
-  async createProject(project: ProjectDto): Promise<ProjectEntityDto> {
-    const newProject = await this.projectPersistence.createProject({
-      id: uuid(),
-      ...project,
-      createdAt: new Date().toISOString(),
-      modifiedAt: null,
-      deletedAt: null,
-    })
+  async createProject(project: CreateProject): Promise<ProjectDto> {
+    const newProject = await this.projectPersistence.createProject(project)
 
     this.publishCreated(newProject)
 
@@ -70,14 +68,14 @@ class ProjectServiceImpl
 
   async patchProjectById(
     id: string,
-    partialProject: Partial<ProjectDto>,
-  ): Promise<ProjectEntityDto> {
+    partialProject: Partial<UpdateProject>,
+  ): Promise<ProjectDto> {
     const changedFields = keysOf(partialProject)
 
-    const patchedProject = await this.projectPersistence.patchProjectById(id, {
-      ...partialProject,
-      modifiedAt: new Date().toISOString(),
-    })
+    const patchedProject = await this.projectPersistence.patchProjectById(
+      id,
+      partialProject,
+    )
 
     this.publishUpdated(patchedProject, changedFields)
 
@@ -85,9 +83,7 @@ class ProjectServiceImpl
   }
 
   async softDeleteProject(id: string): Promise<void> {
-    await this.projectPersistence.patchProjectById(id, {
-      deletedAt: new Date().toISOString(),
-    })
+    await this.projectPersistence.softDeleteProject(id)
 
     this.publishDeleted(id)
   }

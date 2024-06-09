@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { toTypedSchema } from '@vee-validate/zod'
-import { type ProjectDto, projectSchema } from '@shared/model/project'
+import { type CreateProject, projectSchema } from '@shared/model/project'
 import { useForm } from 'vee-validate'
 import {
   FormControl,
@@ -17,7 +17,7 @@ import type { Nullable } from '@shared/lib/utils/types'
 
 const props = withDefaults(
   defineProps<{
-    project?: Nullable<ProjectDto>
+    project?: Nullable<CreateProject>
     submitText?: string
   }>(),
   {
@@ -26,7 +26,7 @@ const props = withDefaults(
 )
 
 const emit = defineEmits<{
-  submit: [values: ProjectDto]
+  submit: [values: CreateProject]
 }>()
 
 const project = computed(() => {

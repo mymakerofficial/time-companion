@@ -1,11 +1,11 @@
 import { useMutation } from '@tanstack/vue-query'
 import { handleMutationError } from '@renderer/composables/mutations/helpers/handleMutationError'
 import { taskService } from '@renderer/factory/service/taskService'
-import type { TaskDto } from '@shared/model/task'
+import type { UpdateProject } from '@shared/model/project'
 
 export function usePatchTaskById() {
   return useMutation({
-    mutationFn: ({ task, id }: { task: Partial<TaskDto>; id: string }) =>
+    mutationFn: ({ id, task }: { id: string; task: Partial<UpdateProject> }) =>
       taskService.patchTaskById(id, task),
     onError: handleMutationError,
   })

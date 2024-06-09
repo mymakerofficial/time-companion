@@ -2,11 +2,11 @@
 import SettingsSection from '@renderer/components/settings/layout/SettingsSection.vue'
 import { Button } from '@renderer/components/ui/button'
 import ProjectsTable from '@renderer/components/playground/ProjectsTable.vue'
-import type { ProjectEntityDto } from '@shared/model/project'
+import type { ProjectDto } from '@shared/model/project'
 import { useGetProjects } from '@renderer/composables/queries/projects/useGetProjects'
 
 const emit = defineEmits<{
-  edit: [project: ProjectEntityDto]
+  edit: [project: ProjectDto]
 }>()
 
 const { data: projects, isPending, isError, error, refetch } = useGetProjects()

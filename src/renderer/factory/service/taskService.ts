@@ -8,14 +8,14 @@ import type {
   EntityPublisherEvent,
   EntityPublisherTopics,
 } from '@shared/events/entityPublisher'
-import type { TaskEntityDto } from '@shared/model/task'
+import type { TaskDto } from '@shared/model/task'
 
 export const taskService: TaskService = (() => {
   if (isDefined(window.electronAPI)) {
     return createPublisherServiceProxy<
       TaskService,
-      EntityPublisherTopics<TaskEntityDto>,
-      EntityPublisherEvent<TaskEntityDto>
+      EntityPublisherTopics<TaskDto>,
+      EntityPublisherEvent<TaskDto>
     >(window.electronAPI.service.task)
   }
 

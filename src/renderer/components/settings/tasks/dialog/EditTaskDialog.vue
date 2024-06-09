@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import BaseDialog from '@renderer/components/common/dialog/BaseDialog.vue'
 import { Button } from '@renderer/components/ui/button'
-import type { TaskDto } from '@shared/model/task'
+import type { UpdateTask } from '@shared/model/task'
 import TaskForm from '@renderer/components/settings/tasks/dialog/TaskForm.vue'
 import { useDialogContext } from '@renderer/composables/dialog/useDialog'
 import { useGetTaskById } from '@renderer/composables/queries/tasks/useGetTaskById'
@@ -17,7 +17,7 @@ const { data: task, isPending, isError, error } = useGetTaskById(props.id)
 const { mutate: patchTask } = usePatchTaskById()
 const { mutate: deleteTask } = useSoftDeleteTask()
 
-function handleSubmit(task: TaskDto) {
+function handleSubmit(task: UpdateTask) {
   patchTask(
     {
       id: props.id,

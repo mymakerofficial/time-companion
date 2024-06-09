@@ -4,7 +4,7 @@ import { Button } from '@renderer/components/ui/button'
 import ProjectForm from '@renderer/components/settings/projects/dialog/ProjectForm.vue'
 import { useGetProjectById } from '@renderer/composables/queries/projects/useGetProjectById'
 import { usePatchProjectById } from '@renderer/composables/mutations/projects/usePatchProjectById'
-import type { ProjectDto } from '@shared/model/project'
+import type { UpdateProject } from '@shared/model/project'
 import { useSoftDeleteProject } from '@renderer/composables/mutations/projects/useSoftDeleteProject'
 import { useDialogContext } from '@renderer/composables/dialog/useDialog'
 
@@ -17,7 +17,7 @@ const { data: project, isPending, isError, error } = useGetProjectById(props.id)
 const { mutate: patchProject } = usePatchProjectById()
 const { mutate: deleteProject } = useSoftDeleteProject()
 
-function handleSubmit(project: ProjectDto) {
+function handleSubmit(project: UpdateProject) {
   patchProject(
     {
       id: props.id,

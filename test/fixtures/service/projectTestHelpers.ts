@@ -1,6 +1,6 @@
 import type { ProjectService } from '@shared/service/projectService'
 import type { TaskService } from '@shared/service/taskService'
-import type { ProjectDto, ProjectEntityDto } from '@shared/model/project'
+import type { CreateProject, ProjectDto } from '@shared/model/project'
 import { faker } from '@faker-js/faker'
 import {
   randomElement,
@@ -13,7 +13,7 @@ export class ProjectTestHelpers {
     private readonly projectService: ProjectService,
   ) {}
 
-  sampleProject(override: Partial<ProjectDto> = {}): ProjectDto {
+  sampleProject(override: Partial<CreateProject> = {}): CreateProject {
     return {
       displayName: faker.company.name(),
       color: faker.color.human(),
@@ -25,15 +25,15 @@ export class ProjectTestHelpers {
 
   sampleProjects(
     amount: number,
-    override: Partial<ProjectDto> = {},
-  ): Array<ProjectDto> {
+    override: Partial<CreateProject> = {},
+  ): Array<CreateProject> {
     return Array.from({ length: amount }, () => this.sampleProject(override))
   }
 
   async createSampleProjects(
     amount = 6,
-    override: Partial<ProjectDto> = {},
-  ): Promise<Array<ProjectDto>> {
+    override: Partial<CreateProject> = {},
+  ): Promise<Array<CreateProject>> {
     const sampleProjects = this.sampleProjects(amount, override)
 
     for (const sampleProject of sampleProjects) {
@@ -43,13 +43,13 @@ export class ProjectTestHelpers {
     return sampleProjects
   }
 
-  async getAllProjects(): Promise<ReadonlyArray<ProjectEntityDto>> {
+  async getAllProjects(): Promise<ReadonlyArray<ProjectDto>> {
     return await this.projectService.getProjects()
   }
 
   async getRandomExistingProject(
     options?: RandomElementOptions,
-  ): Promise<ProjectEntityDto> {
+  ): Promise<ProjectDto> {
     const projects = await this.getAllProjects()
     return randomElement(projects, options)
   }

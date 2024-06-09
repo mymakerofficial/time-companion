@@ -2,14 +2,14 @@
 import BaseDialog from '@renderer/components/common/dialog/BaseDialog.vue'
 import { Button } from '@renderer/components/ui/button'
 import { useCreateTask } from '@renderer/composables/mutations/tasks/useCreateTask'
-import type { TaskDto } from '@shared/model/task'
+import type { CreateTask } from '@shared/model/task'
 import TaskForm from '@renderer/components/settings/tasks/dialog/TaskForm.vue'
 import { useDialogContext } from '@renderer/composables/dialog/useDialog'
 
 const { close, open } = useDialogContext()
 const { mutate: createTask } = useCreateTask()
 
-function handleSubmit(values: TaskDto) {
+function handleSubmit(values: CreateTask) {
   createTask(values, {
     onSuccess: close,
   })

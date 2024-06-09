@@ -4,7 +4,7 @@ import {
   type RandomElementOptions,
 } from '@shared/lib/utils/random'
 import { check, isDefined } from '@shared/lib/utils/checks'
-import type { TaskDto } from '@shared/model/task'
+import type { CreateTask } from '@shared/model/task'
 import type { ProjectService } from '@shared/service/projectService'
 
 export class TaskTestHelpers {
@@ -60,7 +60,7 @@ export class TaskTestHelpers {
 
     check(isDefined(secondProject), 'Second project not found')
 
-    const tasks: ReadonlyArray<TaskDto> = [
+    const tasks: ReadonlyArray<CreateTask> = [
       { projectId: firstProject.id, displayName: 'Scheming', color: 'blue' },
       { projectId: firstProject.id, displayName: 'Pondering', color: null },
       { projectId: secondProject.id, displayName: 'Chewing', color: 'green' },

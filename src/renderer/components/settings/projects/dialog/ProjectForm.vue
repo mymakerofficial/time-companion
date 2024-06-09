@@ -8,17 +8,17 @@ import {
 } from '@renderer/components/ui/form'
 import { Input } from '@renderer/components/ui/input'
 import { toTypedSchema } from '@vee-validate/zod'
-import { type ProjectDto, projectSchema } from '@shared/model/project'
+import { type ProjectBase, projectSchema } from '@shared/model/project'
 import { useForm } from 'vee-validate'
 import { Switch } from '@renderer/components/ui/switch'
 import { getSchemaDefaults } from '@shared/lib/helpers/getSchemaDefaults'
 
 const props = defineProps<{
-  project?: ProjectDto
+  project?: ProjectBase
 }>()
 
 const emit = defineEmits<{
-  submit: [values: ProjectDto]
+  submit: [values: ProjectBase]
 }>()
 
 const form = useForm({

@@ -9,10 +9,10 @@ import { useI18n } from 'vue-i18n'
 import BillableSelectBadge from '@renderer/components/common/inputs/billableSelectBadge/BillableSelectBadge.vue'
 import { h } from 'vue'
 import ColorSelectBadge from '@renderer/components/common/inputs/colorSelectBadge/ColorSelectBadge.vue'
-import type { ProjectEntityDto } from '@shared/model/project'
+import type { ProjectDto } from '@shared/model/project'
 import InplaceInput from '@renderer/components/common/inputs/inplaceInput/InplaceInput.vue'
 
-const getNameCell = defineEditableTableCell<ProjectEntityDto, 'displayName'>(
+const getNameCell = defineEditableTableCell<ProjectDto, 'displayName'>(
   (value, updateValue) => {
     return h(InplaceInput, {
       modelValue: value,
@@ -21,7 +21,7 @@ const getNameCell = defineEditableTableCell<ProjectEntityDto, 'displayName'>(
   },
 )
 
-const getColorCell = defineEditableTableCell<ProjectEntityDto, 'color'>(
+const getColorCell = defineEditableTableCell<ProjectDto, 'color'>(
   (value, updateValue) => {
     return h(ColorSelectBadge, {
       modelValue: value,
@@ -30,7 +30,7 @@ const getColorCell = defineEditableTableCell<ProjectEntityDto, 'color'>(
   },
 )
 
-const getBillableCell = defineEditableTableCell<ProjectEntityDto, 'isBillable'>(
+const getBillableCell = defineEditableTableCell<ProjectDto, 'isBillable'>(
   (value, updateValue) => {
     return h(BillableSelectBadge, {
       modelValue: value,
@@ -39,10 +39,7 @@ const getBillableCell = defineEditableTableCell<ProjectEntityDto, 'isBillable'>(
   },
 )
 
-function getActionsCell(
-  row: Row<ProjectEntityDto>,
-  options: ProjectColumnsOptions,
-) {
+function getActionsCell(row: Row<ProjectDto>, options: ProjectColumnsOptions) {
   function handleClick() {
     options.onEdit(row.original.id)
   }
@@ -56,10 +53,10 @@ function getActionsCell(
   )
 }
 
-const columnHelper = createColumnHelper<ProjectEntityDto>()
+const columnHelper = createColumnHelper<ProjectDto>()
 
 interface ProjectColumnsOptions {
-  updateData: DataUpdater<ProjectEntityDto>
+  updateData: DataUpdater<ProjectDto>
   onEdit: (id: string) => void
 }
 

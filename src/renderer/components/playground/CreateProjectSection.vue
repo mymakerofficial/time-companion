@@ -2,7 +2,7 @@
 import SettingsSection from '@renderer/components/settings/layout/SettingsSection.vue'
 import ProjectForm from '@renderer/components/playground/ProjectForm.vue'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
-import type { ProjectDto } from '@shared/model/project'
+import type { CreateProject } from '@shared/model/project'
 import { projectService } from '@renderer/factory/service/projectService'
 import { toast } from 'vue-sonner'
 import { Button } from '@renderer/components/ui/button'
@@ -12,7 +12,7 @@ import { faker } from '@faker-js/faker'
 const queryClient = useQueryClient()
 
 const { mutate: createProject } = useMutation({
-  mutationFn: (project: ProjectDto) => projectService.createProject(project),
+  mutationFn: (project: CreateProject) => projectService.createProject(project),
   onSuccess: () => {
     queryClient.invalidateQueries({ queryKey: ['projects'] })
   },

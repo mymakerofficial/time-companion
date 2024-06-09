@@ -9,9 +9,9 @@ import { createColumnHelper, type Row } from '@tanstack/vue-table'
 import { Button } from '@renderer/components/ui/button'
 import { Pencil } from 'lucide-vue-next'
 import { useI18n } from 'vue-i18n'
-import type { TaskEntityDto } from '@shared/model/task'
+import type { TaskDto } from '@shared/model/task'
 
-const getNameCell = defineEditableTableCell<TaskEntityDto, 'displayName'>(
+const getNameCell = defineEditableTableCell<TaskDto, 'displayName'>(
   (value, updateValue) => {
     return h(InplaceInput, {
       modelValue: value,
@@ -20,7 +20,7 @@ const getNameCell = defineEditableTableCell<TaskEntityDto, 'displayName'>(
   },
 )
 
-const getColorCell = defineEditableTableCell<TaskEntityDto, 'color'>(
+const getColorCell = defineEditableTableCell<TaskDto, 'color'>(
   (value, updateValue) => {
     return h(ColorSelectBadge, {
       modelValue: value,
@@ -29,7 +29,7 @@ const getColorCell = defineEditableTableCell<TaskEntityDto, 'color'>(
   },
 )
 
-function getActionsCell(row: Row<TaskEntityDto>, options: TaskColumnsOptions) {
+function getActionsCell(row: Row<TaskDto>, options: TaskColumnsOptions) {
   function handleClick() {
     options.onEdit(row.original.id)
   }
@@ -43,10 +43,10 @@ function getActionsCell(row: Row<TaskEntityDto>, options: TaskColumnsOptions) {
   )
 }
 
-const columnHelper = createColumnHelper<TaskEntityDto>()
+const columnHelper = createColumnHelper<TaskDto>()
 
 interface TaskColumnsOptions {
-  updateData: DataUpdater<TaskEntityDto>
+  updateData: DataUpdater<TaskDto>
   onEdit: (id: string) => void
 }
 
