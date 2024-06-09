@@ -52,24 +52,30 @@ export type KeyRange<TRow extends object = object, TColumn = unknown> = {
   upperOpen: boolean
 }
 
-export type FindProps<TRow extends object> = {
+export type FindProps<TRow extends object, TReturn extends object = TRow> = {
   range?: KeyRange<TRow>
   where?: WhereBuilderOrRaw<TRow>
   orderBy?: OrderBy<TRow>
+  map?: (row: TRow) => TReturn
 }
 
-export type FindManyProps<TRow extends object> = {
+export type FindManyProps<
+  TRow extends object,
+  TReturn extends object = TRow,
+> = {
   range?: KeyRange<TRow>
   where?: WhereBuilderOrRaw<TRow>
   orderBy?: OrderBy<TRow>
   offset?: number
   limit?: number
+  map?: (row: TRow) => TReturn
 }
 
-export type UpdateProps<TRow extends object> = {
+export type UpdateProps<TRow extends object, TReturn extends object = TRow> = {
   range?: KeyRange<TRow>
   where?: WhereBuilderOrRaw<TRow>
   data: Partial<TRow>
+  map?: (row: TRow) => TReturn
 }
 
 export type DeleteProps<TRow extends object> = {
@@ -77,22 +83,37 @@ export type DeleteProps<TRow extends object> = {
   where?: WhereBuilderOrRaw<TRow>
 }
 
-export type InsertProps<TRow extends object> = {
+export type InsertProps<TRow extends object, TReturn extends object = TRow> = {
   data: TRow
+  map?: (row: TRow) => TReturn
 }
 
-export type InsertManyProps<TRow extends object> = {
+export type InsertManyProps<
+  TRow extends object,
+  TReturn extends object = TRow,
+> = {
   data: Array<TRow>
+  map?: (row: TRow) => TReturn
 }
 
 export interface Table<TRow extends object> {
-  findFirst(props?: FindProps<TRow>): Promise<Nullable<TRow>>
-  findMany(props?: FindManyProps<TRow>): Promise<Array<TRow>>
-  update(props: UpdateProps<TRow>): Promise<Array<TRow>>
+  findFirst<TReturn extends object = TRow>(
+    props?: FindProps<TRow, TReturn>,
+  ): Promise<Nullable<TReturn>>
+  findMany<TReturn extends object = TRow>(
+    props?: FindManyProps<TRow, TReturn>,
+  ): Promise<Array<TReturn>>
+  update<TReturn extends object = TRow>(
+    props: UpdateProps<TRow, TReturn>,
+  ): Promise<Array<TReturn>>
   delete(props: DeleteProps<TRow>): Promise<void>
   deleteAll(): Promise<void>
-  insert(props: InsertProps<TRow>): Promise<TRow>
-  insertMany(props: InsertManyProps<TRow>): Promise<Array<TRow>>
+  insert<TReturn extends object = TRow>(
+    props: InsertProps<TRow, TReturn>,
+  ): Promise<TReturn>
+  insertMany<TReturn extends object = TRow>(
+    props: InsertManyProps<TRow, TReturn>,
+  ): Promise<Array<TReturn>>
   getColumnNames(): Array<string>
 }
 

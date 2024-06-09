@@ -40,28 +40,46 @@ export class DatabaseTableImpl<TRow extends object> implements Table<TRow> {
     return props.where as RawWhere
   }
 
-  async findFirst(props?: FindProps<TRow>): Promise<Nullable<TRow>> {
+  async findFirst<TReturn extends object = TRow>(
+    props?: FindProps<TRow, TReturn>,
+  ): Promise<Nullable<TReturn>> {
     const res = await this.findMany({ ...props, limit: 1, offset: 0 })
 
     return firstOfOrNull(res)
   }
 
-  async findMany(props?: FindManyProps<TRow>): Promise<Array<TRow>> {
-    return await this.tableAdapter.select({
-      orderBy: getOrNull(props?.orderBy),
-      range: getOrNull(props?.range),
+  async findMany<TReturn extends object = TRow>(
+    props: FindManyProps<TRow, TReturn> = {},
+  ): Promise<Array<TReturn>> {
+    const res = await this.tableAdapter.select({
+      orderBy: getOrNull(props.orderBy),
+      range: getOrNull(props.range),
       where: this.getWhere(props),
-      limit: getOrNull(props?.limit),
-      offset: getOrNull(props?.offset),
+      limit: getOrNull(props.limit),
+      offset: getOrNull(props.offset),
     })
+
+    if (isDefined(props.map)) {
+      return res.map(props.map)
+    }
+
+    return res as unknown as Array<TReturn>
   }
 
-  async update(props: UpdateProps<TRow>): Promise<Array<TRow>> {
-    return await this.tableAdapter.update({
+  async update<TReturn extends object = TRow>(
+    props: UpdateProps<TRow, TReturn>,
+  ): Promise<Array<TReturn>> {
+    const res = await this.tableAdapter.update({
       data: props.data,
       where: this.getWhere(props),
       range: getOrNull(props?.range),
     })
+
+    if (isDefined(props.map)) {
+      return res.map(props.map)
+    }
+
+    return res as unknown as Array<TReturn>
   }
 
   async delete(props: DeleteProps<TRow>): Promise<void> {
@@ -75,16 +93,32 @@ export class DatabaseTableImpl<TRow extends object> implements Table<TRow> {
     return await this.tableAdapter.deleteAll()
   }
 
-  async insert(args: InsertProps<TRow>): Promise<TRow> {
-    return await this.tableAdapter.insert({
-      data: args.data,
+  async insert<TReturn extends object = TRow>(
+    props: InsertProps<TRow, TReturn>,
+  ): Promise<TReturn> {
+    const res = await this.tableAdapter.insert({
+      data: props.data,
     })
+
+    if (isDefined(props.map)) {
+      return props.map(res)
+    }
+
+    return res as unknown as TReturn
   }
 
-  async insertMany(args: InsertManyProps<TRow>): Promise<Array<TRow>> {
-    return await this.tableAdapter.insertMany({
-      data: args.data,
+  async insertMany<TReturn extends object = TRow>(
+    props: InsertManyProps<TRow, TReturn>,
+  ): Promise<Array<TReturn>> {
+    const res = await this.tableAdapter.insertMany({
+      data: props.data,
     })
+
+    if (isDefined(props.map)) {
+      return res.map(props.map)
+    }
+
+    return res as unknown as Array<TReturn>
   }
 
   getColumnNames(): Array<string> {
