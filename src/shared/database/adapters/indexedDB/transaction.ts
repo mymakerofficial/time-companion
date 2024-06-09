@@ -19,6 +19,7 @@ import { promisedRequest } from '@shared/database/adapters/indexedDB/helpers/pro
 import { toArray } from '@shared/lib/utils/list'
 import { openCursor } from '@shared/database/adapters/indexedDB/helpers/openCursor'
 import { cursorIterator } from '@shared/database/helpers/cursorIterator'
+import { getIndexKeyPath } from '@shared/database/adapters/indexedDB/helpers/getIndexKeyPath'
 
 export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
   constructor(
@@ -52,7 +53,7 @@ export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
         check(isNotNull(column.columnName), 'Column name may not be null')
 
         if (column.isIndexed) {
-          objectStore.createIndex(column.columnName, column.columnName)
+          objectStore.createIndex(column.columnName, getIndexKeyPath(column))
           // normally we would set unique here, but we check for unique violations ourselves
         }
       })

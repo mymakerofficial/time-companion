@@ -489,11 +489,11 @@ describe.each([
       await helpers.cleanup()
     })
 
-    describe('table', () => {
-      afterEach(async () => {
-        await helpers.clearDatabase()
-      })
+    afterEach(async () => {
+      await helpers.clearDatabase()
+    })
 
+    describe('table', () => {
       it('only getting the table should not throw', () => {
         expect(() => database.table('non_existent_table')).not.toThrow()
       })
@@ -1145,28 +1145,86 @@ describe.each([
     })
 
     describe('data types', () => {
-      describe('date time', () => {
-        it('should insert and retrieve a date value', async () => {
-          const data = {
-            id: uuid(),
-            datetime: new Date('2024-06-09T08:43:25Z'),
-            datetimeIndexed: new Date('2024-06-09T08:43:25Z'),
-            date: new Date('2024-06-09'),
-            dateIndexed: new Date('2024-06-09'),
-            time: '08:43:25',
-            timeIndexed: '08:43:25',
-            interval: 'P23DT23H',
-            intervalIndexed: 'P23DT23H',
-          }
+      it('should insert and retrieve all types correctly', async () => {
+        const data = helpers.sampleTestRow()
 
-          const insertRes = await database.table(testTable).insert({
-            data,
+        const insertRes = await database.table(testTable).insert({
+          data,
+        })
+
+        const selectRes = await database.table(testTable).findFirst()
+
+        expect(insertRes).toEqual(data)
+        expect(selectRes).toEqual(data)
+      })
+
+      describe('datetime', () => {
+        it('should sort by indexed datetime', async () => {
+          await helpers.insertSampleTestRows(4, {
+            datetimeIndexed: [
+              new Date('2024-06-09T08:00:00Z'),
+              new Date('2024-05-09T08:00:00Z'),
+              new Date('2025-05-09T08:00:00Z'),
+              new Date('2024-06-09T04:00:00Z'),
+            ],
           })
 
-          const selectRes = await database.table(testTable).findFirst()
+          const res = await database.table(testTable).findMany({
+            orderBy: testTable.datetimeIndexed.asc(),
+          })
 
-          expect(insertRes).toEqual(data)
-          expect(selectRes).toEqual(data)
+          expect(res).toEqual([
+            expect.objectContaining({
+              datetimeIndexed: new Date('2024-05-09T08:00:00Z'),
+            }),
+            expect.objectContaining({
+              datetimeIndexed: new Date('2024-06-09T04:00:00Z'),
+            }),
+            expect.objectContaining({
+              datetimeIndexed: new Date('2024-06-09T08:00:00Z'),
+            }),
+            expect.objectContaining({
+              datetimeIndexed: new Date('2025-05-09T08:00:00Z'),
+            }),
+          ])
+        })
+      })
+
+      describe('time', () => {
+        it('should sort by indexed time', async () => {
+          await helpers.insertSampleTestRows(4, {
+            timeIndexed: ['08:00:00', '03:00:00', '12:00:00', '05:00:00'],
+          })
+
+          const res = await database.table(testTable).findMany({
+            orderBy: testTable.timeIndexed.asc(),
+          })
+
+          expect(res).toEqual([
+            expect.objectContaining({ timeIndexed: '03:00:00' }),
+            expect.objectContaining({ timeIndexed: '05:00:00' }),
+            expect.objectContaining({ timeIndexed: '08:00:00' }),
+            expect.objectContaining({ timeIndexed: '12:00:00' }),
+          ])
+        })
+      })
+
+      describe('interval', () => {
+        it('should sort by indexed interval', async () => {
+          await helpers.insertSampleTestRows(4, {
+            intervalIndexed: ['PT3H', 'PT1H', 'PT4H', 'PT2H'],
+          })
+
+          const res = await database.table(testTable).findMany({
+            orderBy: testTable.intervalIndexed.asc(),
+          })
+
+          expect(res).toEqual([
+            expect.objectContaining({ intervalIndexed: 'PT1H' }),
+            expect.objectContaining({ intervalIndexed: 'PT2H' }),
+            expect.objectContaining({ intervalIndexed: 'PT3H' }),
+            expect.objectContaining({ intervalIndexed: 'PT4H' }),
+          ])
         })
       })
     })

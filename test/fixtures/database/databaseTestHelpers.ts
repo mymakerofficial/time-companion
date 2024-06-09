@@ -1,12 +1,21 @@
 import type { Database } from '@shared/database/types/database'
-import type { Person, Pet } from '@test/fixtures/database/schema'
-import { personsTable, petsTable } from '@test/fixtures/database/schema'
+import {
+  type Person,
+  personsTable,
+  type Pet,
+  petsTable,
+  type TestRow,
+  testTable,
+} from '@test/fixtures/database/schema'
 import { faker } from '@faker-js/faker'
 import { firstOf } from '@shared/lib/utils/list'
 import { uuid } from '@shared/lib/utils/uuid'
 import { randomElements } from '@shared/lib/utils/random'
 import { check } from '@renderer/lib/utils'
 import type { MaybeArray, Nullable } from '@shared/lib/utils/types'
+import { isArray } from '@shared/lib/utils/checks'
+import { entriesOf, objectFromEntries } from '@shared/lib/utils/object'
+import { Temporal } from 'temporal-polyfill'
 
 type TestDataOverride<T> = {
   [K in keyof T]: MaybeArray<T[K]>
@@ -16,12 +25,12 @@ function getOverrideAtIndex<T>(
   override: Partial<TestDataOverride<T>>,
   index: number,
 ) {
-  return Object.fromEntries(
-    Object.entries(override).map(([key, value]) => [
+  return objectFromEntries(
+    entriesOf(override).map(([key, value]) => [
       key,
-      Array.isArray(value) ? value[index % value.length] : value,
+      (isArray(value) ? value[index % value.length] : value) as T[keyof T],
     ]),
-  ) as Partial<T>
+  )
 }
 
 export class DatabaseTestHelpers {
@@ -83,6 +92,60 @@ export class DatabaseTestHelpers {
     )
   }
 
+  sampleTestRow(override: Partial<TestRow> = {}): TestRow {
+    return {
+      id: uuid(),
+      datetime: faker.date.anytime(),
+      datetimeIndexed: faker.date.anytime(),
+      date: new Date(
+        Temporal.PlainDate.from({
+          year: faker.number.int({ min: 2000, max: 2100 }),
+          month: faker.number.int({ min: 1, max: 12 }),
+          day: faker.number.int({ min: 1, max: 28 }),
+        }).toString(),
+      ),
+      dateIndexed: new Date(
+        Temporal.PlainDate.from({
+          year: faker.number.int({ min: 2000, max: 2100 }),
+          month: faker.number.int({ min: 1, max: 12 }),
+          day: faker.number.int({ min: 1, max: 28 }),
+        }).toString(),
+      ),
+      time: Temporal.PlainTime.from({
+        hour: faker.number.int({ min: 0, max: 23 }),
+        minute: faker.number.int({ min: 0, max: 59 }),
+        second: faker.number.int({ min: 0, max: 59 }),
+      }).toString(),
+      timeIndexed: Temporal.PlainTime.from({
+        hour: faker.number.int({ min: 0, max: 23 }),
+        minute: faker.number.int({ min: 0, max: 59 }),
+        second: faker.number.int({ min: 0, max: 59 }),
+      }).toString(),
+      interval: Temporal.Duration.from({
+        days: faker.number.int({ min: 0, max: 100 }),
+        hours: faker.number.int({ min: 0, max: 23 }),
+        minutes: faker.number.int({ min: 0, max: 59 }),
+        seconds: faker.number.int({ min: 0, max: 59 }),
+      }).toString(),
+      intervalIndexed: Temporal.Duration.from({
+        days: faker.number.int({ min: 0, max: 100 }),
+        hours: faker.number.int({ min: 0, max: 23 }),
+        minutes: faker.number.int({ min: 0, max: 59 }),
+        seconds: faker.number.int({ min: 0, max: 59 }),
+      }).toString(),
+      ...override,
+    }
+  }
+
+  sampleTestRows(
+    amount: number,
+    override: Partial<TestDataOverride<TestRow>> = {},
+  ): Array<TestRow> {
+    return Array.from({ length: amount }, (_, index) =>
+      this.sampleTestRow(getOverrideAtIndex(override, index)),
+    )
+  }
+
   async insertPersons(persons: Array<Person>): Promise<Array<Person>> {
     return await this.database.withTransaction(async (transaction) => {
       return await transaction.table(personsTable).insertMany({
@@ -95,6 +158,14 @@ export class DatabaseTestHelpers {
     return await this.database.withTransaction(async (transaction) => {
       return await transaction.table(petsTable).insertMany({
         data: pets,
+      })
+    })
+  }
+
+  async insertTestRows(testRows: Array<TestRow>): Promise<Array<TestRow>> {
+    return await this.database.withTransaction(async (transaction) => {
+      return await transaction.table(testTable).insertMany({
+        data: testRows,
       })
     })
   }
@@ -128,6 +199,21 @@ export class DatabaseTestHelpers {
     const pet = this.samplePet(override)
 
     return firstOf(await this.insertPets([pet]))
+  }
+
+  async insertSampleTestRows(
+    amount: number,
+    override: Partial<TestDataOverride<TestRow>> = {},
+  ): Promise<Array<TestRow>> {
+    const testRows = this.sampleTestRows(amount, override)
+
+    return await this.insertTestRows(testRows)
+  }
+
+  async insertSampleTestRow(override: Partial<TestRow> = {}): Promise<TestRow> {
+    const testRow = this.sampleTestRow(override)
+
+    return firstOf(await this.insertTestRows([testRow]))
   }
 
   async getAllPersonsInDatabase(): Promise<Array<Person>> {

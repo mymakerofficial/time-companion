@@ -28,6 +28,10 @@ import type { TableSchemaRaw } from '@shared/database/types/schema'
 import { keysOf, valuesOf } from '@shared/lib/utils/object'
 import { promisedRequest } from '@shared/database/adapters/indexedDB/helpers/promisedRequest'
 import { openIterator } from '@shared/database/adapters/indexedDB/helpers/openIterator'
+import {
+  deserializeRow,
+  serializeRow,
+} from '@shared/database/adapters/indexedDB/helpers/mappers'
 
 export class IdbTableAdapter<TRow extends object>
   implements TableAdapter<TRow>
@@ -67,6 +71,7 @@ export class IdbTableAdapter<TRow extends object>
     const list = await iteratorToList(iterator)
 
     if (requiresManualSort && isNotNull(byColumn)) {
+      // TODO: sort interval and time types
       const compareFn =
         direction === 'asc'
           ? (a: TRow, b: TRow) => (a[byColumn] > b[byColumn] ? 1 : -1)
@@ -75,7 +80,8 @@ export class IdbTableAdapter<TRow extends object>
       list.sort(compareFn)
     }
 
-    return list
+    // deserialize after sorting because we only serialize to make sorting easier
+    return list.map((row) => deserializeRow(row, this.tableSchema!))
   }
 
   async update(props: AdapterUpdateProps<TRow>): Promise<Array<TRow>> {
@@ -103,9 +109,9 @@ export class IdbTableAdapter<TRow extends object>
 
       await cursor.update({
         ...cursor.value,
-        ...props.data,
+        ...serializeRow(props.data, this.tableSchema!), // TODO: ensure tableSchema is always defined
       })
-      results.push(cursor.value)
+      results.push(deserializeRow(cursor.value, this.tableSchema!)) // TODO: ensure tableSchema is always defined
     }
 
     return results
@@ -127,7 +133,9 @@ export class IdbTableAdapter<TRow extends object>
     await this.checkUniqueConstraints(props.data)
     await this.checkColumnsExist(props.data)
     await this.checkRequiredColumns(props.data)
-    await promisedRequest(this.objectStore.add(props.data))
+    await promisedRequest(
+      this.objectStore.add(serializeRow(props.data, this.tableSchema!)), // TODO: ensure tableSchema is always defined
+    )
     return props.data
   }
 
