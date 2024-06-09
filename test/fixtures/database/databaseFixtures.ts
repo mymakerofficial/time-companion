@@ -1,9 +1,15 @@
 import type { Database } from '@shared/database/types/database'
 import { createFixtures } from '@test/helpers/createFixtures'
 import { DatabaseTestHelpers } from '@test/fixtures/database/databaseTestHelpers'
-import { personsTable, petsTable } from '@test/fixtures/database/schema'
+import {
+  type Person,
+  personsTable,
+  type Pet,
+  petsTable,
+  type TestRow,
+  testTable,
+} from '@test/fixtures/database/schema'
 import type { DatabaseSchema, TableSchema } from '@shared/database/types/schema'
-import type { Person, Pet } from '@test/fixtures/database/types'
 
 interface DatabaseTestFixturesOptions<TSchema extends DatabaseSchema> {
   database: Database<TSchema>
@@ -15,6 +21,7 @@ interface DatabaseTestFixtures<TSchema extends DatabaseSchema> {
   helpers: DatabaseTestHelpers
   personsTable: TableSchema<Person>
   petsTable: TableSchema<Pet>
+  testTable: TableSchema<TestRow>
 }
 
 export const useDatabaseFixtures = <TSchema extends DatabaseSchema>({
@@ -27,4 +34,5 @@ export const useDatabaseFixtures = <TSchema extends DatabaseSchema>({
     },
     personsTable,
     petsTable,
+    testTable,
   })()

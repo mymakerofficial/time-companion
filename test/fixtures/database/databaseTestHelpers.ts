@@ -1,12 +1,12 @@
 import type { Database } from '@shared/database/types/database'
-import type { Person, Pet } from '@test/fixtures/database/types'
+import type { Person, Pet } from '@test/fixtures/database/schema'
+import { personsTable, petsTable } from '@test/fixtures/database/schema'
 import { faker } from '@faker-js/faker'
 import { firstOf } from '@shared/lib/utils/list'
 import { uuid } from '@shared/lib/utils/uuid'
 import { randomElements } from '@shared/lib/utils/random'
 import { check } from '@renderer/lib/utils'
 import type { MaybeArray, Nullable } from '@shared/lib/utils/types'
-import { personsTable, petsTable } from '@test/fixtures/database/schema'
 
 type TestDataOverride<T> = {
   [K in keyof T]: MaybeArray<T[K]>

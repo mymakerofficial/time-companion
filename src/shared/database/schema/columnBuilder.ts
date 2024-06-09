@@ -121,6 +121,22 @@ export class ColumnBuilderFactoryImpl<TRow extends object = object>
     return this.setType<boolean>('boolean')
   }
 
+  datetime() {
+    return this.setType<Date>('datetime')
+  }
+
+  date() {
+    return this.setType<Date>('date')
+  }
+
+  time() {
+    return this.setType<string>('time')
+  }
+
+  interval() {
+    return this.setType<string>('interval')
+  }
+
   uuid() {
     return this.setType<string>('uuid')
   }

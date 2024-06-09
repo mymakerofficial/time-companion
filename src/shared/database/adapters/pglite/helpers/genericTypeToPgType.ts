@@ -6,6 +6,10 @@ const pgColumnTypeMap: Record<ColumnType, PgColumnType> = {
   integer: 'integer',
   double: 'double precision',
   boolean: 'boolean',
+  datetime: 'timestamp',
+  date: 'date',
+  time: 'time',
+  interval: 'interval',
   uuid: 'uuid',
   json: 'json',
 }

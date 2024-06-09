@@ -1,8 +1,8 @@
 import { defineTable } from '@shared/database/schema/defineTable'
-import type { Person, Pet } from '@test/fixtures/database/types'
 import { c } from '@shared/database/schema/columnBuilder'
+import type { InferTable } from '@shared/database/types/schema'
 
-export const personsTable = defineTable<Person>('persons', {
+export const personsTable = defineTable('persons', {
   id: c.uuid().primaryKey(),
   firstName: c.text().indexed(),
   lastName: c.text(),
@@ -11,9 +11,27 @@ export const personsTable = defineTable<Person>('persons', {
   age: c.number().indexed(),
 })
 
-export const petsTable = defineTable<Pet>('pets', {
+export type Person = InferTable<typeof personsTable>
+
+export const petsTable = defineTable('pets', {
   id: c.uuid().primaryKey(),
   name: c.text().indexed(),
   age: c.number(),
   ownerId: c.uuid(),
 })
+
+export type Pet = InferTable<typeof petsTable>
+
+export const testTable = defineTable('test', {
+  id: c.uuid().primaryKey(),
+  datetime: c.datetime(),
+  datetimeIndexed: c.datetime().indexed(),
+  date: c.date(),
+  dateIndexed: c.date().indexed(),
+  time: c.time(),
+  timeIndexed: c.time().indexed(),
+  interval: c.interval(),
+  intervalIndexed: c.interval().indexed(),
+})
+
+export type TestRow = InferTable<typeof testTable>

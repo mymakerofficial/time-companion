@@ -11,7 +11,12 @@ import { faker } from '@faker-js/faker'
 import { asArray, emptyArray, firstOf, lastOf } from '@shared/lib/utils/list'
 import { randomElement, randomElements } from '@shared/lib/utils/random'
 import { useDatabaseFixtures } from '@test/fixtures/database/databaseFixtures'
-import type { Person } from '@test/fixtures/database/types'
+import type { Person } from '@test/fixtures/database/schema'
+import {
+  personsTable,
+  petsTable,
+  testTable,
+} from '@test/fixtures/database/schema'
 import type { HasId } from '@shared/model/helpers/hasId'
 import { uuid } from '@shared/lib/utils/uuid'
 import { createDatabase } from '@shared/database/factory/database'
@@ -25,7 +30,6 @@ import type {
 import { c } from '@shared/database/schema/columnBuilder'
 import 'fake-indexeddb/auto'
 import { defineConfig } from '@shared/database/schema/defineConfig'
-import { personsTable, petsTable } from '@test/fixtures/database/schema'
 import { defineTable } from '@shared/database/schema/defineTable'
 
 function byId(a: HasId, b: HasId) {
@@ -473,7 +477,7 @@ describe.each([
   })
 
   describe('queries', () => {
-    const { database, helpers, personsTable, petsTable } = useDatabaseFixtures({
+    const { database, helpers } = useDatabaseFixtures({
       database: createDatabase(adapterFactory(), config),
     })
 
@@ -1136,6 +1140,33 @@ describe.each([
           const personsInDatabase = await helpers.getAllPersonsInDatabase()
 
           expect(personsInDatabase).toHaveLength(0)
+        })
+      })
+    })
+
+    describe('data types', () => {
+      describe('date time', () => {
+        it('should insert and retrieve a date value', async () => {
+          const data = {
+            id: uuid(),
+            datetime: new Date('2024-06-09T08:43:25Z'),
+            datetimeIndexed: new Date('2024-06-09T08:43:25Z'),
+            date: new Date('2024-06-09'),
+            dateIndexed: new Date('2024-06-09'),
+            time: '08:43:25Z',
+            timeIndexed: '08:43:25Z',
+            interval: 'P23DT23H',
+            intervalIndexed: 'P23DT23H',
+          }
+
+          const insertRes = await database.table(testTable).insert({
+            data,
+          })
+
+          const selectRes = await database.table(testTable).findFirst()
+
+          expect(insertRes).toEqual(data)
+          expect(selectRes).toEqual(data)
         })
       })
     })

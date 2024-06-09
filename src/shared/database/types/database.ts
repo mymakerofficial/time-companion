@@ -30,6 +30,10 @@ export const columnTypes = [
   'integer',
   'double',
   'boolean',
+  'datetime',
+  'date',
+  'time',
+  'interval',
   'uuid',
   'json',
 ] as const

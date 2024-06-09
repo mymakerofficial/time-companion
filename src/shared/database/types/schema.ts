@@ -293,6 +293,38 @@ export interface ColumnBuilderFactoryBase<TRow extends object = object> {
    */
   boolean: () => ColumnBuilder<boolean, TRow>
   /***
+   * Create a column with the date time data type.
+   *
+   * | JavaScript Type    | PostgreSQL Type   |
+   * |--------------------|-------------------|
+   * | string (ISO 8601)  | timestamp         |
+   */
+  datetime: () => ColumnBuilder<Date, TRow>
+  /***
+   * Create a column with the date data type.
+   *
+   * | JavaScript Type    | PostgreSQL Type   |
+   * |--------------------|-------------------|
+   * | string (ISO 8601)  | date              |
+   */
+  date: () => ColumnBuilder<Date, TRow>
+  /***
+   * Create a column with the time data type.
+   *
+   * | JavaScript Type    | PostgreSQL Type   |
+   * |--------------------|-------------------|
+   * | string (ISO 8601)  | time              |
+   */
+  time: () => ColumnBuilder<string, TRow>
+  /***
+   * Create a column with the interval data type.
+   *
+   * | JavaScript Type    | PostgreSQL Type   |
+   * |--------------------|-------------------|
+   * | number             | interval          |
+   */
+  interval: () => ColumnBuilder<string, TRow>
+  /***
    * Create a column with the uuid data type.
    *
    * | JavaScript Type | PostgreSQL Type |
