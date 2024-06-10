@@ -5,7 +5,7 @@ import { handleMutationError } from '@renderer/composables/mutations/helpers/han
 
 export function useCreateProject() {
   return useMutation({
-    mutationFn: (project: CreateProject) =>
+    mutationFn: (project: Partial<CreateProject>) =>
       projectService.createProject(project),
     onError: handleMutationError,
   })

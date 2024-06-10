@@ -3,6 +3,7 @@ import type {
   ProjectDto,
   UpdateProject,
 } from '@shared/model/project'
+import { projectSchema } from '@shared/model/project'
 import { type ProjectPersistence } from '@shared/persistence/projectPersistence'
 import type { Nullable } from '@shared/lib/utils/types'
 import { keysOf } from '@shared/lib/utils/object'
@@ -11,6 +12,7 @@ import {
   EntityServiceImpl,
 } from '@shared/service/helpers/entityService'
 import type { UpdateTask } from '@shared/model/task'
+import { getSchemaDefaults } from '@shared/lib/helpers/getSchemaDefaults'
 
 export interface ProjectServiceDependencies {
   projectPersistence: ProjectPersistence
@@ -22,7 +24,7 @@ export interface ProjectService extends EntityService<ProjectDto> {
   // get a project by its id. returns null if the project does not exist
   getProjectById(id: string): Promise<Nullable<ProjectDto>>
   // create a new project and return the created project
-  createProject(project: CreateProject): Promise<ProjectDto>
+  createProject(project: Partial<CreateProject>): Promise<ProjectDto>
   // patches a project by its id, updates the modifiedAt field and returns the updated project
   patchProjectById(
     id: string,
@@ -58,8 +60,11 @@ class ProjectServiceImpl
     return await this.projectPersistence.getProjectById(id)
   }
 
-  async createProject(project: CreateProject): Promise<ProjectDto> {
-    const newProject = await this.projectPersistence.createProject(project)
+  async createProject(project: Partial<CreateProject>): Promise<ProjectDto> {
+    const newProject = await this.projectPersistence.createProject({
+      ...getSchemaDefaults(projectSchema),
+      ...project,
+    })
 
     this.publishCreated(newProject)
 
