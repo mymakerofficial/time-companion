@@ -2,29 +2,11 @@
 import SettingsHeader from '@renderer/components/settings/layout/SettingsHeader.vue'
 import SettingsSection from '@renderer/components/settings/layout/SettingsSection.vue'
 import { Button } from '@renderer/components/ui/button'
-import { database } from '@renderer/factory/database/database'
-import { toast } from 'vue-sonner'
+import { useDialog } from '@renderer/composables/dialog/useDialog'
+import DeleteEverythingDialog from '@renderer/components/settings/advanced/DeleteEverythingDialog.vue'
+import { Trash2 } from 'lucide-vue-next'
 
-function handleDeleteForReal() {
-  database.unsafe.dropSchema().then(() => {
-    toast.info('Congrats!', {
-      description:
-        'You just deleted everything. Its all gone now. Reload the page to get things working again.',
-      duration: Infinity,
-    })
-  })
-}
-
-function handleDelete() {
-  toast.warning('Are you sure?', {
-    description:
-      'You are about to delete all your data. **THIS ACTION CAN NOT BE UNDONE**.',
-    action: {
-      label: 'Do it!',
-      onClick: handleDeleteForReal,
-    },
-  })
-}
+const { open: openDeleteEverythingDialog } = useDialog(DeleteEverythingDialog)
 </script>
 
 <template>
@@ -34,7 +16,13 @@ function handleDelete() {
       title="Delete my data"
       description="Want to loose all your data quick? This is the way!"
     >
-      <Button variant="destructive" @click="handleDelete">Delete me!</Button>
+      <Button
+        variant="destructive"
+        class="gap-2"
+        @click="openDeleteEverythingDialog"
+      >
+        <Trash2 class="size-4" /><span>Delete Everything</span>
+      </Button>
     </SettingsSection>
   </div>
 </template>
