@@ -2,50 +2,40 @@
 import Combobox, {
   type ComboboxProps,
 } from '@renderer/components/common/inputs/combobox/Combobox.vue'
-import { useProjectsService } from '@renderer/services/projectsService'
-import type { ReactiveProject } from '@renderer/model/project/types'
-import { isDefined, type Nullable } from '@renderer/lib/utils'
-import { createProject } from '@renderer/model/project/model'
-import { computed } from 'vue'
+import { type Nullable } from '@renderer/lib/utils'
+import { useGetProjects } from '@renderer/composables/queries/projects/useGetProjects'
+import type { ProjectDto } from '@shared/model/project'
+import { useCreateProject } from '@renderer/composables/mutations/projects/useCreateProject'
 
-const model = defineModel<Nullable<ReactiveProject>>({ required: true })
+const model = defineModel<Nullable<ProjectDto>>({ required: true })
 
-const props = defineProps<
-  Pick<
-    ComboboxProps<ReactiveProject, false>,
-    | 'allowDeselect'
-    | 'placeholder'
-    | 'searchLabel'
-    | 'emptyLabel'
-    | 'class'
-    | 'triggerClass'
-    | 'popoverClass'
-  > & {
-    filter?: (project: ReactiveProject) => boolean
-  }
->()
+const props =
+  defineProps<
+    Pick<
+      ComboboxProps<ProjectDto, false>,
+      | 'allowDeselect'
+      | 'placeholder'
+      | 'searchLabel'
+      | 'emptyLabel'
+      | 'class'
+      | 'triggerClass'
+      | 'popoverClass'
+    >
+  >()
 
-const projectsService = useProjectsService()
+function handleCreated(project: ProjectDto) {
+  model.value = project
+}
 
-const filteredProjects = computed(() => {
-  if (isDefined(props.filter)) {
-    return projectsService.projects.filter(props.filter)
-  }
-
-  return projectsService.projects
+const { data: projects } = useGetProjects()
+const { mutate: createProject } = useCreateProject({
+  onSuccess: handleCreated,
 })
 
 function handleCreate(displayName: string) {
-  const project = createProject(
-    {
-      displayName,
-    },
-    { randomColor: true },
-  )
-
-  projectsService.addProject(project)
-
-  model.value = project
+  createProject({
+    displayName,
+  })
 }
 </script>
 
@@ -53,7 +43,8 @@ function handleCreate(displayName: string) {
   <Combobox
     v-bind="props"
     v-model="model"
-    :options="filteredProjects"
+    :options="projects"
+    :get-key="(project) => project?.id"
     :display-value="(project) => project?.displayName"
     allow-create
     @create="handleCreate"
