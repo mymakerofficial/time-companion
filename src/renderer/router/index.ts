@@ -45,6 +45,12 @@ const router = createRouter({
           component: () =>
             import('../views/app/settings/SettingsAppearanceView.vue'),
         },
+        {
+          path: 'advanced',
+          name: 'app-settings-advanced',
+          component: () =>
+            import('../views/app/settings/SettingsAdvancedView.vue'),
+        },
       ],
     },
     {

@@ -21,6 +21,10 @@ const links = computed<NavLink[]>(() => [
     label: t('settings.appearance.title'),
     to: { name: 'app-settings-appearance' },
   },
+  {
+    label: 'Advanced',
+    to: { name: 'app-settings-advanced' },
+  },
 ])
 </script>
 
