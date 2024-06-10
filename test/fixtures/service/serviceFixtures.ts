@@ -17,6 +17,8 @@ import { indexedDBAdapter } from '@shared/database/adapters/indexedDB/database'
 import fakeIndexedDB from 'fake-indexeddb'
 import config from '@shared/database.config'
 import { ServiceTestHelpers } from '@test/fixtures/service/serviceTestHelpers'
+import { createDayService, type DayService } from '@shared/service/dayService'
+import { createDayPersistence } from '@shared/persistence/dayPersistence'
 
 import 'fake-indexeddb/auto'
 
@@ -24,6 +26,7 @@ export interface ServiceFixtures {
   database: Database
   taskService: TaskService
   projectService: ProjectService
+  dayService: DayService
   serviceHelpers: ServiceTestHelpers
   projectHelpers: ProjectTestHelpers
   taskHelpers: TaskTestHelpers
@@ -46,6 +49,13 @@ export const useServiceFixtures = createFixtures<ServiceFixtures>({
   projectService: ({ database }) => {
     return createProjectService({
       projectPersistence: createProjectPersistence({
+        database: database,
+      }),
+    })
+  },
+  dayService: ({ database }) => {
+    return createDayService({
+      dayPersistence: createDayPersistence({
         database: database,
       }),
     })
