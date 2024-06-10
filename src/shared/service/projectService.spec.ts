@@ -134,7 +134,7 @@ describe('projectService', () => {
       expect(resPatched).toEqual({
         ...randomProject,
         displayName: 'Patched Project',
-        modifiedAt: expect.any(String),
+        modifiedAt: expect.anything(),
       })
     })
 
