@@ -1,5 +1,5 @@
 import type { ProjectDto, ProjectEntity } from '@shared/model/project'
-import { plainDateTimeFromDate } from '@shared/model/mappers/dateToPlainDateTime'
+import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 
 export function toProjectDto(project: ProjectEntity): ProjectDto {
   return {
@@ -8,12 +8,10 @@ export function toProjectDto(project: ProjectEntity): ProjectDto {
     color: project.color,
     isBillable: project.isBillable,
     isBreak: project.isBreak,
-    createdAt: plainDateTimeFromDate(project.createdAt),
+    createdAt: PlainDateTime.from(project.createdAt),
     modifiedAt: project.modifiedAt
-      ? plainDateTimeFromDate(project.modifiedAt)
+      ? PlainDateTime.from(project.modifiedAt)
       : null,
-    deletedAt: project.deletedAt
-      ? plainDateTimeFromDate(project.deletedAt)
-      : null,
+    deletedAt: project.deletedAt ? PlainDateTime.from(project.deletedAt) : null,
   }
 }

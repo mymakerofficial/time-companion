@@ -1,6 +1,6 @@
 import type { Nullable } from '@shared/lib/utils/types'
-import { Temporal } from 'temporal-polyfill'
+import type { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 
-export type HasModifiedAt<T = Temporal.PlainDateTime> = {
+export type HasModifiedAt<T = PlainDateTime> = {
   modifiedAt: Nullable<T>
 }

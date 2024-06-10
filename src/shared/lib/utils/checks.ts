@@ -82,6 +82,10 @@ export function isObject(value: unknown): value is object {
   return typeof value === 'object' && value !== null && !isArray(value)
 }
 
+export function isDate(value: unknown): value is Date {
+  return value instanceof Date
+}
+
 export function isEmpty(
   value: unknown,
 ): value is null | undefined | '' | [] | {} {

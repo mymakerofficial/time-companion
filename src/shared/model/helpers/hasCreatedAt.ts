@@ -1,5 +1,5 @@
-import { Temporal } from 'temporal-polyfill'
+import type { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 
-export type HasCreatedAt<T = Temporal.PlainDateTime> = {
+export type HasCreatedAt<T = PlainDateTime> = {
   createdAt: T
 }
