@@ -5,7 +5,7 @@ import { taskService } from '@renderer/factory/service/taskService'
 
 export function useCreateTask() {
   return useMutation({
-    mutationFn: (task: CreateTask) => taskService.createTask(task),
+    mutationFn: (task: Partial<CreateTask>) => taskService.createTask(task),
     onError: handleMutationError,
   })
 }
