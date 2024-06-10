@@ -1,18 +1,22 @@
 import { useMutation } from '@tanstack/vue-query'
 import { handleMutationError } from '@renderer/composables/mutations/helpers/handleMutationError'
 import { taskService } from '@renderer/factory/service/taskService'
-import type { UpdateProject } from '@shared/model/project'
 import type { MutationOptions } from '@renderer/composables/mutations/helpers/mutationOptions'
-import type { TaskDto } from '@shared/model/task'
+import type { TaskDto, UpdateTask } from '@shared/model/task'
+
+type UsePatchTaskByIdVariables = {
+  task: Partial<UpdateTask>
+  id: string
+}
 
 export function usePatchTaskById(
-  options: MutationOptions<TaskDto, Partial<UpdateProject>>,
+  options: MutationOptions<TaskDto, UsePatchTaskByIdVariables>,
 ) {
   return useMutation({
-    mutationFn: ({ id, task }: { id: string; task: Partial<UpdateProject> }) =>
+    mutationFn: ({ id, task }: UsePatchTaskByIdVariables) =>
       taskService.patchTaskById(id, task),
-    onError: options.onError ?? handleMutationError,
-    onSuccess: options.onSuccess,
-    onSettled: options.onSettled,
+    onError: options?.onError ?? handleMutationError,
+    onSuccess: options?.onSuccess,
+    onSettled: options?.onSettled,
   })
 }

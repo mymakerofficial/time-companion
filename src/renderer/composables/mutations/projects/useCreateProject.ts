@@ -10,8 +10,8 @@ export function useCreateProject(
   return useMutation({
     mutationFn: (project: Partial<CreateProject>) =>
       projectService.createProject(project),
-    onError: options.onError ?? handleMutationError,
-    onSuccess: options.onSuccess,
-    onSettled: options.onSettled,
+    onError: options?.onError ?? handleMutationError,
+    onSuccess: options?.onSuccess,
+    onSettled: options?.onSettled,
   })
 }

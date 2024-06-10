@@ -9,8 +9,8 @@ export function useCreateTask(
 ) {
   return useMutation({
     mutationFn: (task: Partial<CreateTask>) => taskService.createTask(task),
-    onError: options.onError ?? handleMutationError,
-    onSuccess: options.onSuccess,
-    onSettled: options.onSettled,
+    onError: options?.onError ?? handleMutationError,
+    onSuccess: options?.onSuccess,
+    onSettled: options?.onSettled,
   })
 }

@@ -6,8 +6,8 @@ import type { MutationOptions } from '@renderer/composables/mutations/helpers/mu
 export function useSoftDeleteProject(options: MutationOptions<void, string>) {
   return useMutation({
     mutationFn: (id: string) => projectService.softDeleteProject(id),
-    onError: options.onError ?? handleMutationError,
-    onSuccess: options.onSuccess,
-    onSettled: options.onSettled,
+    onError: options?.onError ?? handleMutationError,
+    onSuccess: options?.onSuccess,
+    onSettled: options?.onSettled,
   })
 }

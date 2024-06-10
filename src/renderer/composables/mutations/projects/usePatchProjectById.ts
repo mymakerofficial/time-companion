@@ -15,8 +15,8 @@ export function usePatchProjectById(
   return useMutation({
     mutationFn: ({ project, id }: UsePatchProjectByIdVariables) =>
       projectService.patchProjectById(id, project),
-    onError: options.onError ?? handleMutationError,
-    onSuccess: options.onSuccess,
-    onSettled: options.onSettled,
+    onError: options?.onError ?? handleMutationError,
+    onSuccess: options?.onSuccess,
+    onSettled: options?.onSettled,
   })
 }
