@@ -2,16 +2,14 @@ import { type Publisher, PublisherImpl } from '@shared/events/publisher'
 
 export type EntityNotificationType = 'updated' | 'deleted' | 'created'
 
-export type EntityPublisherTopics<TData extends object> = {
+export type EntityPublisherTopics = {
   type: EntityNotificationType
-  entityId: string
-  field: keyof TData
+  id: string
 }
 
 export type EntityPublisherUpdateEvent<TData extends object> = {
   type: 'updated'
-  data: Readonly<TData>
-  changedFields: ReadonlyArray<keyof TData>
+  data: TData
 }
 
 export type EntityPublisherDeleteEvent = {
@@ -21,7 +19,7 @@ export type EntityPublisherDeleteEvent = {
 
 export type EntityPublisherCreateEvent<TData extends object> = {
   type: 'created'
-  data: Readonly<TData>
+  data: TData
 }
 
 export type EntityPublisherEvent<TData extends object> =
@@ -30,14 +28,8 @@ export type EntityPublisherEvent<TData extends object> =
   | EntityPublisherCreateEvent<TData>
 
 export interface EntityPublisher<TData extends object>
-  extends Publisher<
-    EntityPublisherTopics<TData>,
-    EntityPublisherEvent<TData>
-  > {}
+  extends Publisher<EntityPublisherTopics, EntityPublisherEvent<TData>> {}
 
 export class EntityPublisherImpl<TData extends object>
-  extends PublisherImpl<
-    EntityPublisherTopics<TData>,
-    EntityPublisherEvent<TData>
-  >
+  extends PublisherImpl<EntityPublisherTopics, EntityPublisherEvent<TData>>
   implements EntityPublisher<TData> {}

@@ -6,7 +6,6 @@ import {
   type UpdateTask,
 } from '@shared/model/task'
 import type { Nullable } from '@shared/lib/utils/types'
-import { keysOf } from '@shared/lib/utils/object'
 import {
   type EntityService,
   EntityServiceImpl,
@@ -72,14 +71,12 @@ class TaskServiceImpl
     id: string,
     partialTask: Partial<UpdateTask>,
   ): Promise<TaskDto> {
-    const changedFields = keysOf(partialTask)
-
     const patchedTask = await this.taskPersistence.patchTaskById(
       id,
       partialTask,
     )
 
-    this.publishUpdated(patchedTask, changedFields)
+    this.publishUpdated(patchedTask)
 
     return patchedTask
   }

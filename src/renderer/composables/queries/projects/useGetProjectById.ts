@@ -15,7 +15,7 @@ export function useGetProjectById(id: MaybeRef<string>) {
 
     projectService.subscribe(
       {
-        entityId: toValue(id),
+        id: toValue(id),
         type: 'updated',
       },
       (event) => {

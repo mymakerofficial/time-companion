@@ -15,7 +15,7 @@ export function useGetTaskById(id: MaybeRef<string>) {
 
     taskService.subscribe(
       {
-        entityId: toValue(id),
+        id: toValue(id),
         type: 'updated',
       },
       (event) => {

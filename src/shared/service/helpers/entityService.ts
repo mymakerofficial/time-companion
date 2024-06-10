@@ -18,32 +18,27 @@ export class EntityServiceImpl<TEntity extends HasId & HasModifiedAt>
 
   protected publishCreated(entity: TEntity): void {
     this.notify(
-      { type: 'created', entityId: entity.id },
+      { type: 'created', id: entity.id },
       { type: 'created', data: entity },
     )
   }
 
-  protected publishUpdated(
-    entity: TEntity,
-    changedFields: ReadonlyArray<keyof TEntity>,
-  ): void {
+  protected publishUpdated(entity: TEntity): void {
     this.notify(
       {
         type: 'updated',
-        entityId: entity.id,
-        field: [...changedFields, 'modifiedAt'],
+        id: entity.id,
       },
       {
         type: 'updated',
         data: entity,
-        changedFields: changedFields,
       },
     )
   }
 
   protected publishDeleted(entityId: string): void {
     this.notify(
-      { type: 'deleted', entityId: entityId },
+      { type: 'deleted', id: entityId },
       { type: 'deleted', id: entityId },
     )
   }

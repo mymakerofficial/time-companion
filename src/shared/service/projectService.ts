@@ -6,7 +6,6 @@ import type {
 import { projectSchema } from '@shared/model/project'
 import { type ProjectPersistence } from '@shared/persistence/projectPersistence'
 import type { Nullable } from '@shared/lib/utils/types'
-import { keysOf } from '@shared/lib/utils/object'
 import {
   type EntityService,
   EntityServiceImpl,
@@ -75,14 +74,12 @@ class ProjectServiceImpl
     id: string,
     partialProject: Partial<UpdateProject>,
   ): Promise<ProjectDto> {
-    const changedFields = keysOf(partialProject)
-
     const patchedProject = await this.projectPersistence.patchProjectById(
       id,
       partialProject,
     )
 
-    this.publishUpdated(patchedProject, changedFields)
+    this.publishUpdated(patchedProject)
 
     return patchedProject
   }

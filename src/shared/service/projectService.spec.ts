@@ -178,12 +178,10 @@ describe('projectService', () => {
           data: expect.objectContaining({
             displayName: 'Other Patched Project',
           }),
-          changedFields: ['displayName'],
         },
         {
           type: 'updated',
-          entityId: randomProject.id,
-          field: ['displayName', 'modifiedAt'],
+          id: randomProject.id,
         },
       )
     })
@@ -224,7 +222,7 @@ describe('projectService', () => {
         },
         {
           type: 'deleted',
-          entityId: randomProject.id,
+          id: randomProject.id,
         },
       )
     })
