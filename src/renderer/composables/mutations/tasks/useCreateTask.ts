@@ -5,7 +5,7 @@ import { taskService } from '@renderer/factory/service/taskService'
 import type { MutationOptions } from '@renderer/composables/mutations/helpers/mutationOptions'
 
 export function useCreateTask(
-  options: MutationOptions<TaskDto, Partial<CreateTask>>,
+  options?: MutationOptions<TaskDto, Partial<CreateTask>>,
 ) {
   return useMutation({
     mutationFn: (task: Partial<CreateTask>) => taskService.createTask(task),

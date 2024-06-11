@@ -10,7 +10,7 @@ type UsePatchProjectByIdVariables = {
 }
 
 export function usePatchProjectById(
-  options: MutationOptions<ProjectDto, UsePatchProjectByIdVariables>,
+  options?: MutationOptions<ProjectDto, UsePatchProjectByIdVariables>,
 ) {
   return useMutation({
     mutationFn: ({ project, id }: UsePatchProjectByIdVariables) =>

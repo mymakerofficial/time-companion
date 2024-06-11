@@ -5,7 +5,7 @@ import { handleMutationError } from '@renderer/composables/mutations/helpers/han
 import type { MutationOptions } from '@renderer/composables/mutations/helpers/mutationOptions'
 
 export function useCreateProject(
-  options: MutationOptions<ProjectDto, Partial<CreateProject>>,
+  options?: MutationOptions<ProjectDto, Partial<CreateProject>>,
 ) {
   return useMutation({
     mutationFn: (project: Partial<CreateProject>) =>

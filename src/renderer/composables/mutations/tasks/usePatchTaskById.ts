@@ -10,7 +10,7 @@ type UsePatchTaskByIdVariables = {
 }
 
 export function usePatchTaskById(
-  options: MutationOptions<TaskDto, UsePatchTaskByIdVariables>,
+  options?: MutationOptions<TaskDto, UsePatchTaskByIdVariables>,
 ) {
   return useMutation({
     mutationFn: ({ id, task }: UsePatchTaskByIdVariables) =>
