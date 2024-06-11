@@ -7,12 +7,12 @@ import TaskForm from '@renderer/components/settings/tasks/dialog/TaskForm.vue'
 import { useDialogContext } from '@renderer/composables/dialog/useDialog'
 
 const { close, open } = useDialogContext()
-const { mutate: createTask } = useCreateTask()
+const { mutate: createTask } = useCreateTask({
+  onSuccess: close,
+})
 
 function handleSubmit(values: CreateTask) {
-  createTask(values, {
-    onSuccess: close,
-  })
+  createTask(values)
 }
 </script>
 

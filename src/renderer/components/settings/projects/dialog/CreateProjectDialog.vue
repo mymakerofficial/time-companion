@@ -7,12 +7,12 @@ import type { CreateProject } from '@shared/model/project'
 import { useDialogContext } from '@renderer/composables/dialog/useDialog'
 
 const { close, open } = useDialogContext()
-const { mutate: createProject } = useCreateProject()
+const { mutate: createProject } = useCreateProject({
+  onSuccess: close,
+})
 
 function handleSubmit(values: CreateProject) {
-  createProject(values, {
-    onSuccess: close,
-  })
+  createProject(values)
 }
 </script>
 

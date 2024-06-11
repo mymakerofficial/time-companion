@@ -14,25 +14,22 @@ const props = defineProps<{
 
 const { close, open } = useDialogContext()
 const { data: project, isPending, isError, error } = useGetProjectById(props.id)
-const { mutate: patchProject } = usePatchProjectById()
-const { mutate: deleteProject } = useSoftDeleteProject()
+const { mutate: patchProject } = usePatchProjectById({
+  onSuccess: close,
+})
+const { mutate: deleteProject } = useSoftDeleteProject({
+  onSuccess: close,
+})
 
 function handleSubmit(project: UpdateProject) {
-  patchProject(
-    {
-      id: props.id,
-      project,
-    },
-    {
-      onSuccess: close,
-    },
-  )
+  patchProject({
+    id: props.id,
+    project,
+  })
 }
 
 function handleDelete() {
-  deleteProject(props.id, {
-    onSuccess: close,
-  })
+  deleteProject(props.id)
 }
 </script>
 

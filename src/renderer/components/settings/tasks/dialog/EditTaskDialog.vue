@@ -14,25 +14,22 @@ const props = defineProps<{
 
 const { close, open } = useDialogContext()
 const { data: task, isPending, isError, error } = useGetTaskById(props.id)
-const { mutate: patchTask } = usePatchTaskById()
-const { mutate: deleteTask } = useSoftDeleteTask()
+const { mutate: patchTask } = usePatchTaskById({
+  onSuccess: close,
+})
+const { mutate: deleteTask } = useSoftDeleteTask({
+  onSuccess: close,
+})
 
 function handleSubmit(task: UpdateTask) {
-  patchTask(
-    {
-      id: props.id,
-      task,
-    },
-    {
-      onSuccess: close,
-    },
-  )
+  patchTask({
+    id: props.id,
+    task,
+  })
 }
 
 function handleDelete() {
-  deleteTask(props.id, {
-    onSuccess: close,
-  })
+  deleteTask(props.id)
 }
 </script>
 
