@@ -7,7 +7,7 @@ export class PlainDateTime extends Temporal.PlainDateTime {
     options?: Temporal.AssignmentOptions,
   ): PlainDateTime {
     if (isDate(item)) {
-      return Temporal.PlainDateTime.from({
+      return PlainDateTime.from({
         year: item.getFullYear(),
         month: item.getMonth() + 1,
         day: item.getDate(),
@@ -18,6 +18,31 @@ export class PlainDateTime extends Temporal.PlainDateTime {
       })
     }
 
-    return Temporal.PlainDateTime.from(item, options)
+    const fields = Temporal.PlainDateTime.from(item, options).getISOFields()
+
+    return new PlainDateTime(
+      fields.isoYear,
+      fields.isoMonth,
+      fields.isoDay,
+      fields.isoHour,
+      fields.isoMinute,
+      fields.isoSecond,
+      fields.isoMillisecond,
+      fields.isoMicrosecond,
+      fields.isoNanosecond,
+      fields.calendar,
+    )
+  }
+
+  toDate(): Date {
+    return new Date(
+      this.year,
+      this.month - 1,
+      this.day,
+      this.hour,
+      this.minute,
+      this.second,
+      this.millisecond,
+    )
   }
 }

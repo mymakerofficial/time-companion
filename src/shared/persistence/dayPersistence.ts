@@ -79,7 +79,7 @@ class DayPersistenceImpl implements DayPersistence {
       .insert({
         data: {
           id: uuid(),
-          date: new Date(day.date.toString()),
+          date: day.date.toDate(),
           targetBillableDuration:
             day.targetBillableDuration?.toString() ?? null,
           createdAt: new Date(),
