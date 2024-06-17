@@ -287,3 +287,17 @@ class WhereConditionBuilderImpl<TRow extends object, TColumn = unknown>
     return new WhereGroupBuilderImpl('or', this, [other])
   }
 }
+
+export function and<GRow extends object, GColumn>(
+  ...conditions: Array<WhereBuilder<GRow, GColumn>>
+): WhereBuilder<GRow, GColumn> {
+  const [first, ...rest] = conditions
+  return new WhereGroupBuilderImpl('and', first, rest)
+}
+
+export function or<GRow extends object, GColumn>(
+  ...conditions: Array<WhereBuilder<GRow, GColumn>>
+): WhereBuilder<GRow, GColumn> {
+  const [first, ...rest] = conditions
+  return new WhereGroupBuilderImpl('or', first, rest)
+}
