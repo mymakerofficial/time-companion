@@ -120,13 +120,63 @@ describe('timeEntryService', () => {
       )
     })
 
-    it.todo(
-      'should fail to create a time entry with a startedAt 24h after the first time entry of the day',
-    )
+    it('should fail to create a time entry with a startedAt 24h after the first time entry of the day', async () => {
+      const day = await dayService.createDay({
+        date: PlainDate.from('2021-01-01'),
+        targetBillableDuration: null,
+      })
 
-    it.todo(
-      'should fail to create a time entry with a stoppedAt 24h after the first time entry of the day',
-    )
+      await timeEntryService.createTimeEntry({
+        dayId: day.id,
+        projectId: null,
+        taskId: null,
+        description: 'Test time entry',
+        startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+        stoppedAt: null,
+      })
+
+      await expect(
+        timeEntryService.createTimeEntry({
+          dayId: day.id,
+          projectId: null,
+          taskId: null,
+          description: 'Test time entry',
+          startedAt: PlainDateTime.from('2021-01-02T08:00:00'),
+          stoppedAt: null,
+        }),
+      ).rejects.toThrowError(
+        'Time entry must end at most 24 hours after the first time entry of the given day.',
+      )
+    })
+
+    it('should fail to create a time entry with a stoppedAt 24h after the first time entry of the day', async () => {
+      const day = await dayService.createDay({
+        date: PlainDate.from('2021-01-01'),
+        targetBillableDuration: null,
+      })
+
+      await timeEntryService.createTimeEntry({
+        dayId: day.id,
+        projectId: null,
+        taskId: null,
+        description: 'Test time entry',
+        startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+        stoppedAt: PlainDateTime.from('2021-01-01T09:00:00'),
+      })
+
+      await expect(
+        timeEntryService.createTimeEntry({
+          dayId: day.id,
+          projectId: null,
+          taskId: null,
+          description: 'Test time entry',
+          startedAt: PlainDateTime.from('2021-01-02T07:00:00'),
+          stoppedAt: PlainDateTime.from('2021-01-02T08:00:00'),
+        }),
+      ).rejects.toThrowError(
+        'Time entry must end at most 24 hours after the first time entry of the given day.',
+      )
+    })
 
     it.each([
       [
