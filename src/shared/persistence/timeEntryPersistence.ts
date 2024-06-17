@@ -15,7 +15,8 @@ import { uuid } from '@shared/lib/utils/uuid'
 import { firstOf } from '@shared/lib/utils/list'
 import { daysTable } from '@shared/model/day'
 import { toDayDto } from '@shared/model/mappers/day'
-import { check, isNotNull } from '@shared/lib/utils/checks'
+import { check, isNotNull, isNull } from '@shared/lib/utils/checks'
+import { and, or } from '@shared/database/schema/columnDefinition'
 
 export type TimeEntryPersistenceDependencies = {
   database: Database
@@ -98,7 +99,43 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
           `Time entry must end at most 24 hours after the first time entry of the given day.`,
         )
 
-        // TODO check if time entry overlaps with existing time entries
+        const overlappingTimeEntry = await tx
+          .table(timeEntriesTable)
+          .findFirst({
+            range: timeEntriesTable.startedAt.range.between(
+              timeEntry.startedAt.subtract({ hours: 24 }).toDate(),
+              timeEntry.startedAt.add({ hours: 24 }).toDate(),
+            ),
+            where: and(
+              timeEntriesTable.stoppedAt.isNotNull(),
+              or(
+                and(
+                  timeEntriesTable.startedAt.lessThan(
+                    timeEntry.startedAt.toDate(),
+                  ),
+                  timeEntriesTable.stoppedAt.greaterThan(
+                    timeEntry.startedAt.toDate(),
+                  ),
+                ),
+                and(
+                  timeEntriesTable.startedAt.lessThan(
+                    timeEntry.stoppedAt?.toDate() ??
+                      timeEntry.startedAt.toDate(),
+                  ),
+                  timeEntriesTable.stoppedAt.greaterThan(
+                    timeEntry.stoppedAt?.toDate() ??
+                      timeEntry.startedAt.toDate(),
+                  ),
+                ),
+              ),
+            ),
+            map: toTimeEntryDto,
+          })
+
+        check(
+          isNull(overlappingTimeEntry),
+          `Time entry must not overlap with an existing time entry.`,
+        )
       }
 
       return await tx.table(timeEntriesTable).insert({
