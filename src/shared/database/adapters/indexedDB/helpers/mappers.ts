@@ -1,19 +1,19 @@
 import type { TableSchemaRaw } from '@shared/database/types/schema'
 import { entriesOf, objectFromEntries } from '@shared/lib/utils/object'
 import type { ColumnType } from '@shared/database/types/database'
-import { check, isNotNull, isString } from '@shared/lib/utils/checks'
-import type { Pair } from '@shared/lib/utils/types'
+import { check, isNotNull, isNull, isString } from '@shared/lib/utils/checks'
+import type { Nullable, Pair } from '@shared/lib/utils/types'
 import { Temporal } from 'temporal-polyfill'
 
 export type SerializedTime = {
   __dataType__: 'time'
-  original: string
+  original: Nullable<string>
   totalSeconds: number
 }
 
 export type SerializedInterval = {
   __dataType__: 'interval'
-  original: string
+  original: Nullable<string>
   totalSeconds: number
 }
 
@@ -28,10 +28,10 @@ export function serializeRow<TRow extends object>(
       isNotNull(column.dataType),
       'Column definition must not be null for key',
     )
-    return [key, serializeColumn(value, column.dataType)] as Pair<
-      keyof TRow,
-      any
-    >
+    return [
+      key,
+      serializeColumn(value, column.dataType, column.isNullable),
+    ] as Pair<keyof TRow, any>
   })
 
   return objectFromEntries(mappedEntries) as object
@@ -57,13 +57,22 @@ export function deserializeRow<TRow extends object>(
   return objectFromEntries(mappedEntries)
 }
 
-function serializeColumn(value: unknown, dataType: ColumnType): any {
+function serializeColumn(
+  value: unknown,
+  dataType: ColumnType,
+  isNullable: boolean,
+): any {
+  check(
+    isNullable || isNotNull(value),
+    'Value of a not nullable column must not be null',
+  )
+
   switch (dataType) {
     case 'time':
-      check(isString(value), 'Time must be a string')
+      check(isNull(value) || isString(value), 'Time must be a string')
       return serializeTime(value)
     case 'interval':
-      check(isString(value), 'Interval must be a string')
+      check(isNull(value) || isString(value), 'Interval must be a string')
       return serializeInterval(value)
     default:
       return value
@@ -81,28 +90,32 @@ function deserializeColumn(value: unknown, dataType: ColumnType): any {
   }
 }
 
-function serializeTime(value: string): SerializedTime {
+function serializeTime(value: Nullable<string>): SerializedTime {
   return {
     __dataType__: 'time',
     original: value,
-    totalSeconds: Temporal.PlainTime.from({ second: 0 })
-      .until(value)
-      .total({ unit: 'seconds' }),
+    totalSeconds: value
+      ? Temporal.PlainTime.from({ second: 0 })
+          .until(value)
+          .total({ unit: 'seconds' })
+      : -Infinity,
   }
 }
 
-function deserializeTime(value: SerializedTime): string {
+function deserializeTime(value: SerializedTime): Nullable<string> {
   return value.original
 }
 
-function serializeInterval(value: string): SerializedInterval {
+function serializeInterval(value: Nullable<string>): SerializedInterval {
   return {
     __dataType__: 'interval',
     original: value,
-    totalSeconds: Temporal.Duration.from(value).total({ unit: 'seconds' }),
+    totalSeconds: value
+      ? Temporal.Duration.from(value).total({ unit: 'seconds' })
+      : -Infinity,
   }
 }
 
-function deserializeInterval(value: SerializedInterval): string {
+function deserializeInterval(value: SerializedInterval): Nullable<string> {
   return value.original
 }
