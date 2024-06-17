@@ -3,6 +3,7 @@ import { useServiceFixtures } from '@test/fixtures/service/serviceFixtures'
 import { PlainDate } from '@shared/lib/datetime/plainDate'
 import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 import { firstOf } from '@shared/lib/utils/list'
+import { uuid } from '@shared/lib/utils/uuid'
 
 describe('timeEntryService', () => {
   const { serviceHelpers, timeEntryService, dayService } = useServiceFixtures()
@@ -285,6 +286,60 @@ describe('timeEntryService', () => {
           stoppedAt: PlainDateTime.from('2021-01-01T10:00:00'),
         }),
       ).rejects.toThrowError()
+    })
+  })
+
+  describe('patchTimeEntry', () => {
+    it('should update a time entry', async () => {
+      const day = await dayService.createDay({
+        date: PlainDate.from('2021-01-01'),
+        targetBillableDuration: null,
+      })
+
+      const timeEntry = await timeEntryService.createTimeEntry({
+        dayId: day.id,
+        projectId: null,
+        taskId: null,
+        description: 'Test time entry',
+        startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+        stoppedAt: null,
+      })
+
+      await timeEntryService.patchTimeEntry(timeEntry.id, {
+        description: 'Updated time entry',
+      })
+
+      const timeEntries = await timeEntryService.getTimeEntriesByDayId(day.id)
+
+      expect(firstOf(timeEntries)).toEqual(
+        expect.objectContaining({
+          description: 'Updated time entry',
+        }),
+      )
+    })
+
+    it('should fail when trying to update a time entry that does not exist', async () => {
+      const day = await dayService.createDay({
+        date: PlainDate.from('2021-01-01'),
+        targetBillableDuration: null,
+      })
+
+      await timeEntryService.createTimeEntry({
+        dayId: day.id,
+        projectId: null,
+        taskId: null,
+        description: 'Test time entry',
+        startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+        stoppedAt: null,
+      })
+
+      const nonExistingId = uuid()
+
+      await expect(
+        timeEntryService.patchTimeEntry(nonExistingId, {
+          description: 'Updated time entry',
+        }),
+      ).rejects.toThrowError(`Time entry with id "${nonExistingId}" not found`)
     })
   })
 })

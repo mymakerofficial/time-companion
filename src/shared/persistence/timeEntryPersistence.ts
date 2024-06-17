@@ -12,7 +12,7 @@ import {
 } from '@shared/model/mappers/timeEntry'
 import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 import { uuid } from '@shared/lib/utils/uuid'
-import { firstOf } from '@shared/lib/utils/list'
+import { firstOfOrNull } from '@shared/lib/utils/list'
 import { daysTable } from '@shared/model/day'
 import { toDayDto } from '@shared/model/mappers/day'
 import {
@@ -171,15 +171,27 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
     id: string,
     timeEntry: Partial<UpdateTimeEntry>,
   ): Promise<TimeEntryDto> {
-    const res = await this.database.table(timeEntriesTable).update({
-      range: timeEntriesTable.id.range.only(id),
-      where: timeEntriesTable.deletedAt.isNull(),
-      data: timeEntryEntityUpdateFrom(timeEntry, {
-        modifiedAt: PlainDateTime.now(),
-      }),
-      map: toTimeEntryDto,
-    })
+    return await this.database.withTransaction(async (tx) => {
+      const updatedTimeEntry = firstOfOrNull(
+        await tx.table(timeEntriesTable).update({
+          range: timeEntriesTable.id.range.only(id),
+          where: timeEntriesTable.deletedAt.isNull(),
+          data: timeEntryEntityUpdateFrom(timeEntry, {
+            modifiedAt: PlainDateTime.now(),
+          }),
+          map: toTimeEntryDto,
+        }),
+      )
 
-    return firstOf(res)
+      check(isNotNull(updatedTimeEntry), `Time entry with id "${id}" not found`)
+
+      check(
+        isNull(updatedTimeEntry.stoppedAt) ||
+          updatedTimeEntry.startedAt.isBefore(updatedTimeEntry.stoppedAt),
+        `Time entry must start before it stops.`,
+      )
+
+      return updatedTimeEntry
+    })
   }
 }
