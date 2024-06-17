@@ -65,6 +65,10 @@ describe('timeEntryService', () => {
           stoppedAt: PlainDateTime.from('2021-01-01T07:00:00'),
         }),
       ).rejects.toThrowError('Time entry must start before it stops.')
+
+      await expect(
+        timeEntryService.getTimeEntriesByDayId(day.id),
+      ).resolves.toHaveLength(0)
     })
 
     it('should fail to create a time entry with a startedAt before midnight of the day', async () => {
@@ -179,6 +183,10 @@ describe('timeEntryService', () => {
         ).rejects.toThrowError(
           'Time entry must not overlap with an existing time entry.',
         )
+
+        await expect(
+          timeEntryService.getTimeEntriesByDayId(day.id),
+        ).resolves.toHaveLength(1)
       },
     )
 
