@@ -34,7 +34,7 @@ import {
 } from '@shared/database/types/errors'
 import { emptyMap, toArray } from '@shared/lib/utils/list'
 import { DatabaseQuertyFactoryImpl } from '@shared/database/factory/queryFactory'
-import { entriesOf } from '@shared/lib/utils/object'
+import { valuesOf } from '@shared/lib/utils/object'
 import { rawTableSchemasMatch } from '@shared/database/schema/schemasMatch'
 
 export function createDatabase<TSchema extends DatabaseSchema>(
@@ -157,15 +157,14 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
       return
     }
 
-    entriesOf(this.config.schema).forEach(([tableName, tableSchema]) => {
-      const runtimeTableSchema = this.runtimeSchema.get(tableName as string)
+    valuesOf(this.config.schema).forEach((tableSchema: TableSchema) => {
+      const tableName = tableSchema._.raw.tableName
+
+      const runtimeTableSchema = this.runtimeSchema.get(tableName)
 
       if (
         isUndefined(runtimeTableSchema) ||
-        !rawTableSchemasMatch(
-          runtimeTableSchema,
-          (tableSchema as TableSchema)._.raw,
-        )
+        !rawTableSchemasMatch(runtimeTableSchema, tableSchema._.raw)
       ) {
         throw new DatabaseSchemaMismatchError()
       }
@@ -179,11 +178,8 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
       return
     }
 
-    entriesOf(this.config.schema).forEach(([tableName, tableSchema]) => {
-      this.runtimeSchema.set(
-        tableName as string,
-        (tableSchema as TableSchema)._.raw,
-      )
+    valuesOf(this.config.schema).forEach((tableSchema: TableSchema) => {
+      this.runtimeSchema.set(tableSchema._.raw.tableName, tableSchema._.raw)
     })
   }
 
