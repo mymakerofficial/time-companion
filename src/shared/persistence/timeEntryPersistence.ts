@@ -73,6 +73,12 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
 
   async createTimeEntry(timeEntry: CreateTimeEntry): Promise<TimeEntryDto> {
     return await this.database.withTransaction(async (tx) => {
+      check(
+        isNull(timeEntry.stoppedAt) ||
+          timeEntry.startedAt.isBefore(timeEntry.stoppedAt),
+        `Time entry must start before it stops.`,
+      )
+
       const day = await tx.table(daysTable).findFirst({
         range: daysTable.id.range.only(timeEntry.dayId),
         map: toDayDto,

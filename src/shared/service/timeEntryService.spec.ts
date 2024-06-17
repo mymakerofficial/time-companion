@@ -49,9 +49,23 @@ describe('timeEntryService', () => {
       )
     })
 
-    it.todo(
-      'should fail to create a time entry with a stoppedAt before startedAt',
-    )
+    it('should fail to create a time entry with a stoppedAt before startedAt', async () => {
+      const day = await dayService.createDay({
+        date: PlainDate.from('2021-01-01'),
+        targetBillableDuration: null,
+      })
+
+      await expect(
+        timeEntryService.createTimeEntry({
+          dayId: day.id,
+          projectId: null,
+          taskId: null,
+          description: 'Test time entry',
+          startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+          stoppedAt: PlainDateTime.from('2021-01-01T07:00:00'),
+        }),
+      ).rejects.toThrowError('Time entry must start before it stops.')
+    })
 
     it.todo(
       'should fail to create a time entry with a startedAt before midnight of the day',
