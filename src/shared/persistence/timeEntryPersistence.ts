@@ -150,6 +150,11 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
             'Time entry must not overlap with an existing time entry.',
           )
         }
+      } else {
+        check(
+          timeEntry.startedAt.isBefore(day.date.add({ days: 1 })),
+          `The first time entry of a day must start on the same date.`,
+        )
       }
 
       return await tx.table(timeEntriesTable).insert({
