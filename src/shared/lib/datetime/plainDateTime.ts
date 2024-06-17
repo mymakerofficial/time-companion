@@ -1,5 +1,6 @@
 import { Temporal } from 'temporal-polyfill'
 import { isDate } from '@shared/lib/utils/checks'
+import type { Duration } from '@shared/lib/datetime/duration'
 
 export class PlainDateTime extends Temporal.PlainDateTime {
   static from(
@@ -18,7 +19,15 @@ export class PlainDateTime extends Temporal.PlainDateTime {
       })
     }
 
-    const fields = Temporal.PlainDateTime.from(item, options).getISOFields()
+    return PlainDateTime.fromTemporalPlainDateTime(
+      Temporal.PlainDateTime.from(item, options),
+    )
+  }
+
+  static fromTemporalPlainDateTime(
+    temporalPlainDateTime: Temporal.PlainDateTime,
+  ): PlainDateTime {
+    const fields = temporalPlainDateTime.getISOFields()
 
     return new PlainDateTime(
       fields.isoYear,
@@ -35,7 +44,9 @@ export class PlainDateTime extends Temporal.PlainDateTime {
   }
 
   static now(): PlainDateTime {
-    return PlainDateTime.from(Temporal.Now.plainDateTimeISO())
+    return PlainDateTime.fromTemporalPlainDateTime(
+      Temporal.Now.plainDateTimeISO(),
+    )
   }
 
   toDate(): Date {
@@ -48,5 +59,22 @@ export class PlainDateTime extends Temporal.PlainDateTime {
       this.second,
       this.millisecond,
     )
+  }
+
+  add(
+    durationLike: Duration | Temporal.Duration | Temporal.DurationLike | string,
+    options?: Temporal.ArithmeticOptions,
+  ): PlainDateTime {
+    return PlainDateTime.fromTemporalPlainDateTime(
+      super.add(durationLike, options),
+    )
+  }
+
+  isBefore(other: PlainDateTime): boolean {
+    return PlainDateTime.compare(this, other) === -1
+  }
+
+  isAfter(other: PlainDateTime): boolean {
+    return PlainDateTime.compare(this, other) === 1
   }
 }
