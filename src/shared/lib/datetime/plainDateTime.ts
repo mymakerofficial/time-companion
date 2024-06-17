@@ -34,6 +34,10 @@ export class PlainDateTime extends Temporal.PlainDateTime {
     )
   }
 
+  static now(): PlainDateTime {
+    return PlainDateTime.from(Temporal.Now.plainDateTimeISO())
+  }
+
   toDate(): Date {
     return new Date(
       this.year,

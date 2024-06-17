@@ -5,8 +5,12 @@ import {
   type TimeEntryDto,
   type UpdateTimeEntry,
 } from '@shared/model/timeEntry'
-import { toTimeEntryDto } from '@shared/model/mappers/timeEntry'
-import { type PlainDateTime } from '@shared/lib/datetime/plainDateTime'
+import {
+  toTimeEntryDto,
+  timeEntryEntityUpdateFrom,
+  timeEntryEntityCreateFrom,
+} from '@shared/model/mappers/timeEntry'
+import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 import { uuid } from '@shared/lib/utils/uuid'
 import { firstOf } from '@shared/lib/utils/list'
 
@@ -64,18 +68,11 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
   }
 
   async createTimeEntry(timeEntry: CreateTimeEntry): Promise<TimeEntryDto> {
-    const { startedAt, stoppedAt, ...rest } = timeEntry
-
     return await this.database.table(timeEntriesTable).insert({
-      data: {
+      data: timeEntryEntityCreateFrom(timeEntry, {
         id: uuid(),
-        ...rest,
-        startedAt: startedAt.toDate(),
-        stoppedAt: stoppedAt?.toDate() ?? null,
-        createdAt: new Date(),
-        modifiedAt: null,
-        deletedAt: null,
-      },
+        createdAt: PlainDateTime.now(),
+      }),
       map: toTimeEntryDto,
     })
   }
@@ -84,20 +81,15 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
     id: string,
     timeEntry: Partial<UpdateTimeEntry>,
   ): Promise<TimeEntryDto> {
-    const { startedAt, stoppedAt, ...rest } = timeEntry
-
-    return firstOf(
-      await this.database.table(timeEntriesTable).update({
-        range: timeEntriesTable.id.range.only(id),
-        where: timeEntriesTable.deletedAt.isNull(),
-        data: {
-          ...rest,
-          startedAt: startedAt?.toDate(),
-          stoppedAt: stoppedAt?.toDate(),
-          modifiedAt: new Date(),
-        },
-        map: toTimeEntryDto,
+    const res = await this.database.table(timeEntriesTable).update({
+      range: timeEntriesTable.id.range.only(id),
+      where: timeEntriesTable.deletedAt.isNull(),
+      data: timeEntryEntityUpdateFrom(timeEntry, {
+        modifiedAt: PlainDateTime.now(),
       }),
-    )
+      map: toTimeEntryDto,
+    })
+
+    return firstOf(res)
   }
 }
