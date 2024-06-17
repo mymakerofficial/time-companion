@@ -85,35 +85,35 @@ export type WhereConditionFactory<TRow extends object, TColumn = unknown> = {
   /***
    * Check if the column is less than the value
    */
-  lessThan: (value: number) => WhereBuilder<TRow, TColumn>
+  lessThan: (value: number | Date) => WhereBuilder<TRow, TColumn>
   /***
    * Check if the column is less than or equal to the value
    */
-  lessThanOrEquals: (value: number) => WhereBuilder<TRow, TColumn>
+  lessThanOrEquals: (value: number | Date) => WhereBuilder<TRow, TColumn>
   /***
    * Check if the column is greater than the value
    */
-  greaterThan: (value: number) => WhereBuilder<TRow, TColumn>
+  greaterThan: (value: number | Date) => WhereBuilder<TRow, TColumn>
   /***
    * Check if the column is greater than or equal to the value
    */
-  greaterThanOrEquals: (value: number) => WhereBuilder<TRow, TColumn>
+  greaterThanOrEquals: (value: number | Date) => WhereBuilder<TRow, TColumn>
   /***
    * Shorthand for {@link lessThan}
    */
-  lt: (value: number) => WhereBuilder<TRow, TColumn>
+  lt: (value: number | Date) => WhereBuilder<TRow, TColumn>
   /***
    * Shorthand for {@link lessThanOrEquals}
    */
-  lte: (value: number) => WhereBuilder<TRow, TColumn>
+  lte: (value: number | Date) => WhereBuilder<TRow, TColumn>
   /***
    * Shorthand for {@link greaterThan}
    */
-  gt: (value: number) => WhereBuilder<TRow, TColumn>
+  gt: (value: number | Date) => WhereBuilder<TRow, TColumn>
   /***
    * Shorthand for {@link greaterThanOrEquals}
    */
-  gte: (value: number) => WhereBuilder<TRow, TColumn>
+  gte: (value: number | Date) => WhereBuilder<TRow, TColumn>
   /***
    * Check if the column is null
    */

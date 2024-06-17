@@ -122,19 +122,19 @@ export class ColumnDefinitionImpl<TRow extends object, TColumn = unknown>
     return this.where('equals', value)
   }
 
-  greaterThan(value: number): WhereBuilder<TRow, TColumn> {
+  greaterThan(value: number | Date): WhereBuilder<TRow, TColumn> {
     return this.where('greaterThan', value)
   }
 
-  greaterThanOrEquals(value: number): WhereBuilder<TRow, TColumn> {
+  greaterThanOrEquals(value: number | Date): WhereBuilder<TRow, TColumn> {
     return this.where('greaterThanOrEquals', value)
   }
 
-  gt(value: number): WhereBuilder<TRow, TColumn> {
+  gt(value: number | Date): WhereBuilder<TRow, TColumn> {
     return this.greaterThan(value)
   }
 
-  gte(value: number): WhereBuilder<TRow, TColumn> {
+  gte(value: number | Date): WhereBuilder<TRow, TColumn> {
     return this.greaterThanOrEquals(value)
   }
 
@@ -154,19 +154,19 @@ export class ColumnDefinitionImpl<TRow extends object, TColumn = unknown>
     return this.where('equals', null)
   }
 
-  lessThan(value: number): WhereBuilder<TRow, TColumn> {
+  lessThan(value: number | Date): WhereBuilder<TRow, TColumn> {
     return this.where('lessThan', value)
   }
 
-  lessThanOrEquals(value: number): WhereBuilder<TRow, TColumn> {
+  lessThanOrEquals(value: number | Date): WhereBuilder<TRow, TColumn> {
     return this.where('lessThanOrEquals', value)
   }
 
-  lt(value: number): WhereBuilder<TRow, TColumn> {
+  lt(value: number | Date): WhereBuilder<TRow, TColumn> {
     return this.lessThan(value)
   }
 
-  lte(value: number): WhereBuilder<TRow, TColumn> {
+  lte(value: number | Date): WhereBuilder<TRow, TColumn> {
     return this.lessThanOrEquals(value)
   }
 
