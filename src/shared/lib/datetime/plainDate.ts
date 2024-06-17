@@ -1,5 +1,7 @@
 import { Temporal } from 'temporal-polyfill'
 import { isDate } from '@shared/lib/utils/checks'
+import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
+import type { PlainTime } from '@shared/lib/datetime/plainTime'
 
 export class PlainDate extends Temporal.PlainDate {
   static from(
@@ -26,5 +28,17 @@ export class PlainDate extends Temporal.PlainDate {
 
   toDate(): Date {
     return new Date(this.year, this.month - 1, this.day)
+  }
+
+  toPlainDateTime(
+    temporalDate:
+      | PlainTime
+      | Temporal.PlainTime
+      | Temporal.PlainTimeLike
+      | string = { hour: 0, minute: 0, second: 0 },
+  ): PlainDateTime {
+    return PlainDateTime.fromTemporalPlainDateTime(
+      super.toPlainDateTime(temporalDate),
+    )
   }
 }

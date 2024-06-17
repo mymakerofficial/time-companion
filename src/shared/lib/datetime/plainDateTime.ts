@@ -70,11 +70,11 @@ export class PlainDateTime extends Temporal.PlainDateTime {
     )
   }
 
-  isBefore(other: PlainDateTime): boolean {
+  isBefore(other: PlainDateTime | Temporal.PlainDateTimeLike): boolean {
     return PlainDateTime.compare(this, other) === -1
   }
 
-  isAfter(other: PlainDateTime): boolean {
+  isAfter(other: PlainDateTime | Temporal.PlainDateTimeLike): boolean {
     return PlainDateTime.compare(this, other) === 1
   }
 }
