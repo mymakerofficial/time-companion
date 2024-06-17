@@ -70,6 +70,15 @@ export class PlainDateTime extends Temporal.PlainDateTime {
     )
   }
 
+  subtract(
+    durationLike: Duration | Temporal.Duration | Temporal.DurationLike | string,
+    options?: Temporal.ArithmeticOptions,
+  ): PlainDateTime {
+    return PlainDateTime.fromTemporalPlainDateTime(
+      super.subtract(durationLike, options),
+    )
+  }
+
   isBefore(other: PlainDateTime | Temporal.PlainDateTimeLike): boolean {
     return PlainDateTime.compare(this, other) === -1
   }
