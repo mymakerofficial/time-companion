@@ -83,7 +83,19 @@ export class PlainDateTime extends Temporal.PlainDateTime {
     return PlainDateTime.compare(this, other) === -1
   }
 
+  isBeforeOrEqual(other: PlainDateTime | Temporal.PlainDateTimeLike): boolean {
+    return PlainDateTime.compare(this, other) !== 1
+  }
+
   isAfter(other: PlainDateTime | Temporal.PlainDateTimeLike): boolean {
     return PlainDateTime.compare(this, other) === 1
+  }
+
+  isAfterOrEqual(other: PlainDateTime | Temporal.PlainDateTimeLike): boolean {
+    return PlainDateTime.compare(this, other) !== -1
+  }
+
+  isEqual(other: PlainDateTime | Temporal.PlainDateTimeLike): boolean {
+    return PlainDateTime.compare(this, other) === 0
   }
 }
