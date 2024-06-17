@@ -1,7 +1,13 @@
 import type { TableSchemaRaw } from '@shared/database/types/schema'
 import { entriesOf, objectFromEntries } from '@shared/lib/utils/object'
 import type { ColumnType } from '@shared/database/types/database'
-import { check, isNotNull, isNull, isString } from '@shared/lib/utils/checks'
+import {
+  check,
+  isDefined,
+  isNotNull,
+  isNull,
+  isString,
+} from '@shared/lib/utils/checks'
 import type { Nullable, Pair } from '@shared/lib/utils/types'
 import { Temporal } from 'temporal-polyfill'
 
@@ -34,7 +40,11 @@ export function serializeRow<TRow extends object>(
     ] as Pair<keyof TRow, any>
   })
 
-  return objectFromEntries(mappedEntries) as object
+  return objectFromEntries(
+    // filter out undefined entries to avoid getting an object with undefined values.
+    //  yes there is a difference between an undefined value and a missing key
+    mappedEntries.filter(([, value]) => isDefined(value)),
+  ) as object
 }
 
 export function deserializeRow<TRow extends object>(
