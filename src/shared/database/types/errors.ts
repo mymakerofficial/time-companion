@@ -51,11 +51,22 @@ export class DatabaseVersionMissingError extends DatabaseError {
   }
 }
 
-export class DatabaseSchemaMismatchError extends DatabaseError {
-  constructor() {
+export class DatabaseMigrationTableMismatchError extends DatabaseError {
+  constructor(tableName: string) {
     super(
-      'DatabaseSchemaMismatchError',
+      'DatabaseMigrationTableMismatchError',
       'The database schema after migration does not match the expected schema.',
+      `The table "${tableName}" is either missing columns, has extra columns, or the column types do not match.`,
+    )
+  }
+}
+
+export class DatabaseMigrationTableMissingError extends DatabaseError {
+  constructor(tableName: string) {
+    super(
+      'DatabaseMigrationTableMissingError',
+      'The database schema after migration does not match the expected schema.',
+      `The table "${tableName}" is either missing from the database or the config.`,
     )
   }
 }

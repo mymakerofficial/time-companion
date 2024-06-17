@@ -29,7 +29,7 @@ import {
 } from '@shared/events/publisher'
 import {
   DatabaseAlreadyOpenError,
-  DatabaseSchemaMismatchError,
+  DatabaseMigrationTableMismatchError,
   DatabaseVersionTooHighError,
 } from '@shared/database/types/errors'
 import { emptyMap, toArray } from '@shared/lib/utils/list'
@@ -162,11 +162,12 @@ export class DatabaseImpl<TSchema extends DatabaseSchema>
 
       const runtimeTableSchema = this.runtimeSchema.get(tableName)
 
-      if (
-        isUndefined(runtimeTableSchema) ||
-        !rawTableSchemasMatch(runtimeTableSchema, tableSchema._.raw)
-      ) {
-        throw new DatabaseSchemaMismatchError()
+      if (isUndefined(runtimeTableSchema)) {
+        throw new DatabaseMigrationTableMismatchError(tableName)
+      }
+
+      if (!rawTableSchemasMatch(runtimeTableSchema, tableSchema._.raw)) {
+        throw new DatabaseMigrationTableMismatchError(tableName)
       }
     })
   }
