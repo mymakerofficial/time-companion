@@ -19,6 +19,11 @@ import config from '@shared/database.config'
 import { ServiceTestHelpers } from '@test/fixtures/service/serviceTestHelpers'
 import { createDayService, type DayService } from '@shared/service/dayService'
 import { createDayPersistence } from '@shared/persistence/dayPersistence'
+import {
+  createTimeEntryService,
+  type TimeEntryService,
+} from '@shared/service/timeEntryService'
+import { createTimeEntryPersistence } from '@shared/persistence/timeEntryPersistence'
 
 import 'fake-indexeddb/auto'
 
@@ -27,6 +32,7 @@ export interface ServiceFixtures {
   taskService: TaskService
   projectService: ProjectService
   dayService: DayService
+  timeEntryService: TimeEntryService
   serviceHelpers: ServiceTestHelpers
   projectHelpers: ProjectTestHelpers
   taskHelpers: TaskTestHelpers
@@ -56,6 +62,13 @@ export const useServiceFixtures = createFixtures<ServiceFixtures>({
   dayService: ({ database }) => {
     return createDayService({
       dayPersistence: createDayPersistence({
+        database: database,
+      }),
+    })
+  },
+  timeEntryService: ({ database }) => {
+    return createTimeEntryService({
+      timeEntryPersistence: createTimeEntryPersistence({
         database: database,
       }),
     })
