@@ -15,7 +15,12 @@ import { uuid } from '@shared/lib/utils/uuid'
 import { firstOf } from '@shared/lib/utils/list'
 import { daysTable } from '@shared/model/day'
 import { toDayDto } from '@shared/model/mappers/day'
-import { check, isNotNull, isNull } from '@shared/lib/utils/checks'
+import {
+  check,
+  IllegalStateError,
+  isNotNull,
+  isNull,
+} from '@shared/lib/utils/checks'
 import { and, or } from '@shared/database/schema/columnDefinition'
 
 export type TimeEntryPersistenceDependencies = {
@@ -105,43 +110,46 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
           `Time entry must end at most 24 hours after the first time entry of the given day.`,
         )
 
-        const overlappingTimeEntry = await tx
-          .table(timeEntriesTable)
-          .findFirst({
-            range: timeEntriesTable.startedAt.range.between(
-              timeEntry.startedAt.subtract({ hours: 24 }).toDate(),
-              timeEntry.startedAt.add({ hours: 24 }).toDate(),
-            ),
-            where: and(
-              timeEntriesTable.stoppedAt.isNotNull(),
-              or(
-                and(
-                  timeEntriesTable.startedAt.lessThan(
-                    timeEntry.startedAt.toDate(),
-                  ),
-                  timeEntriesTable.stoppedAt.greaterThan(
-                    timeEntry.startedAt.toDate(),
-                  ),
+        const collidingTimeEntry = await tx.table(timeEntriesTable).findFirst({
+          range: timeEntriesTable.startedAt.range.between(
+            timeEntry.startedAt.subtract({ hours: 24 }).toDate(),
+            timeEntry.startedAt.add({ hours: 24 }).toDate(),
+          ),
+          where: or(
+            timeEntriesTable.stoppedAt.isNull(),
+            or(
+              and(
+                timeEntriesTable.startedAt.lessThan(
+                  timeEntry.startedAt.toDate(),
                 ),
-                and(
-                  timeEntriesTable.startedAt.lessThan(
-                    timeEntry.stoppedAt?.toDate() ??
-                      timeEntry.startedAt.toDate(),
-                  ),
-                  timeEntriesTable.stoppedAt.greaterThan(
-                    timeEntry.stoppedAt?.toDate() ??
-                      timeEntry.startedAt.toDate(),
-                  ),
+                timeEntriesTable.stoppedAt.greaterThan(
+                  timeEntry.startedAt.toDate(),
+                ),
+              ),
+              and(
+                timeEntriesTable.startedAt.lessThan(
+                  timeEntry.stoppedAt?.toDate() ?? timeEntry.startedAt.toDate(),
+                ),
+                timeEntriesTable.stoppedAt.greaterThan(
+                  timeEntry.stoppedAt?.toDate() ?? timeEntry.startedAt.toDate(),
                 ),
               ),
             ),
-            map: toTimeEntryDto,
-          })
+          ),
+          map: toTimeEntryDto,
+        })
 
-        check(
-          isNull(overlappingTimeEntry),
-          `Time entry must not overlap with an existing time entry.`,
-        )
+        if (isNotNull(collidingTimeEntry)) {
+          if (collidingTimeEntry.stoppedAt === null) {
+            throw new IllegalStateError(
+              'Cannot create a time entry while another time entry is running.',
+            )
+          }
+
+          throw new IllegalStateError(
+            'Time entry must not overlap with an existing time entry.',
+          )
+        }
       }
 
       return await tx.table(timeEntriesTable).insert({

@@ -243,5 +243,32 @@ describe('timeEntryService', () => {
     it.todo(
       'should fail to create the first time entry of a day with startedAt not at same date',
     )
+
+    it('should fail to create a time entry while another time entry without stoppedAt exists', async () => {
+      const day = await dayService.createDay({
+        date: PlainDate.from('2021-01-01'),
+        targetBillableDuration: null,
+      })
+
+      await timeEntryService.createTimeEntry({
+        dayId: day.id,
+        projectId: null,
+        taskId: null,
+        description: 'Test time entry',
+        startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+        stoppedAt: null,
+      })
+
+      await expect(
+        timeEntryService.createTimeEntry({
+          dayId: day.id,
+          projectId: null,
+          taskId: null,
+          description: 'Test time entry',
+          startedAt: PlainDateTime.from('2021-01-01T09:00:00'),
+          stoppedAt: PlainDateTime.from('2021-01-01T10:00:00'),
+        }),
+      ).rejects.toThrowError()
+    })
   })
 })
