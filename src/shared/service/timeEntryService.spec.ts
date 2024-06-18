@@ -29,6 +29,24 @@ describe('timeEntryService', () => {
       expect(firstOf(timeEntries)).toEqual(expect.objectContaining(timeEntry))
     })
 
+    it('should fail to create a time entry with a dayId that does not exist', async () => {
+      const day = await dayHelpers.createSampleDay({
+        date: PlainDate.from('2021-01-01'),
+      })
+
+      const nonExistingDayId = uuid()
+
+      const timeEntry = timeEntryHelpers.sampleTimeEntry({
+        dayId: nonExistingDayId,
+        startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+        stoppedAt: PlainDateTime.from('2021-01-01T09:00:00'),
+      })
+
+      await expect(
+        timeEntryService.createTimeEntry(timeEntry),
+      ).rejects.toThrowError(`Day with id "${nonExistingDayId}" not found.`)
+    })
+
     it('should fail to create a time entry with a stoppedAt before startedAt', async () => {
       const day = await dayHelpers.createSampleDay({
         date: PlainDate.from('2021-01-01'),
@@ -284,6 +302,26 @@ describe('timeEntryService', () => {
           description: 'Updated time entry',
         }),
       ).rejects.toThrowError(`Time entry with id "${nonExistingId}" not found`)
+    })
+
+    it('should fail when trying to update the dayId to a day that doesnt exist', async () => {
+      const day = await dayHelpers.createSampleDay({
+        date: PlainDate.from('2021-01-01'),
+      })
+
+      const timeEntry = await timeEntryHelpers.createSampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+        stoppedAt: null,
+      })
+
+      const nonExistingDayId = uuid()
+
+      await expect(
+        timeEntryService.patchTimeEntry(timeEntry.id, {
+          dayId: nonExistingDayId,
+        }),
+      ).rejects.toThrowError(`Day with id "${nonExistingDayId}" not found`)
     })
 
     it('should fail when trying to update a time entry with a stoppedAt before startedAt', async () => {

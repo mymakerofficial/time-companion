@@ -89,7 +89,7 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
         map: toDayDto,
       })
 
-      check(isNotNull(day), `Day with id "${timeEntry.dayId}" not found`)
+      check(isNotNull(day), `Day with id "${timeEntry.dayId}" not found.`)
 
       check(
         timeEntry.startedAt.isAfterOrEqual(day.date),
@@ -183,12 +183,25 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
         }),
       )
 
-      check(isNotNull(updatedTimeEntry), `Time entry with id "${id}" not found`)
+      check(
+        isNotNull(updatedTimeEntry),
+        `Time entry with id "${id}" not found.`,
+      )
 
       check(
         isNull(updatedTimeEntry.stoppedAt) ||
           updatedTimeEntry.startedAt.isBefore(updatedTimeEntry.stoppedAt),
         `Time entry must start before it stops.`,
+      )
+
+      const day = await tx.table(daysTable).findFirst({
+        range: daysTable.id.range.only(updatedTimeEntry.dayId),
+        map: toDayDto,
+      })
+
+      check(
+        isNotNull(day),
+        `Day with id "${updatedTimeEntry.dayId}" not found.`,
       )
 
       return updatedTimeEntry
