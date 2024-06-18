@@ -24,8 +24,11 @@ import {
   type TimeEntryService,
 } from '@shared/service/timeEntryService'
 import { createTimeEntryPersistence } from '@shared/persistence/timeEntryPersistence'
+import { afterAll, afterEach, beforeAll } from 'vitest'
+import { DayTestHelpers } from '@test/fixtures/service/dayTestHelpers'
 
 import 'fake-indexeddb/auto'
+import { TimeEntryTestHelpers } from '@test/fixtures/service/timeEntryTestHelpers'
 
 export interface ServiceFixtures {
   database: Database
@@ -36,6 +39,8 @@ export interface ServiceFixtures {
   serviceHelpers: ServiceTestHelpers
   projectHelpers: ProjectTestHelpers
   taskHelpers: TaskTestHelpers
+  dayHelpers: DayTestHelpers
+  timeEntryHelpers: TimeEntryTestHelpers
 }
 
 export const useServiceFixtures = createFixtures<ServiceFixtures>({
@@ -82,4 +87,28 @@ export const useServiceFixtures = createFixtures<ServiceFixtures>({
   taskHelpers: ({ taskService, projectService }) => {
     return new TaskTestHelpers(taskService, projectService)
   },
+  dayHelpers: ({ dayService }) => {
+    return new DayTestHelpers(dayService)
+  },
+  timeEntryHelpers: ({ timeEntryService }) => {
+    return new TimeEntryTestHelpers(timeEntryService)
+  },
 })
+
+export function useServiceTest() {
+  const fixtures = useServiceFixtures()
+
+  beforeAll(async () => {
+    await fixtures.serviceHelpers.setup()
+  })
+
+  afterAll(async () => {
+    await fixtures.serviceHelpers.teardown()
+  })
+
+  afterEach(async () => {
+    await fixtures.serviceHelpers.cleanup()
+  })
+
+  return fixtures
+}
