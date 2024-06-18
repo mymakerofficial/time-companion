@@ -354,5 +354,52 @@ describe('timeEntryService', () => {
         }),
       ).rejects.toThrowError(`Time entry with id "${nonExistingId}" not found`)
     })
+
+    it('should fail when trying to update a time entry with a stoppedAt before startedAt', async () => {
+      const day = await dayService.createDay({
+        date: PlainDate.from('2021-01-01'),
+        targetBillableDuration: null,
+      })
+
+      const timeEntry = await timeEntryService.createTimeEntry({
+        dayId: day.id,
+        projectId: null,
+        taskId: null,
+        description: 'Test time entry',
+        startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+        stoppedAt: PlainDateTime.from('2021-01-01T09:00:00'),
+      })
+
+      await expect(
+        timeEntryService.patchTimeEntry(timeEntry.id, {
+          startedAt: PlainDateTime.from('2021-01-01T09:00:00'),
+          stoppedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+        }),
+      ).rejects.toThrowError('Time entry must start before it stops.')
+    })
+
+    it('should fail when trying to update a time entry with a startedAt before midnight of the day', async () => {
+      const day = await dayService.createDay({
+        date: PlainDate.from('2021-01-02'),
+        targetBillableDuration: null,
+      })
+
+      const timeEntry = await timeEntryService.createTimeEntry({
+        dayId: day.id,
+        projectId: null,
+        taskId: null,
+        description: 'Test time entry',
+        startedAt: PlainDateTime.from('2021-01-02T00:00:00'),
+        stoppedAt: null,
+      })
+
+      await expect(
+        timeEntryService.patchTimeEntry(timeEntry.id, {
+          startedAt: PlainDateTime.from('2021-01-01T23:59:00'),
+        }),
+      ).rejects.toThrowError(
+        'Time entry must start after midnight of the given day.',
+      )
+    })
   })
 })
