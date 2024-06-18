@@ -362,5 +362,29 @@ describe('timeEntryService', () => {
         'Time entry must start after midnight of the given day.',
       )
     })
+
+    it('should not fail when trying to update a time entry to a startedAt at midnight of the day', async () => {
+      const day = await dayHelpers.createSampleDay({
+        date: PlainDate.from('2021-01-01'),
+      })
+
+      const timeEntry = await timeEntryHelpers.createSampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-01T00:08:00'),
+        stoppedAt: null,
+      })
+
+      await timeEntryService.patchTimeEntry(timeEntry.id, {
+        startedAt: PlainDateTime.from('2021-01-01T00:00:00'),
+      })
+
+      const timeEntries = await timeEntryService.getTimeEntriesByDayId(day.id)
+
+      expect(firstOf(timeEntries)).toEqual(
+        expect.objectContaining({
+          startedAt: PlainDateTime.from('2021-01-01T00:00:00'),
+        }),
+      )
+    })
   })
 })
