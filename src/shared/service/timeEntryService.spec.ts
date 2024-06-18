@@ -13,6 +13,7 @@ import { PlainDate } from '@shared/lib/datetime/plainDate'
 import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 import { firstOf } from '@shared/lib/utils/list'
 import { uuid } from '@shared/lib/utils/uuid'
+import { acceptNull } from '@shared/lib/utils/acceptNull'
 
 describe('timeEntryService', () => {
   const { serviceHelpers, timeEntryService, dayService } = useServiceFixtures()
@@ -239,9 +240,7 @@ describe('timeEntryService', () => {
                 taskId: null,
                 description: 'Test time entry',
                 startedAt: PlainDateTime.from(secondStartedAt),
-                stoppedAt: secondStoppedAt
-                  ? PlainDateTime.from(secondStoppedAt)
-                  : null,
+                stoppedAt: acceptNull(PlainDateTime.from)(secondStoppedAt),
               }),
             ).rejects.toThrowError(
               'Time entry must not overlap with an existing time entry.',

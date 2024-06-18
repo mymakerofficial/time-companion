@@ -1,5 +1,6 @@
 import type { ProjectDto, ProjectEntity } from '@shared/model/project'
 import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
+import { acceptNull } from '@shared/lib/utils/acceptNull'
 
 export function toProjectDto(project: ProjectEntity): ProjectDto {
   return {
@@ -9,9 +10,7 @@ export function toProjectDto(project: ProjectEntity): ProjectDto {
     isBillable: project.isBillable,
     isBreak: project.isBreak,
     createdAt: PlainDateTime.from(project.createdAt),
-    modifiedAt: project.modifiedAt
-      ? PlainDateTime.from(project.modifiedAt)
-      : null,
-    deletedAt: project.deletedAt ? PlainDateTime.from(project.deletedAt) : null,
+    modifiedAt: acceptNull(PlainDateTime.from)(project.modifiedAt),
+    deletedAt: acceptNull(PlainDateTime.from)(project.deletedAt),
   }
 }
