@@ -204,6 +204,11 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
         `Day with id "${updatedTimeEntry.dayId}" not found.`,
       )
 
+      check(
+        updatedTimeEntry.startedAt.isAfterOrEqual(day.date),
+        `Time entry must start after midnight of the given day.`,
+      )
+
       return updatedTimeEntry
     })
   }

@@ -345,7 +345,7 @@ describe('timeEntryService', () => {
 
     it('should fail when trying to update a time entry with a startedAt before midnight of the day', async () => {
       const day = await dayHelpers.createSampleDay({
-        date: PlainDate.from('2021-01-01'),
+        date: PlainDate.from('2021-01-02'),
       })
 
       const timeEntry = await timeEntryHelpers.createSampleTimeEntry({
