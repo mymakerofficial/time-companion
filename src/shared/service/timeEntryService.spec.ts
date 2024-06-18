@@ -252,6 +252,22 @@ describe('timeEntryService', () => {
         timeEntryService.createTimeEntry(timeEntry),
       ).rejects.toThrowError()
     })
+
+    it('should fail to create a time entry longer than 24h', async () => {
+      const day = await dayHelpers.createSampleDay({
+        date: PlainDate.from('2021-01-01'),
+      })
+
+      const timeEntry = timeEntryHelpers.sampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-01T09:00:00'),
+        stoppedAt: PlainDateTime.from('2021-01-02T10:00:00'),
+      })
+
+      await expect(
+        timeEntryService.createTimeEntry(timeEntry),
+      ).rejects.toThrowError()
+    })
   })
 
   describe('patchTimeEntry', () => {
