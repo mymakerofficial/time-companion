@@ -217,6 +217,21 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
         `Time entry must start after midnight of the given day.`,
       )
 
+      const earliestTimeEntry = await tx.table(timeEntriesTable).findFirst({
+        range: timeEntriesTable.dayId.range.only(day.id),
+        orderBy: timeEntriesTable.startedAt.asc(),
+        map: toTimeEntryDto,
+      })
+
+      if (isNotNull(earliestTimeEntry)) {
+        check(
+          earliestTimeEntry.startedAt
+            .add({ hours: 24 })
+            .isAfter(updatedTimeEntry.stoppedAt ?? updatedTimeEntry.startedAt),
+          `Time entry must end at most 24 hours after the first time entry of the given day.`,
+        )
+      }
+
       return updatedTimeEntry
     })
   }

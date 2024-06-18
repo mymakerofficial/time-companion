@@ -398,5 +398,63 @@ describe('timeEntryService', () => {
         }),
       )
     })
+
+    it.todo(
+      'should fail to update a time entry to a startedAt 24h after the first time entry of the day',
+      async () => {
+        const day = await dayHelpers.createSampleDay({
+          date: PlainDate.from('2021-01-01'),
+        })
+
+        await timeEntryHelpers.createSampleTimeEntry({
+          dayId: day.id,
+          startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+          stoppedAt: PlainDateTime.from('2021-01-01T09:00:00'),
+        })
+
+        const timeEntry = await timeEntryHelpers.createSampleTimeEntry({
+          dayId: day.id,
+          startedAt: PlainDateTime.from('2021-01-01T10:00:00'),
+          stoppedAt: null,
+        })
+
+        await expect(
+          timeEntryService.patchTimeEntry(timeEntry.id, {
+            startedAt: PlainDateTime.from('2021-01-02T08:00:00'),
+          }),
+        ).rejects.toThrowError(
+          'Time entry must end at most 24 hours after the first time entry of the given day.',
+        )
+      },
+    )
+
+    it.todo(
+      'should fail to update a time entry to a stoppedAt 24h after the first time entry of the day',
+      async () => {
+        const day = await dayHelpers.createSampleDay({
+          date: PlainDate.from('2021-01-01'),
+        })
+
+        await timeEntryHelpers.createSampleTimeEntry({
+          dayId: day.id,
+          startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+          stoppedAt: PlainDateTime.from('2021-01-01T09:00:00'),
+        })
+
+        const timeEntry = await timeEntryHelpers.createSampleTimeEntry({
+          dayId: day.id,
+          startedAt: PlainDateTime.from('2021-01-01T09:00:00'),
+          stoppedAt: PlainDateTime.from('2021-01-01T10:00:00'),
+        })
+
+        await expect(
+          timeEntryService.patchTimeEntry(timeEntry.id, {
+            stoppedAt: PlainDateTime.from('2021-01-02T08:00:00'),
+          }),
+        ).rejects.toThrowError(
+          'Time entry must end at most 24 hours after the first time entry of the given day.',
+        )
+      },
+    )
   })
 })
