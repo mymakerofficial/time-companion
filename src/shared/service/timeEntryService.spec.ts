@@ -1,4 +1,13 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  it,
+  suite,
+  test,
+} from 'vitest'
 import { useServiceFixtures } from '@test/fixtures/service/serviceFixtures'
 import { PlainDate } from '@shared/lib/datetime/plainDate'
 import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
@@ -179,65 +188,70 @@ describe('timeEntryService', () => {
       )
     })
 
-    it.each([
-      [
-        '2021-01-01T08:00:00',
-        '2021-01-01T09:00:00',
-        '2021-01-01T08:30:00',
-        '2021-01-01T09:30:00',
-      ],
-      [
-        '2021-01-01T08:00:00',
-        '2021-01-01T09:00:00',
-        '2021-01-01T08:30:00',
-        null,
-      ],
-      [
-        '2021-01-01T08:00:00',
-        '2021-01-01T09:00:00',
-        '2021-01-01T07:30:00',
-        '2021-01-01T08:30:00',
-      ],
-    ])(
-      'should fail to create a time entry that overlaps with an existing time entry, %s - %s, %s - %s',
-      async (
-        firstStartedAt,
-        firstStoppedAt,
-        secondStartedAt,
-        secondStoppedAt,
-      ) => {
-        const day = await dayService.createDay({
-          date: PlainDate.from('2021-01-01'),
-          targetBillableDuration: null,
-        })
+    suite(
+      'should fail to create a time entry that overlaps with an existing time entry',
+      () => {
+        test.each([
+          [
+            '2021-01-01T08:00:00',
+            '2021-01-01T09:00:00',
+            '2021-01-01T08:30:00',
+            '2021-01-01T09:30:00',
+          ],
+          [
+            '2021-01-01T08:00:00',
+            '2021-01-01T09:00:00',
+            '2021-01-01T08:30:00',
+            null,
+          ],
+          [
+            '2021-01-01T08:00:00',
+            '2021-01-01T09:00:00',
+            '2021-01-01T07:30:00',
+            '2021-01-01T08:30:00',
+          ],
+        ])(
+          '%s - %s, %s - %s',
+          async (
+            firstStartedAt,
+            firstStoppedAt,
+            secondStartedAt,
+            secondStoppedAt,
+          ) => {
+            const day = await dayService.createDay({
+              date: PlainDate.from('2021-01-01'),
+              targetBillableDuration: null,
+            })
 
-        await timeEntryService.createTimeEntry({
-          dayId: day.id,
-          projectId: null,
-          taskId: null,
-          description: 'Test time entry',
-          startedAt: PlainDateTime.from(firstStartedAt),
-          stoppedAt: PlainDateTime.from(firstStoppedAt),
-        })
+            await timeEntryService.createTimeEntry({
+              dayId: day.id,
+              projectId: null,
+              taskId: null,
+              description: 'Test time entry',
+              startedAt: PlainDateTime.from(firstStartedAt),
+              stoppedAt: PlainDateTime.from(firstStoppedAt),
+            })
 
-        await expect(
-          timeEntryService.createTimeEntry({
-            dayId: day.id,
-            projectId: null,
-            taskId: null,
-            description: 'Test time entry',
-            startedAt: PlainDateTime.from(secondStartedAt),
-            stoppedAt: secondStoppedAt
-              ? PlainDateTime.from(secondStoppedAt)
-              : null,
-          }),
-        ).rejects.toThrowError(
-          'Time entry must not overlap with an existing time entry.',
+            await expect(
+              timeEntryService.createTimeEntry({
+                dayId: day.id,
+                projectId: null,
+                taskId: null,
+                description: 'Test time entry',
+                startedAt: PlainDateTime.from(secondStartedAt),
+                stoppedAt: secondStoppedAt
+                  ? PlainDateTime.from(secondStoppedAt)
+                  : null,
+              }),
+            ).rejects.toThrowError(
+              'Time entry must not overlap with an existing time entry.',
+            )
+
+            await expect(
+              timeEntryService.getTimeEntriesByDayId(day.id),
+            ).resolves.toHaveLength(1)
+          },
         )
-
-        await expect(
-          timeEntryService.getTimeEntriesByDayId(day.id),
-        ).resolves.toHaveLength(1)
       },
     )
 
