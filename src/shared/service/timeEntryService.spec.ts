@@ -132,24 +132,20 @@ describe('timeEntryService', () => {
         date: PlainDate.from('2021-01-01'),
       })
 
-      await timeEntryService.createTimeEntry({
+      await timeEntryHelpers.createSampleTimeEntry({
         dayId: day.id,
-        projectId: null,
-        taskId: null,
-        description: 'Test time entry',
         startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
         stoppedAt: PlainDateTime.from('2021-01-01T09:00:00'),
       })
 
+      const timeEntry = timeEntryHelpers.sampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-02T07:00:00'),
+        stoppedAt: PlainDateTime.from('2021-01-02T08:00:00'),
+      })
+
       await expect(
-        timeEntryService.createTimeEntry({
-          dayId: day.id,
-          projectId: null,
-          taskId: null,
-          description: 'Test time entry',
-          startedAt: PlainDateTime.from('2021-01-02T07:00:00'),
-          stoppedAt: PlainDateTime.from('2021-01-02T08:00:00'),
-        }),
+        timeEntryService.createTimeEntry(timeEntry),
       ).rejects.toThrowError(
         'Time entry must end at most 24 hours after the first time entry of the given day.',
       )
