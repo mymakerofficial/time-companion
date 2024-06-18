@@ -81,3 +81,10 @@ export function emptyMap<K, V>(): Map<K, V> {
 export function arraysHaveOverlap<T>(a: Array<T>, b: Array<T>): boolean {
   return a.some((value) => b.includes(value))
 }
+
+export function arrayOfLength<T>(
+  length: number,
+  mapfn: (v: unknown, k: number) => T,
+): Array<T> {
+  return Array.from({ length }, mapfn)
+}
