@@ -2,6 +2,7 @@ import { Temporal } from 'temporal-polyfill'
 import { isDate } from '@shared/lib/utils/checks'
 import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 import type { PlainTime } from '@shared/lib/datetime/plainTime'
+import type { Duration } from '@shared/lib/datetime/duration'
 
 export class PlainDate extends Temporal.PlainDate {
   static from(
@@ -16,7 +17,15 @@ export class PlainDate extends Temporal.PlainDate {
       })
     }
 
-    const fields = Temporal.PlainDate.from(item, options).getISOFields()
+    return PlainDate.fromTemporalPlainDate(
+      Temporal.PlainDate.from(item, options),
+    )
+  }
+
+  static fromTemporalPlainDate(
+    temporalPlainDate: Temporal.PlainDate,
+  ): PlainDate {
+    const fields = temporalPlainDate.getISOFields()
 
     return new PlainDate(
       fields.isoYear,
@@ -39,6 +48,22 @@ export class PlainDate extends Temporal.PlainDate {
   ): PlainDateTime {
     return PlainDateTime.fromTemporalPlainDateTime(
       super.toPlainDateTime(temporalDate),
+    )
+  }
+
+  add(
+    durationLike: Duration | Temporal.Duration | Temporal.DurationLike | string,
+    options?: Temporal.ArithmeticOptions,
+  ): PlainDate {
+    return PlainDate.fromTemporalPlainDate(super.add(durationLike, options))
+  }
+
+  subtract(
+    durationLike: Duration | Temporal.Duration | Temporal.DurationLike | string,
+    options?: Temporal.ArithmeticOptions,
+  ): PlainDate {
+    return PlainDate.fromTemporalPlainDate(
+      super.subtract(durationLike, options),
     )
   }
 }

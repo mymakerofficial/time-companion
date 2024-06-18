@@ -1,6 +1,6 @@
 import { Temporal } from 'temporal-polyfill'
 import { isDate } from '@shared/lib/utils/checks'
-import type { Duration } from '@shared/lib/datetime/duration'
+import { Duration } from '@shared/lib/datetime/duration'
 
 export class PlainDateTime extends Temporal.PlainDateTime {
   static from(
@@ -77,6 +77,24 @@ export class PlainDateTime extends Temporal.PlainDateTime {
     return PlainDateTime.fromTemporalPlainDateTime(
       super.subtract(durationLike, options),
     )
+  }
+
+  until(
+    other: Temporal.PlainDateTime | Temporal.PlainDateTimeLike | string,
+    options?: Temporal.DifferenceOptions<
+      | 'year'
+      | 'month'
+      | 'week'
+      | 'day'
+      | 'hour'
+      | 'minute'
+      | 'second'
+      | 'millisecond'
+      | 'microsecond'
+      | 'nanosecond'
+    >,
+  ): Duration {
+    return Duration.fromTemporalDuration(super.until(other, options))
   }
 
   isBefore(other: PlainDateTime | Temporal.PlainDateTimeLike): boolean {

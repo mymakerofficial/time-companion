@@ -1,6 +1,7 @@
 import { Temporal } from 'temporal-polyfill'
 import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 import { PlainDate } from '@shared/lib/datetime/plainDate'
+import type { Duration } from '@shared/lib/datetime/duration'
 
 export class PlainTime extends Temporal.PlainTime {
   static from(
@@ -24,8 +25,18 @@ export class PlainTime extends Temporal.PlainTime {
     )
   }
 
-  add(duration: Temporal.Duration): PlainTime {
-    return PlainTime.fromTemporalPlainTime(super.add(duration))
+  add(
+    durationLike: Duration | Temporal.Duration | Temporal.DurationLike | string,
+    options?: Temporal.ArithmeticOptions,
+  ): PlainTime {
+    return PlainTime.fromTemporalPlainTime(super.add(durationLike))
+  }
+
+  subtract(
+    durationLike: Duration | Temporal.Duration | Temporal.DurationLike | string,
+    options?: Temporal.ArithmeticOptions,
+  ): PlainTime {
+    return PlainTime.fromTemporalPlainTime(super.subtract(durationLike))
   }
 
   toPlainDateTime(
