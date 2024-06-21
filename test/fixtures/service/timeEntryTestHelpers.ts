@@ -6,12 +6,18 @@ import {
 import { randomDateTime } from '@test/helpers/datetime'
 import type { TimeEntryService } from '@shared/service/timeEntryService'
 import type { TimeEntryBase, TimeEntryDto } from '@shared/model/timeEntry'
+import { timeEntriesTable } from '@shared/model/timeEntry'
 import { uuid } from '@shared/lib/utils/uuid'
 import { faker } from '@faker-js/faker'
 import { isSometimesNullOr } from '@test/helpers/maybe'
+import type { Database } from '@shared/database/types/database'
+import { toTimeEntryDto } from '@shared/model/mappers/timeEntry'
 
 export class TimeEntryTestHelpers {
-  constructor(private readonly timeEntryService: TimeEntryService) {}
+  constructor(
+    private readonly timeEntryService: TimeEntryService,
+    private readonly database: Database,
+  ) {}
 
   sampleTimeEntry(override: Partial<TimeEntryBase>): TimeEntryBase {
     return {
@@ -50,5 +56,12 @@ export class TimeEntryTestHelpers {
     return await Promise.all(
       sampleDays.map(this.timeEntryService.createTimeEntry),
     )
+  }
+
+  async getAll(): Promise<Array<TimeEntryDto>> {
+    return await this.database.table(timeEntriesTable).findMany({
+      where: timeEntriesTable.deletedAt.isNull(),
+      map: toTimeEntryDto,
+    })
   }
 }

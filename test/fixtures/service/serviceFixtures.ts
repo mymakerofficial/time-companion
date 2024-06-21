@@ -90,8 +90,8 @@ export const useServiceFixtures = createFixtures<ServiceFixtures>({
   dayHelpers: ({ dayService }) => {
     return new DayTestHelpers(dayService)
   },
-  timeEntryHelpers: ({ timeEntryService }) => {
-    return new TimeEntryTestHelpers(timeEntryService)
+  timeEntryHelpers: ({ timeEntryService, database }) => {
+    return new TimeEntryTestHelpers(timeEntryService, database)
   },
 })
 

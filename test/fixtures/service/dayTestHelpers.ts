@@ -6,6 +6,7 @@ import {
   type TestDataOverride,
 } from '@test/helpers/testDataOverride'
 import { randomDate } from '@test/helpers/datetime'
+import { PlainDate } from '@shared/lib/datetime/plainDate'
 
 export class DayTestHelpers {
   constructor(private readonly dayService: DayService) {}
@@ -37,5 +38,9 @@ export class DayTestHelpers {
   ): Promise<Array<DayDto>> {
     const sampleDays = this.sampleDays(amount, override)
     return await Promise.all(sampleDays.map(this.dayService.createDay))
+  }
+
+  async createDay(date: string | PlainDate): Promise<DayDto> {
+    return await this.createSampleDay({ date: PlainDate.from(date) })
   }
 }
