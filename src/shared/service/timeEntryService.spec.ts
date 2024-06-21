@@ -252,9 +252,7 @@ describe('timeEntryService', () => {
             secondStartedAt,
             secondStoppedAt,
           ) => {
-            const day = await dayHelpers.createSampleDay({
-              date: PlainDate.from('2021-01-01'),
-            })
+            const day = await dayHelpers.createDay('2021-01-01')
 
             const firstTimeEntry = timeEntryHelpers.sampleTimeEntry({
               dayId: day.id,
@@ -289,6 +287,37 @@ describe('timeEntryService', () => {
         )
       },
     )
+
+    it('should not fail to create time entries that touch but do not overlap', async () => {
+      const day = await dayHelpers.createDay('2021-01-01')
+
+      const firstTimeEntry = timeEntryHelpers.sampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+        stoppedAt: PlainDateTime.from('2021-01-01T09:00:00'),
+      })
+
+      const secondTimeEntry = timeEntryHelpers.sampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-01T09:00:00'),
+        stoppedAt: PlainDateTime.from('2021-01-01T10:00:00'),
+      })
+
+      await expect(
+        timeEntryService.createTimeEntry(firstTimeEntry),
+      ).resolves.toEqual(timeEntryDtoContaining(firstTimeEntry))
+
+      await expect(
+        timeEntryService.createTimeEntry(secondTimeEntry),
+      ).resolves.toEqual(timeEntryDtoContaining(secondTimeEntry))
+
+      // ensure the time entries were created.
+      const timeEntries = await timeEntryService.getTimeEntriesByDayId(day.id)
+      expect(timeEntries).toContainEqual(timeEntryDtoContaining(firstTimeEntry))
+      expect(timeEntries).toContainEqual(
+        timeEntryDtoContaining(secondTimeEntry),
+      )
+    })
 
     it('should fail to create the first time entry of a day with startedAt not at same date', async () => {
       const day = await dayHelpers.createDay('2021-01-01')
@@ -703,6 +732,35 @@ describe('timeEntryService', () => {
         )
       },
     )
+
+    it('should not fail to updates time entries to touch but do not overlap', async () => {
+      const day = await dayHelpers.createDay('2021-01-01')
+
+      await timeEntryHelpers.createSampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+        stoppedAt: PlainDateTime.from('2021-01-01T09:00:00'),
+      })
+
+      const timeEntry = await timeEntryHelpers.createSampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-01T12:00:00'),
+        stoppedAt: PlainDateTime.from('2021-01-01T14:00:00'),
+      })
+
+      const update = {
+        startedAt: PlainDateTime.from('2021-01-01T06:00:00'),
+        stoppedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+      }
+
+      await expect(
+        timeEntryService.patchTimeEntry(timeEntry.id, update),
+      ).resolves.toEqual(timeEntryDtoContaining(update))
+
+      // ensure the time entry was updated.
+      const timeEntries = await timeEntryService.getTimeEntriesByDayId(day.id)
+      expect(timeEntries).toContainEqual(timeEntryDtoContaining(update))
+    })
 
     it('should fail to update the only time entry of a day with startedAt not at same date', async () => {
       const day = await dayHelpers.createDay('2021-01-01')
