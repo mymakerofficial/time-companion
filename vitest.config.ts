@@ -4,6 +4,8 @@ import viteConfig from './vite.config'
 export default mergeConfig(
   viteConfig,
   defineConfig({
-    test: {},
+    test: {
+      setupFiles: ['./test/setup.ts'],
+    },
   }),
 )
