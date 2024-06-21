@@ -128,7 +128,7 @@ describe('timeEntryService', () => {
       await timeEntryHelpers.createSampleTimeEntry({
         dayId: day.id,
         startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
-        stoppedAt: null,
+        stoppedAt: PlainDateTime.from('2021-01-01T09:00:00'),
       })
 
       const timeEntry = timeEntryHelpers.sampleTimeEntry({
@@ -154,7 +154,7 @@ describe('timeEntryService', () => {
       await timeEntryHelpers.createSampleTimeEntry({
         dayId: day.id,
         startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
-        stoppedAt: null,
+        stoppedAt: PlainDateTime.from('2021-01-01T09:00:00'),
       })
 
       const timeEntry = timeEntryHelpers.sampleTimeEntry({
@@ -490,9 +490,7 @@ describe('timeEntryService', () => {
       }
 
       await expect(
-        timeEntryService.patchTimeEntry(timeEntry.id, {
-          startedAt: PlainDateTime.from('2021-01-01T00:00:00'),
-        }),
+        timeEntryService.patchTimeEntry(timeEntry.id, update),
       ).resolves.toEqual(timeEntryDtoContaining(update))
 
       // ensure the time entry was updated.
@@ -506,7 +504,7 @@ describe('timeEntryService', () => {
       await timeEntryHelpers.createSampleTimeEntry({
         dayId: day.id,
         startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
-        stoppedAt: null,
+        stoppedAt: PlainDateTime.from('2021-01-01T09:00:00'),
       })
 
       const timeEntry = await timeEntryHelpers.createSampleTimeEntry({
@@ -537,7 +535,7 @@ describe('timeEntryService', () => {
       await timeEntryHelpers.createSampleTimeEntry({
         dayId: day.id,
         startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
-        stoppedAt: null,
+        stoppedAt: PlainDateTime.from('2021-01-01T09:00:00'),
       })
 
       const timeEntry = await timeEntryHelpers.createSampleTimeEntry({
