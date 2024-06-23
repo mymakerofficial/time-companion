@@ -22,6 +22,14 @@ interface Window {
         invoke: (method: string, ...args: any[]) => Promise<any>
         onNotify: (callback: (event: object, topics: object) => void) => void
       }
+      day: {
+        invoke: (method: string, ...args: any[]) => Promise<any>
+        onNotify: (callback: (event: object, topics: object) => void) => void
+      }
+      timeEntry: {
+        invoke: (method: string, ...args: any[]) => Promise<any>
+        onNotify: (callback: (event: object, topics: object) => void) => void
+      }
     }
   }
 }

@@ -14,7 +14,7 @@ export const taskService: TaskService = (() => {
   if (isDefined(window.electronAPI)) {
     return createPublisherServiceProxy<
       TaskService,
-      EntityPublisherTopics<TaskDto>,
+      EntityPublisherTopics,
       EntityPublisherEvent<TaskDto>
     >(window.electronAPI.service.task)
   }

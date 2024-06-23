@@ -9,6 +9,8 @@ import {
   servicePublishChannel,
 } from '@shared/ipc/helpers/channels'
 import { preflightService } from '@main/factory/service/preflightService'
+import { dayService } from '@main/factory/service/dayService'
+import { timeEntryService } from '@main/factory/service/timeEntryService'
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -87,6 +89,8 @@ function registerIpcHandlers() {
   registerIpcHandler(serviceInvokeChannel('preflight'), preflightService)
   registerIpcHandler(serviceInvokeChannel('project'), projectService)
   registerIpcHandler(serviceInvokeChannel('task'), taskService)
+  registerIpcHandler(serviceInvokeChannel('day'), dayService)
+  registerIpcHandler(serviceInvokeChannel('timeEntry'), timeEntryService)
 }
 
 function registerIpcPublishers(window: BrowserWindow) {
@@ -97,6 +101,12 @@ function registerIpcPublishers(window: BrowserWindow) {
   )
   registerIpcPublisher(servicePublishChannel('project'), projectService, window)
   registerIpcPublisher(servicePublishChannel('task'), taskService, window)
+  registerIpcPublisher(servicePublishChannel('day'), dayService, window)
+  registerIpcPublisher(
+    servicePublishChannel('timeEntry'),
+    timeEntryService,
+    window,
+  )
 }
 
 // This method will be called when Electron has finished

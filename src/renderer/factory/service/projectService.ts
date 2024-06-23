@@ -16,7 +16,7 @@ export const projectService: ProjectService = (() => {
   if (isDefined(window.electronAPI)) {
     return createPublisherServiceProxy<
       ProjectService,
-      EntityPublisherTopics<ProjectDto>,
+      EntityPublisherTopics,
       EntityPublisherEvent<ProjectDto>
     >(window.electronAPI.service.project)
   }
