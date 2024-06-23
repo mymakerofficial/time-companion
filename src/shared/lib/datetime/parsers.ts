@@ -123,12 +123,10 @@ export function parseHumanDurationWithEquation(
       }
 
       switch (operator) {
-        case '+':
-          return duration
         case '-':
           return duration.negated()
         default:
-          return null
+          return duration
       }
     })
     .filter(isNotNull)
