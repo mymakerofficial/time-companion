@@ -25,6 +25,10 @@ export class PlainTime extends Temporal.PlainTime {
     )
   }
 
+  static now(): PlainTime {
+    return PlainTime.fromTemporalPlainTime(Temporal.Now.plainTimeISO())
+  }
+
   add(
     durationLike: Duration | Temporal.Duration | Temporal.DurationLike | string,
     options?: Temporal.ArithmeticOptions,
