@@ -86,6 +86,9 @@ export function isDate(value: unknown): value is Date {
   return value instanceof Date
 }
 
+export function isEmpty(value: Array<unknown>): value is []
+export function isEmpty(value: string): value is ''
+export function isEmpty(value: object): value is {}
 export function isEmpty(
   value: unknown,
 ): value is null | undefined | '' | [] | {} {
@@ -107,5 +110,5 @@ export function isEmpty(
 export function isNotEmpty(
   value: unknown,
 ): value is Exclude<unknown, null | undefined | '' | []> {
-  return !isEmpty(value)
+  return !isEmpty(value!)
 }
