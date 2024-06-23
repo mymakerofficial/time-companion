@@ -9,6 +9,7 @@ import type { BaseDto } from '@shared/model/helpers/baseDto'
 import type { HasCreatedAt } from '@shared/model/helpers/hasCreatedAt'
 import type { HasId } from '@shared/model/helpers/hasId'
 import { acceptNull } from '@shared/lib/utils/acceptNull'
+import { isDefined, isNotNull } from '@shared/lib/utils/checks'
 
 export function toTimeEntryDto(timeEntry: TimeEntryEntity): TimeEntryDto {
   return {
@@ -54,7 +55,11 @@ export function timeEntryEntityUpdateFrom(
     taskId: timeEntry.taskId,
     description: timeEntry.description,
     startedAt: timeEntry.startedAt?.toDate(),
-    stoppedAt: timeEntry.stoppedAt?.toDate(),
+    stoppedAt: isDefined(timeEntry.stoppedAt)
+      ? isNotNull(timeEntry.stoppedAt)
+        ? timeEntry.stoppedAt.toDate()
+        : null
+      : undefined, // beautiful
     createdAt: base.createdAt?.toDate(),
     modifiedAt: base.modifiedAt?.toDate(),
     deletedAt: base.deletedAt?.toDate(),

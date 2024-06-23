@@ -138,25 +138,25 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
     timeEntry: Partial<UpdateTimeEntry>,
   ): Promise<TimeEntryDto> {
     return await this.database.withTransaction(async (tx) => {
-      const updatedTimeEntry = firstOfOrNull(
-        await tx.table(timeEntriesTable).update({
+      return await tx
+        .table(timeEntriesTable)
+        .update({
           range: timeEntriesTable.id.range.only(id),
           where: timeEntriesTable.deletedAt.isNull(),
           data: timeEntryEntityUpdateFrom(timeEntry, {
             modifiedAt: PlainDateTime.now(),
           }),
           map: toTimeEntryDto,
-        }),
-      )
-
-      check(
-        isNotNull(updatedTimeEntry),
-        `Time entry with id "${id}" not found.`,
-      )
-
-      await checkConstraints(tx, updatedTimeEntry, id)
-
-      return updatedTimeEntry
+        })
+        .then(firstOfOrNull)
+        .then((res) => {
+          check(isNotNull(res), `Time entry with id "${id}" not found.`)
+          return res
+        })
+        .then(async (res) => {
+          await checkConstraints(tx, res, id)
+          return res
+        })
     })
   }
 }

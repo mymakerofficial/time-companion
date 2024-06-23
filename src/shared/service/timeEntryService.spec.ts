@@ -5,6 +5,7 @@ import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 import { uuid } from '@shared/lib/utils/uuid'
 import { acceptNull } from '@shared/lib/utils/acceptNull'
 import type { TimeEntryBase } from '@shared/model/timeEntry'
+import { isDefined, isNull } from '@shared/lib/utils/checks'
 
 function timeEntryDtoContaining(timeEntry: Partial<TimeEntryBase>) {
   const { startedAt, stoppedAt, ...rest } = timeEntry
@@ -15,12 +16,14 @@ function timeEntryDtoContaining(timeEntry: Partial<TimeEntryBase>) {
     startedAt: startedAt
       ? expect.toSatisfy((it) => !!startedAt?.isEqual(it))
       : expect.any(PlainDateTime),
-    stoppedAt: stoppedAt
-      ? expect.toSatisfy((it) => !!stoppedAt?.isEqual(it))
+    stoppedAt: isDefined(stoppedAt)
+      ? isNull(stoppedAt)
+        ? null
+        : expect.toSatisfy((it) => !!stoppedAt?.isEqual(it))
       : expect.toBeOneOf([null, expect.any(PlainDateTime)]),
     createdAt: expect.any(PlainDateTime),
     modifiedAt: expect.toBeOneOf([null, expect.any(PlainDateTime)]),
-    deletedAt: expect.toBeOneOf([null, expect.any(PlainDateTime)]),
+    deletedAt: null,
   })
 }
 
