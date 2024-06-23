@@ -44,14 +44,14 @@ export class PlainDate extends Temporal.PlainDate {
   }
 
   toPlainDateTime(
-    temporalDate:
+    temporalTime:
       | PlainTime
       | Temporal.PlainTime
       | Temporal.PlainTimeLike
       | string = { hour: 0, minute: 0, second: 0 },
   ): PlainDateTime {
     return PlainDateTime.fromTemporalPlainDateTime(
-      super.toPlainDateTime(temporalDate),
+      super.toPlainDateTime(temporalTime),
     )
   }
 
