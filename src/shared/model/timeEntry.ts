@@ -3,7 +3,9 @@ import type { BaseDto } from '@shared/model/helpers/baseDto'
 import { defineTable } from '@shared/database/schema/defineTable'
 import { c } from '@shared/database/schema/columnBuilder'
 import type { InferTable } from '@shared/database/types/schema'
-import type { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
+import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
+import { z } from 'zod'
+import { plainDateTimeType } from '@shared/lib/datetime/schema'
 
 export type TimeEntryBase = {
   dayId: string
@@ -34,3 +36,12 @@ export const timeEntriesTable = defineTable('time_entries', {
 })
 
 export type TimeEntryEntity = InferTable<typeof timeEntriesTable>
+
+export const timeEntrySchema = z.object({
+  dayId: z.string(),
+  projectId: z.string().nullable().default(null),
+  taskId: z.string().nullable().default(null),
+  description: z.string().min(1).default(''),
+  startedAt: plainDateTimeType.default(() => PlainDateTime.now()),
+  stoppedAt: plainDateTimeType.nullable().default(null),
+})
