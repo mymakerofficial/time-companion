@@ -1,35 +1,40 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import {
-  absDuration,
-  durationSinceStartOfDay,
-  durationToTime,
-} from '@renderer/lib/neoTime'
-import { Temporal } from 'temporal-polyfill'
 import DurationInput from '@renderer/components/common/inputs/timeInput/DurationInput.vue'
 import type {
   InputProps,
   InputSlots,
 } from '@renderer/components/ui/input/Input.vue'
+import type { PlainTime } from '@shared/lib/datetime/plainTime'
+import type { Duration } from '@shared/lib/datetime/duration'
 
-const model = defineModel<Temporal.PlainTime>({ required: true })
-
-const props = defineProps<Omit<InputProps, 'type'>>()
-
+const model = defineModel<PlainTime>({ required: true })
+const props = defineProps<
+  Omit<InputProps, 'type'> & {
+    tooltip?: string
+  }
+>()
 defineSlots<InputSlots>()
 
-const forwardModel = computed<Temporal.Duration>({
+const forwardModel = computed<Duration>({
   get() {
-    return durationSinceStartOfDay(model.value)
+    return model.value.toDuration()
   },
   set(value) {
-    model.value = durationToTime(absDuration(value))
+    model.value = value.toPlainTime()
   },
 })
+
+const tooltip = computed(() => props.tooltip ?? model.value.toString())
 </script>
 
 <template>
-  <DurationInput v-bind="props" v-model="forwardModel" mode="time">
+  <DurationInput
+    v-bind="props"
+    v-model="forwardModel"
+    :tooltip="tooltip"
+    mode="time"
+  >
     <template #leading>
       <slot name="leading" />
     </template>

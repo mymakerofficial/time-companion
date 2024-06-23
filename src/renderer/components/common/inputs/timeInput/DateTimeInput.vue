@@ -1,31 +1,35 @@
 <script setup lang="ts">
-import { Temporal } from 'temporal-polyfill'
 import { computed } from 'vue'
-import { dateWithTime, toPlainTime } from '@renderer/lib/neoTime'
 import TimeInput from '@renderer/components/common/inputs/timeInput/TimeInput.vue'
 import type {
   InputProps,
   InputSlots,
 } from '@renderer/components/ui/input/Input.vue'
+import type { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
+import type { PlainTime } from '@shared/lib/datetime/plainTime'
 
-const model = defineModel<Temporal.PlainDateTime>({ required: true })
-
-const props = defineProps<Omit<InputProps, 'type'>>()
-
+const model = defineModel<PlainDateTime>({ required: true })
+const props = defineProps<
+  Omit<InputProps, 'type'> & {
+    tooltip?: string
+  }
+>()
 defineSlots<InputSlots>()
 
-const forwardModel = computed<Temporal.PlainTime>({
+const forwardModel = computed<PlainTime>({
   get() {
-    return toPlainTime(model.value)
+    return model.value.toPlainTime()
   },
   set(value) {
-    model.value = dateWithTime(model.value, value)
+    model.value = value.toPlainDateTime(model.value)
   },
 })
+
+const tooltip = computed(() => props.tooltip ?? model.value.toString())
 </script>
 
 <template>
-  <TimeInput v-bind="props" v-model="forwardModel">
+  <TimeInput v-bind="props" v-model="forwardModel" :tooltip="tooltip">
     <template #leading>
       <slot name="leading" />
     </template>

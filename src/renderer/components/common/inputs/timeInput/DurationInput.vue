@@ -1,23 +1,29 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { Input } from '@renderer/components/ui/input'
 import { formatDuration, humanizeDuration } from '@renderer/lib/neoTime'
-import { parseHumanDurationWithEquation } from '@renderer/lib/parsers'
 import { isNull } from '@renderer/lib/utils'
-import { Temporal } from 'temporal-polyfill'
 import { watchImmediate } from '@vueuse/core'
 import type {
   InputProps,
   InputSlots,
 } from '@renderer/components/ui/input/Input.vue'
+import type { Duration } from '@shared/lib/datetime/duration'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@renderer/components/ui/tooltip'
+import { parseHumanDurationWithEquation } from '@shared/lib/datetime/parsers'
 
-const model = defineModel<Temporal.Duration>({ required: true })
+const model = defineModel<Duration>({ required: true })
 
 const props = withDefaults(
   defineProps<
     Omit<InputProps, 'type'> & {
       mode?: 'duration' | 'time'
       allowSeconds?: boolean
+      tooltip?: string
     }
   >(),
   {
@@ -53,18 +59,25 @@ function handleChange() {
 
   model.value = parsedDuration
 }
+
+const tooltip = computed(() => props.tooltip ?? model.value.toString())
 </script>
 
 <template>
-  <Input v-bind="props" v-model="inputValue" @change="handleChange">
-    <template #leading>
-      <slot name="leading" />
-    </template>
-    <template #input="inputProps">
-      <slot name="input" v-bind="inputProps" />
-    </template>
-    <template #trailing>
-      <slot name="trailing" />
-    </template>
-  </Input>
+  <Tooltip>
+    <TooltipTrigger as-child>
+      <Input v-bind="props" v-model="inputValue" @change="handleChange">
+        <template #leading>
+          <slot name="leading" />
+        </template>
+        <template #input="inputProps">
+          <slot name="input" v-bind="inputProps" />
+        </template>
+        <template #trailing>
+          <slot name="trailing" />
+        </template>
+      </Input>
+    </TooltipTrigger>
+    <TooltipContent>{{ tooltip }}</TooltipContent>
+  </Tooltip>
 </template>

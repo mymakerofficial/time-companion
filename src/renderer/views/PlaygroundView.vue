@@ -13,18 +13,21 @@ import { asyncGetOrNull } from '@shared/lib/utils/result'
 import { timeEntryService } from '@renderer/factory/service/timeEntryService'
 import { Button } from '@renderer/components/ui/button'
 import { Toggle } from '@renderer/components/ui/toggle'
+import TimeEntryInput from '@renderer/components/common/inputs/timeEntryInput/TimeEntryInput.vue'
+import DateTimeInput from '@renderer/components/common/inputs/timeInput/DateTimeInput.vue'
 
 const day = ref()
 
 const selectedTimeEntryId = ref('')
 const dayIdInput = ref('')
+const selectedProject = ref(null)
 const descriptionInput = ref(faker.lorem.sentence(4))
-const startedAtInput = ref(PlainDateTime.now().toString())
-const stoppedAtInput = ref(PlainDateTime.now().toString())
+const startedAtInput = ref(PlainDateTime.now())
+const stoppedAtInput = ref(PlainDateTime.now())
 const stoppedAtIsNull = ref(true)
-const patchDescription = ref(false)
+const patchDescription = ref(true)
 const patchStartedAt = ref(false)
-const patchStoppedAt = ref(false)
+const patchStoppedAt = ref(true)
 
 async function create() {
   await timeEntryService.createTimeEntry({
@@ -32,24 +35,16 @@ async function create() {
     projectId: null,
     taskId: null,
     description: descriptionInput.value,
-    startedAt: PlainDateTime.from(startedAtInput.value),
-    stoppedAt: stoppedAtIsNull.value
-      ? null
-      : PlainDateTime.from(stoppedAtInput.value),
+    startedAt: startedAtInput.value,
+    stoppedAt: stoppedAtIsNull.value ? null : stoppedAtInput.value,
   })
 }
 
 async function patch() {
   await timeEntryService.patchTimeEntry(selectedTimeEntryId.value, {
     description: patchDescription.value ? descriptionInput.value : undefined,
-    startedAt: patchStartedAt.value
-      ? PlainDateTime.from(startedAtInput.value)
-      : undefined,
-    stoppedAt: patchStoppedAt.value
-      ? stoppedAtIsNull.value
-        ? null
-        : PlainDateTime.from(stoppedAtInput.value)
-      : undefined,
+    startedAt: startedAtInput.value,
+    stoppedAt: stoppedAtIsNull.value ? null : stoppedAtInput.value,
   })
 }
 
@@ -69,6 +64,12 @@ onMounted(async () => {
 <template>
   <ResponsiveContainer class="my-14 flex flex-col">
     <SettingsSection>
+      <TimeEntryInput
+        v-model:project="selectedProject"
+        v-model:description="descriptionInput"
+      />
+    </SettingsSection>
+    <SettingsSection>
       <div>timeEntryId: {{ selectedTimeEntryId }}</div>
       <div class="grid grid-cols-4 items-center gap-4">
         <Label class="text-right">dayId</Label>
@@ -80,11 +81,11 @@ onMounted(async () => {
       </div>
       <div class="grid grid-cols-4 items-center gap-4">
         <Label class="text-right">startedAt</Label>
-        <Input v-model="startedAtInput" class="col-span-2" />
+        <DateTimeInput v-model="startedAtInput" class="col-span-2" />
       </div>
       <div class="grid grid-cols-4 items-center gap-4">
         <Label class="text-right">stoppedAt</Label>
-        <Input
+        <DateTimeInput
           v-model="stoppedAtInput"
           :disabled="stoppedAtIsNull"
           class="col-span-2"
