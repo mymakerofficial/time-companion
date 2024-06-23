@@ -782,14 +782,14 @@ describe('timeEntryService', () => {
       })
 
       const update = {
-        startedAt: PlainDateTime.from('2021-01-02T07:00:00'),
-        stoppedAt: PlainDateTime.from('2021-01-02T08:00:01'),
+        startedAt: PlainDateTime.from('2021-02-02T07:00:00'),
+        stoppedAt: PlainDateTime.from('2021-02-02T08:00:01'),
       }
 
       await expect(
-        timeEntryService.createTimeEntry(timeEntry),
+        timeEntryService.patchTimeEntry(timeEntry.id, update),
       ).rejects.toThrowError(
-        'Time entry must end at or before "2021-01-02T08:00:00". Received "2021-01-02T08:00:01".',
+        'Time entry must end at or before "2021-01-02T08:00:00". Received "2021-02-02T08:00:01".',
       )
 
       // ensure the time entry was not updated.
