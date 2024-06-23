@@ -2,18 +2,29 @@
 import { Input } from '@renderer/components/ui/input'
 import ProjectSelect from '@renderer/components/common/inputs/projectInput/ProjectSelect.vue'
 import type { Nullable } from '@shared/lib/utils/types'
-import type { ProjectDto } from '@shared/model/project'
 
-const project = defineModel<Nullable<ProjectDto>>('project', { required: true })
+const projectId = defineModel<Nullable<string>>('projectId', {
+  required: true,
+})
 const description = defineModel<string>('description', { required: true })
+const emit = defineEmits<{
+  change: []
+}>()
+
+function handleChange() {
+  emit('change')
+}
 </script>
 
 <template>
-  <div class="flex flex-row gap-2">
-    <ProjectSelect v-model="project" allow-deselect />
+  <div class="flex flex-row items-center gap-2">
+    <slot name="leading" />
+    <ProjectSelect v-model="projectId" allow-deselect @change="handleChange" />
     <Input
       v-model="description"
+      @change="handleChange"
       :placeholder="$t('dashboard.labels.whatAreYouWorkingOn')"
     />
+    <slot name="trailing" />
   </div>
 </template>

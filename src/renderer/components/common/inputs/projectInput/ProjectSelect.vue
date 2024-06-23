@@ -6,9 +6,9 @@ import { type Nullable } from '@renderer/lib/utils'
 import { useGetProjects } from '@renderer/composables/queries/projects/useGetProjects'
 import type { ProjectDto } from '@shared/model/project'
 import { useCreateProject } from '@renderer/composables/mutations/projects/useCreateProject'
+import { computed } from 'vue'
 
-const model = defineModel<Nullable<ProjectDto>>({ required: true })
-
+const model = defineModel<Nullable<string>>({ required: true })
 const props =
   defineProps<
     Pick<
@@ -22,15 +22,30 @@ const props =
       | 'popoverClass'
     >
   >()
+const emit = defineEmits<{
+  change: [string]
+  create: [string]
+}>()
 
 function handleCreated(project: ProjectDto) {
-  model.value = project
+  model.value = project.id
+  emit('change', project.id)
 }
 
 const { data: projects } = useGetProjects()
 const { mutate: createProject } = useCreateProject({
   onSuccess: handleCreated,
 })
+
+const ids = computed(() => projects.value.map((project) => project.id))
+
+function getDisplayName(id: string) {
+  return projects.value.find((project) => project.id === id)?.displayName ?? ''
+}
+
+function handleChange(value: string) {
+  emit('change', value)
+}
 
 function handleCreate(displayName: string) {
   createProject({
@@ -43,10 +58,10 @@ function handleCreate(displayName: string) {
   <Combobox
     v-bind="props"
     v-model="model"
-    :options="projects"
-    :get-key="(project) => project?.id"
-    :display-value="(project) => project?.displayName"
+    :options="ids"
+    :display-value="getDisplayName"
     allow-create
     @create="handleCreate"
+    @selected="handleChange!"
   />
 </template>
