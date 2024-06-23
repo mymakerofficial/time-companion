@@ -28,9 +28,27 @@ export class Duration extends Temporal.Duration {
     return Duration.compare(this, Duration.from(other)) === -1
   }
 
+  isShorterThanOrEqual(
+    other: Duration | Temporal.Duration | Temporal.DurationLike | string,
+  ): boolean {
+    return Duration.compare(this, Duration.from(other)) !== 1
+  }
+
   isLongerThan(
     other: Duration | Temporal.Duration | Temporal.DurationLike | string,
   ): boolean {
     return Duration.compare(this, Duration.from(other)) === 1
+  }
+
+  isLongerThanOrEqual(
+    other: Duration | Temporal.Duration | Temporal.DurationLike | string,
+  ): boolean {
+    return Duration.compare(this, Duration.from(other)) !== -1
+  }
+
+  isEqualTo(
+    other: Duration | Temporal.Duration | Temporal.DurationLike | string,
+  ): boolean {
+    return Duration.compare(this, Duration.from(other)) === 0
   }
 }
