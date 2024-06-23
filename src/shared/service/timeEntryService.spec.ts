@@ -84,6 +84,42 @@ describe('timeEntryService', () => {
       expect(timeEntries).not.toContainEqual(timeEntryDtoContaining(timeEntry))
     })
 
+    it('should fail to create a time entry longer than 24h', async () => {
+      const day = await dayHelpers.createDay('2021-01-01')
+
+      const timeEntry = timeEntryHelpers.sampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-01T09:00:00'),
+        stoppedAt: PlainDateTime.from('2021-01-02T10:00:00'),
+      })
+
+      await expect(
+        timeEntryService.createTimeEntry(timeEntry),
+      ).rejects.toThrowError('Time entry must not be longer than 24 hours.')
+
+      // ensure the time entry was not created.
+      const timeEntries = await timeEntryHelpers.getAll()
+      expect(timeEntries).not.toContainEqual(timeEntryDtoContaining(timeEntry))
+    })
+
+    it('should not fail to create a time entry exactly 24h long', async () => {
+      const day = await dayHelpers.createDay('2021-01-01')
+
+      const timeEntry = timeEntryHelpers.sampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+        stoppedAt: PlainDateTime.from('2021-01-02T08:00:00'),
+      })
+
+      await expect(
+        timeEntryService.createTimeEntry(timeEntry),
+      ).resolves.toEqual(timeEntryDtoContaining(timeEntry))
+
+      // ensure the time entry was created.
+      const timeEntries = await timeEntryHelpers.getAll()
+      expect(timeEntries).toContainEqual(timeEntryDtoContaining(timeEntry))
+    })
+
     it('should fail to create a time entry with a startedAt before midnight of the day', async () => {
       const day = await dayHelpers.createDay('2021-01-02')
 
@@ -96,7 +132,7 @@ describe('timeEntryService', () => {
       await expect(
         timeEntryService.createTimeEntry(timeEntry),
       ).rejects.toThrowError(
-        'Time entry must start after midnight of the given day.',
+        'Time entry must start at or after "2021-01-02T00:00:00". Received "2021-01-01T23:59:00"',
       )
 
       // ensure the time entry was not created.
@@ -122,6 +158,78 @@ describe('timeEntryService', () => {
       expect(timeEntries).toContainEqual(timeEntryDtoContaining(timeEntry))
     })
 
+    it('should fail to create the first time entry of a day with startedAt not at same date', async () => {
+      const day = await dayHelpers.createDay('2021-01-01')
+
+      const timeEntry = timeEntryHelpers.sampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-02T08:00:00'),
+        stoppedAt: null,
+      })
+
+      await expect(
+        timeEntryService.createTimeEntry(timeEntry),
+      ).rejects.toThrowError(
+        'Time entry must end at or before "2021-01-02T00:00:00". Received "2021-01-02T08:00:00".',
+      )
+
+      // ensure the time entry was not created.
+      const timeEntries = await timeEntryHelpers.getAll()
+      expect(timeEntries).not.toContainEqual(timeEntryDtoContaining(timeEntry))
+    })
+
+    it('should fail to create a time entry after a running time entry', async () => {
+      const day = await dayHelpers.createDay('2021-01-01')
+
+      await timeEntryHelpers.createSampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+        stoppedAt: null,
+      })
+
+      const timeEntry = timeEntryHelpers.sampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-01T09:00:00'),
+        stoppedAt: PlainDateTime.from('2021-01-01T10:00:00'),
+      })
+
+      await expect(
+        timeEntryService.createTimeEntry(timeEntry),
+      ).rejects.toThrowError(
+        'Time entry must not overlap with an existing time entry.',
+      )
+
+      // ensure the time entry was not created.
+      const timeEntries = await timeEntryHelpers.getAll()
+      expect(timeEntries).not.toContainEqual(timeEntryDtoContaining(timeEntry))
+    })
+
+    it('should fail to create a running time entry before another time entry', async () => {
+      const day = await dayHelpers.createDay('2021-01-01')
+
+      await timeEntryHelpers.createSampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+        stoppedAt: PlainDateTime.from('2021-01-01T09:00:00'),
+      })
+
+      const timeEntry = timeEntryHelpers.sampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-01T06:00:00'),
+        stoppedAt: null,
+      })
+
+      await expect(
+        timeEntryService.createTimeEntry(timeEntry),
+      ).rejects.toThrowError(
+        'Time entry must not overlap with an existing time entry.',
+      )
+
+      // ensure the time entry was not created.
+      const timeEntries = await timeEntryHelpers.getAll()
+      expect(timeEntries).not.toContainEqual(timeEntryDtoContaining(timeEntry))
+    })
+
     it('should fail to create a time entry with a startedAt more than 24h after the first time entry of the day started', async () => {
       const day = await dayHelpers.createDay('2021-01-01')
 
@@ -140,7 +248,7 @@ describe('timeEntryService', () => {
       await expect(
         timeEntryService.createTimeEntry(timeEntry),
       ).rejects.toThrowError(
-        'Time entry must end at most 24 hours after the first time entry of the given day has started.',
+        'Time entry must end at or before "2021-01-02T08:00:00". Received "2021-01-02T08:00:01".',
       )
 
       // ensure the time entry was not created.
@@ -190,7 +298,7 @@ describe('timeEntryService', () => {
       await expect(
         timeEntryService.createTimeEntry(timeEntry),
       ).rejects.toThrowError(
-        'Time entry must end at most 24 hours after the first time entry of the given day has started.',
+        'Time entry must end at or before "2021-01-02T08:00:00". Received "2021-01-02T08:00:01".',
       )
 
       // ensure the time entry was not created.
@@ -318,70 +426,6 @@ describe('timeEntryService', () => {
         timeEntryDtoContaining(secondTimeEntry),
       )
     })
-
-    it('should fail to create the first time entry of a day with startedAt not at same date', async () => {
-      const day = await dayHelpers.createDay('2021-01-01')
-
-      const timeEntry = timeEntryHelpers.sampleTimeEntry({
-        dayId: day.id,
-        startedAt: PlainDateTime.from('2021-01-02T08:00:00'),
-        stoppedAt: null,
-      })
-
-      await expect(
-        timeEntryService.createTimeEntry(timeEntry),
-      ).rejects.toThrowError(
-        'The first time entry of a day must start on the same date.',
-      )
-
-      // ensure the time entry was not created.
-      const timeEntries = await timeEntryHelpers.getAll()
-      expect(timeEntries).not.toContainEqual(timeEntryDtoContaining(timeEntry))
-    })
-
-    it('should fail to create a time entry while another time entry without stoppedAt exists', async () => {
-      const day = await dayHelpers.createDay('2021-01-01')
-
-      await timeEntryHelpers.createSampleTimeEntry({
-        dayId: day.id,
-        startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
-        stoppedAt: null,
-      })
-
-      const timeEntry = timeEntryHelpers.sampleTimeEntry({
-        dayId: day.id,
-        startedAt: PlainDateTime.from('2021-01-01T09:00:00'),
-        stoppedAt: PlainDateTime.from('2021-01-01T10:00:00'),
-      })
-
-      await expect(
-        timeEntryService.createTimeEntry(timeEntry),
-      ).rejects.toThrowError(
-        'Cannot create a time entry while another time entry is running.',
-      )
-
-      // ensure the time entry was not created.
-      const timeEntries = await timeEntryHelpers.getAll()
-      expect(timeEntries).not.toContainEqual(timeEntryDtoContaining(timeEntry))
-    })
-
-    it('should fail to create a time entry longer than 24h', async () => {
-      const day = await dayHelpers.createDay('2021-01-01')
-
-      const timeEntry = timeEntryHelpers.sampleTimeEntry({
-        dayId: day.id,
-        startedAt: PlainDateTime.from('2021-01-01T09:00:00'),
-        stoppedAt: PlainDateTime.from('2021-01-02T10:00:00'),
-      })
-
-      await expect(
-        timeEntryService.createTimeEntry(timeEntry),
-      ).rejects.toThrowError('Time entry must not be longer than 24 hours.')
-
-      // ensure the time entry was not created.
-      const timeEntries = await timeEntryHelpers.getAll()
-      expect(timeEntries).not.toContainEqual(timeEntryDtoContaining(timeEntry))
-    })
   })
 
   describe('patchTimeEntry', () => {
@@ -480,6 +524,51 @@ describe('timeEntryService', () => {
       expect(timeEntries).toContainEqual(timeEntryDtoContaining(timeEntry))
     })
 
+    it('should fail to update a time entry to be longer than 24h', async () => {
+      const day = await dayHelpers.createDay('2021-01-01')
+
+      const timeEntry = await timeEntryHelpers.createSampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-01T09:00:00'),
+        stoppedAt: PlainDateTime.from('2021-01-01T10:00:00'),
+      })
+
+      const update = {
+        stoppedAt: PlainDateTime.from('2021-01-02T10:00:00'),
+      }
+
+      await expect(
+        timeEntryService.patchTimeEntry(timeEntry.id, update),
+      ).rejects.toThrowError('Time entry must not be longer than 24 hours.')
+
+      // ensure the time entry was not updated.
+      const timeEntries = await timeEntryHelpers.getAll()
+      expect(timeEntries).not.toContainEqual(timeEntryDtoContaining(update))
+      expect(timeEntries).toContainEqual(timeEntryDtoContaining(timeEntry))
+    })
+
+    it('should not fail to update a time entry to be exactly 24h long', async () => {
+      const day = await dayHelpers.createDay('2021-01-01')
+
+      const timeEntry = await timeEntryHelpers.createSampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-01T09:00:00'),
+        stoppedAt: PlainDateTime.from('2021-01-01T10:00:00'),
+      })
+
+      const update = {
+        stoppedAt: PlainDateTime.from('2021-01-02T09:00:00'),
+      }
+
+      await expect(
+        timeEntryService.patchTimeEntry(timeEntry.id, update),
+      ).resolves.toEqual(timeEntryDtoContaining(update))
+
+      // ensure the time entry was updated.
+      const timeEntries = await timeEntryHelpers.getAll()
+      expect(timeEntries).toContainEqual(timeEntryDtoContaining(update))
+    })
+
     it('should fail to update a time entry with a startedAt before midnight of the day', async () => {
       const day = await dayHelpers.createDay('2021-01-02')
 
@@ -496,7 +585,7 @@ describe('timeEntryService', () => {
       await expect(
         timeEntryService.patchTimeEntry(timeEntry.id, update),
       ).rejects.toThrowError(
-        'Time entry must start after midnight of the given day.',
+        'Time entry must start at or after "2021-01-02T00:00:00". Received "2021-01-01T23:59:00".',
       )
 
       // ensure the time entry was not updated.
@@ -527,6 +616,94 @@ describe('timeEntryService', () => {
       expect(timeEntries).toContainEqual(timeEntryDtoContaining(update))
     })
 
+    it('should fail to update the only time entry of a day with startedAt not at same date', async () => {
+      const day = await dayHelpers.createDay('2021-01-01')
+
+      const timeEntry = await timeEntryHelpers.createSampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+        stoppedAt: null,
+      })
+
+      const update = {
+        startedAt: PlainDateTime.from('2021-01-02T08:00:00'),
+      }
+
+      await expect(
+        timeEntryService.patchTimeEntry(timeEntry.id, update),
+      ).rejects.toThrowError(
+        'Time entry must end at or before "2021-01-02T00:00:00". Received "2021-01-02T08:00:00".',
+      )
+
+      // ensure the time entry was not updated.
+      const timeEntries = await timeEntryHelpers.getAll()
+      expect(timeEntries).not.toContainEqual(timeEntryDtoContaining(update))
+      expect(timeEntries).toContainEqual(timeEntryDtoContaining(timeEntry))
+    })
+
+    it('should fail to update a time entry to be after a running time entry', async () => {
+      const day = await dayHelpers.createDay('2021-01-01')
+
+      await timeEntryHelpers.createSampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+        stoppedAt: null,
+      })
+
+      const timeEntry = await timeEntryHelpers.createSampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-01T06:00:00'),
+        stoppedAt: PlainDateTime.from('2021-01-01T07:00:00'),
+      })
+
+      const update = {
+        startedAt: PlainDateTime.from('2021-01-01T09:00:00'),
+        stoppedAt: PlainDateTime.from('2021-01-01T10:00:00'),
+      }
+
+      await expect(
+        timeEntryService.patchTimeEntry(timeEntry.id, update),
+      ).rejects.toThrowError(
+        'Time entry must not overlap with an existing time entry.',
+      )
+
+      // ensure the time entry was not updated.
+      const timeEntries = await timeEntryHelpers.getAll()
+      expect(timeEntries).not.toContainEqual(timeEntryDtoContaining(update))
+      expect(timeEntries).toContainEqual(timeEntryDtoContaining(timeEntry))
+    })
+
+    it('should fail to update a time entry to be running before another time entry', async () => {
+      const day = await dayHelpers.createDay('2021-01-01')
+
+      await timeEntryHelpers.createSampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
+        stoppedAt: PlainDateTime.from('2021-01-01T09:00:00'),
+      })
+
+      const timeEntry = await timeEntryHelpers.createSampleTimeEntry({
+        dayId: day.id,
+        startedAt: PlainDateTime.from('2021-01-01T06:00:00'),
+        stoppedAt: PlainDateTime.from('2021-01-01T07:00:00'),
+      })
+
+      const update = {
+        stoppedAt: null,
+      }
+
+      await expect(
+        timeEntryService.patchTimeEntry(timeEntry.id, update),
+      ).rejects.toThrowError(
+        'Time entry must not overlap with an existing time entry.',
+      )
+
+      // ensure the time entry was not updated.
+      const timeEntries = await timeEntryHelpers.getAll()
+      expect(timeEntries).not.toContainEqual(timeEntryDtoContaining(update))
+      expect(timeEntries).toContainEqual(timeEntryDtoContaining(timeEntry))
+    })
+
     it('should fail to update a time entry with a startedAt more than 24h after the first time entry of the day started', async () => {
       const day = await dayHelpers.createDay('2021-01-01')
 
@@ -549,7 +726,7 @@ describe('timeEntryService', () => {
       await expect(
         timeEntryService.patchTimeEntry(timeEntry.id, update),
       ).rejects.toThrowError(
-        'Time entry must end at most 24 hours after the first time entry of the given day has started.',
+        'Time entry must end at or before "2021-01-02T08:00:00". Received "2021-01-02T08:00:01".',
       )
 
       // ensure the time entry was not updated.
@@ -609,7 +786,7 @@ describe('timeEntryService', () => {
       await expect(
         timeEntryService.createTimeEntry(timeEntry),
       ).rejects.toThrowError(
-        'Time entry must end at most 24 hours after the first time entry of the given day has started.',
+        'Time entry must end at or before "2021-01-02T08:00:00". Received "2021-01-02T08:00:01".',
       )
 
       // ensure the time entry was not updated.
@@ -760,87 +937,6 @@ describe('timeEntryService', () => {
       // ensure the time entry was updated.
       const timeEntries = await timeEntryService.getTimeEntriesByDayId(day.id)
       expect(timeEntries).toContainEqual(timeEntryDtoContaining(update))
-    })
-
-    it('should fail to update the only time entry of a day with startedAt not at same date', async () => {
-      const day = await dayHelpers.createDay('2021-01-01')
-
-      const timeEntry = await timeEntryHelpers.createSampleTimeEntry({
-        dayId: day.id,
-        startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
-        stoppedAt: null,
-      })
-
-      const update = {
-        startedAt: PlainDateTime.from('2021-01-02T08:00:00'),
-      }
-
-      await expect(
-        timeEntryService.patchTimeEntry(timeEntry.id, update),
-      ).rejects.toThrowError(
-        'The first time entry of a day must start on the same date.',
-      )
-
-      // ensure the time entry was not updated.
-      const timeEntries = await timeEntryHelpers.getAll()
-      expect(timeEntries).not.toContainEqual(timeEntryDtoContaining(update))
-      expect(timeEntries).toContainEqual(timeEntryDtoContaining(timeEntry))
-    })
-
-    it('should fail to update a time entry causing multiple running time entries to exist', async () => {
-      const day = await dayHelpers.createSampleDay({
-        date: PlainDate.from('2021-01-01'),
-      })
-
-      const timeEntry = await timeEntryHelpers.createSampleTimeEntry({
-        dayId: day.id,
-        startedAt: PlainDateTime.from('2021-01-01T08:00:00'),
-        stoppedAt: PlainDateTime.from('2021-01-01T09:00:00'),
-      })
-
-      await timeEntryHelpers.createSampleTimeEntry({
-        dayId: day.id,
-        startedAt: PlainDateTime.from('2021-01-01T10:00:00'),
-        stoppedAt: null,
-      })
-
-      const update = {
-        stoppedAt: null,
-      }
-
-      await expect(
-        timeEntryService.patchTimeEntry(timeEntry.id, update),
-      ).rejects.toThrowError(
-        'Cannot create a time entry while another time entry is running.',
-      )
-
-      // ensure the time entry was not updated.
-      const timeEntries = await timeEntryHelpers.getAll()
-      expect(timeEntries).not.toContainEqual(timeEntryDtoContaining(update))
-      expect(timeEntries).toContainEqual(timeEntryDtoContaining(timeEntry))
-    })
-
-    it('should fail to update a time entry to be longer than 24h', async () => {
-      const day = await dayHelpers.createDay('2021-01-01')
-
-      const timeEntry = await timeEntryHelpers.createSampleTimeEntry({
-        dayId: day.id,
-        startedAt: PlainDateTime.from('2021-01-01T09:00:00'),
-        stoppedAt: PlainDateTime.from('2021-01-01T10:00:00'),
-      })
-
-      const update = {
-        stoppedAt: PlainDateTime.from('2021-01-02T10:00:00'),
-      }
-
-      await expect(
-        timeEntryService.patchTimeEntry(timeEntry.id, update),
-      ).rejects.toThrowError('Time entry must not be longer than 24 hours.')
-
-      // ensure the time entry was not updated.
-      const timeEntries = await timeEntryHelpers.getAll()
-      expect(timeEntries).not.toContainEqual(timeEntryDtoContaining(update))
-      expect(timeEntries).toContainEqual(timeEntryDtoContaining(timeEntry))
     })
   })
 })

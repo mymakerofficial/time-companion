@@ -13,16 +13,58 @@ import {
 } from '@shared/model/mappers/timeEntry'
 import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 import { uuid } from '@shared/lib/utils/uuid'
-import { firstOfOrNull } from '@shared/lib/utils/list'
+import { firstOf, firstOfOrNull } from '@shared/lib/utils/list'
 import { type DayDto, daysTable } from '@shared/model/day'
 import { toDayDto } from '@shared/model/mappers/day'
 import {
   check,
   IllegalStateError,
+  isDefined,
+  isEmpty,
   isNotNull,
-  isNull,
 } from '@shared/lib/utils/checks'
-import { and, or } from '@shared/database/schema/columnDefinition'
+import { and } from '@shared/database/schema/columnDefinition'
+
+class TimeEntryLowerBoundViolation extends IllegalStateError {
+  constructor(expected: PlainDateTime, actual: PlainDateTime) {
+    super(
+      `Time entry must start at or after "${expected.toString()}". Received "${actual.toString()}".`,
+    )
+    this.name = 'TimeEntryLowerBoundViolation'
+  }
+}
+
+class TimeEntryUpperBoundViolation extends IllegalStateError {
+  constructor(expected: PlainDateTime, actual: PlainDateTime) {
+    super(
+      `Time entry must end at or before "${expected.toString()}". Received "${actual.toString()}".`,
+    )
+    this.name = 'TimeEntryUpperBoundViolation'
+  }
+}
+
+class TimeEntryOverlapViolation extends IllegalStateError {
+  constructor(firstTimeEntry: TimeEntryBase, secondTimeEntry: TimeEntryBase) {
+    super(
+      `Time entry must not overlap with an existing time entry. "${firstTimeEntry.startedAt.toString()}" - "${firstTimeEntry.stoppedAt?.toString() ?? null}" overlaps with "${secondTimeEntry.startedAt.toString()}" - "${secondTimeEntry.stoppedAt?.toString() ?? null}".`,
+    )
+    this.name = 'TimeEntryOverlapViolation'
+  }
+}
+
+class TimeEntryStoppedBeforeStartedViolation extends IllegalStateError {
+  constructor() {
+    super('Time entry must start before it stops.')
+    this.name = 'TimeEntryStoppedBeforeStartedViolation'
+  }
+}
+
+class TimeEntryDurationViolation extends IllegalStateError {
+  constructor() {
+    super('Time entry must not be longer than 24 hours.')
+    this.name = 'TimeEntryDurationViolation'
+  }
+}
 
 export type TimeEntryPersistenceDependencies = {
   database: Database
@@ -79,7 +121,7 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
 
   async createTimeEntry(timeEntry: CreateTimeEntry): Promise<TimeEntryDto> {
     return await this.database.withTransaction(async (tx) => {
-      await checkConstraints(timeEntry, tx)
+      await checkConstraints(tx, timeEntry)
 
       return await tx.table(timeEntriesTable).insert({
         data: timeEntryEntityCreateFrom(timeEntry, {
@@ -112,125 +154,102 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
         `Time entry with id "${id}" not found.`,
       )
 
-      await checkConstraints(updatedTimeEntry, tx)
+      await checkConstraints(tx, updatedTimeEntry, id)
 
       return updatedTimeEntry
     })
   }
 }
 
-async function checkConstraints(timeEntry: TimeEntryBase, tx: Transaction) {
-  checkDateTimeRange(timeEntry)
-  const day = await checkDay(timeEntry, tx)
-  await checkDateTimeLimit(timeEntry, day, tx)
-  await checkOverlap(timeEntry, tx)
-}
-
-function checkDateTimeRange({
-  startedAt,
-  stoppedAt,
-}: Pick<TimeEntryBase, 'startedAt' | 'stoppedAt'>) {
-  if (isNull(stoppedAt)) {
-    // Time entry is still running, no need to check the stoppedAt date.
-    return
+/***
+ * The upper bound represents the latest possible time a time entry can end.
+ *  **Expects time entries to be sorted by startedAt in ascending order.**
+ */
+function calculateUpperBound(day: DayDto, timeEntries: Array<TimeEntryDto>) {
+  if (isEmpty(timeEntries)) {
+    // A time entry can at most be 24 hours long.
+    //  The earliest time a time entry can start is at midnight.
+    //  Therefore, if no other time entries exist, the upper bound is the end of the day.
+    return day.date.toPlainDateTime().add({ hours: 24 })
   }
 
-  check(startedAt.isBefore(stoppedAt), `Time entry must start before it stops.`)
-
-  check(
-    startedAt.until(stoppedAt).isShorterThan({ hours: 24 }),
-    `Time entry must not be longer than 24 hours.`,
-  )
+  const firstTimeEntry = firstOf(timeEntries)
+  // A day may only last 24 starting from the first time entry.
+  //  Therefore, the upper bound is 24 hours after the first entry has started.
+  return firstTimeEntry.startedAt.add({ hours: 24 })
 }
 
-async function checkDay(timeEntry: TimeEntryBase, tx: Transaction) {
-  const { startedAt, dayId } = timeEntry
+async function checkConstraints(
+  tx: Transaction,
+  timeEntry: TimeEntryBase,
+  ignoreId?: string,
+) {
+  if (isNotNull(timeEntry.stoppedAt)) {
+    check(
+      timeEntry.startedAt.isBefore(timeEntry.stoppedAt),
+      () => new TimeEntryStoppedBeforeStartedViolation(),
+    )
+
+    check(
+      timeEntry.startedAt
+        .until(timeEntry.stoppedAt)
+        .isShorterThanOrEqual({ hours: 24 }),
+      () => new TimeEntryDurationViolation(),
+    )
+  }
 
   const day = await tx.table(daysTable).findFirst({
-    range: daysTable.id.range.only(dayId),
+    range: daysTable.id.range.only(timeEntry.dayId),
     map: toDayDto,
   })
 
-  check(isNotNull(day), `Day with id "${dayId}" not found.`)
+  check(isNotNull(day), `Day with id "${timeEntry.dayId}" not found.`)
 
-  check(
-    startedAt.isAfterOrEqual(day.date),
-    `Time entry must start after midnight of the given day.`,
-  )
-
-  return day
-}
-
-async function checkDateTimeLimit(
-  timeEntry: TimeEntryBase,
-  day: DayDto,
-  tx: Transaction,
-) {
-  const { startedAt, stoppedAt } = timeEntry
-
-  const earliestTimeEntry = await tx.table(timeEntriesTable).findFirst({
+  const timeEntries = await tx.table(timeEntriesTable).findMany({
     range: timeEntriesTable.dayId.range.only(timeEntry.dayId),
+    where: and(
+      timeEntriesTable.deletedAt.isNull(),
+      isDefined(ignoreId) ? timeEntriesTable.id.notEquals(ignoreId) : undefined,
+    ),
     orderBy: timeEntriesTable.startedAt.asc(),
     map: toTimeEntryDto,
   })
 
-  if (isNull(earliestTimeEntry)) {
-    // This is the first time entry of the day.
-    check(
-      startedAt.isBefore(day.date.add({ days: 1 })),
-      `The first time entry of a day must start on the same date.`,
-    )
-  } else {
-    check(
-      earliestTimeEntry.startedAt
-        .add({ hours: 24 })
-        .isAfterOrEqual(stoppedAt ?? startedAt),
-      `Time entry must end at most 24 hours after the first time entry of the given day has started.`,
-    )
-  }
-}
+  const lowerBound = day.date.toPlainDateTime()
+  const upperBound = calculateUpperBound(day, timeEntries)
 
-async function checkOverlap(timeEntry: TimeEntryBase, tx: Transaction) {
-  const lowerBound = timeEntry.startedAt.subtract({ hours: 24 })
-  const upperBound = timeEntry.stoppedAt ?? timeEntry.startedAt
-
-  const collision = await tx.table(timeEntriesTable).findFirst({
-    range: timeEntriesTable.startedAt.range.between(
-      lowerBound.toDate(),
-      upperBound.toDate(),
-    ),
-    where: or(
-      timeEntriesTable.stoppedAt.isNull(),
-      or(
-        and(
-          timeEntriesTable.startedAt.lessThan(timeEntry.startedAt.toDate()),
-          timeEntriesTable.stoppedAt.greaterThan(timeEntry.startedAt.toDate()),
-        ),
-        and(
-          timeEntriesTable.startedAt.lessThan(
-            timeEntry.stoppedAt?.toDate() ?? timeEntry.startedAt.toDate(),
-          ),
-          timeEntriesTable.stoppedAt.greaterThan(
-            timeEntry.stoppedAt?.toDate() ?? timeEntry.startedAt.toDate(),
-          ),
-        ),
-      ),
-    ),
-    map: toTimeEntryDto,
-  })
-
-  if (isNull(collision)) {
-    // all good
-    return
-  }
-
-  if (isNull(collision.stoppedAt)) {
-    throw new IllegalStateError(
-      'Cannot create a time entry while another time entry is running.',
-    )
-  }
-
-  throw new IllegalStateError(
-    'Time entry must not overlap with an existing time entry.',
+  const timeEntryEarliest = timeEntry.startedAt
+  check(
+    timeEntryEarliest.isAfterOrEqual(lowerBound),
+    () => new TimeEntryLowerBoundViolation(lowerBound, timeEntryEarliest),
   )
+
+  const timeEntryLatest = timeEntry.stoppedAt ?? timeEntry.startedAt
+  check(
+    timeEntryLatest.isBeforeOrEqual(upperBound),
+    () => new TimeEntryUpperBoundViolation(upperBound, timeEntryLatest),
+  )
+
+  // If the time entry is still running,
+  //  we assume the maximum possible duration of 24 hours.
+  //  This way, no other time entry can overlap with it.
+  const timeEntryAbsLatest =
+    timeEntry.stoppedAt ?? timeEntry.startedAt.add({ hours: 24 })
+  timeEntries.forEach((entry) => {
+    const otherStart = entry.startedAt
+    // same here, we assume the maximum possible duration of 24 hours.
+    const otherAbsLatest = entry.stoppedAt ?? entry.startedAt.add({ hours: 24 })
+
+    const overlaps =
+      (timeEntryAbsLatest.isAfter(otherStart) &&
+        timeEntryAbsLatest.isBefore(otherAbsLatest)) ||
+      (timeEntryEarliest.isBefore(otherAbsLatest) &&
+        timeEntryEarliest.isAfter(otherStart)) ||
+      (otherStart.isBefore(timeEntryAbsLatest) &&
+        otherAbsLatest.isAfter(timeEntryEarliest))
+
+    if (overlaps) {
+      throw new TimeEntryOverlapViolation(timeEntry, entry)
+    }
+  })
 }
