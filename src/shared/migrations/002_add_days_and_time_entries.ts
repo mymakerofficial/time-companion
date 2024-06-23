@@ -18,7 +18,7 @@ export default defineMigration(async (transaction) => {
     taskId: c.uuid().nullable(),
     description: c.text(),
     startedAt: c.datetime().indexed(),
-    stoppedAt: c.datetime().nullable().indexed(),
+    stoppedAt: c.datetime().nullable(),
     createdAt: c.datetime(),
     modifiedAt: c.datetime().nullable(),
     deletedAt: c.datetime().nullable(),

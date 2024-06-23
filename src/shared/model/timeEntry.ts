@@ -27,7 +27,7 @@ export const timeEntriesTable = defineTable('time_entries', {
   taskId: c.uuid().nullable(),
   description: c.text(),
   startedAt: c.datetime().indexed(),
-  stoppedAt: c.datetime().nullable().indexed(),
+  stoppedAt: c.datetime().nullable(), // indexeddb does not support indexing nullable columns
   createdAt: c.datetime(),
   modifiedAt: c.datetime().nullable(),
   deletedAt: c.datetime().nullable(),
