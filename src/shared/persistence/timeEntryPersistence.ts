@@ -14,7 +14,7 @@ import {
 import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 import { uuid } from '@shared/lib/utils/uuid'
 import { firstOf, firstOfOrNull } from '@shared/lib/utils/list'
-import { type DayDto, daysTable } from '@shared/model/day'
+import { daysTable } from '@shared/model/day'
 import { toDayDto } from '@shared/model/mappers/day'
 import {
   check,
@@ -161,24 +161,6 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
   }
 }
 
-/***
- * The upper bound represents the latest possible time a time entry can end.
- *  **Expects time entries to be sorted by startedAt in ascending order.**
- */
-function calculateUpperBound(day: DayDto, timeEntries: Array<TimeEntryDto>) {
-  if (isEmpty(timeEntries)) {
-    // A time entry can at most be 24 hours long.
-    //  The earliest time a time entry can start is at midnight.
-    //  Therefore, if no other time entries exist, the upper bound is the end of the day.
-    return day.date.toPlainDateTime().add({ hours: 24 })
-  }
-
-  const firstTimeEntry = firstOf(timeEntries)
-  // A day may only last 24 starting from the first time entry.
-  //  Therefore, the upper bound is 24 hours after the first entry has started.
-  return firstTimeEntry.startedAt.add({ hours: 24 })
-}
-
 async function checkConstraints(
   tx: Transaction,
   timeEntry: TimeEntryBase,
@@ -209,6 +191,7 @@ async function checkConstraints(
     range: timeEntriesTable.dayId.range.only(timeEntry.dayId),
     where: and(
       timeEntriesTable.deletedAt.isNull(),
+      // Ignore the time entry we are currently updating.
       isDefined(ignoreId) ? timeEntriesTable.id.notEquals(ignoreId) : undefined,
     ),
     orderBy: timeEntriesTable.startedAt.asc(),
@@ -216,19 +199,30 @@ async function checkConstraints(
   })
 
   const lowerBound = day.date.toPlainDateTime()
-  const upperBound = calculateUpperBound(day, timeEntries)
-
   const timeEntryEarliest = timeEntry.startedAt
   check(
     timeEntryEarliest.isAfterOrEqual(lowerBound),
     () => new TimeEntryLowerBoundViolation(lowerBound, timeEntryEarliest),
   )
 
-  const timeEntryLatest = timeEntry.stoppedAt ?? timeEntry.startedAt
-  check(
-    timeEntryLatest.isBeforeOrEqual(upperBound),
-    () => new TimeEntryUpperBoundViolation(upperBound, timeEntryLatest),
-  )
+  if (isEmpty(timeEntries)) {
+    // The first time entry added to a day must start during on the given date.
+    const upperBound = day.date.toPlainDateTime().add({ days: 1 })
+    check(
+      timeEntry.startedAt.isBeforeOrEqual(upperBound),
+      () => new TimeEntryUpperBoundViolation(upperBound, timeEntry.startedAt),
+    )
+  } else {
+    // A day may only last 24 hours starting from the first time entry.
+    //  Therefore, the upper bound is 24 hours after the first entry has started.
+    const firstTimeEntry = firstOf(timeEntries)
+    const upperBound = firstTimeEntry.startedAt.add({ hours: 24 })
+    const timeEntryLatest = timeEntry.stoppedAt ?? timeEntry.startedAt
+    check(
+      timeEntryLatest.isBeforeOrEqual(upperBound),
+      () => new TimeEntryUpperBoundViolation(upperBound, timeEntryLatest),
+    )
+  }
 
   // If the time entry is still running,
   //  we assume the maximum possible duration of 24 hours.
