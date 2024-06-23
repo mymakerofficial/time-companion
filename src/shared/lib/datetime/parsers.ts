@@ -1,16 +1,12 @@
+import { Duration } from '@shared/lib/datetime/duration'
 import {
-  isNotDefined,
+  isAbsent,
+  isDefined,
+  isEmpty,
   isNotNull,
   isNull,
-  type Nullable,
-} from '@renderer/lib/utils'
-import { isEmpty } from '@renderer/lib/listUtils'
-import { Temporal } from 'temporal-polyfill'
-import {
-  durationZero,
-  negateDuration,
-  sumOfDurations,
-} from '@renderer/lib/neoTime'
+} from '@shared/lib/utils/checks'
+import type { Nullable } from '@shared/lib/utils/types'
 
 /**
  * Parses any single human-readable duration input into Duration
@@ -24,7 +20,7 @@ import {
  * parseHumanTime('90m') // 1 hour and 30 minutes
  * parseHumanTime('1h') // 1 hour and 0 minutes
  */
-export function parseHumanDuration(value: string): Nullable<Temporal.Duration> {
+export function parseHumanDuration(value: string): Nullable<Duration> {
   // match any valid input and extract the relevant parts in groups
   // whole.decimal | hour:minute | value unit
   const inputRegex =
@@ -32,7 +28,7 @@ export function parseHumanDuration(value: string): Nullable<Temporal.Duration> {
 
   const match = inputRegex.exec(value)
 
-  if (isNotDefined(match)) {
+  if (isAbsent(match)) {
     return null
   }
 
@@ -45,41 +41,51 @@ export function parseHumanDuration(value: string): Nullable<Temporal.Duration> {
     unit,
   } = match.groups!
 
-  if (whole !== undefined) {
+  if (isDefined(whole)) {
     // value is given as a decimal (e.g. 1.5)
     const hours = parseInt(whole)
     const minutes = (parseInt(decimal) / 10) * 60
 
-    return Temporal.Duration.from({
+    return Duration.from({
       hours,
       minutes,
     })
   }
 
-  if (hour !== undefined) {
+  if (isDefined(hour)) {
     // value is given in hours and minutes (e.g. 1:30)
     const hours = parseInt(hour)
     const minutes = parseInt(minute) || 0
 
-    return Temporal.Duration.from({
+    return Duration.from({
       hours,
       minutes,
     })
   }
 
-  if (valueString !== undefined) {
-    // value is given in seconds,  minutes or hours (e.g. 30s, 90m or 1h)
-
-    const isMinutes =
-      unit === 'm' || unit === 'min' || unit === 'minute' || unit === 'minutes'
-    const isSeconds =
-      unit === 's' || unit === 'sec' || unit === 'second' || unit === 'seconds'
-
-    const multiplier = isSeconds ? 1 : isMinutes ? 60 : 3600
-
-    return durationZero().add({
-      seconds: parseInt(valueString) * multiplier,
-    })
+  if (isDefined(valueString)) {
+    // value is given in seconds, minutes or hours (e.g. 30s, 90m or 1h)
+    switch (unit) {
+      case 's':
+      case 'sec':
+      case 'second':
+      case 'seconds':
+        return Duration.from({
+          seconds: parseInt(valueString),
+        })
+      case 'm':
+      case 'min':
+      case 'minute':
+      case 'minutes':
+        return Duration.from({
+          minutes: parseInt(valueString),
+        })
+      case 'h':
+      case 'hour':
+        return Duration.from({
+          hours: parseInt(valueString),
+        })
+    }
   }
 
   return null
@@ -96,7 +102,7 @@ export function parseHumanDuration(value: string): Nullable<Temporal.Duration> {
  */
 export function parseHumanDurationWithEquation(
   value: string,
-): Nullable<Temporal.Duration> {
+): Nullable<Duration> {
   // split the input into individual values and operators
   const inputRegex = /(?<operator>[+-])?\s*(?<value>\d+.?\d*\w*)/gi
 
@@ -110,17 +116,19 @@ export function parseHumanDurationWithEquation(
     .map((match) => {
       const { operator, value: rawValue } = match.groups!
 
-      const isNegative = operator === '-'
       const duration = parseHumanDuration(rawValue)
 
       if (isNull(duration)) {
         return null
       }
 
-      if (isNegative) {
-        return negateDuration(duration)
-      } else {
-        return duration
+      switch (operator) {
+        case '+':
+          return duration
+        case '-':
+          return duration.negated()
+        default:
+          return null
       }
     })
     .filter(isNotNull)
@@ -129,5 +137,5 @@ export function parseHumanDurationWithEquation(
     return null
   }
 
-  return sumOfDurations(values)
+  return Duration.sum(values)
 }

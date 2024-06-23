@@ -1,4 +1,5 @@
 import { Temporal } from 'temporal-polyfill'
+import { PlainTime } from '@shared/lib/datetime/plainTime'
 
 export class Duration extends Temporal.Duration {
   static from(
@@ -20,6 +21,48 @@ export class Duration extends Temporal.Duration {
       temporalDuration.microseconds,
       temporalDuration.nanoseconds,
     )
+  }
+
+  static zero(): Duration {
+    return new Duration()
+  }
+
+  static sum(durations: Duration[]): Duration {
+    return durations.reduce(
+      (acc, duration) => acc.add(duration),
+      Duration.zero(),
+    )
+  }
+
+  toPlainTime(): PlainTime {
+    return PlainTime.from({
+      hour: this.total({ unit: 'hours' }),
+      minute: this.total({ unit: 'minutes' }) % 60,
+      second: this.total({ unit: 'seconds' }) % 60,
+      millisecond: this.total({ unit: 'milliseconds' }) % 1000,
+      microsecond: this.total({ unit: 'microseconds' }) % 1000,
+      nanosecond: this.total({ unit: 'nanoseconds' }) % 1000,
+    })
+  }
+
+  add(
+    other: Duration | Temporal.Duration | Temporal.DurationLike | string,
+  ): Duration {
+    return Duration.fromTemporalDuration(super.add(Duration.from(other)))
+  }
+
+  subtract(
+    other: Duration | Temporal.Duration | Temporal.DurationLike | string,
+  ): Duration {
+    return Duration.fromTemporalDuration(super.subtract(Duration.from(other)))
+  }
+
+  abs(): Duration {
+    return Duration.fromTemporalDuration(super.abs())
+  }
+
+  negated(): Duration {
+    return Duration.fromTemporalDuration(super.negated())
   }
 
   isShorterThan(

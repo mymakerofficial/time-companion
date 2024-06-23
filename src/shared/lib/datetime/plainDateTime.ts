@@ -1,6 +1,7 @@
 import { Temporal } from 'temporal-polyfill'
 import { isDate } from '@shared/lib/utils/checks'
 import { Duration } from '@shared/lib/datetime/duration'
+import { PlainTime } from '@shared/lib/datetime/plainTime'
 
 export class PlainDateTime extends Temporal.PlainDateTime {
   static from(
@@ -59,6 +60,10 @@ export class PlainDateTime extends Temporal.PlainDateTime {
       this.second,
       this.millisecond,
     )
+  }
+
+  toPlainTime(): PlainTime {
+    return PlainTime.fromTemporalPlainTime(super.toPlainTime())
   }
 
   add(
