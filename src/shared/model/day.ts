@@ -6,6 +6,7 @@ import type { InferTable } from '@shared/database/types/schema'
 import { z } from 'zod'
 import { PlainDate } from '@shared/lib/datetime/plainDate'
 import { Duration } from '@shared/lib/datetime/duration'
+import { durationType, plainDateType } from '@shared/lib/datetime/schema'
 
 export type DayBase = {
   date: PlainDate
@@ -30,9 +31,8 @@ export const daysTable = defineTable('days', {
 export type DayEntity = InferTable<typeof daysTable>
 
 export const daySchema = z.object({
-  date: z.custom<PlainDate>(),
-  targetBillableDuration: z
-    .custom<Duration>()
+  date: plainDateType.default(() => PlainDate.now()),
+  targetBillableDuration: durationType
     .nullable()
     .default(Duration.from('PT8H')),
 })
