@@ -17,7 +17,6 @@ import {
 import { parseHumanDurationWithEquation } from '@shared/lib/datetime/parsers'
 
 const model = defineModel<Duration>({ required: true })
-
 const props = withDefaults(
   defineProps<
     Omit<InputProps, 'type'> & {
@@ -30,7 +29,9 @@ const props = withDefaults(
     mode: 'duration',
   },
 )
-
+const emit = defineEmits<{
+  change: [Duration]
+}>()
 defineSlots<InputSlots>()
 
 const inputValue = ref('')
@@ -58,6 +59,7 @@ function handleChange() {
   }
 
   model.value = parsedDuration
+  emit('change', parsedDuration)
 }
 
 const tooltip = computed(() => props.tooltip ?? model.value.toString())

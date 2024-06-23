@@ -14,6 +14,9 @@ const props = defineProps<
     tooltip?: string
   }
 >()
+const emit = defineEmits<{
+  change: [PlainTime]
+}>()
 defineSlots<InputSlots>()
 
 const forwardModel = computed<Duration>({
@@ -25,6 +28,10 @@ const forwardModel = computed<Duration>({
   },
 })
 
+function handleChange(value: Duration) {
+  emit('change', value.toPlainTime())
+}
+
 const tooltip = computed(() => props.tooltip ?? model.value.toString())
 </script>
 
@@ -34,6 +41,7 @@ const tooltip = computed(() => props.tooltip ?? model.value.toString())
     v-model="forwardModel"
     :tooltip="tooltip"
     mode="time"
+    @change="handleChange"
   >
     <template #leading>
       <slot name="leading" />
