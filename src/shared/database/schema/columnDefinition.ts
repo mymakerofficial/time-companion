@@ -13,6 +13,8 @@ import {
   type WhereBooleanOperator,
   type WhereOperator,
 } from '@shared/database/types/database'
+import type { Optional } from '@shared/lib/utils/types'
+import { isDefined } from '@shared/lib/utils/checks'
 
 class KeyRangeFactoryImpl<TRow extends object = object, TColumn = unknown>
   implements KeyRangeFactory<TRow, TColumn>
@@ -289,15 +291,15 @@ class WhereConditionBuilderImpl<TRow extends object, TColumn = unknown>
 }
 
 export function and<GRow extends object, GColumn>(
-  ...conditions: Array<WhereBuilder<GRow, GColumn>>
+  ...conditions: Array<Optional<WhereBuilder<GRow, GColumn>>>
 ): WhereBuilder<GRow, GColumn> {
-  const [first, ...rest] = conditions
+  const [first, ...rest] = conditions.filter(isDefined)
   return new WhereGroupBuilderImpl('and', first, rest)
 }
 
 export function or<GRow extends object, GColumn>(
-  ...conditions: Array<WhereBuilder<GRow, GColumn>>
+  ...conditions: Array<Optional<WhereBuilder<GRow, GColumn>>>
 ): WhereBuilder<GRow, GColumn> {
-  const [first, ...rest] = conditions
+  const [first, ...rest] = conditions.filter(isDefined)
   return new WhereGroupBuilderImpl('or', first, rest)
 }
