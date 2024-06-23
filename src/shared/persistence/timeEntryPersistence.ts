@@ -24,6 +24,7 @@ import {
   isNotNull,
 } from '@shared/lib/utils/checks'
 import { and } from '@shared/database/schema/columnDefinition'
+import type { Nullable } from '@shared/lib/utils/types'
 
 class TimeEntryLowerBoundViolation extends IllegalStateError {
   constructor(expected: PlainDateTime, actual: PlainDateTime) {
@@ -76,6 +77,7 @@ export interface TimeEntryPersistence {
     startedAt: PlainDateTime,
     stoppedAt: PlainDateTime,
   ): Promise<Array<TimeEntryDto>>
+  getRunningTimeEntryByDayId(dayId: string): Promise<Nullable<TimeEntryDto>>
   createTimeEntry(timeEntry: CreateTimeEntry): Promise<TimeEntryDto>
   patchTimeEntry(
     id: string,
@@ -101,6 +103,19 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
       range: timeEntriesTable.dayId.range.only(dayId),
       where: timeEntriesTable.deletedAt.isNull(),
       orderBy: timeEntriesTable.startedAt.asc(),
+      map: toTimeEntryDto,
+    })
+  }
+
+  async getRunningTimeEntryByDayId(
+    dayId: string,
+  ): Promise<Nullable<TimeEntryDto>> {
+    return await this.database.table(timeEntriesTable).findFirst({
+      range: timeEntriesTable.dayId.range.only(dayId),
+      where: and(
+        timeEntriesTable.deletedAt.isNull(),
+        timeEntriesTable.stoppedAt.isNull(),
+      ),
       map: toTimeEntryDto,
     })
   }
