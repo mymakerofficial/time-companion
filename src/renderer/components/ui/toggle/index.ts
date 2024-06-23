@@ -1,4 +1,4 @@
-import { cva } from 'class-variance-authority'
+import { cva, type VariantProps } from 'class-variance-authority'
 
 export { default as Toggle } from './Toggle.vue'
 
@@ -23,3 +23,5 @@ export const toggleVariants = cva(
     },
   },
 )
+
+export type ToggleVariants = VariantProps<typeof toggleVariants>
