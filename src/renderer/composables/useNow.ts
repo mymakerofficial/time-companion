@@ -1,16 +1,19 @@
 import { customRef } from 'vue'
-import { now, seconds, timeNow, today } from '@renderer/lib/neoTime'
-import { Temporal } from 'temporal-polyfill'
+import { Duration } from '@shared/lib/datetime/duration'
+import { PlainDate } from '@shared/lib/datetime/plainDate'
+import { PlainTime } from '@shared/lib/datetime/plainTime'
+import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 
 export interface UseNowOptions {
   // Update interval
-  interval?: Temporal.Duration
+  interval?: Duration
 }
 
-function usePrimitiveNow<
-  T extends Temporal.PlainDate | Temporal.PlainTime | Temporal.PlainDateTime,
->(options: UseNowOptions, getter: () => T) {
-  const { interval = seconds(1) } = options
+function usePrimitiveNow<T extends PlainDate | PlainTime | PlainDateTime>(
+  options: UseNowOptions,
+  getter: () => T,
+) {
+  const { interval = Duration.from({ seconds: 1 }) } = options
 
   return customRef<T>((track, trigger) => {
     setInterval(
@@ -33,19 +36,19 @@ function usePrimitiveNow<
 }
 
 export function useNow(options: UseNowOptions = {}) {
-  const { interval = seconds(1) } = options
+  const { interval = Duration.from({ seconds: 1 }) } = options
 
-  return usePrimitiveNow({ interval }, () => now())
+  return usePrimitiveNow({ interval }, () => PlainDateTime.now())
 }
 
 export function useTimeNow(options: UseNowOptions = {}) {
-  const { interval = seconds(1) } = options
+  const { interval = Duration.from({ seconds: 1 }) } = options
 
-  return usePrimitiveNow({ interval }, () => timeNow())
+  return usePrimitiveNow({ interval }, () => PlainTime.now())
 }
 
 export function useToday(options: UseNowOptions = {}) {
-  const { interval = seconds(1) } = options
+  const { interval = Duration.from({ seconds: 1 }) } = options
 
-  return usePrimitiveNow({ interval }, () => today())
+  return usePrimitiveNow({ interval }, () => PlainDate.now())
 }
