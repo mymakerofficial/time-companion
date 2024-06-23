@@ -6,7 +6,7 @@ import { check, isUndefined } from '@shared/lib/utils/checks'
 
 export function useGetProjectById(id: MaybeRef<string>) {
   const queryClient = useQueryClient()
-  const queryKey = ['projects', id]
+  const queryKey = ['projects', 'getProject', { id }]
 
   watchEffect(() => {
     if (isUndefined(queryClient.getQueryData(queryKey))) {

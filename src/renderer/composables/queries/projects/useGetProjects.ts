@@ -4,7 +4,7 @@ import { isUndefined } from '@shared/lib/utils/checks'
 
 export function useGetProjects() {
   const queryClient = useQueryClient()
-  const queryKey = ['projects']
+  const queryKey = ['projects', 'getProjects']
 
   if (isUndefined(queryClient.getQueryData(queryKey))) {
     projectService.subscribe({}, () => {
