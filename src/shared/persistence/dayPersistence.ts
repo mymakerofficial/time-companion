@@ -8,6 +8,7 @@ import {
   errorIsUndefinedColumn,
   errorIsUniqueViolation,
 } from '@shared/database/types/errors'
+import type { PlainDate } from '@shared/lib/datetime/plainDate'
 
 export type DayPersistenceDependencies = {
   database: Database
@@ -16,6 +17,7 @@ export type DayPersistenceDependencies = {
 export interface DayPersistence {
   getDays(): Promise<Array<DayDto>>
   getDayById(id: string): Promise<DayDto>
+  getDayByDate(date: PlainDate): Promise<DayDto>
   createDay(day: CreateDay): Promise<DayDto>
 }
 
@@ -69,6 +71,21 @@ class DayPersistenceImpl implements DayPersistence {
       .catch(this.resolveError)
       .then((res) => {
         check(isNotNull(res), `Day with id "${id}" not found.`)
+        return res
+      })
+  }
+
+  async getDayByDate(date: PlainDate): Promise<DayDto> {
+    return await this.database
+      .table(daysTable)
+      .findFirst({
+        range: daysTable.date.range.only(date.toDate()),
+        where: daysTable.deletedAt.isNull(),
+        map: toDayDto,
+      })
+      .catch(this.resolveError)
+      .then((res) => {
+        check(isNotNull(res), `Day with date "${date.toString()}" not found.`)
         return res
       })
   }
