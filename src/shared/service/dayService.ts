@@ -14,7 +14,8 @@ export interface DayService extends EntityService<DayDto> {
   getDays(): Promise<Array<DayDto>>
   getDayById(id: string): Promise<DayDto>
   getDayByDate(date: PlainDate): Promise<DayDto>
-  createDay(day: CreateDay): Promise<DayDto>
+  getOrCreateDayByDate(date: PlainDate): Promise<DayDto>
+  createDay(day: Partial<CreateDay>): Promise<DayDto>
 }
 
 export function createDayService(deps: DayServiceDependencies): DayService {
@@ -40,10 +41,21 @@ export class DayServiceImpl
     return await this.dayPersistence.getDayById(id)
   }
 
-  async createDay(day: CreateDay): Promise<DayDto> {
-    return await this.dayPersistence.createDay(day)
   async getDayByDate(date: PlainDate): Promise<DayDto> {
     return await this.dayPersistence.getDayByDate(date)
   }
+
+  async getOrCreateDayByDate(date: PlainDate): Promise<DayDto> {
+    return await asyncGetOrElse(
+      () => this.dayPersistence.getDayByDate(date),
+      () => this.createDay({ date }),
+    )
+  }
+
+  async createDay(day: Partial<CreateDay>): Promise<DayDto> {
+    return await this.dayPersistence.createDay({
+      ...getSchemaDefaults(daySchema),
+      ...day,
+    })
   }
 }
