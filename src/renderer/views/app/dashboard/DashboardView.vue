@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import CalendarView from '@renderer/components/common/calendar/CalendarView.vue'
 import CalendarHeader from '@renderer/components/dashboard/layout/CalendarHeader.vue'
 import { computed } from 'vue'
 import CurrentEventCard from '@renderer/components/dashboard/cards/CurrentEventCard.vue'
@@ -13,6 +12,9 @@ import { useActiveDayService } from '@renderer/services/activeDayService'
 import EditEventCard from '@renderer/components/dashboard/cards/EditEventCard.vue'
 import { useSelectedEventService } from '@renderer/services/selectedEventService'
 import WorkingDurationCard from '@renderer/components/dashboard/cards/WorkingDurationCard.vue'
+import { useToday } from '@renderer/composables/useNow'
+import { useGetOrCreateDayByDate } from '@renderer/composables/queries/days/useGetOrCreateDayByDate'
+import DayCalendar from '@renderer/components/common/calendar/DayCalendar.vue'
 
 const activeDayService = useActiveDayService()
 const activeEventService = useActiveEventService()
@@ -42,6 +44,9 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
     activeEventService.startEvent(shadow)
   }
 }
+
+const today = useToday()
+const { data: day } = useGetOrCreateDayByDate(today)
 </script>
 
 <template>
@@ -66,11 +71,7 @@ function handleQuickStart(shadow: ReactiveCalendarEventShadow) {
     </section>
     <section class="col-span-5 flex flex-col h-viewport">
       <CalendarHeader />
-      <CalendarView
-        v-if="activeDayService.day"
-        :events="activeDayService.day.events"
-        @event-selected="handleEventSelected"
-      />
+      <DayCalendar v-if="day" :day-id="day.id" />
     </section>
   </main>
 </template>

@@ -48,7 +48,7 @@ export function useTimeNow(options: UseNowOptions = {}) {
 }
 
 export function useToday(options: UseNowOptions = {}) {
-  const { interval = Duration.from({ seconds: 1 }) } = options
+  const { interval = Duration.from({ hours: 1 }) } = options
 
   return usePrimitiveNow({ interval }, () => PlainDate.now())
 }

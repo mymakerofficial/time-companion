@@ -3,8 +3,9 @@ import { projectService } from '@renderer/factory/service/projectService'
 import type { MaybeRef } from 'vue'
 import { toValue, watchEffect } from 'vue'
 import { check, isUndefined } from '@shared/lib/utils/checks'
+import type { Maybe } from '@shared/lib/utils/types'
 
-export function useGetProjectById(id: MaybeRef<string>) {
+export function useGetProjectById(id: MaybeRef<Maybe<string>>) {
   const queryClient = useQueryClient()
   const queryKey = ['projects', 'getProject', { id }]
 
@@ -29,6 +30,7 @@ export function useGetProjectById(id: MaybeRef<string>) {
 
   return useQuery({
     queryKey,
-    queryFn: () => projectService.getProjectById(toValue(id)),
+    queryFn: () => projectService.getProjectById(toValue(id)!),
+    enabled: !!toValue(id),
   })
 }

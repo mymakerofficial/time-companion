@@ -1,25 +1,24 @@
 <script setup lang="ts">
-import CalendarViewEvent from '@renderer/components/common/calendar/CalendarViewEvent.vue'
+import CalendarViewEntry from '@renderer/components/common/calendar/CalendarViewEntry.vue'
 import CalendarViewPointer from '@renderer/components/common/calendar/CalendarViewPointer.vue'
-import type { ReactiveCalendarEvent } from '@renderer/model/calendarEvent/types'
 import { rowsToTime } from '@renderer/lib/calendarUtils'
 import { formatTime, withFormat } from '@renderer/lib/neoTime'
-import type { MaybeReadonly } from '@renderer/lib/utils'
+import type { TimeEntryDto } from '@shared/model/timeEntry'
 
 defineProps<{
-  events: MaybeReadonly<Array<ReactiveCalendarEvent>>
+  entries: Array<TimeEntryDto>
 }>()
 
 const emit = defineEmits<{
-  eventSelected: [event: ReactiveCalendarEvent]
+  selected: [event: TimeEntryDto]
 }>()
 
 function getRowTimeLabel(row: number) {
   return formatTime(rowsToTime(row), withFormat('HH:mm'))
 }
 
-function handleClick(event: ReactiveCalendarEvent) {
-  emit('eventSelected', event)
+function handleClick(entry: TimeEntryDto) {
+  emit('selected', entry)
 }
 </script>
 
@@ -49,11 +48,11 @@ function handleClick(event: ReactiveCalendarEvent) {
         <div
           class="relative col-start-1 col-end-2 row-end-2 mr-3 border-r border-border grid grid-rows-[2rem_repeat(288,_minmax(0,_1fr))_auto] grid-cols-1"
         >
-          <CalendarViewEvent
-            v-for="event in events"
-            :key="event.id"
-            :event="event"
-            @click="handleClick(event)"
+          <CalendarViewEntry
+            v-for="entry in entries"
+            :key="entry.id"
+            :entry="entry"
+            @click="handleClick(entry)"
           />
           <CalendarViewPointer />
         </div>

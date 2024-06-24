@@ -2,8 +2,9 @@ import { type MaybeRef, toValue, watchEffect } from 'vue'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { isDefined } from '@shared/lib/utils/checks'
 import { timeEntryService } from '@renderer/factory/service/timeEntryService'
+import type { Maybe } from '@shared/lib/utils/types'
 
-export function useGetTimeEntriesByDay(dayId: MaybeRef<string>) {
+export function useGetTimeEntriesByDay(dayId: MaybeRef<Maybe<string>>) {
   const queryClient = useQueryClient()
   const queryKey = ['timeEntries', 'getTimeEntries', { dayId }]
 
@@ -23,7 +24,8 @@ export function useGetTimeEntriesByDay(dayId: MaybeRef<string>) {
 
   return useQuery({
     queryKey,
-    queryFn: () => timeEntryService.getTimeEntriesByDayId(toValue(dayId)),
+    queryFn: () => timeEntryService.getTimeEntriesByDayId(toValue(dayId)!),
     initialData: [],
+    enabled: !!toValue(dayId),
   })
 }
