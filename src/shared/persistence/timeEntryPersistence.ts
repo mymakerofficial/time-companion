@@ -94,6 +94,7 @@ export type TimeEntryPersistenceDependencies = {
 }
 
 export interface TimeEntryPersistence {
+  getTimeEntryById(id: string): Promise<Nullable<TimeEntryDto>>
   getTimeEntriesByDayId(dayId: string): Promise<Array<TimeEntryDto>>
   getTimeEntriesBetween(
     startedAt: PlainDateTime,
@@ -118,6 +119,17 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
 
   constructor(deps: TimeEntryPersistenceDependencies) {
     this.database = deps.database
+  }
+
+  async getTimeEntryById(id: string): Promise<Nullable<TimeEntryDto>> {
+    return await this.database
+      .table(timeEntriesTable)
+      .findFirst({
+        range: timeEntriesTable.id.range.only(id),
+        where: timeEntriesTable.deletedAt.isNull(),
+        map: toTimeEntryDto,
+      })
+      .catch(resolveError)
   }
 
   async getTimeEntriesByDayId(dayId: string): Promise<Array<TimeEntryDto>> {

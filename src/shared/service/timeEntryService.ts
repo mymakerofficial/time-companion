@@ -16,6 +16,7 @@ export type TimeEntryServiceDependencies = {
 }
 
 export interface TimeEntryService extends EntityService<TimeEntryDto> {
+  getTimeEntryById(id: string): Promise<Nullable<TimeEntryDto>>
   getTimeEntriesByDayId(dayId: string): Promise<Array<TimeEntryDto>>
   getTimeEntriesBetween(
     startedAt: PlainDateTime,
@@ -44,6 +45,10 @@ class TimeEntryServiceImpl
   constructor(deps: TimeEntryServiceDependencies) {
     super()
     this.timeEntryPersistence = deps.timeEntryPersistence
+  }
+
+  getTimeEntryById(id: string): Promise<Nullable<TimeEntryDto>> {
+    return this.timeEntryPersistence.getTimeEntryById(id)
   }
 
   getTimeEntriesByDayId(dayId: string): Promise<Array<TimeEntryDto>> {
