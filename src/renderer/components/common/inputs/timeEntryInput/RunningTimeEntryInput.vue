@@ -61,7 +61,6 @@ const durationLabel = computed(() => {
 
 async function handleChange() {
   if (isNull(runningEntry.value)) return
-  console.log(startedAt.value.toString())
   await patchEntry({
     id: runningEntry.value.id,
     timeEntry: {
