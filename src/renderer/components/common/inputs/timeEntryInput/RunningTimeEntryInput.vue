@@ -12,6 +12,7 @@ import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 import type { Nullable } from '@shared/lib/utils/types'
 import { useNow } from '@renderer/composables/useNow'
 import { humanizeDuration } from '@renderer/lib/neoTime'
+import { Clock } from 'lucide-vue-next'
 
 const props = defineProps<{
   dayId: string
@@ -108,14 +109,21 @@ async function handleToggle() {
     <template #leading>
       <slot name="leading" />
     </template>
+    <template #input-trailing>
+      <Button @click="handleToggle" class="h-8 mr-1">{{ buttonLabel }}</Button>
+    </template>
     <template #trailing>
-      <Button @click="handleToggle">{{ buttonLabel }}</Button>
       <DateTimeInput
         v-if="isRunning"
         v-model="startedAt"
         @change="handleChange"
-        class="w-fit"
-      />
+        class="w-32"
+        input-class="w-12"
+      >
+        <template #leading>
+          <Clock class="mx-3 size-4 text-muted-foreground" />
+        </template>
+      </DateTimeInput>
       <time
         v-if="isRunning"
         class="text-lg font-medium text-center min-w-24"

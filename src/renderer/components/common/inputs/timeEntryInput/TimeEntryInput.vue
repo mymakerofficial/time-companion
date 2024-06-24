@@ -2,6 +2,9 @@
 import { Input } from '@renderer/components/ui/input'
 import ProjectSelect from '@renderer/components/common/inputs/projectInput/ProjectSelect.vue'
 import type { Nullable } from '@shared/lib/utils/types'
+import { useGetProjectById } from '@renderer/composables/queries/projects/useGetProjectById'
+import { vProvideColor } from '@renderer/directives/vProvideColor'
+import { Dot } from 'lucide-vue-next'
 
 const projectId = defineModel<Nullable<string>>('projectId', {
   required: true,
@@ -11,6 +14,8 @@ const emit = defineEmits<{
   change: []
 }>()
 
+const { data: project } = useGetProjectById(projectId)
+
 function handleChange() {
   emit('change')
 }
@@ -19,12 +24,33 @@ function handleChange() {
 <template>
   <div class="flex flex-row items-center gap-2">
     <slot name="leading" />
-    <ProjectSelect v-model="projectId" allow-deselect @change="handleChange" />
     <Input
       v-model="description"
       @change="handleChange"
       :placeholder="$t('dashboard.labels.whatAreYouWorkingOn')"
-    />
+    >
+      <template #leading>
+        <ProjectSelect
+          v-model="projectId"
+          allow-deselect
+          @change="handleChange"
+          trigger-class="w-fit pr-2"
+        >
+          <template #trigger>
+            <span
+              v-provide-color="project?.color"
+              class="text-nowrap text-color flex gap-2 items-center"
+            >
+              {{ project?.displayName ?? 'Select Project...' }}
+              <Dot />
+            </span>
+          </template>
+        </ProjectSelect>
+      </template>
+      <template #trailing>
+        <slot name="input-trailing" />
+      </template>
+    </Input>
     <slot name="trailing" />
   </div>
 </template>

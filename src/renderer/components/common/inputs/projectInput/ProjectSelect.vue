@@ -63,5 +63,9 @@ function handleCreate(displayName: string) {
     allow-create
     @create="handleCreate"
     @selected="handleChange!"
-  />
+  >
+    <template #trigger="value">
+      <slot name="trigger" v-bind="value" />
+    </template>
+  </Combobox>
 </template>
