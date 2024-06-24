@@ -4,7 +4,7 @@ import ProjectSelect from '@renderer/components/common/inputs/projectInput/Proje
 import type { Nullable } from '@shared/lib/utils/types'
 import { useGetProjectById } from '@renderer/composables/queries/projects/useGetProjectById'
 import { vProvideColor } from '@renderer/directives/vProvideColor'
-import { Dot } from 'lucide-vue-next'
+import { Dot, Tag } from 'lucide-vue-next'
 
 const projectId = defineModel<Nullable<string>>('projectId', {
   required: true,
@@ -37,7 +37,9 @@ function handleChange() {
           trigger-class="w-fit pr-2"
         >
           <template #trigger>
+            <Tag v-if="!project" class="w-4 mr-1" />
             <span
+              v-else
               v-provide-color="project?.color"
               class="text-nowrap text-color flex gap-2 items-center"
             >
