@@ -26,6 +26,27 @@ import {
 import { and } from '@shared/database/schema/columnDefinition'
 import type { Nullable } from '@shared/lib/utils/types'
 import { Duration } from '@shared/lib/datetime/duration'
+import {
+  type DatabaseError,
+  errorIsUndefinedColumn,
+  errorIsUniqueViolation,
+} from '@shared/database/types/errors'
+
+class TimeEntryUniqueViolation extends IllegalStateError {
+  constructor(columnName: string, value: string) {
+    super(`Time Entry with ${columnName} "${value}" already exists.`)
+    this.name = 'TimeEntryUniqueViolation'
+  }
+}
+
+class TimeEntryUndefinedFieldViolation extends IllegalStateError {
+  constructor(columnName: string) {
+    super(
+      `Tried to set value for undefined field "${columnName}" on time entry.`,
+    )
+    this.name = 'TimeEntryUndefinedFieldViolation'
+  }
+}
 
 class TimeEntryLowerBoundViolation extends IllegalStateError {
   constructor(expected: PlainDateTime, actual: PlainDateTime) {
@@ -100,52 +121,64 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
   }
 
   async getTimeEntriesByDayId(dayId: string): Promise<Array<TimeEntryDto>> {
-    return await this.database.table(timeEntriesTable).findMany({
-      range: timeEntriesTable.dayId.range.only(dayId),
-      where: timeEntriesTable.deletedAt.isNull(),
-      orderBy: timeEntriesTable.startedAt.asc(),
-      map: toTimeEntryDto,
-    })
+    return await this.database
+      .table(timeEntriesTable)
+      .findMany({
+        range: timeEntriesTable.dayId.range.only(dayId),
+        where: timeEntriesTable.deletedAt.isNull(),
+        orderBy: timeEntriesTable.startedAt.asc(),
+        map: toTimeEntryDto,
+      })
+      .catch(resolveError)
   }
 
   async getRunningTimeEntryByDayId(
     dayId: string,
   ): Promise<Nullable<TimeEntryDto>> {
-    return await this.database.table(timeEntriesTable).findFirst({
-      range: timeEntriesTable.dayId.range.only(dayId),
-      where: and(
-        timeEntriesTable.deletedAt.isNull(),
-        timeEntriesTable.stoppedAt.isNull(),
-      ),
-      map: toTimeEntryDto,
-    })
+    return await this.database
+      .table(timeEntriesTable)
+      .findFirst({
+        range: timeEntriesTable.dayId.range.only(dayId),
+        where: and(
+          timeEntriesTable.deletedAt.isNull(),
+          timeEntriesTable.stoppedAt.isNull(),
+        ),
+        map: toTimeEntryDto,
+      })
+      .catch(resolveError)
   }
 
   async getTimeEntriesBetween(
     startedAt: PlainDateTime,
     stoppedAt: PlainDateTime,
   ): Promise<Array<TimeEntryDto>> {
-    return await this.database.table(timeEntriesTable).findMany({
-      range: timeEntriesTable.startedAt.range.between(
-        startedAt.toDate(),
-        stoppedAt.toDate(),
-      ),
-      where: timeEntriesTable.deletedAt.isNull(),
-      map: toTimeEntryDto,
-    })
+    return await this.database
+      .table(timeEntriesTable)
+      .findMany({
+        range: timeEntriesTable.startedAt.range.between(
+          startedAt.toDate(),
+          stoppedAt.toDate(),
+        ),
+        where: timeEntriesTable.deletedAt.isNull(),
+        map: toTimeEntryDto,
+      })
+      .catch(resolveError)
   }
 
   async createTimeEntry(timeEntry: CreateTimeEntry): Promise<TimeEntryDto> {
     return await this.database.withTransaction(async (tx) => {
       await checkConstraints(tx, timeEntry)
 
-      return await tx.table(timeEntriesTable).insert({
-        data: timeEntryEntityCreateFrom(timeEntry, {
-          id: uuid(),
-          createdAt: PlainDateTime.now(),
-        }),
-        map: toTimeEntryDto,
-      })
+      return await tx
+        .table(timeEntriesTable)
+        .insert({
+          data: timeEntryEntityCreateFrom(timeEntry, {
+            id: uuid(),
+            createdAt: PlainDateTime.now(),
+          }),
+          map: toTimeEntryDto,
+        })
+        .catch(resolveError)
     })
   }
 
@@ -164,6 +197,7 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
           }),
           map: toTimeEntryDto,
         })
+        .catch(resolveError)
         .then(firstOfOrNull)
         .then((res) => {
           check(isNotNull(res), `Time entry with id "${id}" not found.`)
@@ -175,6 +209,18 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
         })
     })
   }
+}
+
+function resolveError(error: DatabaseError): never {
+  if (errorIsUniqueViolation(error)) {
+    throw new TimeEntryUniqueViolation(error.columnName, error.value)
+  }
+
+  if (errorIsUndefinedColumn(error)) {
+    throw new TimeEntryUndefinedFieldViolation(error.columnName)
+  }
+
+  throw error
 }
 
 const TIME_ENTRY_MAX_DURATION = Duration.from({ hours: 24 })
