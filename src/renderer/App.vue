@@ -58,9 +58,9 @@ const { isReady } = usePreflight()
 </script>
 
 <template>
-  <DialogProvider />
   <Toaster />
   <TooltipProvider>
+    <DialogProvider />
     <AppNavigation :links="links">
       <RouterView v-slot="{ Component }">
         <Transition>
