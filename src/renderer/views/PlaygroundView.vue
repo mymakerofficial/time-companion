@@ -6,6 +6,7 @@ import { useToday } from '@renderer/composables/useNow'
 import PlaygroundTimeEntriesList from '@renderer/components/playground/PlaygroundTimeEntriesList.vue'
 import PlaygroundDayInfo from '@renderer/components/playground/PlaygroundDayInfo.vue'
 import { useGetOrCreateDayByDate } from '@renderer/composables/queries/days/useGetOrCreateDayByDate'
+import ProjectsTable from '@renderer/components/settings/projects/table/ProjectsTable.vue'
 
 const today = useToday()
 const { data: day } = useGetOrCreateDayByDate(today)
@@ -19,6 +20,9 @@ const { data: day } = useGetOrCreateDayByDate(today)
     <SettingsSection v-if="day">
       <PlaygroundDayInfo :day-id="day.id" />
       <PlaygroundTimeEntriesList :day-id="day.id" />
+    </SettingsSection>
+    <SettingsSection>
+      <ProjectsTable />
     </SettingsSection>
   </ResponsiveContainer>
 </template>
