@@ -1,4 +1,4 @@
-import type { MaybeRef } from 'vue'
+import type { MaybeRefOrGetter } from 'vue'
 import { computed, toValue } from 'vue'
 import type { TimeEntryDto } from '@shared/model/timeEntry'
 import { useNow } from '@renderer/composables/useNow'
@@ -9,7 +9,9 @@ import { durationToGridRows } from '@renderer/components/common/calendar/calenda
 const START_OFFSET = 2 // due to spacing at the top
 const MIN_ROW_SPAN = 1 // to prevent too small and negative spans
 
-export function useCalendarViewEntry(timeEntry: MaybeRef<TimeEntryDto>) {
+export function useCalendarViewEntry(
+  timeEntry: MaybeRefOrGetter<TimeEntryDto>,
+) {
   const now = useNow({ interval: Duration.from({ minutes: 1 }) })
 
   const containerStyle = computed(() => {
@@ -32,7 +34,7 @@ export function useCalendarViewEntry(timeEntry: MaybeRef<TimeEntryDto>) {
   }
 }
 
-export function useCalendarViewPointer(time: MaybeRef<PlainTime>) {
+export function useCalendarViewPointer(time: MaybeRefOrGetter<PlainTime>) {
   const containerStyle = computed(() => {
     return {
       gridRow: durationToGridRows(toValue(time).toDuration()) + START_OFFSET,

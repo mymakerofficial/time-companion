@@ -13,13 +13,13 @@ const emit = defineEmits<{
 }>()
 
 const { data: project } = useGetProjectById(() => props.entry.projectId)
-const { containerStyle } = useCalendarViewEntry(props.entry)
-const startedAtLabel = useFormattedDateTime(props.entry.startedAt, {
+const { containerStyle } = useCalendarViewEntry(() => props.entry)
+const startedAtLabel = useFormattedDateTime(() => props.entry.startedAt, {
   hour: 'numeric',
   minute: 'numeric',
   hour12: false,
 })
-const stoppedAtLabel = useFormattedDateTime(props.entry.stoppedAt, {
+const stoppedAtLabel = useFormattedDateTime(() => props.entry.stoppedAt, {
   hour: 'numeric',
   minute: 'numeric',
   hour12: false,

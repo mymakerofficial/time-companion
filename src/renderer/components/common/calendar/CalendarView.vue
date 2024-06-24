@@ -4,6 +4,8 @@ import CalendarViewPointer from '@renderer/components/common/calendar/CalendarVi
 import type { TimeEntryDto } from '@shared/model/timeEntry'
 import { useI18n } from 'vue-i18n'
 import { rowsToTime } from '@renderer/components/common/calendar/calendarUtils'
+import { useDialog } from '@renderer/composables/dialog/useDialog'
+import DayEditorSidebar from '@renderer/components/common/dayEditor/DayEditorSidebar.vue'
 
 defineProps<{
   entries: Array<TimeEntryDto>
@@ -13,6 +15,7 @@ const emit = defineEmits<{
 }>()
 
 const { locale } = useI18n()
+const { open: openEditor } = useDialog(DayEditorSidebar)
 
 function getRowTimeLabel(row: number) {
   return rowsToTime(row).toLocaleString(locale.value, {
@@ -23,6 +26,7 @@ function getRowTimeLabel(row: number) {
 }
 
 function handleClick(entry: TimeEntryDto) {
+  openEditor({ dayId: entry.dayId })
   emit('selected', entry)
 }
 </script>
