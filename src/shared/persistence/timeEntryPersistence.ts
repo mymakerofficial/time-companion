@@ -25,6 +25,7 @@ import {
 } from '@shared/lib/utils/checks'
 import { and } from '@shared/database/schema/columnDefinition'
 import type { Nullable } from '@shared/lib/utils/types'
+import { Duration } from '@shared/lib/datetime/duration'
 
 class TimeEntryLowerBoundViolation extends IllegalStateError {
   constructor(expected: PlainDateTime, actual: PlainDateTime) {
@@ -176,6 +177,9 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
   }
 }
 
+const TIME_ENTRY_MAX_DURATION = Duration.from({ hours: 24 })
+const ONE_DAY = Duration.from({ days: 1 })
+
 async function checkConstraints(
   tx: Transaction,
   timeEntry: TimeEntryBase,
@@ -190,7 +194,7 @@ async function checkConstraints(
     check(
       timeEntry.startedAt
         .until(timeEntry.stoppedAt)
-        .isShorterThanOrEqual({ hours: 24 }),
+        .isShorterThanOrEqual(TIME_ENTRY_MAX_DURATION),
       () => new TimeEntryDurationViolation(),
     )
   }
@@ -222,16 +226,17 @@ async function checkConstraints(
 
   if (isEmpty(timeEntries)) {
     // The first time entry added to a day must start during on the given date.
-    const upperBound = day.date.toPlainDateTime().add({ days: 1 })
+    const upperBound = day.date.toPlainDateTime().add(ONE_DAY)
     check(
       timeEntry.startedAt.isBeforeOrEqual(upperBound),
       () => new TimeEntryUpperBoundViolation(upperBound, timeEntry.startedAt),
     )
   } else {
     // A day may only last 24 hours starting from the first time entry.
-    //  Therefore, the upper bound is 24 hours after the first entry has started.
+    //  Therefore, the upper bound is the maximum entry duration
+    //  after the first entry has started.
     const firstTimeEntry = firstOf(timeEntries)
-    const upperBound = firstTimeEntry.startedAt.add({ hours: 24 })
+    const upperBound = firstTimeEntry.startedAt.add(TIME_ENTRY_MAX_DURATION)
     const timeEntryLatest = timeEntry.stoppedAt ?? timeEntry.startedAt
     check(
       timeEntryLatest.isBeforeOrEqual(upperBound),
@@ -240,14 +245,15 @@ async function checkConstraints(
   }
 
   // If the time entry is still running,
-  //  we assume the maximum possible duration of 24 hours.
+  //  we assume the maximum possible duration.
   //  This way, no other time entry can overlap with it.
   const timeEntryAbsLatest =
-    timeEntry.stoppedAt ?? timeEntry.startedAt.add({ hours: 24 })
+    timeEntry.stoppedAt ?? timeEntry.startedAt.add(TIME_ENTRY_MAX_DURATION)
   timeEntries.forEach((entry) => {
     const otherStart = entry.startedAt
-    // same here, we assume the maximum possible duration of 24 hours.
-    const otherAbsLatest = entry.stoppedAt ?? entry.startedAt.add({ hours: 24 })
+    // same here, we assume the maximum possible duration.
+    const otherAbsLatest =
+      entry.stoppedAt ?? entry.startedAt.add(TIME_ENTRY_MAX_DURATION)
 
     const overlaps =
       (timeEntryAbsLatest.isAfter(otherStart) &&
@@ -257,8 +263,6 @@ async function checkConstraints(
       (otherStart.isBefore(timeEntryAbsLatest) &&
         otherAbsLatest.isAfter(timeEntryEarliest))
 
-    if (overlaps) {
-      throw new TimeEntryOverlapViolation(timeEntry, entry)
-    }
+    check(!overlaps, () => new TimeEntryOverlapViolation(timeEntry, entry))
   })
 }
