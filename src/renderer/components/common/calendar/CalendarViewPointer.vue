@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useTimeNow } from '@renderer/composables/useNow'
-import { useTimeoutFn } from '@vueuse/core'
 import { vProvideColor } from '@renderer/directives/vProvideColor'
 import { Duration } from '@shared/lib/datetime/duration'
 import { useFormattedDateTime } from '@renderer/composables/datetime/useFormattedDateTime'
@@ -17,19 +16,23 @@ const timeLabel = useFormattedDateTime(now.value, {
   hour12: false,
 })
 
-function scrollIntoView() {
+function scrollIntoView(behavior: ScrollBehavior) {
   pointer.value?.scrollIntoView({
     block: 'center',
-    behavior: 'smooth',
+    behavior,
   })
 }
-watch(now, () => useTimeoutFn(scrollIntoView, 10), { immediate: true })
+function handleClick() {
+  scrollIntoView('smooth')
+}
+watch(now, () => scrollIntoView('smooth'), { immediate: true })
+onMounted(() => scrollIntoView('instant'))
 </script>
 
 <template>
   <div
     ref="pointer"
-    @click="scrollIntoView"
+    @click="handleClick"
     v-provide-color="'rose'"
     class="col-start-1 col-span-full h-0.5 bg-color z-10"
     :style="containerStyle"
