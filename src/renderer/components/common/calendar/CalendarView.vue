@@ -1,20 +1,25 @@
 <script setup lang="ts">
 import CalendarViewEntry from '@renderer/components/common/calendar/CalendarViewEntry.vue'
 import CalendarViewPointer from '@renderer/components/common/calendar/CalendarViewPointer.vue'
-import { rowsToTime } from '@renderer/lib/calendarUtils'
-import { formatTime, withFormat } from '@renderer/lib/neoTime'
 import type { TimeEntryDto } from '@shared/model/timeEntry'
+import { useI18n } from 'vue-i18n'
+import { rowsToTime } from '@renderer/components/common/calendar/calendarUtils'
 
 defineProps<{
   entries: Array<TimeEntryDto>
 }>()
-
 const emit = defineEmits<{
   selected: [event: TimeEntryDto]
 }>()
 
+const { locale } = useI18n()
+
 function getRowTimeLabel(row: number) {
-  return formatTime(rowsToTime(row), withFormat('HH:mm'))
+  return rowsToTime(row).toLocaleString(locale.value, {
+    hour: 'numeric',
+    minute: 'numeric',
+    hour12: false,
+  })
 }
 
 function handleClick(entry: TimeEntryDto) {
@@ -39,8 +44,8 @@ function handleClick(entry: TimeEntryDto) {
               >
                 <time
                   class="text-xs font-medium text-muted-foreground select-none"
-                  >{{ getRowTimeLabel(i - 1) }}</time
-                >
+                  v-text="getRowTimeLabel(i - 1)"
+                />
               </div>
             </div>
           </template>

@@ -1,16 +1,20 @@
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { projectService } from '@renderer/factory/service/projectService'
-import type { MaybeRef } from 'vue'
-import { toValue, watchEffect } from 'vue'
+import type { MaybeRefOrGetter } from 'vue'
+import { computed, toValue, watchEffect } from 'vue'
 import { check, isUndefined } from '@shared/lib/utils/checks'
 import type { Maybe } from '@shared/lib/utils/types'
 
-export function useGetProjectById(id: MaybeRef<Maybe<string>>) {
+export function useGetProjectById(id: MaybeRefOrGetter<Maybe<string>>) {
   const queryClient = useQueryClient()
-  const queryKey = ['projects', 'getProject', { id }]
+  const queryKey = computed(() => [
+    'projects',
+    'getProject',
+    { id: toValue(id) ?? null },
+  ])
 
   watchEffect(() => {
-    if (isUndefined(queryClient.getQueryData(queryKey))) {
+    if (isUndefined(queryClient.getQueryData(toValue(queryKey)))) {
       return
     }
 
@@ -21,7 +25,7 @@ export function useGetProjectById(id: MaybeRef<Maybe<string>>) {
       },
       (event) => {
         check(event.type === 'updated')
-        queryClient.setQueryData(queryKey, event.data)
+        queryClient.setQueryData(toValue(queryKey), event.data)
       },
     )
 
@@ -31,6 +35,7 @@ export function useGetProjectById(id: MaybeRef<Maybe<string>>) {
   return useQuery({
     queryKey,
     queryFn: () => projectService.getProjectById(toValue(id)!),
-    enabled: !!toValue(id),
+    initialData: null,
+    enabled: () => !!toValue(id),
   })
 }

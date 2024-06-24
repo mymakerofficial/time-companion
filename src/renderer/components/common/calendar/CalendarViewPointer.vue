@@ -1,26 +1,20 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
-import { durationToGridRows } from '@renderer/lib/calendarUtils'
-import {
-  durationSinceStartOfDay,
-  formatTime,
-  minutes,
-  withFormat,
-} from '@renderer/lib/neoTime'
-import { useNow } from '@renderer/composables/useNow'
+import { ref, watch } from 'vue'
+import { useTimeNow } from '@renderer/composables/useNow'
 import { useTimeoutFn } from '@vueuse/core'
 import { vProvideColor } from '@renderer/directives/vProvideColor'
+import { Duration } from '@shared/lib/datetime/duration'
+import { useFormattedDateTime } from '@renderer/composables/datetime/useFormattedDateTime'
+import { useCalendarViewPointer } from '@renderer/components/common/calendar/useCalendarView'
 
-const pointer = ref<HTMLElement | null>(null)
+const pointer = ref<HTMLElement>()
 
-const now = useNow({ interval: minutes(1) })
-
-const containerStyle = computed(() => {
-  const startOffset = 2 // due to spacing at the top
-  return {
-    gridRow:
-      durationToGridRows(durationSinceStartOfDay(now.value)) + startOffset,
-  }
+const now = useTimeNow({ interval: Duration.from({ minutes: 1 }) })
+const { containerStyle } = useCalendarViewPointer(now)
+const timeLabel = useFormattedDateTime(now.value, {
+  hour: 'numeric',
+  minute: 'numeric',
+  hour12: false,
 })
 
 function scrollIntoView() {
@@ -29,18 +23,7 @@ function scrollIntoView() {
     behavior: 'smooth',
   })
 }
-
-watch(
-  now,
-  () => {
-    useTimeoutFn(scrollIntoView, 10)
-  },
-  { immediate: true },
-)
-
-const timeLabel = computed(() => {
-  return formatTime(now.value, withFormat('HH:mm'))
-})
+watch(now, () => useTimeoutFn(scrollIntoView, 10), { immediate: true })
 </script>
 
 <template>

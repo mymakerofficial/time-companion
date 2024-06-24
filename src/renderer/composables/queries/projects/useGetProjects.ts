@@ -8,7 +8,7 @@ export function useGetProjects() {
 
   if (isUndefined(queryClient.getQueryData(queryKey))) {
     projectService.subscribe({}, () => {
-      queryClient.invalidateQueries({ queryKey, exact: true })
+      queryClient.invalidateQueries({ queryKey, exact: true }).then()
     })
   }
 

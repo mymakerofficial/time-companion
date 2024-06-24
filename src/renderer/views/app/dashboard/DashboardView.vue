@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import CalendarHeader from '@renderer/components/dashboard/layout/CalendarHeader.vue'
 import { computed } from 'vue'
-import CurrentEventCard from '@renderer/components/dashboard/cards/CurrentEventCard.vue'
 import type { ReactiveCalendarEvent } from '@renderer/model/calendarEvent/types'
 import type { ReactiveCalendarEventShadow } from '@renderer/model/eventShadow/types'
 import QuickStartCard from '@renderer/components/dashboard/cards/QuickStartCard.vue'
@@ -15,6 +14,8 @@ import WorkingDurationCard from '@renderer/components/dashboard/cards/WorkingDur
 import { useToday } from '@renderer/composables/useNow'
 import { useGetOrCreateDayByDate } from '@renderer/composables/queries/days/useGetOrCreateDayByDate'
 import DayCalendar from '@renderer/components/common/calendar/DayCalendar.vue'
+import RunningTimeEntryInput from '@renderer/components/common/inputs/timeEntryInput/RunningTimeEntryInput.vue'
+import DashboardSection from '@renderer/components/dashboard/cards/DashboardSection.vue'
 
 const activeDayService = useActiveDayService()
 const activeEventService = useActiveEventService()
@@ -54,7 +55,9 @@ const { data: day } = useGetOrCreateDayByDate(today)
     <section class="col-span-7 border-r border-border flex flex-col">
       <ControlsHeader />
       <div class="flex-1 overflow-y-auto">
-        <CurrentEventCard />
+        <DashboardSection>
+          <RunningTimeEntryInput v-if="day" :day-id="day.id" />
+        </DashboardSection>
         <EditEventCard
           v-if="selectedEventService.event"
           :event="selectedEventService.event"
