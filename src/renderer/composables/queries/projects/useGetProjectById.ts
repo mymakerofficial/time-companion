@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { projectService } from '@renderer/factory/service/projectService'
 import type { MaybeRefOrGetter } from 'vue'
 import { computed, toValue, watchEffect } from 'vue'
-import { check, isUndefined } from '@shared/lib/utils/checks'
+import { isUndefined } from '@shared/lib/utils/checks'
 import type { Maybe } from '@shared/lib/utils/types'
 
 export function useGetProjectById(id: MaybeRefOrGetter<Maybe<string>>) {
@@ -18,18 +18,9 @@ export function useGetProjectById(id: MaybeRefOrGetter<Maybe<string>>) {
       return
     }
 
-    projectService.subscribe(
-      {
-        id: toValue(id),
-        type: 'updated',
-      },
-      (event) => {
-        check(event.type === 'updated')
-        queryClient.setQueryData(toValue(queryKey), event.data)
-      },
-    )
-
-    // we don't need to unsubscribe because somebody else might use the same query again
+    projectService.subscribe({}, () => {
+      queryClient.invalidateQueries({ queryKey: toValue(queryKey) }).then()
+    })
   })
 
   return useQuery({
