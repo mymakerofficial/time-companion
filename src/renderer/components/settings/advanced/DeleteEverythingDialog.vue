@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useDialogContext } from '@renderer/composables/dialog/useDialog'
 import BaseDialog from '@renderer/components/common/dialog/BaseDialog.vue'
-import { Button } from '@renderer/components/ui/button'
+import { Button } from '@shadcn/button'
 import { AlertTriangle, Trash2 } from 'lucide-vue-next'
 import { database } from '@renderer/factory/database/database'
 import { toast } from 'vue-sonner'

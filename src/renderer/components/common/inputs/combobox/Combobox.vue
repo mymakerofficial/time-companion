@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { MaybeReadonly } from '@renderer/lib/utils'
-import { buttonVariants } from '@renderer/components/ui/button'
+import { buttonVariants } from '@shadcn/button'
 import type { HTMLAttributes } from 'vue'
 
 type PrimitiveAcceptableValue = string | number | true | false | object
@@ -52,13 +52,9 @@ import {
   type Nullable,
 } from '@renderer/lib/utils'
 import { ComboboxRoot, PopoverAnchor } from 'radix-vue'
-import { Popover, PopoverContent } from '@renderer/components/ui/popover'
-import {
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@renderer/components/ui/command'
-import { Button } from '@renderer/components/ui/button'
+import { Popover, PopoverContent } from '@shadcn/popover'
+import { CommandInput, CommandItem, CommandList } from '@shadcn/command'
+import { Button } from '@shadcn/button'
 import { Check, ChevronsUpDown, Plus } from 'lucide-vue-next'
 import { useToggle } from '@vueuse/core'
 import { asArray, isArray, isEmpty, isNotEmpty } from '@renderer/lib/listUtils'

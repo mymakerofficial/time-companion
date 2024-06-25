@@ -1,10 +1,6 @@
 <script setup lang="ts">
-import { buttonVariants } from '@renderer/components/ui/button'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@renderer/components/ui/tooltip'
+import { buttonVariants } from '@shadcn/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@shadcn/tooltip'
 import type { NavLink } from '@renderer/components/common/layout/nav/nav-link'
 import { cn } from '@renderer/lib/utils'
 

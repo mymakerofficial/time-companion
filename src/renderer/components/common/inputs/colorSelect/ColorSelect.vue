@@ -2,7 +2,7 @@
 import Combobox from '@renderer/components/common/inputs/combobox/Combobox.vue'
 import type { Nullable } from '@renderer/lib/utils'
 import { vProvideColor } from '@renderer/directives/vProvideColor'
-import { buttonVariants } from '@renderer/components/ui/button'
+import { buttonVariants } from '@shadcn/button'
 import { colors } from '@renderer/lib/colorUtils'
 import { firstOf } from '@renderer/lib/listUtils'
 

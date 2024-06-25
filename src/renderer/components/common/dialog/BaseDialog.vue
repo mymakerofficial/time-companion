@@ -5,7 +5,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@renderer/components/ui/dialog'
+} from '@shadcn/dialog'
 import { isDefined } from '@shared/lib/utils/checks'
 
 const open = defineModel<boolean>('open', { required: true })

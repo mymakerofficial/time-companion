@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import SettingsSection from '@renderer/components/settings/layout/SettingsSection.vue'
-import { Switch } from '@renderer/components/ui/switch'
+import { Switch } from '@shadcn/switch'
 import { useSettingsStore } from '@renderer/stores/settingsStore'
 import DurationInput from '@renderer/components/common/inputs/timeInput/DurationInput.vue'
 import { formatDurationIso, parseDuration } from '@renderer/lib/neoTime'

@@ -1,12 +1,7 @@
 <script setup lang="ts">
 import ColorSelect from '@renderer/components/common/inputs/colorSelect/ColorSelect.vue'
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from '@renderer/components/ui/form'
-import { Input } from '@renderer/components/ui/input'
+import { FormControl, FormField, FormItem, FormLabel } from '@shadcn/form'
+import { Input } from '@shadcn/input'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useForm } from 'vee-validate'
 import { getSchemaDefaults } from '@shared/lib/helpers/getSchemaDefaults'

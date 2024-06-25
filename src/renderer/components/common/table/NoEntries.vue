@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { TableCell, TableRow } from '@renderer/components/ui/table'
+import { TableCell, TableRow } from '@shadcn/table'
 
 defineProps<{
   colSpan: number

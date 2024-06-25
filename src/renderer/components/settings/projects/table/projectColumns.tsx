@@ -1,6 +1,6 @@
 import { createColumnHelper, type Row } from '@tanstack/vue-table'
 import { Pencil } from 'lucide-vue-next'
-import { Button } from '@renderer/components/ui/button'
+import { Button } from '@shadcn/button'
 import {
   type DataUpdater,
   defineEditableTableCell,

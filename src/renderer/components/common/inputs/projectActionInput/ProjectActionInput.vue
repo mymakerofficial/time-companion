@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, type HTMLAttributes, onMounted, ref, watch } from 'vue'
-import { Input } from '@renderer/components/ui/input'
+import { Input } from '@shadcn/input'
 import Combobox from '@renderer/components/common/inputs/combobox/Combobox.vue'
 import ComboboxInput from '@renderer/components/common/inputs/combobox/ComboboxInput.vue'
 import {
@@ -21,7 +21,7 @@ import { createProject } from '@renderer/model/project/model'
 import type { ReactiveActivity } from '@renderer/model/activity/types'
 import { createActivity } from '@renderer/model/activity/model'
 import { projectActionInputBadgeVariants } from '@renderer/components/common/inputs/projectActionInput/variants'
-import type { BadgeVariants } from '@renderer/components/ui/badge'
+import type { BadgeVariants } from '@shadcn/badge'
 import { useProjectsService } from '@renderer/services/projectsService'
 import EditableShadowBadge from '@renderer/components/common/shadow/EditableShadowBadge.vue'
 

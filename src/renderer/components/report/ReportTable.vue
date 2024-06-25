@@ -12,7 +12,7 @@ import Table from '@renderer/components/common/table/Table.vue'
 import { updater } from '@renderer/lib/helpers/tableHelpers'
 import TableVisibilitySelect from '@renderer/components/common/table/TableVisibilitySelect.vue'
 import { isNotEmpty } from '@renderer/lib/listUtils'
-import { Button } from '@renderer/components/ui/button'
+import { Button } from '@shadcn/button'
 import { useOpenDialog } from '@renderer/composables/useOpenDialog'
 import { createReportColumns } from '@renderer/components/report/reportColumns'
 import {

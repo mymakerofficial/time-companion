@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import TimeEntryInput from '@renderer/components/common/inputs/timeEntryInput/TimeEntryInput.vue'
 import DateTimeInput from '@renderer/components/common/inputs/timeInput/DateTimeInput.vue'
-import { Button } from '@renderer/components/ui/button'
+import { Button } from '@shadcn/button'
 import { useGetRunningTimeEntry } from '@renderer/composables/queries/timeEntries/useGetRunningTimeEntry'
 import { useCreateTimeEntry } from '@renderer/composables/mutations/timeEntries/useCreateTimeEntry'
 import { computed, ref, watch } from 'vue'

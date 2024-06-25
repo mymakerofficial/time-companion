@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Input } from '@renderer/components/ui/input'
+import { Input } from '@shadcn/input'
 import ProjectSelect from '@renderer/components/common/inputs/projectInput/ProjectSelect.vue'
 import type { Nullable } from '@shared/lib/utils/types'
 import { useGetProjectById } from '@renderer/composables/queries/projects/useGetProjectById'

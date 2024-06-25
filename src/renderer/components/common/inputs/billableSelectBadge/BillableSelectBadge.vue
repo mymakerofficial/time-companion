@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Check, X } from 'lucide-vue-next'
-import { Badge } from '@renderer/components/ui/badge'
+import { Badge } from '@shadcn/badge'
 import Combobox from '@renderer/components/common/inputs/combobox/Combobox.vue'
 
 const model = defineModel<boolean>({ required: true })

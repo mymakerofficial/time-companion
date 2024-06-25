@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { NavLink } from '@renderer/components/common/layout/nav/nav-link'
-import { buttonVariants } from '@renderer/components/ui/button'
+import { buttonVariants } from '@shadcn/button'
 import { cn } from '@renderer/lib/utils'
 
 const props = defineProps<{

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Sheet, SheetContent } from '@renderer/components/ui/sheet'
+import { Sheet, SheetContent } from '@shadcn/sheet'
 import DayCalendar from '@renderer/components/common/calendar/DayCalendar.vue'
 import { useDialogContext } from '@renderer/composables/dialog/useDialog'
 import { useGetTimeEntriesByDay } from '@renderer/composables/queries/timeEntries/useTimeEntriesByDay'

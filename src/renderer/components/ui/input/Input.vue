@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { cn } from '@renderer/lib/utils'
 import { computed, type HTMLAttributes, useAttrs } from 'vue'
-import InputPrimitive from '@renderer/components/ui/input/InputPrimitive.vue'
+import InputPrimitive from '@shadcn/input/InputPrimitive.vue'
 import {
   inputContainerVariants,
   inputInputVariants,
   type InputVariants,
-} from '@renderer/components/ui/input/index'
+} from '@shadcn/input/index'
 
 export interface InputProps {
   size?: InputVariants['size']

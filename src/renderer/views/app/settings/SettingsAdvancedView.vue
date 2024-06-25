@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import SettingsHeader from '@renderer/components/settings/layout/SettingsHeader.vue'
 import SettingsSection from '@renderer/components/settings/layout/SettingsSection.vue'
-import { Button } from '@renderer/components/ui/button'
+import { Button } from '@shadcn/button'
 import { useDialog } from '@renderer/composables/dialog/useDialog'
 import DeleteEverythingDialog from '@renderer/components/settings/advanced/DeleteEverythingDialog.vue'
 import { Trash2 } from 'lucide-vue-next'

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Label } from '@renderer/components/ui/label'
+import { Label } from '@shadcn/label'
 import { useGetDay } from '@renderer/composables/queries/days/useGetDay'
 
 const props = defineProps<{

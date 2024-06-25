@@ -3,7 +3,7 @@ import IconNav from '@renderer/components/common/layout/nav/IconNav.vue'
 import type { NavLink } from '@renderer/components/common/layout/nav/nav-link'
 import { cn } from '@renderer/lib/utils'
 import { Clock, PanelLeft } from 'lucide-vue-next'
-import { Button } from '@renderer/components/ui/button'
+import { Button } from '@shadcn/button'
 import { useToggle } from '@vueuse/core'
 import { useElectronService } from '@renderer/services/electronService'
 

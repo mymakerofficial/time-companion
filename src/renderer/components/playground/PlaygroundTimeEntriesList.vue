@@ -8,7 +8,7 @@ import PlaygroundProjectBadge from '@renderer/components/playground/PlaygroundPr
 import { isNull } from '@shared/lib/utils/checks'
 import TableActions from '@renderer/components/common/table/TableActions.vue'
 import { Pen } from 'lucide-vue-next'
-import { Button } from '@renderer/components/ui/button'
+import { Button } from '@shadcn/button'
 import { useDialog } from '@renderer/composables/dialog/useDialog'
 import DayEditorSidebar from '@renderer/components/common/dayEditor/DayEditorSidebar.vue'
 

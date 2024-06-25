@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Separator } from '@renderer/components/ui/separator'
+import { Separator } from '@shadcn/separator'
 
 defineProps<{
   title?: string

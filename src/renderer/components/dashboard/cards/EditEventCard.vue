@@ -2,12 +2,12 @@
 import {
   ArrowRight,
   Clock,
-  MoreVertical,
-  Trash,
   EyeOff,
+  MoreVertical,
   Play,
+  Trash,
 } from 'lucide-vue-next'
-import { Button } from '@renderer/components/ui/button'
+import { Button } from '@shadcn/button'
 import { isNotNull } from '@renderer/lib/utils'
 import type { ReactiveCalendarEvent } from '@renderer/model/calendarEvent/types'
 import type { ReactiveCalendarEventShadow } from '@renderer/model/eventShadow/types'
@@ -16,7 +16,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@renderer/components/ui/dropdown-menu'
+} from '@shadcn/dropdown-menu'
 import ProjectActionInput from '@renderer/components/common/inputs/projectActionInput/ProjectActionInput.vue'
 import DateTimeInput from '@renderer/components/common/inputs/timeInput/DateTimeInput.vue'
 import DurationInput from '@renderer/components/common/inputs/timeInput/DurationInput.vue'

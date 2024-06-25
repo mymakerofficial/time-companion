@@ -12,7 +12,7 @@ import { useActiveDayService } from '@renderer/services/activeDayService'
 import { useCalendarService } from '@renderer/services/calendarService'
 import { useLocaleService } from '@renderer/services/localeService'
 import { useThemeService } from '@renderer/services/themeService'
-import { Toaster } from '@renderer/components/ui/sonner'
+import { Toaster } from '@shadcn/sonner'
 import AppLoader from '@renderer/components/common/layout/AppLoader.vue'
 import { usePreflight } from '@renderer/composables/preflight/usePreflight'
 

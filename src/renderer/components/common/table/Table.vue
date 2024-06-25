@@ -6,13 +6,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@renderer/components/ui/table'
+} from '@shadcn/table'
 import { isNotEmpty } from '@renderer/lib/listUtils'
 import {
-  useVueTable,
   FlexRender,
   getCoreRowModel,
   type TableOptions,
+  useVueTable,
 } from '@tanstack/vue-table'
 import NoEntries from '@renderer/components/common/table/NoEntries.vue'
 

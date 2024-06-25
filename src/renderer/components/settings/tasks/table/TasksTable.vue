@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Table from '@renderer/components/common/table/Table.vue'
-import { Button } from '@renderer/components/ui/button'
+import { Button } from '@shadcn/button'
 import { Plus } from 'lucide-vue-next'
 import TableActions from '@renderer/components/common/table/TableActions.vue'
 import { useGetTasks } from '@renderer/composables/queries/tasks/useGetTasks'

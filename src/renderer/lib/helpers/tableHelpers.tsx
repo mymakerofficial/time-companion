@@ -15,7 +15,7 @@ import {
   ChevronsDownUp,
   ChevronsUpDown,
 } from 'lucide-vue-next'
-import { Button } from '@renderer/components/ui/button'
+import { Button } from '@shadcn/button'
 import { useI18n } from 'vue-i18n'
 
 /**

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import BaseDialog from '@renderer/components/common/dialog/BaseDialog.vue'
-import { Button } from '@renderer/components/ui/button'
+import { Button } from '@shadcn/button'
 import { useCreateTask } from '@renderer/composables/mutations/tasks/useCreateTask'
 import type { CreateTask } from '@shared/model/task'
 import TaskForm from '@renderer/components/common/forms/task/TaskForm.vue'

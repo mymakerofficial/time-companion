@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import DurationInput from '@renderer/components/common/inputs/timeInput/DurationInput.vue'
-import type {
-  InputProps,
-  InputSlots,
-} from '@renderer/components/ui/input/Input.vue'
+import type { InputProps, InputSlots } from '@shadcn/input/Input.vue'
 import type { PlainTime } from '@shared/lib/datetime/plainTime'
 import type { Duration } from '@shared/lib/datetime/duration'
 

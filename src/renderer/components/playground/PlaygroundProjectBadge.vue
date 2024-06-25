@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useGetProjectById } from '@renderer/composables/queries/projects/useGetProjectById'
-import { Badge } from '@renderer/components/ui/badge'
+import { Badge } from '@shadcn/badge'
 
 const props = defineProps<{
   projectId: string

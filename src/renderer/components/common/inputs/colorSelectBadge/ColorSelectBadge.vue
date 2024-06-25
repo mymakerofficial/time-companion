@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Badge } from '@renderer/components/ui/badge'
+import { Badge } from '@shadcn/badge'
 import ColorSelect from '@renderer/components/common/inputs/colorSelect/ColorSelect.vue'
 import type { Nullable } from '@renderer/lib/utils'
 

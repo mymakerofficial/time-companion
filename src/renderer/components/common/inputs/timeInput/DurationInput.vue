@@ -1,19 +1,12 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { Input } from '@renderer/components/ui/input'
+import { Input } from '@shadcn/input'
 import { formatDuration, humanizeDuration } from '@renderer/lib/neoTime'
 import { isNull } from '@renderer/lib/utils'
 import { watchImmediate } from '@vueuse/core'
-import type {
-  InputProps,
-  InputSlots,
-} from '@renderer/components/ui/input/Input.vue'
+import type { InputProps, InputSlots } from '@shadcn/input/Input.vue'
 import type { Duration } from '@shared/lib/datetime/duration'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@renderer/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@shadcn/tooltip'
 import { parseHumanDurationWithEquation } from '@shared/lib/datetime/parsers'
 
 const model = defineModel<Duration>({ required: true })

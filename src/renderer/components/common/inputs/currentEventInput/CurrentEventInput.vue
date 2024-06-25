@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ProjectActionInput from '@renderer/components/common/inputs/projectActionInput/ProjectActionInput.vue'
-import { Button } from '@renderer/components/ui/button'
+import { Button } from '@shadcn/button'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
