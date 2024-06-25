@@ -6,12 +6,9 @@ import { computed, toValue } from 'vue'
 import type { Intl } from 'temporal-polyfill'
 import { useI18n } from 'vue-i18n'
 import type { Maybe } from '@shared/lib/utils/types'
-import type { Duration } from '@shared/lib/datetime/duration'
 
 export function useFormattedDateTime(
-  dateTime: MaybeRefOrGetter<
-    Maybe<PlainDateTime | PlainDate | PlainTime | Duration>
-  >,
+  dateTime: MaybeRefOrGetter<Maybe<PlainDateTime | PlainDate | PlainTime>>,
   options: Intl.DateTimeFormatOptions & { fallback?: string } = {},
 ) {
   const { fallback = '', ...temporalOptions } = options
