@@ -29,7 +29,7 @@
       "@renderer/*": ["src/renderer/*"],
       "@test/*": ["test/*"],
       "@database/*": ["src/shared/database/*"],
-      "@shadcn/*": ["src/renderer/components/ui/*"],
+      "@shadcn/*": ["src/renderer/components/ui/*"]
     }
   }
 }
