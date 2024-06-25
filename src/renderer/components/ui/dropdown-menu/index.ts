@@ -1,3 +1,5 @@
+import { cva } from 'class-variance-authority'
+
 export { DropdownMenuPortal } from 'radix-vue'
 
 export { default as DropdownMenu } from './DropdownMenu.vue'
@@ -14,3 +16,19 @@ export { default as DropdownMenuLabel } from './DropdownMenuLabel.vue'
 export { default as DropdownMenuSub } from './DropdownMenuSub.vue'
 export { default as DropdownMenuSubTrigger } from './DropdownMenuSubTrigger.vue'
 export { default as DropdownMenuSubContent } from './DropdownMenuSubContent.vue'
+
+export const dropdownMenuItemVariants = cva(
+  'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+  {
+    variants: {
+      variant: {
+        default: '',
+        destructive:
+          'bg-destructive text-destructive-foreground hover:bg-destructive/90!',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+    },
+  },
+)

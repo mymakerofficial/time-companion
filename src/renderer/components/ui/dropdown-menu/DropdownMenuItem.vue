@@ -6,13 +6,20 @@ import {
   useForwardProps,
 } from 'radix-vue'
 import { cn } from '@renderer/lib/utils'
+import { dropdownMenuItemVariants } from '@shadcn/dropdown-menu/index'
 
 const props = defineProps<
-  DropdownMenuItemProps & { class?: HTMLAttributes['class']; inset?: boolean }
+  DropdownMenuItemProps & {
+    variant?: NonNullable<
+      Parameters<typeof dropdownMenuItemVariants>[0]
+    >['variant']
+    class?: HTMLAttributes['class']
+    inset?: boolean
+  }
 >()
 
 const delegatedProps = computed(() => {
-  const { class: _, ...delegated } = props
+  const { class: _class, variant: _variant, ...delegated } = props
 
   return delegated
 })
@@ -24,11 +31,7 @@ const forwardedProps = useForwardProps(delegatedProps)
   <DropdownMenuItem
     v-bind="forwardedProps"
     :class="
-      cn(
-        'relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
-        inset && 'pl-8',
-        props.class,
-      )
+      cn(dropdownMenuItemVariants({ variant }), inset && 'pl-8', props.class)
     "
   >
     <slot />
