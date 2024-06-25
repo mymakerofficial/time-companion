@@ -40,22 +40,6 @@ export function runIf<T>(
   }
 }
 
-export function takeIf<T, G>(
-  condition: G,
-  predicate: (condition: G) => boolean,
-  value: T,
-): Nullable<T> {
-  if (predicate(condition)) {
-    return value
-  }
-
-  return null
-}
-
-export function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max)
-}
-
 export function isCallable(
   maybeFunction: unknown | ((...args: any[]) => any),
 ): maybeFunction is (...args: any[]) => void {
