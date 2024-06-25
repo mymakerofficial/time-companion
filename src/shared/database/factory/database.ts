@@ -7,21 +7,21 @@ import type {
   Transaction,
   UnsafeDatabase,
   UpgradeTransaction,
-} from '@shared/database/types/database'
-import type { DatabaseAdapter } from '@shared/database/types/adapter'
+} from '@database/types/database'
+import type { DatabaseAdapter } from '@database/types/adapter'
 import {
   check,
   isEmpty,
   isNotNull,
   isUndefined,
 } from '@shared/lib/utils/checks'
-import { DatabaseTransactionImpl } from '@shared/database/factory/transaction'
-import { DatabaseUpgradeTransactionImpl } from '@shared/database/factory/upgradeTransaction'
+import { DatabaseTransactionImpl } from '@database/factory/transaction'
+import { DatabaseUpgradeTransactionImpl } from '@database/factory/upgradeTransaction'
 import type {
   DatabaseSchema,
   TableSchema,
   TableSchemaRaw,
-} from '@shared/database/types/schema'
+} from '@database/types/schema'
 import { getOrDefault } from '@shared/lib/utils/result'
 import {
   OpenPublisherImpl,
@@ -31,11 +31,11 @@ import {
   DatabaseAlreadyOpenError,
   DatabaseMigrationTableMismatchError,
   DatabaseVersionTooHighError,
-} from '@shared/database/types/errors'
+} from '@database/types/errors'
 import { emptyMap, toArray } from '@shared/lib/utils/list'
-import { DatabaseQuertyFactoryImpl } from '@shared/database/factory/queryFactory'
+import { DatabaseQuertyFactoryImpl } from '@database/factory/queryFactory'
 import { valuesOf } from '@shared/lib/utils/object'
-import { rawTableSchemasMatch } from '@shared/database/schema/schemasMatch'
+import { rawTableSchemasMatch } from '@database/schema/schemasMatch'
 
 export function createDatabase<TSchema extends DatabaseSchema>(
   adapter: DatabaseAdapter,

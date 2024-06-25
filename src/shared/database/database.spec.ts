@@ -19,18 +19,15 @@ import {
 } from '@test/fixtures/database/schema'
 import type { HasId } from '@shared/model/helpers/hasId'
 import { uuid } from '@shared/lib/utils/uuid'
-import { createDatabase } from '@shared/database/factory/database'
-import { indexedDBAdapter } from '@shared/database/adapters/indexedDB/database'
+import { createDatabase } from '@database/factory/database'
+import { indexedDBAdapter } from '@database/adapters/indexedDB/database'
 import config from '@test/fixtures/database/config'
-import { pgliteAdapter } from '@shared/database/adapters/pglite/database'
-import type {
-  Database,
-  UpgradeTransaction,
-} from '@shared/database/types/database'
-import { c } from '@shared/database/schema/columnBuilder'
+import { pgliteAdapter } from '@database/adapters/pglite/database'
+import type { Database, UpgradeTransaction } from '@database/types/database'
+import { c } from '@database/schema/columnBuilder'
 import 'fake-indexeddb/auto'
-import { defineConfig } from '@shared/database/schema/defineConfig'
-import { defineTable } from '@shared/database/schema/defineTable'
+import { defineConfig } from '@database/schema/defineConfig'
+import { defineTable } from '@database/schema/defineTable'
 
 function byId(a: HasId, b: HasId) {
   return a.id.localeCompare(b.id)

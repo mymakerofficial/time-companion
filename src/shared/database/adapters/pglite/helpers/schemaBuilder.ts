@@ -5,8 +5,8 @@ import type {
   AlterTableRenameTableAction,
   ColumnDefinitionRaw,
   TableSchemaRaw,
-} from '@shared/database/types/schema'
-import { genericTypeToPgType } from '@shared/database/adapters/pglite/helpers/genericTypeToPgType'
+} from '@database/types/schema'
+import { genericTypeToPgType } from '@database/adapters/pglite/helpers/genericTypeToPgType'
 import { valuesOf } from '@shared/lib/utils/object'
 import type { Optional } from '@shared/lib/utils/types'
 import { check, isDefined, isNotNull } from '@shared/lib/utils/checks'

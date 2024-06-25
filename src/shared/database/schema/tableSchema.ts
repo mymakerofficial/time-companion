@@ -3,8 +3,8 @@ import type {
   TableSchema,
   TableSchemaBase,
   TableSchemaRaw,
-} from '@shared/database/types/schema'
-import { ColumnDefinitionImpl } from '@shared/database/schema/columnDefinition'
+} from '@database/types/schema'
+import { ColumnDefinitionImpl } from '@database/schema/columnDefinition'
 import { valuesOf } from '@shared/lib/utils/object'
 
 class TableSchemaBaseImpl<T extends object> implements TableSchemaBase<T> {

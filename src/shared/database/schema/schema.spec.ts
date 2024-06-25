@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { c } from '@shared/database/schema/columnBuilder'
-import { defineTable } from '@shared/database/schema/defineTable'
-import { orderByDirections } from '@shared/database/types/database'
+import { c } from '@database/schema/columnBuilder'
+import { defineTable } from '@database/schema/defineTable'
+import { orderByDirections } from '@database/types/database'
 
 describe('schema', () => {
   describe('columnBuilder', () => {

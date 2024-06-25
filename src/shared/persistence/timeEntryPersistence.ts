@@ -1,4 +1,4 @@
-import type { Database, Transaction } from '@shared/database/types/database'
+import type { Database, Transaction } from '@database/types/database'
 import {
   type CreateTimeEntry,
   timeEntriesTable,
@@ -23,14 +23,14 @@ import {
   isEmpty,
   isNotNull,
 } from '@shared/lib/utils/checks'
-import { and } from '@shared/database/schema/columnDefinition'
+import { and } from '@database/schema/columnDefinition'
 import type { Nullable } from '@shared/lib/utils/types'
 import { Duration } from '@shared/lib/datetime/duration'
 import {
   type DatabaseError,
   errorIsUndefinedColumn,
   errorIsUniqueViolation,
-} from '@shared/database/types/errors'
+} from '@database/types/errors'
 
 class TimeEntryUniqueViolation extends IllegalStateError {
   constructor(columnName: string, value: string) {

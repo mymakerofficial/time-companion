@@ -5,7 +5,7 @@ import {
   DatabaseUndefinedColumnError,
   DatabaseUndefinedTableError,
   DatabaseUniqueViolationError,
-} from '@shared/database/types/errors'
+} from '@database/types/errors'
 
 export interface PGliteDatabaseError extends Error {
   readonly length: number

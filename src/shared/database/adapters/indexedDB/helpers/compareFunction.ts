@@ -1,7 +1,4 @@
-import type {
-  ColumnType,
-  OrderByDirection,
-} from '@shared/database/types/database'
+import type { ColumnType, OrderByDirection } from '@database/types/database'
 
 // TODO: make this less awful
 export function compareFn(

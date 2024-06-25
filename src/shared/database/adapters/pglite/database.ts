@@ -2,18 +2,18 @@ import type {
   DatabaseAdapter,
   DatabaseInfo,
   TransactionAdapter,
-} from '@shared/database/types/adapter'
+} from '@database/types/adapter'
 import { knex as createKnex } from 'knex'
 import { PGlite, type PGliteInterface } from '@electric-sql/pglite'
 import { check, isNotEmpty, isNotNull } from '@shared/lib/utils/checks'
-import { PGLiteDatabaseTransactionAdapter } from '@shared/database/adapters/pglite/transaction'
-import { PGLiteTableAdapterFactory } from '@shared/database/adapters/pglite/tableFactory'
+import { PGLiteDatabaseTransactionAdapter } from '@database/adapters/pglite/transaction'
+import { PGLiteTableAdapterFactory } from '@database/adapters/pglite/tableFactory'
 import { asArray, firstOf } from '@shared/lib/utils/list'
 import type { MaybePromise } from '@shared/lib/utils/types'
 import {
   DatabaseNotOpenError,
   DatabaseVersionMissingError,
-} from '@shared/database/types/errors'
+} from '@database/types/errors'
 
 // TODO: PGlite is an ES module, but electron doesn't support ES modules
 

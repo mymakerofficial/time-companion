@@ -1,6 +1,6 @@
-import { defineTable } from '@shared/database/schema/defineTable'
-import { c } from '@shared/database/schema/columnBuilder'
-import type { InferTable } from '@shared/database/types/schema'
+import { defineTable } from '@database/schema/defineTable'
+import { c } from '@database/schema/columnBuilder'
+import type { InferTable } from '@database/types/schema'
 
 export const personsTable = defineTable('persons', {
   id: c.uuid().primaryKey(),

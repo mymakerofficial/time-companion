@@ -3,9 +3,9 @@ import type {
   ColumnBuilder,
   ColumnDefinitionRaw,
   TableSchema,
-} from '@shared/database/types/schema'
+} from '@database/types/schema'
 import { check, isDefined, isNull } from '@shared/lib/utils/checks'
-import { createTableSchema } from '@shared/database/schema/tableSchema'
+import { createTableSchema } from '@database/schema/tableSchema'
 
 export function defineTable<TRow extends object>(
   tableName: string,

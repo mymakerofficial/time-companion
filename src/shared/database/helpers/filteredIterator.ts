@@ -1,7 +1,7 @@
-import { wherePredicate } from '@shared/database/helpers/wherePredicate'
-import type { RawWhere } from '@shared/database/types/schema'
+import { wherePredicate } from '@database/helpers/wherePredicate'
+import type { RawWhere } from '@database/types/schema'
 import type { Nullable } from '@shared/lib/utils/types'
-import type { DatabaseIterator } from '@shared/database/types/cursor'
+import type { DatabaseIterator } from '@database/types/cursor'
 
 export async function* filteredIterator<TRow extends object>(
   iterator: DatabaseIterator<TRow>,

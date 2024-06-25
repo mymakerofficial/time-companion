@@ -1,9 +1,9 @@
 import type { Nullable } from '@shared/lib/utils/types'
-import type { OrderByDirection } from '@shared/database/types/database'
-import type { DatabaseCursor } from '@shared/database/types/cursor'
+import type { OrderByDirection } from '@database/types/database'
+import type { DatabaseCursor } from '@database/types/cursor'
 import { isNotNull } from '@shared/lib/utils/checks'
-import { directionToIdbCursorDirection } from '@shared/database/adapters/indexedDB/helpers/directionToIdbCursorDirection'
-import { IndexedDBCursorImpl } from '@shared/database/adapters/indexedDB/helpers/cursor'
+import { directionToIdbCursorDirection } from '@database/adapters/indexedDB/helpers/directionToIdbCursorDirection'
+import { IndexedDBCursorImpl } from '@database/adapters/indexedDB/helpers/cursor'
 
 export function openCursor<TRow extends object>(
   objectStore: IDBObjectStore,

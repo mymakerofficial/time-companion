@@ -1,12 +1,6 @@
-import type {
-  TableAdapter,
-  TransactionAdapter,
-} from '@shared/database/types/adapter'
-import { IdbTableAdapter } from '@shared/database/adapters/indexedDB/table'
-import type {
-  AlterTableAction,
-  TableSchemaRaw,
-} from '@shared/database/types/schema'
+import type { TableAdapter, TransactionAdapter } from '@database/types/adapter'
+import { IdbTableAdapter } from '@database/adapters/indexedDB/table'
+import type { AlterTableAction, TableSchemaRaw } from '@database/types/schema'
 import { check, isNotNull } from '@shared/lib/utils/checks'
 import { valuesOf } from '@shared/lib/utils/object'
 import { todo } from '@shared/lib/utils/todo'
@@ -14,12 +8,12 @@ import {
   DatabaseDuplicateTableError,
   DatabaseInvalidTransactionError,
   DatabaseUndefinedTableError,
-} from '@shared/database/types/errors'
-import { promisedRequest } from '@shared/database/adapters/indexedDB/helpers/promisedRequest'
+} from '@database/types/errors'
+import { promisedRequest } from '@database/adapters/indexedDB/helpers/promisedRequest'
 import { toArray } from '@shared/lib/utils/list'
-import { openCursor } from '@shared/database/adapters/indexedDB/helpers/openCursor'
-import { cursorIterator } from '@shared/database/helpers/cursorIterator'
-import { getIndexKeyPath } from '@shared/database/adapters/indexedDB/helpers/getIndexKeyPath'
+import { openCursor } from '@database/adapters/indexedDB/helpers/openCursor'
+import { cursorIterator } from '@database/helpers/cursorIterator'
+import { getIndexKeyPath } from '@database/adapters/indexedDB/helpers/getIndexKeyPath'
 
 export class IdbDatabaseTransactionAdapter implements TransactionAdapter {
   constructor(

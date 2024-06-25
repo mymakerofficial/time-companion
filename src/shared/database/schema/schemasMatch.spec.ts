@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { rawTableSchemasMatch } from '@shared/database/schema/schemasMatch'
-import { defineTable } from '@shared/database/schema/defineTable'
-import { c } from '@shared/database/schema/columnBuilder'
+import { rawTableSchemasMatch } from '@database/schema/schemasMatch'
+import { defineTable } from '@database/schema/defineTable'
+import { c } from '@database/schema/columnBuilder'
 
 describe('rawTableSchemasMatch', () => {
   it('should return true if everything matches', () => {

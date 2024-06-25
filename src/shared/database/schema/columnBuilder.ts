@@ -3,11 +3,11 @@ import type {
   ColumnBuilderFactory,
   ColumnDefinitionRaw,
   MagicColumnBuilder,
-} from '@shared/database/types/schema'
+} from '@database/types/schema'
 import type { Nullable } from '@shared/lib/utils/types'
-import { ColumnDefinitionImpl } from '@shared/database/schema/columnDefinition'
+import { ColumnDefinitionImpl } from '@database/schema/columnDefinition'
 import { assignProperties } from '@shared/lib/utils/object'
-import type { ColumnType } from '@shared/database/types/database'
+import type { ColumnType } from '@database/types/database'
 
 class ColumnBuilderImpl<TColumn = unknown, TRow extends object = object>
   extends ColumnDefinitionImpl<TRow, TColumn>

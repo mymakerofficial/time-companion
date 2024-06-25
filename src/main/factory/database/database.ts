@@ -1,6 +1,6 @@
-import { createDatabase } from '@shared/database/factory/database'
+import { createDatabase } from '@database/factory/database'
 import config from '@shared/database.config'
-import { pgliteAdapter } from '@shared/database/adapters/pglite/database'
+import { pgliteAdapter } from '@database/adapters/pglite/database'
 import path from 'path'
 import { app } from 'electron'
 

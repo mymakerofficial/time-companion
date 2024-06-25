@@ -1,13 +1,10 @@
-import type { AdapterBaseQueryProps } from '@shared/database/types/adapter'
+import type { AdapterBaseQueryProps } from '@database/types/adapter'
 import type { Knex } from 'knex'
 import { check, isNotNull, isNull, isPresent } from '@shared/lib/utils/checks'
-import type {
-  ColumnDefinitionRaw,
-  RawWhere,
-} from '@shared/database/types/schema'
-import { genericOperatorToPgOperator } from '@shared/database/adapters/pglite/helpers/genericOperatorToPgOperator'
+import type { ColumnDefinitionRaw, RawWhere } from '@database/types/schema'
+import { genericOperatorToPgOperator } from '@database/adapters/pglite/helpers/genericOperatorToPgOperator'
 import type { Maybe, Nullable } from '@shared/lib/utils/types'
-import type { KeyRange } from '@shared/database/types/database'
+import type { KeyRange } from '@database/types/database'
 import { getOrNull } from '@shared/lib/utils/result'
 
 export function buildQuery(

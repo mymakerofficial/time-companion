@@ -1,4 +1,4 @@
-import type { Database } from '@shared/database/types/database'
+import type { Database } from '@database/types/database'
 import { type CreateDay, type DayDto, daysTable } from '@shared/model/day'
 import { uuid } from '@shared/lib/utils/uuid'
 import { toDayDto } from '@shared/model/mappers/day'
@@ -7,7 +7,7 @@ import {
   type DatabaseError,
   errorIsUndefinedColumn,
   errorIsUniqueViolation,
-} from '@shared/database/types/errors'
+} from '@database/types/errors'
 import type { PlainDate } from '@shared/lib/datetime/plainDate'
 
 export type DayPersistenceDependencies = {

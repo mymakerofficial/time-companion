@@ -1,4 +1,4 @@
-import type { TableSchemaRaw } from '@shared/database/types/schema'
+import type { TableSchemaRaw } from '@database/types/schema'
 import { entriesOf, keysOf } from '@shared/lib/utils/object'
 import { isUndefined } from '@shared/lib/utils/checks'
 

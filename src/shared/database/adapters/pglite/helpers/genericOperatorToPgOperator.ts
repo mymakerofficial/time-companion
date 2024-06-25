@@ -1,4 +1,4 @@
-import type { WhereOperator } from '@shared/database/types/database'
+import type { WhereOperator } from '@database/types/database'
 
 const pgOperatorMap: Record<WhereOperator, string> = {
   equals: '=',

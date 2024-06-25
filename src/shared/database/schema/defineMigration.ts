@@ -1,4 +1,4 @@
-import type { MigrationFunction } from '@shared/database/types/database'
+import type { MigrationFunction } from '@database/types/database'
 
 export function defineMigration(migrationFn: MigrationFunction) {
   return migrationFn

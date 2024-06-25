@@ -1,7 +1,7 @@
-import type { Transaction } from '@shared/database/types/database'
-import type { TransactionAdapter } from '@shared/database/types/adapter'
-import type { TableSchemaRaw } from '@shared/database/types/schema'
-import { DatabaseQuertyFactoryImpl } from '@shared/database/factory/queryFactory'
+import type { Transaction } from '@database/types/database'
+import type { TransactionAdapter } from '@database/types/adapter'
+import type { TableSchemaRaw } from '@database/types/schema'
+import { DatabaseQuertyFactoryImpl } from '@database/factory/queryFactory'
 
 export class DatabaseTransactionImpl
   extends DatabaseQuertyFactoryImpl

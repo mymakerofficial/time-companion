@@ -1,6 +1,6 @@
-import type { TableSchemaRaw } from '@shared/database/types/schema'
+import type { TableSchemaRaw } from '@database/types/schema'
 import { entriesOf, objectFromEntries } from '@shared/lib/utils/object'
-import type { ColumnType } from '@shared/database/types/database'
+import type { ColumnType } from '@database/types/database'
 import {
   check,
   isDefined,

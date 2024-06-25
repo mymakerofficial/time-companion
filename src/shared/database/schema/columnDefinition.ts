@@ -5,14 +5,14 @@ import type {
   RawWhere,
   RawWhereBooleanGroup,
   WhereBuilder,
-} from '@shared/database/types/schema'
+} from '@database/types/schema'
 import {
   type KeyRange,
   type OrderBy,
   type OrderByDirection,
   type WhereBooleanOperator,
   type WhereOperator,
-} from '@shared/database/types/database'
+} from '@database/types/database'
 import type { Optional } from '@shared/lib/utils/types'
 import { isDefined } from '@shared/lib/utils/checks'
 

@@ -1,10 +1,10 @@
 import type { Nullable } from '@shared/lib/utils/types'
-import { defineTable } from '@shared/database/schema/defineTable'
-import { c } from '@shared/database/schema/columnBuilder'
+import { defineTable } from '@database/schema/defineTable'
+import { c } from '@database/schema/columnBuilder'
 import { z } from 'zod'
 import type { BaseDto } from '@shared/model/helpers/baseDto'
 import { randomTailwindColor } from '@renderer/lib/colorUtils'
-import type { InferTable } from '@shared/database/types/schema'
+import type { InferTable } from '@database/types/schema'
 
 export type ProjectBase = {
   displayName: string

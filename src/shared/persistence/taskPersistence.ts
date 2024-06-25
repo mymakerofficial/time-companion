@@ -1,4 +1,4 @@
-import type { Database } from '@shared/database/types/database'
+import type { Database } from '@database/types/database'
 import {
   type CreateTask,
   type TaskDto,
@@ -11,7 +11,7 @@ import {
   type DatabaseError,
   errorIsUndefinedColumn,
   errorIsUniqueViolation,
-} from '@shared/database/types/errors'
+} from '@database/types/errors'
 import { toTaskDto } from '@shared/model/mappers/task'
 import { uuid } from '@shared/lib/utils/uuid'
 

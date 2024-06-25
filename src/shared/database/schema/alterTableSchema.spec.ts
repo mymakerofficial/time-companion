@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { defineTable } from '@shared/database/schema/defineTable'
-import { c } from '@shared/database/schema/columnBuilder'
-import { applyAlterActions } from '@shared/database/schema/alterTableSchema'
-import { AlterTableBuilderImpl } from '@shared/database/schema/alterTable'
+import { defineTable } from '@database/schema/defineTable'
+import { c } from '@database/schema/columnBuilder'
+import { applyAlterActions } from '@database/schema/alterTableSchema'
+import { AlterTableBuilderImpl } from '@database/schema/alterTable'
 
 describe('applyAlterActions', () => {
   it('should apply addColumn action', () => {

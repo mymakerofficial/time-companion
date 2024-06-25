@@ -1,4 +1,4 @@
-import type { AdapterBaseQueryProps } from '@shared/database/types/adapter'
+import type { AdapterBaseQueryProps } from '@database/types/adapter'
 import { toArray } from '@shared/lib/utils/list'
 import {
   check,
@@ -7,14 +7,11 @@ import {
   isPresent,
   isUndefined,
 } from '@shared/lib/utils/checks'
-import { DatabaseInvalidRangeColumnError } from '@shared/database/types/errors'
+import { DatabaseInvalidRangeColumnError } from '@database/types/errors'
 import { getOrDefault, getOrNull } from '@shared/lib/utils/result'
 import type { Nullable } from '@shared/lib/utils/types'
-import type {
-  ColumnType,
-  OrderByDirection,
-} from '@shared/database/types/database'
-import type { RawWhere } from '@shared/database/types/schema'
+import type { ColumnType, OrderByDirection } from '@database/types/database'
+import type { RawWhere } from '@database/types/schema'
 
 export type IDBQueryPlan<TRow extends object> = {
   /***

@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest'
-import { wherePredicate } from '@shared/database/helpers/wherePredicate'
-import { defineTable } from '@shared/database/schema/defineTable'
-import { c } from '@shared/database/schema/columnBuilder'
+import { wherePredicate } from '@database/helpers/wherePredicate'
+import { defineTable } from '@database/schema/defineTable'
+import { c } from '@database/schema/columnBuilder'
 import { uuid } from '@shared/lib/utils/uuid'
-import type { WhereBuilder } from '@shared/database/types/schema'
+import type { WhereBuilder } from '@database/types/schema'
 
 interface Person {
   id: string

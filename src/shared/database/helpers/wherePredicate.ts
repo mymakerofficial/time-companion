@@ -4,7 +4,7 @@ import type {
   RawWhere,
   RawWhereBooleanGroup,
   RawWhereCondition,
-} from '@shared/database/types/schema'
+} from '@database/types/schema'
 
 function resolveBooleanGroup<TRow extends object>(
   data: TRow,

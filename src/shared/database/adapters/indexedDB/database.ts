@@ -4,15 +4,15 @@ import type {
   DatabaseInfo,
   TableAdapter,
   TransactionAdapter,
-} from '@shared/database/types/adapter'
-import { IdbDatabaseTransactionAdapter } from '@shared/database/adapters/indexedDB/transaction'
+} from '@database/types/adapter'
+import { IdbDatabaseTransactionAdapter } from '@database/adapters/indexedDB/transaction'
 import { check, isNotNull, isUndefined } from '@shared/lib/utils/checks'
 import { toArray } from '@shared/lib/utils/list'
 import {
   DatabaseNotOpenError,
   DatabaseVersionTooHighError,
-} from '@shared/database/types/errors'
-import type { TableSchemaRaw } from '@shared/database/types/schema'
+} from '@database/types/errors'
+import type { TableSchemaRaw } from '@database/types/schema'
 
 export function indexedDBAdapter(
   databaseName: string,

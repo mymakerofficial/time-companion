@@ -1,7 +1,4 @@
-import type {
-  AlterTableAction,
-  TableSchemaRaw,
-} from '@shared/database/types/schema'
+import type { AlterTableAction, TableSchemaRaw } from '@database/types/schema'
 import { check, isNotNull } from '@shared/lib/utils/checks'
 import { todo } from '@shared/lib/utils/todo'
 

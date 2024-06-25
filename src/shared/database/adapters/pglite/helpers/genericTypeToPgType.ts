@@ -1,5 +1,5 @@
-import type { ColumnType } from '@shared/database/types/database'
-import type { PgColumnType } from '@shared/database/adapters/pglite/helpers/types'
+import type { ColumnType } from '@database/types/database'
+import type { PgColumnType } from '@database/adapters/pglite/helpers/types'
 
 const pgColumnTypeMap: Record<ColumnType, PgColumnType> = {
   text: 'text',

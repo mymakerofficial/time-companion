@@ -1,12 +1,12 @@
-import type { QueryFactory, Table } from '@shared/database/types/database'
+import type { QueryFactory, Table } from '@database/types/database'
 import type {
   InferTable,
   TableSchema,
   TableSchemaRaw,
-} from '@shared/database/types/schema'
+} from '@database/types/schema'
 import { isString } from '@shared/lib/utils/checks'
-import { DatabaseTableImpl } from '@shared/database/factory/table'
-import type { TableAdapterFactory } from '@shared/database/types/adapter'
+import { DatabaseTableImpl } from '@database/factory/table'
+import type { TableAdapterFactory } from '@database/types/adapter'
 import type { Optional } from '@shared/lib/utils/types'
 
 export class DatabaseQuertyFactoryImpl implements QueryFactory {

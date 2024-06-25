@@ -10,7 +10,7 @@ import { timeEntriesTable } from '@shared/model/timeEntry'
 import { uuid } from '@shared/lib/utils/uuid'
 import { faker } from '@faker-js/faker'
 import { isSometimesNullOr } from '@test/helpers/maybe'
-import type { Database } from '@shared/database/types/database'
+import type { Database } from '@database/types/database'
 import { toTimeEntryDto } from '@shared/model/mappers/timeEntry'
 
 export class TimeEntryTestHelpers {

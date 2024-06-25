@@ -1,4 +1,4 @@
-import type { Database } from '@shared/database/types/database'
+import type { Database } from '@database/types/database'
 import {
   type Person,
   personsTable,

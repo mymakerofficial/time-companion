@@ -8,7 +8,7 @@ import type {
   TableSchema,
   TableSchemaRaw,
   WhereBuilderOrRaw,
-} from '@shared/database/types/schema'
+} from '@database/types/schema'
 import type { SubscriberCallback } from '@shared/events/publisher'
 
 export const whereBooleanOperators = ['and', 'or'] as const

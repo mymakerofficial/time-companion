@@ -1,10 +1,10 @@
-import type { TableAdapterFactory } from '@shared/database/types/adapter'
-import { PGLiteTableAdapter } from '@shared/database/adapters/pglite/table'
+import type { TableAdapterFactory } from '@database/types/adapter'
+import { PGLiteTableAdapter } from '@database/adapters/pglite/table'
 import type { Knex } from 'knex'
 import type { PGliteInterface, Transaction } from '@electric-sql/pglite'
 import type { Nullable } from '@shared/lib/utils/types'
 import { check, isNotNull } from '@shared/lib/utils/checks'
-import { DatabaseNotOpenError } from '@shared/database/types/errors'
+import { DatabaseNotOpenError } from '@database/types/errors'
 
 export class PGLiteTableAdapterFactory implements TableAdapterFactory {
   constructor(

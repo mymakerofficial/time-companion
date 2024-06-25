@@ -3,7 +3,7 @@ import type {
   DatabaseCursor,
   DatabaseCursorWithValue,
   DatabaseIterator,
-} from '@shared/database/types/cursor'
+} from '@database/types/cursor'
 
 export async function* cursorIterator<TRow extends object>(
   cursor: DatabaseCursor<TRow>,

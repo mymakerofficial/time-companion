@@ -8,11 +8,11 @@ import {
   createProjectService,
   type ProjectService,
 } from '@shared/service/projectService'
-import type { Database } from '@shared/database/types/database'
+import type { Database } from '@database/types/database'
 import { createFixtures } from '@test/helpers/createFixtures'
 import { ProjectTestHelpers } from '@test/fixtures/service/projectTestHelpers'
-import { createDatabase } from '@shared/database/factory/database'
-import { indexedDBAdapter } from '@shared/database/adapters/indexedDB/database'
+import { createDatabase } from '@database/factory/database'
+import { indexedDBAdapter } from '@database/adapters/indexedDB/database'
 import fakeIndexedDB from 'fake-indexeddb'
 import config from '@shared/database.config'
 import { ServiceTestHelpers } from '@test/fixtures/service/serviceTestHelpers'

@@ -1,5 +1,5 @@
-import { defineMigration } from '@shared/database/schema/defineMigration'
-import { c } from '@shared/database/schema/columnBuilder'
+import { defineMigration } from '@database/schema/defineMigration'
+import { c } from '@database/schema/columnBuilder'
 
 export default defineMigration(async (transaction) => {
   await transaction.createTable('days', {

@@ -27,7 +27,8 @@
       "@main/*": ["src/main/*"],
       "@preload/*": ["src/preload/*"],
       "@renderer/*": ["src/renderer/*"],
-      "@test/*": ["test/*"]
+      "@test/*": ["test/*"],
+      "@database/*": ["src/shared/database/*"],
     }
   }
 }

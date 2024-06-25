@@ -1,4 +1,4 @@
-import { defineConfig } from '@shared/database/schema/defineConfig'
+import { defineConfig } from '@database/schema/defineConfig'
 import { projectsTable } from '@shared/model/project'
 import { tasksTable } from '@shared/model/task'
 import { daysTable } from '@shared/model/day'

@@ -5,7 +5,7 @@ import type {
   AdapterSelectProps,
   AdapterUpdateProps,
   TableAdapter,
-} from '@shared/database/types/adapter'
+} from '@database/types/adapter'
 import type { Nullable } from '@shared/lib/utils/types'
 import {
   check,
@@ -21,19 +21,19 @@ import {
   DatabaseUndefinedColumnError,
   DatabaseUndefinedTableError,
   DatabaseUniqueViolationError,
-} from '@shared/database/types/errors'
+} from '@database/types/errors'
 import { arraysHaveOverlap, firstOfOrNull } from '@shared/lib/utils/list'
-import { iteratorToList } from '@shared/database/helpers/iteratorToList'
-import type { TableSchemaRaw } from '@shared/database/types/schema'
+import { iteratorToList } from '@database/helpers/iteratorToList'
+import type { TableSchemaRaw } from '@database/types/schema'
 import { keysOf, valuesOf } from '@shared/lib/utils/object'
-import { promisedRequest } from '@shared/database/adapters/indexedDB/helpers/promisedRequest'
-import { openIterator } from '@shared/database/adapters/indexedDB/helpers/openIterator'
+import { promisedRequest } from '@database/adapters/indexedDB/helpers/promisedRequest'
+import { openIterator } from '@database/adapters/indexedDB/helpers/openIterator'
 import {
   deserializeRow,
   serializeRow,
-} from '@shared/database/adapters/indexedDB/helpers/mappers'
-import { compareFn } from '@shared/database/adapters/indexedDB/helpers/compareFunction'
-import { planQuery } from '@shared/database/adapters/indexedDB/helpers/planQuery'
+} from '@database/adapters/indexedDB/helpers/mappers'
+import { compareFn } from '@database/adapters/indexedDB/helpers/compareFunction'
+import { planQuery } from '@database/adapters/indexedDB/helpers/planQuery'
 
 export class IdbTableAdapter<TRow extends object>
   implements TableAdapter<TRow>

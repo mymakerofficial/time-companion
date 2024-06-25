@@ -4,14 +4,14 @@ import {
   projectsTable,
   type UpdateProject,
 } from '@shared/model/project'
-import type { Database } from '@shared/database/types/database'
+import type { Database } from '@database/types/database'
 import { check, isNotEmpty, isNotNull } from '@shared/lib/utils/checks'
 import { firstOf } from '@shared/lib/utils/list'
 import {
   type DatabaseError,
   errorIsUndefinedColumn,
   errorIsUniqueViolation,
-} from '@shared/database/types/errors'
+} from '@database/types/errors'
 import { toProjectDto } from '@shared/model/mappers/project'
 import { uuid } from '@shared/lib/utils/uuid'
 

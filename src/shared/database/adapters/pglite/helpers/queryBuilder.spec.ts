@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { knex as createKnex } from 'knex'
-import { buildQuery } from '@shared/database/adapters/pglite/helpers/queryBuilder'
-import { c } from '@shared/database/schema/columnBuilder'
+import { buildQuery } from '@database/adapters/pglite/helpers/queryBuilder'
+import { c } from '@database/schema/columnBuilder'
 
 describe('Knex Query Builder', () => {
   const knex = createKnex({

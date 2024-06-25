@@ -1,10 +1,10 @@
 import type { Nullable } from '@shared/lib/utils/types'
-import type { KeyRange, OrderBy } from '@shared/database/types/database'
+import type { KeyRange, OrderBy } from '@database/types/database'
 import type {
   AlterTableAction,
   RawWhere,
   TableSchemaRaw,
-} from '@shared/database/types/schema'
+} from '@database/types/schema'
 
 export type DatabaseInfo = {
   version: number

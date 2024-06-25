@@ -1,4 +1,4 @@
-import type { Database } from '@shared/database/types/database'
+import type { Database } from '@database/types/database'
 import { projectsTable } from '@shared/model/project'
 import { tasksTable } from '@shared/model/task'
 import { daysTable } from '@shared/model/day'

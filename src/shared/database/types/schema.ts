@@ -5,7 +5,7 @@ import {
   type OrderByDirection,
   type WhereBooleanOperator,
   type WhereOperator,
-} from '@shared/database/types/database'
+} from '@database/types/database'
 import type { Nullable } from '@shared/lib/utils/types'
 
 export type RawWhereCondition = {

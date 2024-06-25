@@ -1,4 +1,4 @@
-import type { OrderByDirection } from '@shared/database/types/database'
+import type { OrderByDirection } from '@database/types/database'
 
 export function directionToIdbCursorDirection(
   direction: OrderByDirection,

@@ -1,4 +1,4 @@
-import type { DatabaseIterator } from '@shared/database/types/cursor'
+import type { DatabaseIterator } from '@database/types/cursor'
 
 /***
  * Convert an iterator to a list

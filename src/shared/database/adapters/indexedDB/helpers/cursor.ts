@@ -2,7 +2,7 @@ import type { DatabaseCursor } from '@/shared/database/types/cursor'
 import type { Nullable } from '@shared/lib/utils/types'
 import { check, isNotNull } from '@shared/lib/utils/checks'
 import { getOrNull } from '@shared/lib/utils/result'
-import { promisedRequest } from '@shared/database/adapters/indexedDB/helpers/promisedRequest'
+import { promisedRequest } from '@database/adapters/indexedDB/helpers/promisedRequest'
 
 export class IndexedDBCursorImpl<TRow extends object>
   implements DatabaseCursor<TRow>

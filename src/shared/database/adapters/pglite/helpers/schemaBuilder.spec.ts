@@ -3,10 +3,10 @@ import { knex as createKnex } from 'knex'
 import {
   buildAlterTable,
   buildCreateTable,
-} from '@shared/database/adapters/pglite/helpers/schemaBuilder'
-import { defineTable } from '@shared/database/schema/defineTable'
-import { c } from '@shared/database/schema/columnBuilder'
-import { AlterTableBuilderImpl } from '@shared/database/schema/alterTable'
+} from '@database/adapters/pglite/helpers/schemaBuilder'
+import { defineTable } from '@database/schema/defineTable'
+import { c } from '@database/schema/columnBuilder'
+import { AlterTableBuilderImpl } from '@database/schema/alterTable'
 
 describe('Knex Schema Builder', () => {
   const knex = createKnex({

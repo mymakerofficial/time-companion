@@ -6,13 +6,13 @@ import type {
   InsertProps,
   Table,
   UpdateProps,
-} from '@shared/database/types/database'
-import type { TableAdapter } from '@shared/database/types/adapter'
+} from '@database/types/database'
+import type { TableAdapter } from '@database/types/adapter'
 import type {
   RawWhere,
   TableSchemaRaw,
   WhereBuilder,
-} from '@shared/database/types/schema'
+} from '@database/types/schema'
 import type { Nullable } from '@shared/lib/utils/types'
 import { isNotDefined } from '@renderer/lib/utils'
 import { isDefined, isUndefined } from '@shared/lib/utils/checks'

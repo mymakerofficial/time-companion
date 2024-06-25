@@ -1,7 +1,7 @@
-import type { DatabaseCursor } from '@shared/database/types/cursor'
+import type { DatabaseCursor } from '@database/types/cursor'
 import { describe, expect, it } from 'vitest'
-import { cursorIterator } from '@shared/database/helpers/cursorIterator'
-import { iteratorToList } from '@shared/database/helpers/iteratorToList'
+import { cursorIterator } from '@database/helpers/cursorIterator'
+import { iteratorToList } from '@database/helpers/iteratorToList'
 
 describe('iteratorToList', () => {
   it('should convert the iterator to a list', async () => {

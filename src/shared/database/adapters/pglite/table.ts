@@ -6,11 +6,11 @@ import type {
   AdapterSelectProps,
   AdapterUpdateProps,
   TableAdapter,
-} from '@shared/database/types/adapter'
+} from '@database/types/adapter'
 import type { Knex } from 'knex'
 import type { PGliteInterface, Transaction } from '@electric-sql/pglite'
-import { buildQuery } from '@shared/database/adapters/pglite/helpers/queryBuilder'
-import { handlePGliteError } from '@shared/database/adapters/pglite/helpers/errors'
+import { buildQuery } from '@database/adapters/pglite/helpers/queryBuilder'
+import { handlePGliteError } from '@database/adapters/pglite/helpers/errors'
 import { firstOf } from '@shared/lib/utils/list'
 
 export class PGLiteTableAdapter<TRow extends object>

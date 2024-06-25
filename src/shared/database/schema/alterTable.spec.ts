@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { AlterTableBuilderImpl } from '@shared/database/schema/alterTable'
+import { AlterTableBuilderImpl } from '@database/schema/alterTable'
 
 describe('alterTable', () => {
   it('should record the correct actions', async () => {

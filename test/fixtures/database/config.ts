@@ -3,7 +3,7 @@ import {
   petsTable,
   testTable,
 } from '@test/fixtures/database/schema'
-import { defineConfig } from '@shared/database/schema/defineConfig'
+import { defineConfig } from '@database/schema/defineConfig'
 
 export default defineConfig({
   migrations: [

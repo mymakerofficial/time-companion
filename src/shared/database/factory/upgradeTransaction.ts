@@ -1,12 +1,9 @@
-import type { UpgradeTransaction } from '@shared/database/types/database'
-import { DatabaseTransactionImpl } from '@shared/database/factory/transaction'
-import type {
-  AlterTableBuilder,
-  ColumnBuilder,
-} from '@shared/database/types/schema'
-import { defineTable } from '@shared/database/schema/defineTable'
-import { AlterTableBuilderImpl } from '@shared/database/schema/alterTable'
-import { applyAlterActions } from '@shared/database/schema/alterTableSchema'
+import type { UpgradeTransaction } from '@database/types/database'
+import { DatabaseTransactionImpl } from '@database/factory/transaction'
+import type { AlterTableBuilder, ColumnBuilder } from '@database/types/schema'
+import { defineTable } from '@database/schema/defineTable'
+import { AlterTableBuilderImpl } from '@database/schema/alterTable'
+import { applyAlterActions } from '@database/schema/alterTableSchema'
 
 export class DatabaseUpgradeTransactionImpl
   extends DatabaseTransactionImpl

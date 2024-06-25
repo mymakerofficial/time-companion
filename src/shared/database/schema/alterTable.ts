@@ -4,9 +4,9 @@ import type {
   AlterTableAction,
   AlterTableBuilder,
   ColumnBuilderFactory,
-} from '@shared/database/types/schema'
-import { ColumnBuilderFactoryImpl } from '@shared/database/schema/columnBuilder'
-import type { ColumnType } from '@shared/database/types/database'
+} from '@database/types/schema'
+import { ColumnBuilderFactoryImpl } from '@database/schema/columnBuilder'
+import type { ColumnType } from '@database/types/database'
 
 export class AlterTableBuilderImpl implements AlterTableBuilder {
   protected _actions: Array<AlterTableAction> = []
