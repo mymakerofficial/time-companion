@@ -22,6 +22,7 @@
     "@electric-sql/pglite": "^0.1.5",
     "@js-joda/core": "^5.6.1",
     "@js-joda/locale_en": "^4.8.11",
+    "@tailwindcss/container-queries": "^0.1.1",
     "@tanstack/vue-query": "^5.40.0",
     "@tanstack/vue-table": "^8.11.6",
     "@types/color": "^3.0.6",
