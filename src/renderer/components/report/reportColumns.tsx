@@ -1,7 +1,6 @@
 import { getSortableHeader } from '@renderer/lib/helpers/tableHelpers'
 import { createColumnHelper, type Row } from '@tanstack/vue-table'
 import { useI18n } from 'vue-i18n'
-import type { ReactiveProject } from '@renderer/model/project/types'
 import { Minus } from 'lucide-vue-next'
 import {
   durationZero,
@@ -10,8 +9,10 @@ import {
   isZeroDuration,
   withFormat,
 } from '@renderer/lib/neoTime'
-import { useProjectsService } from '@renderer/services/projectsService'
 import type { DayTimeReport } from '@renderer/lib/timeReport/types'
+import type { ProjectDto } from '@shared/model/project'
+import type { MaybeRefOrGetter } from 'vue'
+import { computed, toValue } from 'vue'
 
 function getDateCell(value: DayTimeReport['date']) {
   // TODO i18n
@@ -25,7 +26,7 @@ function getDateCell(value: DayTimeReport['date']) {
   }
 }
 
-function getProjectCell(row: Row<DayTimeReport>, project: ReactiveProject) {
+function getProjectCell(row: Row<DayTimeReport>, project: ProjectDto) {
   const duration =
     row.original.entries.find((it) => it.project.id === project.id)?.duration ??
     durationZero()
@@ -55,11 +56,12 @@ function getTotalCell(duration: DayTimeReport['totalBillableDuration']) {
 
 const columnHelper = createColumnHelper<DayTimeReport>()
 
-export function createReportColumns() {
+export function useReportColumns(
+  projects: MaybeRefOrGetter<Array<ProjectDto>>,
+) {
   const { t } = useI18n()
-  const projectsService = useProjectsService()
 
-  return [
+  return computed(() => [
     columnHelper.accessor('date', {
       header: ({ column }) =>
         getSortableHeader(column, t('report.table.columns.date')),
@@ -69,7 +71,7 @@ export function createReportColumns() {
         className: 'border-r font-medium',
       },
     }),
-    ...projectsService.projects.map((project) =>
+    ...toValue(projects).map((project) =>
       columnHelper.display({
         id: project.id,
         header: () => project.displayName,
@@ -84,5 +86,5 @@ export function createReportColumns() {
         className: 'border-l font-medium',
       },
     }),
-  ]
+  ])
 }
