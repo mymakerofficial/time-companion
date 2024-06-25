@@ -1,17 +1,18 @@
 import type { ReactiveCalendarEvent } from '@renderer/model/calendarEvent/types'
-import { Temporal } from 'temporal-polyfill'
 import {
   dateTimeZero,
   durationBetween,
   sumOfDurations,
 } from '@renderer/lib/neoTime'
 import type { ReactiveProject } from '@renderer/model/project/types'
+import type { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
+import type { Duration } from '@shared/lib/datetime/duration'
 
 export function calculateProjectDurationExact(
   project: ReactiveProject,
   events: ReadonlyArray<ReactiveCalendarEvent>,
-  endAtFallback?: Temporal.PlainDateTime,
-): Temporal.Duration {
+  endAtFallback?: PlainDateTime,
+): Duration {
   return sumOfDurations(
     events
       .filter((event) => event.project === project)

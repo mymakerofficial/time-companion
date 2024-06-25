@@ -1,4 +1,4 @@
-import { describe, it, vi, expect } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import {
   type EntityPublisherEvent,
   EntityPublisherImpl,
@@ -17,7 +17,7 @@ type TestEntity = {
 
 class TestService extends EntityPublisherImpl<TestEntity> {
   testNotify(
-    topics: PublisherTopics<EntityPublisherTopics<TestEntity>>,
+    topics: PublisherTopics<EntityPublisherTopics>,
     event: EntityPublisherEvent<TestEntity>,
   ): void {
     super.notify(topics, event)
@@ -28,7 +28,7 @@ class TestService extends EntityPublisherImpl<TestEntity> {
   }
 }
 
-function getTestTopics(): PublisherTopics<EntityPublisherTopics<TestEntity>> {
+function getTestTopics(): PublisherTopics<EntityPublisherTopics> {
   return { type: 'updated' }
 }
 
@@ -36,7 +36,6 @@ function getTestEvent(): EntityPublisherEvent<TestEntity> {
   return {
     type: 'updated',
     data: { id: uuid(), name: faker.person.firstName() },
-    changedFields: ['name'],
   }
 }
 
@@ -51,7 +50,7 @@ describe('publisher service proxy and invoker', () => {
   // in reality proxy would live in the renderer process
   const proxy = createPublisherServiceProxy<
     TestService,
-    EntityPublisherTopics<TestEntity>,
+    EntityPublisherTopics,
     EntityPublisherEvent<TestEntity>
   >({
     invoke: async (method, ...args) => await invoker.invoke(method, ...args),

@@ -2,7 +2,7 @@ import type { Maybe, MaybeArray, MaybeReadonly } from '@renderer/lib/utils'
 import { isDefined, isNotDefined, isNull } from '@renderer/lib/utils'
 import type { HasId, ID } from '@renderer/lib/types'
 import { isSameDay } from '@renderer/lib/neoTime'
-import { Temporal } from 'temporal-polyfill'
+import type { PlainDate } from '@shared/lib/datetime/plainDate'
 
 export function isArray<T>(
   value: Maybe<MaybeReadonly<MaybeArray<T>>>,
@@ -130,8 +130,8 @@ export function whereId<T extends HasId>(id: Maybe<ID>) {
   return (it: T) => it.id === id
 }
 
-export function whereDate<T extends { date: Temporal.PlainDate }>(
-  date: Maybe<Temporal.PlainDate>,
+export function whereDate<T extends { date: PlainDate }>(
+  date: Maybe<PlainDate>,
 ) {
   if (isNotDefined(date)) {
     return () => false

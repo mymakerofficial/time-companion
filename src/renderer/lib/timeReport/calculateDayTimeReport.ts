@@ -1,12 +1,12 @@
 import type { ReactiveProject } from '@renderer/model/project/types'
 import type { ReactiveCalendarDay } from '@renderer/model/calendarDay/types'
 import { dateZero, durationZero, sumOfDurations } from '@renderer/lib/neoTime'
-import { Temporal } from 'temporal-polyfill'
 import type {
   DayTimeReport,
   TimeReportProjectEntry,
 } from '@renderer/lib/timeReport/types'
 import { calculateProjectDurationExact } from '@renderer/lib/timeReport/calculatorExact'
+import type { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 
 export function createTimeReport(
   partial: Partial<DayTimeReport>,
@@ -22,7 +22,7 @@ export function createTimeReport(
 export function calculateDayTimeReport(
   day: ReactiveCalendarDay,
   projects: ReadonlyArray<ReactiveProject>,
-  endAtFallback?: Temporal.PlainDateTime,
+  endAtFallback?: PlainDateTime,
 ): DayTimeReport {
   const entries = projects.map(
     (project): TimeReportProjectEntry => ({

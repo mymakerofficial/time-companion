@@ -3,17 +3,18 @@ import type { HasId } from '@renderer/lib/types'
 import type { ReactiveProject } from '@renderer/model/project/types'
 import type { ReactiveActivity } from '@renderer/model/activity/types'
 import type { ReactiveCalendarEventShadow } from '@renderer/model/eventShadow/types'
-import { Temporal } from 'temporal-polyfill'
 import type { ReactiveCalendarDay } from '@renderer/model/calendarDay/types'
 import type { ProjectsService } from '@renderer/services/projectsService'
+import type { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
+import type { Duration } from '@shared/lib/datetime/duration'
 
 export interface CalendarEventContext extends HasId {
   day: Nullable<ReactiveCalendarDay>
   project: Nullable<ReactiveProject>
   activity: Nullable<ReactiveActivity>
   note: string
-  startAt: Temporal.PlainDateTime
-  endAt: Nullable<Temporal.PlainDateTime>
+  startAt: PlainDateTime
+  endAt: Nullable<PlainDateTime>
 }
 
 export interface ReactiveCalendarEvent {
@@ -27,7 +28,7 @@ export interface ReactiveCalendarEvent {
   readonly projectDisplayName: ReactiveProject['displayName']
   readonly activityDisplayName: ReactiveActivity['displayName']
   color: ReactiveProject['color']
-  readonly duration: Temporal.Duration
+  readonly duration: Duration
   readonly hasStarted: boolean
   readonly hasEnded: boolean
   unsafeSetDay: (day: Nullable<ReactiveCalendarDay>) => void

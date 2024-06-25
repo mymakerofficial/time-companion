@@ -89,6 +89,10 @@ export function isDate(value: unknown): value is Date {
 export function isEmpty(value: Array<unknown>): value is []
 export function isEmpty(value: string): value is ''
 export function isEmpty(value: object): value is {}
+export function isEmpty(value: null | undefined): value is null | undefined
+export function isEmpty(
+  value: unknown,
+): value is null | undefined | '' | [] | {}
 export function isEmpty(
   value: unknown,
 ): value is null | undefined | '' | [] | {} {

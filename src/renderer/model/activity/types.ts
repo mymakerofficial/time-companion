@@ -2,13 +2,13 @@ import type { HasId } from '@renderer/lib/types'
 import type { Nullable } from '@renderer/lib/utils'
 import type { ReactiveProject } from '@renderer/model/project/types'
 import type { ProjectsStore } from '@renderer/stores/projectsStore'
-import { Temporal } from 'temporal-polyfill'
+import type { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 
 export interface ActivityContext extends Readonly<HasId> {
   displayName: string
   color: Nullable<string>
   parentProject: Nullable<ReactiveProject>
-  lastUsed: Temporal.PlainDateTime
+  lastUsed: PlainDateTime
 }
 
 export interface ReactiveActivity extends ActivityContext {

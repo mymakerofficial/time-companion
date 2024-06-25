@@ -1,6 +1,5 @@
 import type { ReactiveCalendarDay } from '@renderer/model/calendarDay/types'
 import type { DayTimeReport } from '@renderer/lib/timeReport/types'
-import { Temporal } from 'temporal-polyfill'
 import { createService } from '@renderer/composables/createService'
 import { useProjectsService } from '@renderer/services/projectsService'
 import {
@@ -12,9 +11,11 @@ import { whereDate } from '@renderer/lib/listUtils'
 import { isNull } from '@renderer/lib/utils'
 import { useCalendarService } from '@renderer/services/calendarService'
 import type { ReactiveProject } from '@renderer/model/project/types'
+import type { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
+import type { PlainYearMonth } from '@shared/lib/datetime/plainYearMonth'
 
 export interface GetTimeReportOptions {
-  endAtFallback?: Temporal.PlainDateTime
+  endAtFallback?: PlainDateTime
   projects?: ReadonlyArray<ReactiveProject>
 }
 
@@ -24,7 +25,7 @@ export interface TimeReportService {
     options?: GetTimeReportOptions,
   ) => DayTimeReport
   getMonthTimeReport: (
-    month: Temporal.PlainYearMonth,
+    month: PlainYearMonth,
     options?: GetTimeReportOptions,
   ) => DayTimeReport[]
 }
@@ -43,7 +44,7 @@ export const useTimeReportService = createService<TimeReportService>(() => {
   }
 
   function getMonthTimeReport(
-    month: Temporal.PlainYearMonth,
+    month: PlainYearMonth,
     options: GetTimeReportOptions = {},
   ) {
     return daysInMonth(month).map((date) => {

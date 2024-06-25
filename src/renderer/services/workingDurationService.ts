@@ -1,4 +1,3 @@
-import { Temporal } from 'temporal-polyfill'
 import { createService } from '@renderer/composables/createService'
 import { useSettingsStore } from '@renderer/stores/settingsStore'
 import { computed, reactive } from 'vue'
@@ -15,23 +14,23 @@ import {
   parseDuration,
 } from '@renderer/lib/neoTime'
 import { mapWritable } from '@renderer/model/modelHelpers'
+import type { Duration } from '@shared/lib/datetime/duration'
+import type { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 
 export interface WorkingDurationService {
-  normalWorkingDuration: Temporal.Duration
-  normalBreakDuration: Temporal.Duration
-  readonly normalTotalDuration: Temporal.Duration
+  normalWorkingDuration: Duration
+  normalBreakDuration: Duration
+  readonly normalTotalDuration: Duration
   breakProject: Nullable<ReactiveProject>
   getBreakDurationLeftOnDay: (
     day: ReactiveCalendarDay,
-    endAtFallback?: Temporal.PlainDateTime,
-  ) => Temporal.Duration
+    endAtFallback?: PlainDateTime,
+  ) => Duration
   getDurationLeftOnDay: (
     day: ReactiveCalendarDay,
-    endAtFallback?: Temporal.PlainDateTime,
-  ) => Temporal.Duration
-  getPredictedEndOfDay: (
-    day: ReactiveCalendarDay,
-  ) => Nullable<Temporal.PlainDateTime>
+    endAtFallback?: PlainDateTime,
+  ) => Duration
+  getPredictedEndOfDay: (day: ReactiveCalendarDay) => Nullable<PlainDateTime>
 }
 
 export const useWorkingDurationService = createService<WorkingDurationService>(
@@ -56,7 +55,7 @@ export const useWorkingDurationService = createService<WorkingDurationService>(
 
     function getBreakDurationLeftOnDay(
       day: ReactiveCalendarDay,
-      endAtFallback?: Temporal.PlainDateTime,
+      endAtFallback?: PlainDateTime,
     ) {
       const breakReport = timeReportService.getDayTimeReport(day, {
         endAtFallback,
@@ -68,7 +67,7 @@ export const useWorkingDurationService = createService<WorkingDurationService>(
 
     function getDurationLeftOnDay(
       day: ReactiveCalendarDay,
-      endAtFallback?: Temporal.PlainDateTime,
+      endAtFallback?: PlainDateTime,
     ) {
       const { totalBillableDuration } = timeReportService.getDayTimeReport(
         day,

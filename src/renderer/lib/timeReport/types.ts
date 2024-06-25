@@ -1,16 +1,17 @@
 import type { ReactiveProject } from '@renderer/model/project/types'
-import { Temporal } from 'temporal-polyfill'
+import type { Duration } from '@shared/lib/datetime/duration'
+import type { PlainDate } from '@shared/lib/datetime/plainDate'
 
 export interface TimeReportProjectEntry {
   project: Readonly<ReactiveProject>
-  duration: Readonly<Temporal.Duration>
+  duration: Readonly<Duration>
   isBillable: Readonly<boolean>
   isRunning: Readonly<boolean>
 }
 
 export interface DayTimeReport {
-  date: Readonly<Temporal.PlainDate>
-  totalDuration: Readonly<Temporal.Duration>
-  totalBillableDuration: Readonly<Temporal.Duration>
+  date: Readonly<PlainDate>
+  totalDuration: Readonly<Duration>
+  totalBillableDuration: Readonly<Duration>
   entries: ReadonlyArray<TimeReportProjectEntry>
 }

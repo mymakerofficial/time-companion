@@ -1,38 +1,38 @@
 import {
   DateTimeFormatter,
-  Duration,
+  Duration as JodaDuration,
   LocalDate,
   LocalDateTime,
   LocalTime,
 } from '@js-joda/core'
 import { Locale } from '@js-joda/locale_en'
-import { Temporal } from 'temporal-polyfill'
 import { fillZero, isNotNull, round } from '@renderer/lib/utils'
+import { PlainDate } from '@shared/lib/datetime/plainDate'
+import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
+import { PlainTime } from '@shared/lib/datetime/plainTime'
+import { Duration } from '@shared/lib/datetime/duration'
+import { PlainYearMonth } from '@shared/lib/datetime/plainYearMonth'
 
-export function isTemporalDate(date: any): date is Temporal.PlainDate {
-  return date instanceof Temporal.PlainDate
+export function isTemporalDate(date: any): date is PlainDate {
+  return date instanceof PlainDate
 }
 
-export function isTemporalTime(time: any): time is Temporal.PlainTime {
-  return time instanceof Temporal.PlainTime
+export function isTemporalTime(time: any): time is PlainTime {
+  return time instanceof PlainTime
 }
 
-export function isTemporalDateTime(
-  dateTime: any,
-): dateTime is Temporal.PlainDateTime {
-  return dateTime instanceof Temporal.PlainDateTime
+export function isTemporalDateTime(dateTime: any): dateTime is PlainDateTime {
+  return dateTime instanceof PlainDateTime
 }
 
-export function isTemporalDuration(
-  duration: any,
-): duration is Temporal.Duration {
-  return duration instanceof Temporal.Duration
+export function isTemporalDuration(duration: any): duration is Duration {
+  return duration instanceof Duration
 }
 
-export function temporalToJoda(temporal: Temporal.PlainDate): LocalDate
-export function temporalToJoda(temporal: Temporal.PlainTime): LocalTime
-export function temporalToJoda(temporal: Temporal.PlainDateTime): LocalDateTime
-export function temporalToJoda(temporal: Temporal.Duration): Duration
+export function temporalToJoda(temporal: PlainDate): LocalDate
+export function temporalToJoda(temporal: PlainTime): LocalTime
+export function temporalToJoda(temporal: PlainDateTime): LocalDateTime
+export function temporalToJoda(temporal: Duration): JodaDuration
 export function temporalToJoda(temporal: any): any {
   if (isTemporalDate(temporal)) {
     return LocalDate.of(temporal.year, temporal.month, temporal.day)
@@ -54,7 +54,7 @@ export function temporalToJoda(temporal: any): any {
   }
 
   if (isTemporalDuration(temporal)) {
-    return Duration.ofMillis(temporal.total({ unit: 'milliseconds' }))
+    return JodaDuration.ofMillis(temporal.total({ unit: 'milliseconds' }))
   }
 }
 
@@ -70,17 +70,17 @@ export function isJodaDateTime(dateTime: any): dateTime is LocalDateTime {
   return dateTime instanceof LocalDateTime
 }
 
-export function isJodaDuration(duration: any): duration is Duration {
-  return duration instanceof Duration
+export function isJodaDuration(duration: any): duration is JodaDuration {
+  return duration instanceof JodaDuration
 }
 
-export function jodaToTemporal(joda: LocalDate): Temporal.PlainDate
-export function jodaToTemporal(joda: LocalTime): Temporal.PlainTime
-export function jodaToTemporal(joda: LocalDateTime): Temporal.PlainDateTime
-export function jodaToTemporal(joda: Duration): Temporal.Duration
+export function jodaToTemporal(joda: LocalDate): PlainDate
+export function jodaToTemporal(joda: LocalTime): PlainTime
+export function jodaToTemporal(joda: LocalDateTime): PlainDateTime
+export function jodaToTemporal(joda: JodaDuration): Duration
 export function jodaToTemporal(joda: any): any {
   if (isJodaDate(joda)) {
-    return Temporal.PlainDate.from({
+    return PlainDate.from({
       year: joda.year(),
       month: joda.monthValue(),
       day: joda.dayOfMonth(),
@@ -88,7 +88,7 @@ export function jodaToTemporal(joda: any): any {
   }
 
   if (isJodaTime(joda)) {
-    return Temporal.PlainTime.from({
+    return PlainTime.from({
       hour: joda.hour(),
       minute: joda.minute(),
       second: joda.second(),
@@ -96,7 +96,7 @@ export function jodaToTemporal(joda: any): any {
   }
 
   if (isJodaDateTime(joda)) {
-    return Temporal.PlainDateTime.from({
+    return PlainDateTime.from({
       year: joda.year(),
       month: joda.monthValue(),
       day: joda.dayOfMonth(),
@@ -107,7 +107,7 @@ export function jodaToTemporal(joda: any): any {
   }
 
   if (isJodaDuration(joda)) {
-    return Temporal.Duration.from({
+    return Duration.from({
       milliseconds: joda.toMillis(),
     })
   }
@@ -119,48 +119,48 @@ export function currentMonth() {
 
 // obtain the current LocalDate
 export function today() {
-  return Temporal.Now.plainDateISO()
+  return PlainDate.now()
 }
 
 // obtain the current LocalDateTime
 export function now() {
-  return Temporal.Now.plainDateTimeISO()
+  return PlainDateTime.now()
 }
 
 // obtain the current LocalTime
 export function timeNow() {
-  return Temporal.Now.plainTimeISO()
+  return PlainTime.now()
 }
 
 // obtain a Duration from given hours
 export function hours(hours: number = 1) {
-  return Temporal.Duration.from({ hours })
+  return Duration.from({ hours })
 }
 
 // obtain a Duration from given minutes
 export function minutes(minutes: number = 1) {
-  return Temporal.Duration.from({ minutes })
+  return Duration.from({ minutes })
 }
 
 // obtain a Duration from given seconds
 export function seconds(seconds: number = 1) {
-  return Temporal.Duration.from({ seconds })
+  return Duration.from({ seconds })
 }
 
 export function durationZero() {
-  return Temporal.Duration.from({ milliseconds: 0 })
+  return Duration.from({ milliseconds: 0 })
 }
 
 export function timeZero() {
-  return Temporal.PlainTime.from({ hour: 0, minute: 0, second: 0 })
+  return PlainTime.from({ hour: 0, minute: 0, second: 0 })
 }
 
 export function dateZero() {
-  return Temporal.PlainDate.from({ year: 0, month: 1, day: 1 })
+  return PlainDate.from({ year: 0, month: 1, day: 1 })
 }
 
 export function dateTimeZero() {
-  return Temporal.PlainDateTime.from({
+  return PlainDateTime.from({
     year: 0,
     month: 1,
     day: 1,
@@ -170,7 +170,7 @@ export function dateTimeZero() {
   })
 }
 
-export function isZeroDuration(duration: Temporal.Duration) {
+export function isZeroDuration(duration: Duration) {
   return duration.total({ unit: 'milliseconds' }) === 0
 }
 
@@ -188,7 +188,7 @@ export function parseDate(
 
 // format the Date to a string
 export function formatDate(
-  date: Temporal.PlainDate,
+  date: PlainDate,
   formatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE,
 ) {
   return temporalToJoda(date).format(formatter)
@@ -203,11 +203,11 @@ export function parseTime(
 }
 
 export function formatTime(
-  time: Temporal.PlainTime,
+  time: PlainTime,
   formatter?: DateTimeFormatter,
 ): string
 export function formatTime(
-  time: Temporal.PlainDateTime,
+  time: PlainDateTime,
   formatter?: DateTimeFormatter,
 ): string
 // format the Time to a string
@@ -228,7 +228,7 @@ export function parseDateTime(
 
 // format the DateTime to a string
 export function formatDateTime(
-  dateTime: Temporal.PlainDateTime,
+  dateTime: PlainDateTime,
   formatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME,
 ) {
   return temporalToJoda(dateTime).format(formatter)
@@ -236,16 +236,16 @@ export function formatDateTime(
 
 // parse a string to a Duration
 export function parseDuration(durationString: string) {
-  return jodaToTemporal(Duration.parse(durationString))
+  return jodaToTemporal(JodaDuration.parse(durationString))
 }
 
 // format the Duration to a string
-export function formatDurationIso(duration: Temporal.Duration) {
+export function formatDurationIso(duration: Duration) {
   return duration.toString()
 }
 
 export function formatDuration(
-  duration: Temporal.Duration,
+  duration: Duration,
   options: { includeSeconds?: boolean } = {},
 ) {
   const { includeSeconds = false } = options
@@ -260,7 +260,7 @@ export function formatDuration(
 }
 
 export function humanizeDuration(
-  duration: Temporal.Duration,
+  duration: Duration,
   options: { includeSeconds?: boolean } = {},
 ) {
   const { includeSeconds = false } = options
@@ -279,70 +279,79 @@ export function humanizeDuration(
   return parts.join(' ')
 }
 
-export function timeCompare(a: Temporal.PlainTime, b: Temporal.PlainTime) {
-  return Temporal.PlainTime.compare(a, b)
+/***
+ * @deprecated Use `PlainTime.compare()` instead
+ */
+export function timeCompare(a: PlainTime, b: PlainTime) {
+  return PlainTime.compare(a, b)
 }
 
-export function timeIsBefore(
-  start: Temporal.PlainTime,
-  end: Temporal.PlainTime,
-) {
+/***
+ * @deprecated Use `time.isBefore(other)` instead
+ */
+export function timeIsBefore(start: PlainTime, end: PlainTime) {
   return timeCompare(start, end) < 0
 }
 
-export function timeIsAfter(
-  start: Temporal.PlainTime,
-  end: Temporal.PlainTime,
-) {
+/***
+ * @deprecated Use `time.isAfter(other)` instead
+ */
+export function timeIsAfter(start: PlainTime, end: PlainTime) {
   return timeCompare(start, end) > 0
 }
 
-export function dateTimeCompare(
-  a: Temporal.PlainDateTime,
-  b: Temporal.PlainDateTime,
-) {
-  return Temporal.PlainDateTime.compare(a, b)
+/***
+ * @deprecated Use `PlainDateTime.compare()` instead
+ */
+export function dateTimeCompare(a: PlainDateTime, b: PlainDateTime) {
+  return PlainDateTime.compare(a, b)
 }
 
-export function dateTimeIsBefore(
-  start: Temporal.PlainDateTime,
-  end: Temporal.PlainDateTime,
-) {
+/***
+ * @deprecated Use `dateTime.isBefore(other)` instead
+ */
+export function dateTimeIsBefore(start: PlainDateTime, end: PlainDateTime) {
   return dateTimeCompare(start, end) < 0
 }
 
-export function dateTimeIsAfter(
-  start: Temporal.PlainDateTime,
-  end: Temporal.PlainDateTime,
-) {
+/***
+ * @deprecated Use `dateTime.isAfter(other)` instead
+ */
+export function dateTimeIsAfter(start: PlainDateTime, end: PlainDateTime) {
   return dateTimeCompare(start, end) > 0
 }
 
-export function isSameDay(
-  date1: Temporal.PlainDate,
-  date2: Temporal.PlainDate,
-) {
+/***
+ * @deprecated Use `date.equals(other)` instead
+ */
+export function isSameDay(date1: PlainDate, date2: PlainDate) {
   return date1.equals(date2)
 }
 
-export function toPlainTime(dateTime: Temporal.PlainDateTime) {
-  return Temporal.PlainTime.from({
+/***
+ * @deprecated Use `dateTime.toPlainTime()` instead
+ */
+export function toPlainTime(dateTime: PlainDateTime) {
+  return PlainTime.from({
     hour: dateTime.hour,
     minute: dateTime.minute,
     second: dateTime.second,
   })
 }
 
+/***
+ * @deprecated
+ */
+export function dateWithTime(date: PlainDate, time: PlainTime): PlainDateTime
+/***
+ * @deprecated
+ */
 export function dateWithTime(
-  date: Temporal.PlainDate,
-  time: Temporal.PlainTime,
-): Temporal.PlainDateTime
-export function dateWithTime(
-  date: Temporal.PlainDateTime,
-  time: Temporal.PlainTime,
-): Temporal.PlainDateTime
+  date: PlainDateTime,
+  time: PlainTime,
+): PlainDateTime
 export function dateWithTime(date: any, time: any) {
-  return Temporal.PlainDateTime.from({
+  return PlainDateTime.from({
     year: date.year,
     month: date.month,
     day: date.day,
@@ -352,30 +361,38 @@ export function dateWithTime(date: any, time: any) {
   })
 }
 
+/***
+ * @deprecated Use `time.until()` instead
+ */
+export function durationBetween(start: PlainTime, end: PlainTime): Duration
+/***
+ * @deprecated Use `date.until()` instead
+ */
+export function durationBetween(start: PlainDate, end: PlainDate): Duration
+/***
+ * @deprecated Use `dateTime.until()` instead
+ */
 export function durationBetween(
-  start: Temporal.PlainTime,
-  end: Temporal.PlainTime,
-): Temporal.Duration
-export function durationBetween(
-  start: Temporal.PlainDate,
-  end: Temporal.PlainDate,
-): Temporal.Duration
-export function durationBetween(
-  start: Temporal.PlainDateTime,
-  end: Temporal.PlainDateTime,
-): Temporal.Duration
+  start: PlainDateTime,
+  end: PlainDateTime,
+): Duration
 export function durationBetween(start: any, end: any) {
   return jodaToTemporal(
-    Duration.between(temporalToJoda(start), temporalToJoda(end)),
+    JodaDuration.between(temporalToJoda(start), temporalToJoda(end)),
   )
 }
 
-export function durationSinceStartOfDay(
-  time: Temporal.PlainTime,
-): Temporal.Duration
-export function durationSinceStartOfDay(
-  time: Temporal.PlainDateTime,
-): Temporal.Duration
+/***
+ * @deprecated Use `time.toDuration()` instead
+ */
+export function durationSinceStartOfDay(time: PlainTime): Duration
+/***
+ * @deprecated Use `time.toDuration()` instead
+ */
+export function durationSinceStartOfDay(time: PlainDateTime): Duration
+/***
+ * @deprecated Use `time.toDuration()` instead
+ */
 export function durationSinceStartOfDay(time: any) {
   if (isTemporalDateTime(time)) {
     return durationSinceStartOfDay(toPlainTime(time))
@@ -384,31 +401,39 @@ export function durationSinceStartOfDay(time: any) {
   return durationBetween(timeZero(), time)
 }
 
-// given a duration, return the time of day
-export function durationToTime(
-  duration: Temporal.Duration,
-): Temporal.PlainTime {
-  return Temporal.PlainTime.from({
+/***
+ * given a duration, return the time of day
+ * @deprecated Use `duration.toPlainTime()` instead
+ */
+export function durationToTime(duration: Duration): PlainTime {
+  duration.toPlainTime()
+  return PlainTime.from({
     hour: duration.total({ unit: 'hours' }),
     minute: duration.total({ unit: 'minutes' }) % 60,
     second: duration.total({ unit: 'seconds' }) % 60,
   })
 }
 
-export function dateToMonth(date: Temporal.PlainDate): Temporal.PlainYearMonth {
-  return Temporal.PlainYearMonth.from({
+export function dateToMonth(date: PlainDate): PlainYearMonth {
+  return PlainYearMonth.from({
     year: date.year,
     month: date.month,
   })
 }
 
-export function negateDuration(duration: Temporal.Duration) {
-  return Temporal.Duration.from({
+/***
+ * @deprecated Use `duration.negated()` instead
+ */
+export function negateDuration(duration: Duration) {
+  return Duration.from({
     milliseconds: -duration.total({ unit: 'milliseconds' }),
   })
 }
 
-export function absDuration(duration: Temporal.Duration) {
+/***
+ * @deprecated Use `duration.abs()` instead
+ */
+export function absDuration(duration: Duration) {
   if (duration.sign === -1) {
     return negateDuration(duration)
   }
@@ -416,30 +441,34 @@ export function absDuration(duration: Temporal.Duration) {
   return duration
 }
 
-export function compareDuration(a: Temporal.Duration, b: Temporal.Duration) {
-  return Temporal.Duration.compare(a, b)
+/***
+ * @deprecated Use `Duration.compare()` instead
+ */
+export function compareDuration(a: Duration, b: Duration) {
+  return Duration.compare(a, b)
 }
 
-export function minDuration(a: Temporal.Duration, b: Temporal.Duration) {
+export function minDuration(a: Duration, b: Duration) {
   return compareDuration(a, b) < 0 ? a : b
 }
 
-export function maxDuration(a: Temporal.Duration, b: Temporal.Duration) {
+export function maxDuration(a: Duration, b: Duration) {
   return compareDuration(a, b) > 0 ? a : b
 }
 
-export function sumOfDurations(durations: Temporal.Duration[]) {
+/***
+ * @deprecated Use `Duration.sum()` instead
+ */
+export function sumOfDurations(durations: Duration[]) {
   return durations.reduce((acc, duration) => acc.add(duration), durationZero())
 }
 
 // returns a list of all days in the month and year of the given month
-export function daysInMonth(
-  month: Temporal.PlainYearMonth,
-): Temporal.PlainDate[] {
+export function daysInMonth(month: PlainYearMonth): PlainDate[] {
   const monthLength = month.daysInMonth
 
   return Array.from({ length: monthLength }, (_, i) => {
-    return Temporal.PlainDate.from({
+    return PlainDate.from({
       year: month.year,
       month: month.month,
       day: i + 1,

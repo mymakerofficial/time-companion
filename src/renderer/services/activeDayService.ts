@@ -1,5 +1,4 @@
 import type { ReactiveCalendarDay } from '@renderer/model/calendarDay/types'
-import { Temporal } from 'temporal-polyfill'
 import type { Nullable } from '@renderer/lib/utils'
 import { check, isDefined, isNotNull, isNull } from '@renderer/lib/utils'
 import { useActiveDayStore } from '@renderer/stores/activeDayStore'
@@ -11,12 +10,13 @@ import { mapReadonly } from '@renderer/model/modelHelpers'
 import { createService } from '@renderer/composables/createService'
 import { useActiveEventService } from '@renderer/services/activeEventService'
 import type { ReactiveCalendarEvent } from '@renderer/model/calendarEvent/types'
+import type { PlainDate } from '@shared/lib/datetime/plainDate'
 
 export interface ActiveDayService {
   readonly day: Nullable<ReactiveCalendarDay>
   setDay: (day: ReactiveCalendarDay) => void
   unsetDay: () => void
-  setByDate: (date: Temporal.PlainDate) => ReactiveCalendarDay
+  setByDate: (date: PlainDate) => ReactiveCalendarDay
   addEvent: (event: ReactiveCalendarEvent) => void
   removeEvent: (event: ReactiveCalendarEvent) => void
   getLastRunningEvent: () => Nullable<ReactiveCalendarEvent>
@@ -47,7 +47,7 @@ export const useActiveDayService = createService<ActiveDayService>(() => {
     useActiveEventService().unsetEvent()
   }
 
-  function setByDate(date: Temporal.PlainDate) {
+  function setByDate(date: PlainDate) {
     const existingDay = calendarService.findDay(whereDate(date))
 
     if (isDefined(existingDay)) {

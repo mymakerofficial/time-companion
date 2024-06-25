@@ -1,7 +1,7 @@
 import type { HasId } from '@renderer/lib/types'
 import type { ReactiveActivity } from '@renderer/model/activity/types'
 import type { Nullable } from '@renderer/lib/utils'
-import { Temporal } from 'temporal-polyfill'
+import type { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 
 export interface ProjectContext extends HasId {
   displayName: string
@@ -9,7 +9,7 @@ export interface ProjectContext extends HasId {
   isBillable: boolean
   isBreak: boolean
   childActivities: ReactiveActivity[]
-  lastUsed: Temporal.PlainDateTime
+  lastUsed: PlainDateTime
 }
 
 export interface ReactiveProject {

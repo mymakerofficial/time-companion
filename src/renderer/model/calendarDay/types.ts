@@ -5,10 +5,10 @@ import type {
   SerializedCalendarEvent,
 } from '@renderer/model/calendarEvent/types'
 import type { Nullable } from '@renderer/lib/utils'
-import { Temporal } from 'temporal-polyfill'
+import type { PlainDate } from '@shared/lib/datetime/plainDate'
 
 export interface CalendarDayContext extends HasId {
-  date: Temporal.PlainDate
+  date: PlainDate
   events: ReactiveCalendarEvent[]
 }
 

@@ -11,7 +11,6 @@ import {
 import type { Database } from '@shared/database/types/database'
 import { createFixtures } from '@test/helpers/createFixtures'
 import { ProjectTestHelpers } from '@test/fixtures/service/projectTestHelpers'
-import { TaskTestHelpers } from '@test/fixtures/service/taskTestHelpers'
 import { createDatabase } from '@shared/database/factory/database'
 import { indexedDBAdapter } from '@shared/database/adapters/indexedDB/database'
 import fakeIndexedDB from 'fake-indexeddb'
@@ -38,7 +37,6 @@ export interface ServiceFixtures {
   timeEntryService: TimeEntryService
   serviceHelpers: ServiceTestHelpers
   projectHelpers: ProjectTestHelpers
-  taskHelpers: TaskTestHelpers
   dayHelpers: DayTestHelpers
   timeEntryHelpers: TimeEntryTestHelpers
 }
@@ -83,9 +81,6 @@ export const useServiceFixtures = createFixtures<ServiceFixtures>({
   },
   projectHelpers: ({ taskService, projectService }) => {
     return new ProjectTestHelpers(taskService, projectService)
-  },
-  taskHelpers: ({ taskService, projectService }) => {
-    return new TaskTestHelpers(taskService, projectService)
   },
   dayHelpers: ({ dayService }) => {
     return new DayTestHelpers(dayService)
