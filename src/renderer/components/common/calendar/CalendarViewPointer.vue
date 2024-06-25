@@ -38,10 +38,10 @@ onMounted(() => scrollIntoView('instant'))
     :style="containerStyle"
   >
     <span
-      class="absolute w-14 h-10 -ml-[5em] -mt-10 bg-gradient-to-b via-70% from-transparent via-background to-background"
+      class="absolute w-13 h-10 -ml-[4em] -mt-10 bg-gradient-to-b via-70% from-transparent via-background to-background"
     />
     <span
-      class="absolute w-14 h-10 -ml-[5em] -mt-0 bg-gradient-to-t via-70% from-transparent via-background to-background"
+      class="absolute w-13 h-10 -ml-[4em] -mt-0 bg-gradient-to-t via-70% from-transparent via-background to-background"
     />
     <span
       class="absolute w-10 h-5 -ml-8 -mt-[0.55rem] rounded-md bg-color text-color-foreground flex items-center justify-center"

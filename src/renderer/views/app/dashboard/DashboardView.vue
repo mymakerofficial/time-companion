@@ -16,6 +16,11 @@ import { useGetOrCreateDayByDate } from '@renderer/composables/queries/days/useG
 import DayCalendar from '@renderer/components/common/calendar/DayCalendar.vue'
 import RunningTimeEntryInput from '@renderer/components/common/inputs/timeEntryInput/RunningTimeEntryInput.vue'
 import DashboardSection from '@renderer/components/dashboard/cards/DashboardSection.vue'
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@shadcn/resizable'
 
 const activeDayService = useActiveDayService()
 const activeEventService = useActiveEventService()
@@ -51,8 +56,13 @@ const { data: day } = useGetOrCreateDayByDate(today)
 </script>
 
 <template>
-  <main class="flex-grow grid grid-cols-12">
-    <section class="col-span-7 border-r border-border flex flex-col">
+  <ResizablePanelGroup direction="horizontal" as="main">
+    <ResizablePanel
+      :min-size="42"
+      :default-size="58"
+      as="section"
+      class="flex flex-col"
+    >
       <ControlsHeader />
       <div class="flex-1 overflow-y-auto">
         <DashboardSection>
@@ -71,10 +81,16 @@ const { data: day } = useGetOrCreateDayByDate(today)
         />
         <WorkingDurationCard />
       </div>
-    </section>
-    <section class="col-span-5 flex flex-col h-viewport">
+    </ResizablePanel>
+    <ResizableHandle with-handle :tabindex="-1" />
+    <ResizablePanel
+      :min-size="24"
+      collapsible
+      as="section"
+      class="flex flex-col h-viewport"
+    >
       <CalendarHeader />
       <DayCalendar v-if="day" :day-id="day.id" />
-    </section>
-  </main>
+    </ResizablePanel>
+  </ResizablePanelGroup>
 </template>
