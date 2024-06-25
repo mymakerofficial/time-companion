@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import BaseDialog from '@renderer/components/common/dialog/BaseDialog.vue'
 import { Button } from '@renderer/components/ui/button'
-import ProjectForm from '@renderer/components/settings/projects/dialog/ProjectForm.vue'
+import ProjectForm from '@renderer/components/common/forms/project/ProjectForm.vue'
 import { useGetProjectById } from '@renderer/composables/queries/projects/useGetProjectById'
 import { usePatchProjectById } from '@renderer/composables/mutations/projects/usePatchProjectById'
 import type { UpdateProject } from '@shared/model/project'

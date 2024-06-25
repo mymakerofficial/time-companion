@@ -3,7 +3,7 @@ import BaseDialog from '@renderer/components/common/dialog/BaseDialog.vue'
 import { Button } from '@renderer/components/ui/button'
 import { useCreateTask } from '@renderer/composables/mutations/tasks/useCreateTask'
 import type { CreateTask } from '@shared/model/task'
-import TaskForm from '@renderer/components/settings/tasks/dialog/TaskForm.vue'
+import TaskForm from '@renderer/components/common/forms/task/TaskForm.vue'
 import { useDialogContext } from '@renderer/composables/dialog/useDialog'
 
 const { close, open } = useDialogContext()
