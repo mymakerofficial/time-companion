@@ -61,14 +61,44 @@ function handleEditProject() {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
-    <div class="flex flex-row items-center gap-2">
-      <TimeEntryInput
-        v-model:project-id="values.projectId"
-        v-model:description="values.description"
-        @change="handleChange"
-        class="flex-1"
-      />
+  <div class="flex @container">
+    <div class="mr-2 flex-1 flex flex-col @xl:flex-row gap-4">
+      <div class="flex-1">
+        <TimeEntryInput
+          v-model:project-id="values.projectId"
+          v-model:description="values.description"
+          @change="handleChange"
+          class="flex-1"
+        />
+      </div>
+      <div class="grid grid-cols-3 @xl:flex items-center gap-2">
+        <DateTimeInput
+          v-model="values.startedAt"
+          @change="handleChange"
+          class="bg-transparent @xl:w-fit @xl:-mr-3"
+          input-class="@xl:w-12 "
+          #leading
+        >
+          <Clock class="mx-3 h-4 text-muted-foreground" />
+        </DateTimeInput>
+        <DateTimeInput
+          v-if="values.stoppedAt"
+          v-model="values.stoppedAt"
+          @change="handleChange"
+          class="bg-transparent @xl:w-fit"
+          input-class="@xl:w-12"
+          #leading
+        >
+          <ArrowRight class="mr-3 h-4 text-muted-foreground" />
+        </DateTimeInput>
+        <time
+          v-if="values.stoppedAt"
+          class="mr-2 @xl:ml-3 @xl:min-w-16 text-end @xl:text-center text-md @xl:text-lg font-medium"
+          v-text="durationLabel"
+        />
+      </div>
+    </div>
+    <div>
       <DropdownMenu>
         <DropdownMenuTrigger>
           <Button variant="ghost" size="icon">
@@ -96,30 +126,6 @@ function handleEditProject() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-    </div>
-    <div class="grid grid-cols-3 items-center gap-2 mr-12">
-      <DateTimeInput
-        v-model="values.startedAt"
-        @change="handleChange"
-        class="bg-background"
-        #leading
-      >
-        <Clock class="mx-3 h-4 text-muted-foreground" />
-      </DateTimeInput>
-      <DateTimeInput
-        v-if="values.stoppedAt"
-        v-model="values.stoppedAt"
-        @change="handleChange"
-        class="bg-background"
-        #leading
-      >
-        <ArrowRight class="mx-3 h-4 text-muted-foreground" />
-      </DateTimeInput>
-      <time
-        v-if="values.stoppedAt"
-        class="mr-3 text-end text-lg"
-        v-text="durationLabel"
-      />
     </div>
   </div>
 </template>
