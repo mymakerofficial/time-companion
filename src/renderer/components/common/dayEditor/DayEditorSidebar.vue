@@ -47,11 +47,13 @@ const dayLabel = useFormattedDateTime(() => day.value?.date, {
               Edit your time entries for this day.
             </SheetDescription>
           </SheetHeader>
-          <DayEditorEntryForm
-            v-for="timeEntry in timeEntries"
-            :key="timeEntry.id"
-            :id="timeEntry.id"
-          />
+          <div class="overflow-y-auto pb-16">
+            <DayEditorEntryForm
+              v-for="timeEntry in timeEntries"
+              :key="timeEntry.id"
+              :id="timeEntry.id"
+            />
+          </div>
         </ResizablePanel>
       </ResizablePanelGroup>
     </SheetContent>
