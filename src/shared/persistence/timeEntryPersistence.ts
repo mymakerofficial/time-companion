@@ -106,6 +106,7 @@ export interface TimeEntryPersistence {
     id: string,
     timeEntry: Partial<UpdateTimeEntry>,
   ): Promise<TimeEntryDto>
+  softDeleteTimeEntry(id: string): Promise<void>
 }
 
 export function createTimeEntryPersistence(
@@ -220,6 +221,17 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
           return res
         })
     })
+  }
+
+  async softDeleteTimeEntry(id: string): Promise<void> {
+    const res = await this.database.table(timeEntriesTable).update({
+      range: timeEntriesTable.id.range.only(id),
+      data: {
+        deletedAt: new Date(),
+      },
+    })
+
+    check(isNotNull(res), `Time entry with id "${id}" not found.`)
   }
 }
 
