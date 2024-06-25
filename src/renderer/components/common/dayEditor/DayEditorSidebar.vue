@@ -12,6 +12,11 @@ import { useGetTimeEntriesByDay } from '@renderer/composables/queries/timeEntrie
 import DayEditorEntryForm from '@renderer/components/common/dayEditor/DayEditorEntryForm.vue'
 import { useGetDay } from '@renderer/composables/queries/days/useGetDay'
 import { useFormattedDateTime } from '@renderer/composables/datetime/useFormattedDateTime'
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '@shadcn/resizable'
 
 const props = defineProps<{
   dayId: string
@@ -31,11 +36,12 @@ const dayLabel = useFormattedDateTime(() => day.value?.date, {
 <template>
   <Sheet v-model:open="open">
     <SheetContent class="sm:w-3/5 p-0">
-      <div class="flex flex-row h-full">
-        <div class="flex-1 flex border-r border-border">
+      <ResizablePanelGroup direction="horizontal">
+        <ResizablePanel collapsible :min-size="24" class="flex-1 flex">
           <DayCalendar :day-id="dayId" />
-        </div>
-        <div class="flex-1 flex flex-col">
+        </ResizablePanel>
+        <ResizableHandle with-handle :tabindex="-1" />
+        <ResizablePanel collapsible :min-size="36" class="flex-1 flex flex-col">
           <SheetHeader class="p-6 border-b border-border">
             <SheetTitle>{{ dayLabel }}</SheetTitle>
             <SheetDescription>
@@ -47,8 +53,8 @@ const dayLabel = useFormattedDateTime(() => day.value?.date, {
             :key="timeEntry.id"
             :id="timeEntry.id"
           />
-        </div>
-      </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </SheetContent>
   </Sheet>
 </template>
