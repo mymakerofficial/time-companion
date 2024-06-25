@@ -29,7 +29,6 @@ const dayLabel = useFormattedDateTime(() => day.value?.date, {
   weekday: 'long',
   day: 'numeric',
   month: 'long',
-  year: 'numeric',
 })
 </script>
 
@@ -45,7 +44,7 @@ const dayLabel = useFormattedDateTime(() => day.value?.date, {
           <SheetHeader class="p-6 border-b border-border">
             <SheetTitle>{{ dayLabel }}</SheetTitle>
             <SheetDescription>
-              Edit the time entries for the selected day.
+              Edit your time entries for this day.
             </SheetDescription>
           </SheetHeader>
           <DayEditorEntryForm

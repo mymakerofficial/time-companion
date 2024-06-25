@@ -1,24 +1,20 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { formatDate, formatTime, withFormat } from '@renderer/lib/neoTime'
-import { useTimeNow } from '@renderer/composables/useNow'
-import { isNull } from '@renderer/lib/utils'
-import { useActiveDayService } from '@renderer/services/activeDayService'
+import { useNow } from '@renderer/composables/useNow'
+import { useFormattedDateTime } from '@renderer/composables/datetime/useFormattedDateTime'
 
-const activeDayService = useActiveDayService()
+const now = useNow()
 
-const now = useTimeNow()
-
-const displayDateLabel = computed(() => {
-  if (isNull(activeDayService.day)) {
-    return ''
-  }
-
-  return formatDate(activeDayService.day.date, withFormat('eeee, MMMM dd'))
+const dateLabel = useFormattedDateTime(now, {
+  weekday: 'long',
+  month: 'long',
+  day: 'numeric',
 })
 
-const displayTimeLabel = computed(() => {
-  return formatTime(now.value)
+const timeLabel = useFormattedDateTime(now, {
+  hour: 'numeric',
+  minute: 'numeric',
+  second: 'numeric',
+  hour12: false,
 })
 </script>
 
@@ -26,9 +22,7 @@ const displayTimeLabel = computed(() => {
   <div
     class="h-16 px-8 border-b border-border flex flex-row justify-between items-center gap-8"
   >
-    <h3 class="text-md font-medium tracking-wide">{{ displayDateLabel }}</h3>
-    <time class="text-md font-medium tracking-wide">{{
-      displayTimeLabel
-    }}</time>
+    <h3 class="text-md font-medium tracking-wide">{{ dateLabel }}</h3>
+    <time class="text-md font-medium tracking-wide">{{ timeLabel }}</time>
   </div>
 </template>
