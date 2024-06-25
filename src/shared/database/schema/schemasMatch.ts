@@ -28,11 +28,7 @@ export function rawTableSchemasMatch(
 
       return !entriesOf(columnA)
         .map(([key, value]) => {
-          if (columnB[key] !== value) {
-            return false
-          }
-
-          return true
+          return columnB[key] === value
         })
         .some((it) => !it)
     })
