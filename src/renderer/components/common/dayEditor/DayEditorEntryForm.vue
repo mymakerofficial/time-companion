@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, defineProps, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import DateTimeInput from '@renderer/components/common/inputs/timeInput/DateTimeInput.vue'
 import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 import { ArrowRight, Clock } from 'lucide-vue-next'
