@@ -118,7 +118,7 @@ async function handleToggle() {
         v-model="startedAt"
         @change="handleChange"
         class="w-32"
-        input-class="w-12"
+        input-class="w-12 text-center"
       >
         <template #leading>
           <Clock class="mx-3 size-4 text-muted-foreground" />
@@ -126,7 +126,7 @@ async function handleToggle() {
       </DateTimeInput>
       <time
         v-if="isRunning"
-        class="text-lg font-medium text-center min-w-24"
+        class="text-lg font-medium text-center min-w-32 ml-2"
         v-text="durationLabel"
       />
       <slot name="trailing" />
