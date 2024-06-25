@@ -43,6 +43,20 @@ export class PlainTime extends Temporal.PlainTime {
     return PlainTime.fromTemporalPlainTime(super.subtract(durationLike))
   }
 
+  until(
+    other: PlainTime | Temporal.PlainTime | Temporal.PlainTimeLike | string,
+    options?: Temporal.DifferenceOptions<
+      | 'hour'
+      | 'minute'
+      | 'second'
+      | 'millisecond'
+      | 'microsecond'
+      | 'nanosecond'
+    >,
+  ): Duration {
+    return Duration.fromTemporalDuration(super.until(other, options))
+  }
+
   toPlainDateTime(
     temporalDate:
       | PlainDate
