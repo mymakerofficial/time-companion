@@ -6,6 +6,7 @@ import type { InferTable } from '@database/types/schema'
 import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 import { z } from 'zod'
 import { plainDateTimeType } from '@shared/lib/datetime/schema'
+import { isNull } from '@shared/lib/utils/checks'
 
 export type TimeEntryBase = {
   dayId: string
@@ -41,7 +42,17 @@ export const timeEntrySchema = z.object({
   dayId: z.string(),
   projectId: z.string().nullable().default(null),
   taskId: z.string().nullable().default(null),
-  description: z.string().min(1).default(''),
-  startedAt: plainDateTimeType.default(() => PlainDateTime.now()),
-  stoppedAt: plainDateTimeType.nullable().default(null),
+  description: z.string().default(''),
+  startedAt: plainDateTimeType
+    .refine((val) => {
+      return val.isBeforeOrEqual(PlainDateTime.now())
+    }, 'Started at may not be in the future.')
+    .default(() => PlainDateTime.now()),
+  stoppedAt: plainDateTimeType
+    .nullable()
+    .refine((val) => {
+      if (isNull(val)) return true
+      return val.isBeforeOrEqual(PlainDateTime.now())
+    }, 'Stopped at may not be in the future.')
+    .default(null),
 })

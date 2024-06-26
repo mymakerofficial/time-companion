@@ -11,6 +11,7 @@ import { EntityServiceImpl } from '@shared/service/helpers/entityService'
 import type { Nullable } from '@shared/lib/utils/types'
 import { getSchemaDefaults } from '@shared/lib/helpers/getSchemaDefaults'
 import { Duration } from '@shared/lib/datetime/duration'
+import { runZod } from '@shared/lib/helpers/zod'
 
 const ONE_MONTH = Duration.from({ months: 1 })
 
@@ -76,12 +77,16 @@ class TimeEntryServiceImpl
     id: string,
     timeEntry: Partial<UpdateTimeEntry>,
   ): Promise<TimeEntryDto> {
+    runZod(() => timeEntrySchema.partial().parse(timeEntry))
     const res = await this.timeEntryPersistence.patchTimeEntry(id, timeEntry)
     this.publishUpdated(res)
     return res
   }
 
-  async createTimeEntry(timeEntry: CreateTimeEntry): Promise<TimeEntryDto> {
+  async createTimeEntry(
+    timeEntry: Partial<CreateTimeEntry>,
+  ): Promise<TimeEntryDto> {
+    runZod(() => timeEntrySchema.partial().parse(timeEntry))
     const res = await this.timeEntryPersistence.createTimeEntry({
       ...getSchemaDefaults(timeEntrySchema),
       ...timeEntry,
