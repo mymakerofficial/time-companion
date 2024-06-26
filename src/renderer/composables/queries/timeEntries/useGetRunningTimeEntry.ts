@@ -1,29 +1,24 @@
-import { type MaybeRef, toValue, watchEffect } from 'vue'
 import { useQuery, useQueryClient } from '@tanstack/vue-query'
-import { isDefined } from '@shared/lib/utils/checks'
+import { isUndefined } from '@shared/lib/utils/checks'
 import { timeEntryService } from '@renderer/factory/service/timeEntryService'
 
-export function useGetRunningTimeEntry(dayId: MaybeRef<string>) {
+export function useGetRunningTimeEntry() {
   const queryClient = useQueryClient()
-  const queryKey = ['timeEntries', 'getRunningTimeEntry', { dayId }]
+  const queryKey = ['timeEntries', 'getRunningTimeEntry']
 
-  watchEffect(() => {
-    if (isDefined(queryClient.getQueryData(queryKey))) {
-      return
-    }
-
+  if (isUndefined(queryClient.getQueryData(queryKey))) {
     timeEntryService.subscribe({}, () => {
       queryClient
         .invalidateQueries({
-          queryKey: ['timeEntries', 'getRunningTimeEntry', { dayId }],
+          queryKey,
         })
         .then()
     })
-  })
+  }
 
   return useQuery({
     queryKey,
-    queryFn: () => timeEntryService.getRunningTimeEntryByDayId(toValue(dayId)),
+    queryFn: () => timeEntryService.getRunningTimeEntry(),
     initialData: null,
   })
 }

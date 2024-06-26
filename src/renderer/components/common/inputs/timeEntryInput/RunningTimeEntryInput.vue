@@ -20,7 +20,7 @@ const props = defineProps<{
 
 const { t } = useI18n()
 const now = useNow()
-const { data: runningEntry } = useGetRunningTimeEntry(props.dayId)
+const { data: runningEntry } = useGetRunningTimeEntry()
 const { mutateAsync: createEntry } = useCreateTimeEntry()
 const { mutateAsync: patchEntry } = usePatchTimeEntry()
 

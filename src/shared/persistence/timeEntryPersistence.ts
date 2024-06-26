@@ -108,7 +108,10 @@ export interface TimeEntryPersistence {
     startedAt: PlainDateTime,
     stoppedAt: PlainDateTime,
   ): Promise<Array<TimeEntryDto>>
-  getRunningTimeEntryByDayId(dayId: string): Promise<Nullable<TimeEntryDto>>
+  getRunningTimeEntry(
+    lowerBound?: PlainDateTime,
+    upperBound?: PlainDateTime,
+  ): Promise<Nullable<TimeEntryDto>>
   createTimeEntry(timeEntry: CreateTimeEntry): Promise<TimeEntryDto>
   patchTimeEntry(
     id: string,
@@ -153,17 +156,23 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
       .catch(resolveError)
   }
 
-  async getRunningTimeEntryByDayId(
-    dayId: string,
+  async getRunningTimeEntry(
+    lowerBound?: PlainDateTime,
+    upperBound?: PlainDateTime,
   ): Promise<Nullable<TimeEntryDto>> {
     return await this.database
       .table(timeEntriesTable)
       .findFirst({
-        range: timeEntriesTable.dayId.range.only(dayId),
+        // this is to avoid looking through the whole table.
+        range: timeEntriesTable.startedAt.range.between(
+          lowerBound?.toDate(),
+          upperBound?.toDate(),
+        ),
         where: and(
           timeEntriesTable.deletedAt.isNull(),
           timeEntriesTable.stoppedAt.isNull(),
         ),
+        orderBy: timeEntriesTable.startedAt.desc(),
         map: toTimeEntryDto,
       })
       .catch(resolveError)
