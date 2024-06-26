@@ -21,6 +21,7 @@ import { isNull } from '@shared/lib/utils/checks'
 
 const props = defineProps<{
   timeEntry: Partial<TimeEntryBase>
+  hideMore?: boolean
 }>()
 const emit = defineEmits<{
   change: [values: TimeEntryBase]
@@ -62,7 +63,7 @@ function handleEditProject() {
 
 <template>
   <div class="flex @container">
-    <div class="mr-2 flex-1 flex flex-col @xl:flex-row gap-4">
+    <div class="flex-1 flex flex-col @xl:flex-row gap-4">
       <div class="flex-1">
         <TimeEntryInput
           v-model:project-id="values.projectId"
@@ -98,7 +99,7 @@ function handleEditProject() {
         />
       </div>
     </div>
-    <div>
+    <div v-if="!hideMore" class="ml-2">
       <DropdownMenu>
         <DropdownMenuTrigger>
           <Button variant="ghost" size="icon">

@@ -26,9 +26,7 @@ defineProps<{
         >
           <slot name="title">{{ title }}</slot>
         </DialogTitle>
-        <DialogDescription
-          v-if="isDefined(description ?? $slots.descriptionisDefined)"
-        >
+        <DialogDescription v-if="isDefined(description ?? $slots.description)">
           <slot name="description">{{ description }}</slot>
         </DialogDescription>
       </DialogHeader>

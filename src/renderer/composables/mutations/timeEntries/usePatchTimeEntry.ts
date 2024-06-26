@@ -1,8 +1,9 @@
 import type { MutationOptions } from '@renderer/composables/mutations/helpers/mutationOptions'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
-import { handleMutationError } from '@renderer/composables/mutations/helpers/handleMutationError'
 import type { TimeEntryDto, UpdateTimeEntry } from '@shared/model/timeEntry'
 import { timeEntryService } from '@renderer/factory/service/timeEntryService'
+import { useDialog } from '@renderer/composables/dialog/useDialog'
+import TimeEntryArbiterDialog from '@renderer/components/common/dialogs/timeEntry/arbiter/TimeEntryArbiterDialog.vue'
 
 type UsePatchTimeEntryVariables = {
   timeEntry: Partial<UpdateTimeEntry>
@@ -13,11 +14,18 @@ export function usePatchTimeEntry(
   options?: MutationOptions<TimeEntryDto, UsePatchTimeEntryVariables>,
 ) {
   const queryClient = useQueryClient()
+  const { open: openArbiter } = useDialog(TimeEntryArbiterDialog)
   return useMutation({
     mutationFn: ({ timeEntry, id }: UsePatchTimeEntryVariables) =>
       timeEntryService.patchTimeEntry(id, timeEntry),
     onError: (error, variables, context) => {
-      handleMutationError(error)
+      console.error(error)
+
+      openArbiter({
+        id: variables.id,
+        userInput: variables.timeEntry,
+        error,
+      })
 
       if (options?.onError) {
         options.onError(error, variables, context)
