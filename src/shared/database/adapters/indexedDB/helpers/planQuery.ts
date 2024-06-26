@@ -118,7 +118,11 @@ export function planQuery<TRow extends object>(
 }
 
 function convertToIDBRange(range: Maybe<KeyRange>) {
-  if (isAbsent(range)) {
+  if (
+    isAbsent(range) ||
+    // if both are absent, we don't need a range
+    (isUndefined(range.lower) && isUndefined(range.upper))
+  ) {
     return null
   }
 
@@ -126,11 +130,11 @@ function convertToIDBRange(range: Maybe<KeyRange>) {
   //  but we cant just give it 'undefined' because 'undefined' is not a valid key,
   //  so we have to do this dumb dance instead... life could be so easy.
 
-  if (isAbsent(range.lower)) {
+  if (isUndefined(range.lower)) {
     return IDBKeyRange.upperBound(range.upper, range.upperOpen)
   }
 
-  if (isAbsent(range.upper)) {
+  if (isUndefined(range.upper)) {
     return IDBKeyRange.lowerBound(range.lower, range.lowerOpen)
   }
 
