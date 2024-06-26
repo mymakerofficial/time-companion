@@ -22,6 +22,7 @@ import {
   isDefined,
   isEmpty,
   isNotNull,
+  isNull,
 } from '@shared/lib/utils/checks'
 import { and } from '@database/schema/columnDefinition'
 import type { Nullable } from '@shared/lib/utils/types'
@@ -86,6 +87,13 @@ class TimeEntryDurationViolation extends IllegalStateError {
   constructor() {
     super('Time entry must not be longer than 24 hours.')
     this.name = 'TimeEntryDurationViolation'
+  }
+}
+
+class TimeEntryMultipleRunningViolation extends IllegalStateError {
+  constructor() {
+    super('Cannot have multiple running time entries.')
+    this.name = 'TimeEntryMultipleRunningViolation'
   }
 }
 
@@ -249,6 +257,7 @@ function resolveError(error: DatabaseError): never {
 
 const TIME_ENTRY_MAX_DURATION = Duration.from({ hours: 24 })
 const ONE_DAY = Duration.from({ days: 1 })
+const ONE_MONTH = Duration.from({ months: 1 })
 
 async function checkConstraints(
   tx: Transaction,
@@ -266,6 +275,30 @@ async function checkConstraints(
         .until(timeEntry.stoppedAt)
         .isShorterThanOrEqual(TIME_ENTRY_MAX_DURATION),
       () => new TimeEntryDurationViolation(),
+    )
+  } else {
+    // Check if there is already a running time entry.
+    const runningTimeEntry = await tx.table(timeEntriesTable).findFirst({
+      // this is to avoid looking through the whole table.
+      //  let's just pretend nothing older than a month exists alright?
+      range: timeEntriesTable.startedAt.range.greaterThan(
+        timeEntry.startedAt.subtract(ONE_MONTH).toDate(),
+      ),
+      where: and(
+        timeEntriesTable.deletedAt.isNull(),
+        timeEntriesTable.stoppedAt.isNull(),
+        // Ignore the time entry we are currently updating.
+        isDefined(ignoreId)
+          ? timeEntriesTable.id.notEquals(ignoreId)
+          : undefined,
+      ),
+      orderBy: timeEntriesTable.startedAt.desc(),
+      map: toTimeEntryDto,
+    })
+
+    check(
+      isNull(runningTimeEntry),
+      () => new TimeEntryMultipleRunningViolation(),
     )
   }
 
