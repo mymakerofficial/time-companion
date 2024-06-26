@@ -2,6 +2,7 @@ import type { AdapterBaseQueryProps } from '@database/types/adapter'
 import { toArray } from '@shared/lib/utils/list'
 import {
   check,
+  isAbsent,
   isNotNull,
   isNull,
   isPresent,
@@ -9,8 +10,12 @@ import {
 } from '@shared/lib/utils/checks'
 import { DatabaseInvalidRangeColumnError } from '@database/types/errors'
 import { getOrDefault, getOrNull } from '@shared/lib/utils/result'
-import type { Nullable } from '@shared/lib/utils/types'
-import type { ColumnType, OrderByDirection } from '@database/types/database'
+import type { Maybe, Nullable } from '@shared/lib/utils/types'
+import type {
+  ColumnType,
+  KeyRange,
+  OrderByDirection,
+} from '@database/types/database'
 import type { RawWhere } from '@database/types/schema'
 
 export type IDBQueryPlan<TRow extends object> = {
@@ -99,20 +104,10 @@ export function planQuery<TRow extends object>(
   const limit = getOrDefault(props.limit, Infinity)
   const offset = getOrDefault(props.offset, 0)
 
-  const range = isPresent(props.range)
-    ? IDBKeyRange.bound(
-        // turn the key range into a key range... but different
-        props.range.lower,
-        props.range.upper,
-        props.range.lowerOpen,
-        props.range.upperOpen,
-      )
-    : null
-
   return {
     indexName,
     direction,
-    range,
+    range: convertToIDBRange(props.range),
     where,
     limit,
     offset,
@@ -120,4 +115,29 @@ export function planQuery<TRow extends object>(
     orderByColumnType,
     requiresManualSort,
   }
+}
+
+function convertToIDBRange(range: Maybe<KeyRange>) {
+  if (isAbsent(range)) {
+    return null
+  }
+
+  // so... IDBKeyRange internally stores an undefined bound as 'undefined'
+  //  but we cant just give it 'undefined' because 'undefined' is not a valid key,
+  //  so we have to do this dumb dance instead... life could be so easy.
+
+  if (isAbsent(range.lower)) {
+    return IDBKeyRange.upperBound(range.upper, range.upperOpen)
+  }
+
+  if (isAbsent(range.upper)) {
+    return IDBKeyRange.lowerBound(range.lower, range.lowerOpen)
+  }
+
+  return IDBKeyRange.bound(
+    range.lower,
+    range.upper,
+    range.lowerOpen,
+    range.upperOpen,
+  )
 }
