@@ -9,14 +9,13 @@ export default defineConfig((env) => {
   const name = forgeConfigSelf.name ?? ''
 
   return {
+    ...viteConfig,
     root,
     mode,
     base: './',
     build: {
       outDir: `.vite/renderer/${name}`,
     },
-    optimizeDeps: viteConfig.optimizeDeps,
-    define: viteConfig.define,
     plugins: [pluginExposeRenderer(name), ...(viteConfig.plugins ?? [])],
     resolve: {
       preserveSymlinks: true,
