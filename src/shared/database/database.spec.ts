@@ -28,6 +28,7 @@ import { c } from '@database/schema/columnBuilder'
 import 'fake-indexeddb/auto'
 import { defineConfig } from '@database/schema/defineConfig'
 import { defineTable } from '@database/schema/defineTable'
+import { SqliteWasmDatabaseAdapter } from '@database/adapters/sqlite-wasm/database'
 
 function byId(a: HasId, b: HasId) {
   return a.id.localeCompare(b.id)
@@ -54,6 +55,7 @@ function whereAgeGreaterThanOrEqual(age: number) {
 }
 
 describe.each([
+  ['sqlite-wasm', () => new SqliteWasmDatabaseAdapter()],
   ['IndexedDB', () => indexedDBAdapter(`test-database-${uuid()}`)],
   [
     'PGLite',
