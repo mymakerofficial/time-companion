@@ -8,7 +8,7 @@ import type { Nullable } from '@shared/lib/utils/types'
 import type { TableSchemaRaw } from '@database/types/schema'
 import { todo } from '@shared/lib/utils/todo'
 import '@sqlite.org/sqlite-wasm'
-import { SqliteWorkerWrapper } from '@database/adapters/sqlite-wasm/worker/wrapper'
+import { sqlite3WorkerPromiser } from '@database/adapters/sqlite-wasm/wrapper'
 
 export class SqliteWasmDatabaseAdapter implements DatabaseAdapter {
   constructor() {}
@@ -18,14 +18,56 @@ export class SqliteWasmDatabaseAdapter implements DatabaseAdapter {
   }
 
   async init() {
-    const sqlite3 = new SqliteWorkerWrapper()
-    await sqlite3.init()
-    await sqlite3.exec(
-      `CREATE TABLE IF NOT EXISTS test (id INTEGER PRIMARY KEY, name TEXT);`,
+    console.log('Loading and initializing SQLite3 module...')
+
+    const promiser = await sqlite3WorkerPromiser()
+
+    console.log('Done initializing. Running demo...')
+
+    let response
+
+    response = await promiser('config-get', {})
+    console.log('Running SQLite3 version', response.result.version.libVersion)
+
+    response = await promiser('open', {
+      filename: 'file:worker-promiser.sqlite3?vfs=opfs',
+    })
+    const { dbId } = response
+    console.log(
+      'OPFS is available, created persisted database at',
+      response.result.filename.replace(/^file:(.*?)\?vfs=opfs/, '$1'),
     )
-    await sqlite3.exec(`INSERT INTO test (name) VALUES ('hello');`)
-    await sqlite3.exec(`INSERT INTO test (name) VALUES ('world');`)
-    await sqlite3.exec(`SELECT * FROM test;`)
+
+    await promiser('exec', { dbId, sql: 'CREATE TABLE IF NOT EXISTS t(a,b)' })
+    console.log('Creating a table...')
+
+    console.log('Insert some data using exec()...')
+    for (let i = 20; i <= 25; ++i) {
+      await promiser('exec', {
+        dbId,
+        sql: 'INSERT INTO t(a,b) VALUES (?,?)',
+        bind: [i, i * 2],
+      })
+    }
+
+    console.log('Query data with exec()')
+    await promiser('exec', {
+      dbId,
+      sql: 'SELECT a FROM t ORDER BY a',
+      callback: (result) => {
+        if (!result.row) {
+          return
+        }
+        console.log(result.row)
+      },
+    })
+
+    await promiser('exec', {
+      dbId,
+      sql: 'DROP TABLE t',
+    })
+
+    await promiser('close', { dbId })
   }
 
   async openDatabase(): Promise<DatabaseInfo> {
