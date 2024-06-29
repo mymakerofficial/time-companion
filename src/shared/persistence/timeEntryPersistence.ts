@@ -1,4 +1,3 @@
-import type { Database, Transaction } from '@database/types/database'
 import {
   type CreateTimeEntry,
   timeEntriesTable,
@@ -21,10 +20,10 @@ import {
   IllegalStateError,
   isDefined,
   isEmpty,
+  isNotEmpty,
   isNotNull,
   isNull,
 } from '@shared/lib/utils/checks'
-import { and } from '@database/schema/columnDefinition'
 import type { Nullable } from '@shared/lib/utils/types'
 import { Duration } from '@shared/lib/datetime/duration'
 import {
@@ -32,6 +31,9 @@ import {
   errorIsUndefinedColumn,
   errorIsUniqueViolation,
 } from '@database/types/errors'
+import type { Database, Transaction } from '@shared/drizzle/database'
+import { and, asc, eq, isNull as colIsNull, ne } from 'drizzle-orm'
+import { todo } from '@shared/lib/utils/todo'
 
 class TimeEntryUniqueViolation extends IllegalStateError {
   constructor(columnName: string, value: string) {
@@ -134,81 +136,65 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
   }
 
   async getTimeEntryById(id: string): Promise<Nullable<TimeEntryDto>> {
-    return await this.database
-      .table(timeEntriesTable)
-      .findFirst({
-        range: timeEntriesTable.id.range.only(id),
-        where: timeEntriesTable.deletedAt.isNull(),
-        map: toTimeEntryDto,
-      })
-      .catch(resolveError)
+    const res = await this.database
+      .select()
+      .from(timeEntriesTable)
+      .where(eq(timeEntriesTable.id, id))
+      .limit(1)
+    return firstOfOrNull(res.map(toTimeEntryDto))
   }
 
   async getTimeEntriesByDayId(dayId: string): Promise<Array<TimeEntryDto>> {
-    return await this.database
-      .table(timeEntriesTable)
-      .findMany({
-        range: timeEntriesTable.dayId.range.only(dayId),
-        where: timeEntriesTable.deletedAt.isNull(),
-        orderBy: timeEntriesTable.startedAt.asc(),
-        map: toTimeEntryDto,
-      })
-      .catch(resolveError)
+    const res = await this.database
+      .select()
+      .from(timeEntriesTable)
+      .where(
+        and(
+          eq(timeEntriesTable.dayId, dayId),
+          colIsNull(timeEntriesTable.deletedAt),
+        ),
+      )
+      .orderBy(asc(timeEntriesTable.startedAt))
+    return res.map(toTimeEntryDto)
   }
 
   async getRunningTimeEntry(
     lowerBound?: PlainDateTime,
     upperBound?: PlainDateTime,
   ): Promise<Nullable<TimeEntryDto>> {
-    return await this.database
-      .table(timeEntriesTable)
-      .findFirst({
-        // this is to avoid looking through the whole table.
-        range: timeEntriesTable.startedAt.range.between(
-          lowerBound?.toDate(),
-          upperBound?.toDate(),
+    const res = await this.database
+      .select()
+      .from(timeEntriesTable)
+      .where(
+        and(
+          colIsNull(timeEntriesTable.stoppedAt),
+          colIsNull(timeEntriesTable.deletedAt),
         ),
-        where: and(
-          timeEntriesTable.deletedAt.isNull(),
-          timeEntriesTable.stoppedAt.isNull(),
-        ),
-        orderBy: timeEntriesTable.startedAt.desc(),
-        map: toTimeEntryDto,
-      })
-      .catch(resolveError)
+      )
+      .limit(1)
+    return firstOfOrNull(res.map(toTimeEntryDto))
   }
 
   async getTimeEntriesBetween(
     startedAt: PlainDateTime,
     stoppedAt: PlainDateTime,
   ): Promise<Array<TimeEntryDto>> {
-    return await this.database
-      .table(timeEntriesTable)
-      .findMany({
-        range: timeEntriesTable.startedAt.range.between(
-          startedAt.toDate(),
-          stoppedAt.toDate(),
-        ),
-        where: timeEntriesTable.deletedAt.isNull(),
-        map: toTimeEntryDto,
-      })
-      .catch(resolveError)
+    todo()
   }
 
   async createTimeEntry(timeEntry: CreateTimeEntry): Promise<TimeEntryDto> {
-    return await this.database.withTransaction(async (tx) => {
+    return await this.database.transaction(async (tx) => {
       await checkConstraints(tx, timeEntry)
 
-      return await tx
-        .table(timeEntriesTable)
-        .insert({
-          data: timeEntryEntityCreateFrom(timeEntry, {
+      const res = await tx
+        .insert(timeEntriesTable)
+        .values(
+          timeEntryEntityCreateFrom(timeEntry, {
             id: uuid(),
-            createdAt: PlainDateTime.now(),
           }),
-          map: toTimeEntryDto,
-        })
-        .catch(resolveError)
+        )
+        .returning()
+      return firstOf(res.map(toTimeEntryDto))
     })
   }
 
@@ -216,39 +202,38 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
     id: string,
     timeEntry: Partial<UpdateTimeEntry>,
   ): Promise<TimeEntryDto> {
-    return await this.database.withTransaction(async (tx) => {
-      return await tx
-        .table(timeEntriesTable)
-        .update({
-          range: timeEntriesTable.id.range.only(id),
-          where: timeEntriesTable.deletedAt.isNull(),
-          data: timeEntryEntityUpdateFrom(timeEntry, {
-            modifiedAt: PlainDateTime.now(),
-          }),
-          map: toTimeEntryDto,
-        })
-        .catch(resolveError)
-        .then(firstOfOrNull)
-        .then((res) => {
-          check(isNotNull(res), `Time entry with id "${id}" not found.`)
-          return res
-        })
-        .then(async (res) => {
-          await checkConstraints(tx, res, id)
-          return res
-        })
+    return await this.database.transaction(async (tx) => {
+      const res = await tx
+        .update(timeEntriesTable)
+        .set(timeEntryEntityUpdateFrom(timeEntry))
+        .where(
+          and(
+            eq(timeEntriesTable.id, id),
+            colIsNull(timeEntriesTable.deletedAt),
+          ),
+        )
+        .returning()
+        .then((res) => firstOfOrNull(res.map(toTimeEntryDto)))
+
+      check(isNotNull(res), `Time entry with id "${id}" not found.`)
+
+      await checkConstraints(tx, res, id)
+
+      return res
     })
   }
 
   async softDeleteTimeEntry(id: string): Promise<void> {
-    const res = await this.database.table(timeEntriesTable).update({
-      range: timeEntriesTable.id.range.only(id),
-      data: {
+    const res = await this.database
+      .update(timeEntriesTable)
+      .set({
         deletedAt: new Date(),
-      },
-    })
-
-    check(isNotNull(res), `Time entry with id "${id}" not found.`)
+      })
+      .where(
+        and(eq(timeEntriesTable.id, id), colIsNull(timeEntriesTable.deletedAt)),
+      )
+      .returning()
+    check(isNotEmpty(res), `Time entry with id "${id}" not found.`)
   }
 }
 
@@ -287,23 +272,19 @@ async function checkConstraints(
     )
   } else {
     // Check if there is already a running time entry.
-    const runningTimeEntry = await tx.table(timeEntriesTable).findFirst({
-      // this is to avoid looking through the whole table.
-      //  let's just pretend nothing older than a month exists alright?
-      range: timeEntriesTable.startedAt.range.greaterThan(
-        timeEntry.startedAt.subtract(ONE_MONTH).toDate(),
-      ),
-      where: and(
-        timeEntriesTable.deletedAt.isNull(),
-        timeEntriesTable.stoppedAt.isNull(),
-        // Ignore the time entry we are currently updating.
-        isDefined(ignoreId)
-          ? timeEntriesTable.id.notEquals(ignoreId)
-          : undefined,
-      ),
-      orderBy: timeEntriesTable.startedAt.desc(),
-      map: toTimeEntryDto,
-    })
+    const runningTimeEntry = await tx
+      .select()
+      .from(timeEntriesTable)
+      .where(
+        and(
+          colIsNull(timeEntriesTable.stoppedAt),
+          colIsNull(timeEntriesTable.deletedAt),
+          // Ignore the time entry we are currently updating.
+          isDefined(ignoreId) ? ne(timeEntriesTable.id, ignoreId) : undefined,
+        ),
+      )
+      .limit(1)
+      .then((res) => firstOfOrNull(res.map(toTimeEntryDto)))
 
     check(
       isNull(runningTimeEntry),
@@ -311,23 +292,30 @@ async function checkConstraints(
     )
   }
 
-  const day = await tx.table(daysTable).findFirst({
-    range: daysTable.id.range.only(timeEntry.dayId),
-    map: toDayDto,
-  })
+  const day = await tx
+    .select()
+    .from(daysTable)
+    .where(
+      and(eq(daysTable.id, timeEntry.dayId), colIsNull(daysTable.deletedAt)),
+    )
+    .limit(1)
+    .then((res) => firstOfOrNull(res.map(toDayDto)))
 
   check(isNotNull(day), `Day with id "${timeEntry.dayId}" not found.`)
 
-  const timeEntries = await tx.table(timeEntriesTable).findMany({
-    range: timeEntriesTable.dayId.range.only(timeEntry.dayId),
-    where: and(
-      timeEntriesTable.deletedAt.isNull(),
-      // Ignore the time entry we are currently updating.
-      isDefined(ignoreId) ? timeEntriesTable.id.notEquals(ignoreId) : undefined,
-    ),
-    orderBy: timeEntriesTable.startedAt.asc(),
-    map: toTimeEntryDto,
-  })
+  const timeEntries = await tx
+    .select()
+    .from(timeEntriesTable)
+    .where(
+      and(
+        eq(timeEntriesTable.dayId, timeEntry.dayId),
+        colIsNull(timeEntriesTable.deletedAt),
+        // Ignore the time entry we are currently updating.
+        isDefined(ignoreId) ? ne(timeEntriesTable.id, ignoreId) : undefined,
+      ),
+    )
+    .orderBy(asc(timeEntriesTable.startedAt))
+    .then((res) => res.map(toTimeEntryDto))
 
   const lowerBound = day.date.toPlainDateTime()
   const timeEntryEarliest = timeEntry.startedAt

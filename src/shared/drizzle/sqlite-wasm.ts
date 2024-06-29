@@ -31,7 +31,7 @@ export class Sqlite3Connector {
     _method: 'run' | 'all' | 'values' | 'get',
   ): Promise<{ rows: Array<any> }> {
     return new Promise((resolve) => {
-      console.log('Executing SQL:', sql, bind)
+      console.debug('Executing SQL:', sql, bind)
       check(isNotNull(this.db), 'Database not initialized')
       const rows = this.db.exec({
         sql,

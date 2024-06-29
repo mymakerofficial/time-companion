@@ -1,11 +1,10 @@
-import type { Database } from '@database/types/database'
 import {
   type CreateTask,
   type TaskDto,
   tasksTable,
   type UpdateTask,
 } from '@shared/model/task'
-import { check, isNotEmpty, isNotNull } from '@shared/lib/utils/checks'
+import { check, isNotEmpty } from '@shared/lib/utils/checks'
 import { firstOf } from '@shared/lib/utils/list'
 import {
   type DatabaseError,
@@ -14,6 +13,8 @@ import {
 } from '@database/types/errors'
 import { toTaskDto } from '@shared/model/mappers/task'
 import { uuid } from '@shared/lib/utils/uuid'
+import type { Database } from '@shared/drizzle/database'
+import { and, asc, eq, isNull } from 'drizzle-orm'
 
 export interface TaskPersistenceDependencies {
   database: Database
@@ -54,42 +55,33 @@ export class TaskPersistenceImpl implements TaskPersistence {
   }
 
   async getTasks(): Promise<Array<TaskDto>> {
-    return await this.database
-      .table(tasksTable)
-      .findMany({
-        where: tasksTable.deletedAt.isNull(),
-        orderBy: tasksTable.displayName.asc(),
-        map: toTaskDto,
-      })
-      .catch(this.resolveError)
+    const res = await this.database
+      .select()
+      .from(tasksTable)
+      .where(isNull(tasksTable.deletedAt))
+      .orderBy(asc(tasksTable.displayName))
+    return res.map(toTaskDto)
   }
 
   async getTaskById(id: string): Promise<TaskDto> {
     const res = await this.database
-      .table(tasksTable)
-      .findFirst({
-        range: tasksTable.id.range.only(id),
-        where: tasksTable.deletedAt.isNull(),
-        map: toTaskDto,
-      })
-      .catch(this.resolveError)
-
-    check(isNotNull(res), `Task with id "${id}" not found.`)
-
-    return res
+      .select()
+      .from(tasksTable)
+      .where(and(eq(tasksTable.id, id), isNull(tasksTable.deletedAt)))
+      .limit(1)
+    check(isNotEmpty(res), `Task with id "${id}" not found.`)
+    return toTaskDto(firstOf(res))
   }
 
   async createTask(task: CreateTask): Promise<TaskDto> {
-    return await this.database.table(tasksTable).insert({
-      data: {
+    const res = await this.database
+      .insert(tasksTable)
+      .values({
         id: uuid(),
         ...task,
-        createdAt: new Date(),
-        modifiedAt: null,
-        deletedAt: null,
-      },
-      map: toTaskDto,
-    })
+      })
+      .returning()
+    return toTaskDto(firstOf(res))
   }
 
   async patchTaskById(
@@ -97,31 +89,20 @@ export class TaskPersistenceImpl implements TaskPersistence {
     partialTask: Partial<Readonly<UpdateTask>>,
   ): Promise<Readonly<TaskDto>> {
     const res = await this.database
-      .table(tasksTable)
-      .update({
-        range: tasksTable.id.range.only(id),
-        where: tasksTable.deletedAt.isNull(),
-        data: {
-          ...partialTask,
-          modifiedAt: new Date(),
-        },
-        map: toTaskDto,
-      })
-      .catch(this.resolveError)
-
+      .update(tasksTable)
+      .set(partialTask)
+      .where(and(eq(tasksTable.id, id), isNull(tasksTable.deletedAt)))
+      .returning()
     check(isNotEmpty(res), `Task with id "${id}" not found.`)
-
-    return firstOf(res)
+    return toTaskDto(firstOf(res))
   }
 
   async softDeleteTask(id: string): Promise<void> {
-    const res = await this.database.table(tasksTable).update({
-      range: tasksTable.id.range.only(id),
-      data: {
-        deletedAt: new Date(),
-      },
-    })
-
+    const res = await this.database
+      .update(tasksTable)
+      .set({ deletedAt: new Date() })
+      .where(and(eq(tasksTable.id, id), isNull(tasksTable.deletedAt)))
+      .returning()
     check(isNotEmpty(res), `Task with id "${id}" not found.`)
   }
 }

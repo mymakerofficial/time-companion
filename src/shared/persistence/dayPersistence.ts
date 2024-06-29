@@ -1,14 +1,16 @@
-import type { Database } from '@database/types/database'
 import { type CreateDay, type DayDto, daysTable } from '@shared/model/day'
 import { uuid } from '@shared/lib/utils/uuid'
 import { toDayDto } from '@shared/model/mappers/day'
-import { check, isNotNull } from '@shared/lib/utils/checks'
+import { check, isNotEmpty } from '@shared/lib/utils/checks'
 import {
   type DatabaseError,
   errorIsUndefinedColumn,
   errorIsUniqueViolation,
 } from '@database/types/errors'
 import type { PlainDate } from '@shared/lib/datetime/plainDate'
+import type { Database } from '@shared/drizzle/database'
+import { and, eq, isNull } from 'drizzle-orm'
+import { firstOf } from '@shared/lib/utils/list'
 
 export type DayPersistenceDependencies = {
   database: Database
@@ -51,60 +53,44 @@ class DayPersistenceImpl implements DayPersistence {
   }
 
   async getDays(): Promise<Array<DayDto>> {
-    return await this.database
-      .table(daysTable)
-      .findMany({
-        where: daysTable.deletedAt.isNull(),
-        map: toDayDto,
-      })
-      .catch(this.resolveError)
+    const res = await this.database
+      .select()
+      .from(daysTable)
+      .where(isNull(daysTable.deletedAt))
+    return res.map(toDayDto)
   }
 
   async getDayById(id: string): Promise<DayDto> {
-    return await this.database
-      .table(daysTable)
-      .findFirst({
-        range: daysTable.id.range.only(id),
-        where: daysTable.deletedAt.isNull(),
-        map: toDayDto,
-      })
-      .catch(this.resolveError)
-      .then((res) => {
-        check(isNotNull(res), `Day with id "${id}" not found.`)
-        return res
-      })
+    const res = await this.database
+      .select()
+      .from(daysTable)
+      .where(and(eq(daysTable.id, id), isNull(daysTable.deletedAt)))
+      .limit(1)
+    check(isNotEmpty(res), `Day with id "${id}" not found.`)
+    return toDayDto(firstOf(res))
   }
 
   async getDayByDate(date: PlainDate): Promise<DayDto> {
-    return await this.database
-      .table(daysTable)
-      .findFirst({
-        range: daysTable.date.range.only(date.toDate()),
-        where: daysTable.deletedAt.isNull(),
-        map: toDayDto,
-      })
-      .catch(this.resolveError)
-      .then((res) => {
-        check(isNotNull(res), `Day with date "${date.toString()}" not found.`)
-        return res
-      })
+    const res = await this.database
+      .select()
+      .from(daysTable)
+      .where(
+        and(eq(daysTable.date, date.toDate()), isNull(daysTable.deletedAt)),
+      )
+      .limit(1)
+    check(isNotEmpty(res), `Day with date "${date}" not found.`)
+    return toDayDto(firstOf(res))
   }
 
   async createDay(day: CreateDay): Promise<DayDto> {
-    return await this.database
-      .table(daysTable)
-      .insert({
-        data: {
-          id: uuid(),
-          date: day.date.toDate(),
-          targetBillableDuration:
-            day.targetBillableDuration?.toString() ?? null,
-          createdAt: new Date(),
-          modifiedAt: null,
-          deletedAt: null,
-        },
-        map: toDayDto,
+    const res = await this.database
+      .insert(daysTable)
+      .values({
+        id: uuid(),
+        date: day.date.toDate(),
+        targetBillableDuration: day.targetBillableDuration?.toString() ?? null,
       })
-      .catch(this.resolveError)
+      .returning()
+    return toDayDto(firstOf(res))
   }
 }

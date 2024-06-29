@@ -5,8 +5,6 @@ import type {
   UpdateTimeEntry,
 } from '@shared/model/timeEntry'
 import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
-import type { BaseDto } from '@shared/model/helpers/baseDto'
-import type { HasCreatedAt } from '@shared/model/helpers/hasCreatedAt'
 import type { HasId } from '@shared/model/helpers/hasId'
 import { acceptNull } from '@shared/lib/utils/acceptNull'
 import { isDefined, isNotNull } from '@shared/lib/utils/checks'
@@ -28,7 +26,7 @@ export function toTimeEntryDto(timeEntry: TimeEntryEntity): TimeEntryDto {
 
 export function timeEntryEntityCreateFrom(
   timeEntry: CreateTimeEntry,
-  base: HasId & HasCreatedAt,
+  base: HasId,
 ): TimeEntryEntity {
   return {
     id: base.id,
@@ -38,18 +36,13 @@ export function timeEntryEntityCreateFrom(
     description: timeEntry.description,
     startedAt: timeEntry.startedAt.toDate(),
     stoppedAt: timeEntry.stoppedAt?.toDate() ?? null,
-    createdAt: base.createdAt.toDate(),
-    modifiedAt: null,
-    deletedAt: null,
   }
 }
 
 export function timeEntryEntityUpdateFrom(
   timeEntry: Partial<UpdateTimeEntry>,
-  base: Partial<BaseDto>,
 ): Partial<TimeEntryEntity> {
   return {
-    id: base?.id,
     dayId: timeEntry.dayId,
     projectId: timeEntry.projectId,
     taskId: timeEntry.taskId,
@@ -60,8 +53,5 @@ export function timeEntryEntityUpdateFrom(
         ? timeEntry.stoppedAt.toDate()
         : null
       : undefined, // beautiful
-    createdAt: base.createdAt?.toDate(),
-    modifiedAt: base.modifiedAt?.toDate(),
-    deletedAt: base.deletedAt?.toDate(),
   }
 }

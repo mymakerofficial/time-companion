@@ -4,8 +4,7 @@ import {
   projectsTable,
   type UpdateProject,
 } from '@shared/model/project'
-import type { Database } from '@database/types/database'
-import { check, isNotEmpty, isNotNull } from '@shared/lib/utils/checks'
+import { check, isNotEmpty } from '@shared/lib/utils/checks'
 import { firstOf } from '@shared/lib/utils/list'
 import {
   type DatabaseError,
@@ -14,6 +13,8 @@ import {
 } from '@database/types/errors'
 import { toProjectDto } from '@shared/model/mappers/project'
 import { uuid } from '@shared/lib/utils/uuid'
+import type { Database } from '@shared/drizzle/database'
+import { and, asc, eq, isNull } from 'drizzle-orm'
 
 export interface ProjectPersistenceDependencies {
   database: Database
@@ -55,64 +56,51 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   }
 
   async getProjects(): Promise<Array<ProjectDto>> {
-    return await this.database
-      .table(projectsTable)
-      .findMany({
-        where: projectsTable.deletedAt.isNull(),
-        orderBy: projectsTable.displayName.asc(),
-        map: toProjectDto,
-      })
-      .catch(this.resolveError)
+    const res = await this.database
+      .select()
+      .from(projectsTable)
+      .where(isNull(projectsTable.deletedAt))
+      .orderBy(asc(projectsTable.displayName))
+    return res.map(toProjectDto)
   }
 
   async getProjectById(id: string): Promise<ProjectDto> {
     const res = await this.database
-      .table(projectsTable)
-      .findFirst({
-        range: projectsTable.id.range.only(id),
-        where: projectsTable.deletedAt.isNull(),
-        map: toProjectDto,
-      })
-      .catch(this.resolveError)
-
-    check(isNotNull(res), `Project with id "${id}" not found.`)
-
-    return res
+      .select()
+      .from(projectsTable)
+      .where(and(eq(projectsTable.id, id), isNull(projectsTable.deletedAt)))
+      .limit(1)
+    check(isNotEmpty(res), `Project with id "${id}" not found.`)
+    return toProjectDto(firstOf(res))
   }
 
   async getProjectByDisplayName(displayName: string): Promise<ProjectDto> {
     const res = await this.database
-      .table(projectsTable)
-      .findFirst({
-        where: projectsTable.displayName
-          .equals(displayName)
-          .and(projectsTable.deletedAt.isNull()),
-        map: toProjectDto,
-      })
-      .catch(this.resolveError)
-
+      .select()
+      .from(projectsTable)
+      .where(
+        and(
+          eq(projectsTable.displayName, displayName),
+          isNull(projectsTable.deletedAt),
+        ),
+      )
+      .limit(1)
     check(
-      isNotNull(res),
+      isNotEmpty(res),
       `Project with displayName "${displayName}" not found.`,
     )
-
-    return res
+    return toProjectDto(firstOf(res))
   }
 
   async createProject(project: CreateProject): Promise<ProjectDto> {
-    return await this.database
-      .table(projectsTable)
-      .insert({
-        data: {
-          id: uuid(),
-          ...project,
-          createdAt: new Date(),
-          modifiedAt: null,
-          deletedAt: null,
-        },
-        map: toProjectDto,
+    const res = await this.database
+      .insert(projectsTable)
+      .values({
+        id: uuid(),
+        ...project,
       })
-      .catch(this.resolveError)
+      .returning()
+    return toProjectDto(firstOf(res))
   }
 
   async patchProjectById(
@@ -120,34 +108,22 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     partialProject: Partial<UpdateProject>,
   ): Promise<ProjectDto> {
     const res = await this.database
-      .table(projectsTable)
-      .update({
-        range: projectsTable.id.range.only(id),
-        where: projectsTable.deletedAt.isNull(),
-        data: {
-          ...partialProject,
-          modifiedAt: new Date(),
-        },
-        map: toProjectDto,
-      })
-      .catch(this.resolveError)
-
+      .update(projectsTable)
+      .set(partialProject)
+      .where(and(eq(projectsTable.id, id), isNull(projectsTable.deletedAt)))
+      .returning()
     check(isNotEmpty(res), `Project with id "${id}" not found.`)
-
-    return firstOf(res)
+    return toProjectDto(firstOf(res))
   }
 
   async softDeleteProject(id: string): Promise<void> {
     const res = await this.database
-      .table(projectsTable)
-      .update({
-        range: projectsTable.id.range.only(id),
-        data: {
-          deletedAt: new Date(),
-        },
+      .update(projectsTable)
+      .set({
+        deletedAt: new Date(),
       })
-      .catch(this.resolveError)
-
+      .where(and(eq(projectsTable.id, id), isNull(projectsTable.deletedAt)))
+      .returning()
     check(isNotEmpty(res), `Project with id "${id}" not found.`)
   }
 }
