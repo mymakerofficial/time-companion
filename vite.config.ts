@@ -1,30 +1,29 @@
-import { Connect, defineConfig, type Plugin } from 'vite'
+import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import { VitePWA as vitePwa } from 'vite-plugin-pwa'
 import tsconfigPaths from 'vite-tsconfig-paths'
-import { type ServerResponse } from 'node:http'
 
-function crossOriginIsolationMiddleware(
-  _req: Connect.IncomingMessage,
-  res: ServerResponse,
-  next: Connect.NextFunction,
-) {
-  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin')
-  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp')
-  next()
-}
+// function crossOriginIsolationMiddleware(
+//   _req: Connect.IncomingMessage,
+//   res: ServerResponse,
+//   next: Connect.NextFunction,
+// ) {
+//   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin')
+//   res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp')
+//   next()
+// }
 
-const crossOriginIsolation: Plugin = {
-  name: 'cross-origin-isolation',
-  configureServer: (server) => {
-    server.middlewares.use(crossOriginIsolationMiddleware)
-  },
-  configurePreviewServer: (server) => {
-    server.middlewares.use(crossOriginIsolationMiddleware)
-  },
-}
+// const crossOriginIsolation: Plugin = {
+//   name: 'cross-origin-isolation',
+//   configureServer: (server) => {
+//     server.middlewares.use(crossOriginIsolationMiddleware)
+//   },
+//   configurePreviewServer: (server) => {
+//     server.middlewares.use(crossOriginIsolationMiddleware)
+//   },
+// }
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -32,7 +31,8 @@ export default defineConfig({
     exclude: ['@electric-sql/pglite', '@sqlite.org/sqlite-wasm'],
   },
   plugins: [
-    crossOriginIsolation,
+    // only required for running sqlite in a web worker
+    // crossOriginIsolation,
     tsconfigPaths(),
     vue(),
     vueJsx(),
