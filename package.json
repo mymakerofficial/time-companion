@@ -7,7 +7,7 @@
     "start": "electron-forge start",
     "dev": "vite dev",
     "preview": "vite preview",
-    "build": "run-p check \"build-only {@}\" --",
+    "build": "vite build",
     "make": "run-s build make-only",
     "make-only": "electron-forge make",
     "build-only": "vite build",
