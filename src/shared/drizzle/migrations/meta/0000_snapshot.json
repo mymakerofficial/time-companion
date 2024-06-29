@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "cc6528b0-fd4b-4c97-8e23-a25170d1b735",
+  "id": "1b67dc88-ea53-4abf-ad81-67cf1dcff1d7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "days": {
@@ -18,7 +18,7 @@
           "name": "date",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "target_billable_duration": {
@@ -77,7 +77,7 @@
           "name": "display_name",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "color": {
@@ -150,7 +150,7 @@
           "name": "display_name",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "color": {
@@ -230,7 +230,7 @@
           "name": "description",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "started_at": {

@@ -2,6 +2,7 @@ import type {
   CreateTimeEntry,
   TimeEntryDto,
   TimeEntryEntity,
+  TimeEntryEntityInsert,
   UpdateTimeEntry,
 } from '@shared/model/timeEntry'
 import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
@@ -27,7 +28,7 @@ export function toTimeEntryDto(timeEntry: TimeEntryEntity): TimeEntryDto {
 export function timeEntryEntityCreateFrom(
   timeEntry: CreateTimeEntry,
   base: HasId,
-): TimeEntryEntity {
+): TimeEntryEntityInsert {
   return {
     id: base.id,
     dayId: timeEntry.dayId,
@@ -41,7 +42,7 @@ export function timeEntryEntityCreateFrom(
 
 export function timeEntryEntityUpdateFrom(
   timeEntry: Partial<UpdateTimeEntry>,
-): Partial<TimeEntryEntity> {
+): Partial<TimeEntryEntityInsert> {
   return {
     dayId: timeEntry.dayId,
     projectId: timeEntry.projectId,

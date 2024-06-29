@@ -1,6 +1,6 @@
 CREATE TABLE `days` (
 	`id` text PRIMARY KEY NOT NULL,
-	`date` integer,
+	`date` integer NOT NULL,
 	`target_billable_duration` text,
 	`created_at` integer NOT NULL,
 	`modified_at` integer,
@@ -9,7 +9,7 @@ CREATE TABLE `days` (
 --> statement-breakpoint
 CREATE TABLE `projects` (
 	`id` text PRIMARY KEY NOT NULL,
-	`display_name` text,
+	`display_name` text NOT NULL,
 	`color` text,
 	`is_billable` integer,
 	`is_break` integer,
@@ -20,7 +20,7 @@ CREATE TABLE `projects` (
 --> statement-breakpoint
 CREATE TABLE `tasks` (
 	`id` text PRIMARY KEY NOT NULL,
-	`display_name` text,
+	`display_name` text NOT NULL,
 	`color` text,
 	`created_at` integer NOT NULL,
 	`modified_at` integer,
@@ -32,7 +32,7 @@ CREATE TABLE `time_entries` (
 	`day_id` text NOT NULL,
 	`project_id` text,
 	`task_id` text,
-	`description` text,
+	`description` text NOT NULL,
 	`started_at` integer NOT NULL,
 	`stopped_at` integer,
 	`created_at` integer NOT NULL,

@@ -25,6 +25,8 @@ export const timeEntriesTable = timeEntries
 
 export type TimeEntryEntity = typeof timeEntriesTable.$inferSelect
 
+export type TimeEntryEntityInsert = typeof timeEntriesTable.$inferInsert
+
 export const timeEntrySchema = z.object({
   dayId: z.string(),
   projectId: z.string().nullable().default(null),

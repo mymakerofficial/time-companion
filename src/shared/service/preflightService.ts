@@ -1,7 +1,7 @@
 import { type Publisher, PublisherImpl } from '@shared/events/publisher'
 import { valuesOf } from '@shared/lib/utils/object'
 import type { Database } from '@shared/drizzle/database'
-import migrationFile from '@shared/drizzle/migrations/0000_solid_payback.sql?raw'
+import migrationFile from '@shared/drizzle/migrations/0000_eager_nomad.sql?raw'
 
 export interface PreflightServiceDependencies {
   database: Database
