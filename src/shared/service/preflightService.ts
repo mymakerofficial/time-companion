@@ -1,6 +1,7 @@
 import { type Publisher, PublisherImpl } from '@shared/events/publisher'
-import type { Database } from '@database/types/database'
 import { valuesOf } from '@shared/lib/utils/object'
+import type { Database } from '@shared/drizzle/database'
+import migrationFile from '@shared/drizzle/migrations/0000_solid_payback.sql?raw'
 
 export interface PreflightServiceDependencies {
   database: Database
@@ -72,27 +73,10 @@ class PreflightServiceImpl
     this.notify({ actor, state }, { actor, state })
   }
 
-  start(): void {
-    this.database.onMigrationsStarted(() => {
-      this.setActorState('databaseMigrations', 'running')
-    })
-
-    this.database.onMigrationsSkipped(() => {
-      this.setActorState('databaseMigrations', 'skipped')
-    })
-
-    this.database.onMigrationsFinished(() => {
-      this.setActorState('databaseMigrations', 'finished')
-    })
-
-    this.database.onMigrationsFailed(() => {
-      this.setActorState('databaseMigrations', 'failed')
-    })
-
+  private async startAsync(): Promise<void> {
     this.setActorState('database', 'running')
-
-    this.database
-      .open()
+    await this.database
+      .init()
       .then(() => {
         this._isReady = true
         this.setActorState('database', 'finished')
@@ -101,5 +85,23 @@ class PreflightServiceImpl
         console.error(error)
         this.setActorState('database', 'failed')
       })
+
+    this.setActorState('databaseMigrations', 'running')
+    await this.database
+      .execRaw(migrationFile)
+      .then(() => {
+        this._isReady = true
+        this.setActorState('databaseMigrations', 'finished')
+      })
+      .catch((error) => {
+        console.error(error)
+        this.setActorState('databaseMigrations', 'failed')
+      })
+  }
+
+  start(): void {
+    this.startAsync().catch((error) => {
+      console.error(error)
+    })
   }
 }
