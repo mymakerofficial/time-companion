@@ -1,12 +1,10 @@
-import { defineTable } from '@database/schema/defineTable'
-import { c } from '@database/schema/columnBuilder'
 import type { Nullable } from '@shared/lib/utils/types'
 import type { BaseDto } from '@shared/model/helpers/baseDto'
-import type { InferTable } from '@database/types/schema'
 import { z } from 'zod'
 import { PlainDate } from '@shared/lib/datetime/plainDate'
 import { Duration } from '@shared/lib/datetime/duration'
 import { durationType, plainDateType } from '@shared/lib/datetime/schema'
+import { days } from '@shared/drizzle/schema'
 
 export type DayBase = {
   date: PlainDate
@@ -19,16 +17,9 @@ export type UpdateDay = DayBase
 
 export type DayDto = DayBase & BaseDto
 
-export const daysTable = defineTable('days', {
-  id: c.uuid().primaryKey(),
-  date: c.date().indexed().unique(),
-  targetBillableDuration: c.interval().nullable(),
-  createdAt: c.datetime(),
-  modifiedAt: c.datetime().nullable(),
-  deletedAt: c.datetime().nullable(),
-})
+export const daysTable = days
 
-export type DayEntity = InferTable<typeof daysTable>
+export type DayEntity = typeof daysTable.$inferSelect
 
 export const daySchema = z.object({
   date: plainDateType.default(() => PlainDate.now()),

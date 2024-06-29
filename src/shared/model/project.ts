@@ -1,10 +1,8 @@
 import type { Nullable } from '@shared/lib/utils/types'
-import { defineTable } from '@database/schema/defineTable'
-import { c } from '@database/schema/columnBuilder'
 import { z } from 'zod'
 import type { BaseDto } from '@shared/model/helpers/baseDto'
 import { randomTailwindColor } from '@renderer/lib/colorUtils'
-import type { InferTable } from '@database/types/schema'
+import { projects } from '@shared/drizzle/schema'
 
 export type ProjectBase = {
   displayName: string
@@ -19,18 +17,9 @@ export type UpdateProject = ProjectBase
 
 export type ProjectDto = ProjectBase & BaseDto
 
-export const projectsTable = defineTable('projects', {
-  id: c.uuid().primaryKey(),
-  displayName: c.text().indexed().unique(),
-  color: c.text().nullable(),
-  isBillable: c.boolean(),
-  isBreak: c.boolean(),
-  createdAt: c.datetime(),
-  modifiedAt: c.datetime().nullable(),
-  deletedAt: c.datetime().nullable(),
-})
+export const projectsTable = projects
 
-export type ProjectEntity = InferTable<typeof projectsTable>
+export type ProjectEntity = typeof projectsTable.$inferSelect
 
 export const projectSchema = z.object({
   displayName: z.string().min(1),

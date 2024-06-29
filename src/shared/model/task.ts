@@ -1,10 +1,8 @@
 import type { Nullable } from '@shared/lib/utils/types'
-import { defineTable } from '@database/schema/defineTable'
-import { c } from '@database/schema/columnBuilder'
 import type { BaseDto } from '@shared/model/helpers/baseDto'
 import { z } from 'zod'
 import { randomTailwindColor } from '@renderer/lib/colorUtils'
-import type { InferTable } from '@database/types/schema'
+import { tasks } from '@shared/drizzle/schema'
 
 export type TaskBase = {
   displayName: string
@@ -17,16 +15,9 @@ export type UpdateTask = TaskBase
 
 export type TaskDto = CreateTask & BaseDto
 
-export const tasksTable = defineTable('tasks', {
-  id: c.uuid().primaryKey(),
-  displayName: c.text().indexed(),
-  color: c.text().nullable(),
-  createdAt: c.datetime(),
-  modifiedAt: c.datetime().nullable(),
-  deletedAt: c.datetime().nullable(),
-})
+export const tasksTable = tasks
 
-export type TaskEntity = InferTable<typeof tasksTable>
+export type TaskEntity = typeof tasksTable.$inferSelect
 
 export const taskSchema = z.object({
   displayName: z.string().min(1),
