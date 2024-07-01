@@ -32,6 +32,15 @@ function duration(name: string) {
 }
 
 /***
+ * A signed integer representing a boolean value.
+ *  Automatically converted to a boolean by drizzle.
+ * @see https://orm.drizzle.team/docs/column-types/sqlite#integer
+ */
+function boolean(name: string) {
+  return integer(name, { mode: 'boolean' })
+}
+
+/***
  * Common columns shared by all entity tables.
  */
 const entityMixins = {
@@ -66,10 +75,8 @@ export const projects = sqliteTable(
     ...entityMixins,
     displayName: text('display_name').notNull(),
     color: text('color'),
-    isBillable: integer('is_billable', { mode: 'boolean' })
-      .notNull()
-      .default(true),
-    isBreak: integer('is_break', { mode: 'boolean' }).notNull().default(false),
+    isBillable: boolean('is_billable').notNull().default(true),
+    isBreak: boolean('is_break').notNull().default(false),
   },
   (table) => ({
     // ensure there is only ever one project with a given display name (that hasn't been deleted)
