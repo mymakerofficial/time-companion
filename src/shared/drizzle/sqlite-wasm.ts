@@ -29,14 +29,16 @@ export class Sqlite3Connector {
     sql: string,
     bind: Array<any>,
     _method: 'run' | 'all' | 'values' | 'get',
+    rowMode: 'array' | 'object' = 'array',
   ): Promise<{ rows: Array<any> }> {
     return new Promise((resolve) => {
-      console.debug('Executing SQL:', sql, bind)
       check(isNotNull(this.db), 'Database not initialized')
+      console.debug('Executing SQL:', sql, bind)
       const rows = this.db.exec({
         sql,
         bind,
         returnValue: 'resultRows',
+        rowMode,
       })
 
       resolve({ rows })
@@ -48,7 +50,11 @@ export interface SqliteWasmDatabase<
   TSchema extends Record<string, unknown> = Record<string, never>,
 > extends BaseSQLiteDatabase<'async', SqliteRemoteResult, TSchema> {
   init(): Promise<void>
-  execRaw(sql: string, bind?: Array<any>): Promise<{ rows: Array<any> }>
+  execRaw(
+    sql: string,
+    bind?: Array<any>,
+    rowMode?: 'array' | 'object',
+  ): Promise<{ rows: Array<any> }>
 }
 
 export function drizzle<
@@ -64,7 +70,10 @@ export function drizzle<
   )
   return Object.assign(obj, {
     init: () => connector.init(),
-    execRaw: (sql: string, bind: Array<any> = []) =>
-      connector.exec(sql, bind, 'all'),
+    execRaw: (
+      sql: string,
+      bind: Array<any> = [],
+      rowMode?: 'array' | 'object',
+    ) => connector.exec(sql, bind, 'all', rowMode),
   })
 }
