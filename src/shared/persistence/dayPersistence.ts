@@ -1,5 +1,4 @@
 import { type CreateDay, type DayDto, daysTable } from '@shared/model/day'
-import { uuid } from '@shared/lib/utils/uuid'
 import { toDayDto } from '@shared/model/mappers/day'
 import { check, isNotEmpty } from '@shared/lib/utils/checks'
 import {
@@ -86,9 +85,9 @@ class DayPersistenceImpl implements DayPersistence {
     const res = await this.database
       .insert(daysTable)
       .values({
-        id: uuid(),
         date: day.date.toDate(),
-        targetBillableDuration: day.targetBillableDuration?.toString() ?? null,
+        targetBillableDuration:
+          day.targetBillableDuration?.total('milliseconds') ?? null,
       })
       .returning()
     return toDayDto(firstOf(res))

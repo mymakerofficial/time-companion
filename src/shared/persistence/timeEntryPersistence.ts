@@ -11,7 +11,6 @@ import {
   toTimeEntryDto,
 } from '@shared/model/mappers/timeEntry'
 import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
-import { uuid } from '@shared/lib/utils/uuid'
 import { firstOf, firstOfOrNull } from '@shared/lib/utils/list'
 import { daysTable } from '@shared/model/day'
 import { toDayDto } from '@shared/model/mappers/day'
@@ -22,7 +21,6 @@ import {
   isEmpty,
   isNotEmpty,
   isNotNull,
-  isNull,
 } from '@shared/lib/utils/checks'
 import type { Nullable } from '@shared/lib/utils/types'
 import { Duration } from '@shared/lib/datetime/duration'
@@ -32,7 +30,7 @@ import {
   errorIsUniqueViolation,
 } from '@database/types/errors'
 import type { Database, Transaction } from '@shared/drizzle/database'
-import { and, asc, count, eq, isNull as colIsNull, ne } from 'drizzle-orm'
+import { and, asc, eq, isNull as colIsNull, ne } from 'drizzle-orm'
 import { todo } from '@shared/lib/utils/todo'
 
 class TimeEntryUniqueViolation extends IllegalStateError {
@@ -188,11 +186,7 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
 
       const res = await tx
         .insert(timeEntriesTable)
-        .values(
-          timeEntryEntityCreateFrom(timeEntry, {
-            id: uuid(),
-          }),
-        )
+        .values(timeEntryEntityCreateFrom(timeEntry))
         .returning()
       return firstOf(res.map(toTimeEntryDto))
     })

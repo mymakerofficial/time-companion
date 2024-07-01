@@ -8,7 +8,7 @@ export function toDayDto(day: DayEntity): DayDto {
     id: day.id,
     date: PlainDate.from(day.date),
     targetBillableDuration: day.targetBillableDuration
-      ? Duration.from(day.targetBillableDuration)
+      ? Duration.from({ milliseconds: day.targetBillableDuration })
       : null,
     createdAt: PlainDateTime.from(day.createdAt),
     modifiedAt: day.modifiedAt ? PlainDateTime.from(day.modifiedAt) : null,

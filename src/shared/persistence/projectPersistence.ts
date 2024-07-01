@@ -12,7 +12,6 @@ import {
   errorIsUniqueViolation,
 } from '@database/types/errors'
 import { toProjectDto } from '@shared/model/mappers/project'
-import { uuid } from '@shared/lib/utils/uuid'
 import type { Database } from '@shared/drizzle/database'
 import { and, asc, eq, isNull } from 'drizzle-orm'
 
@@ -95,10 +94,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   async createProject(project: CreateProject): Promise<ProjectDto> {
     const res = await this.database
       .insert(projectsTable)
-      .values({
-        id: uuid(),
-        ...project,
-      })
+      .values(project)
       .returning()
     return toProjectDto(firstOf(res))
   }

@@ -27,10 +27,8 @@ export function toTimeEntryDto(timeEntry: TimeEntryEntity): TimeEntryDto {
 
 export function timeEntryEntityCreateFrom(
   timeEntry: CreateTimeEntry,
-  base: HasId,
 ): TimeEntryEntityInsert {
   return {
-    id: base.id,
     dayId: timeEntry.dayId,
     projectId: timeEntry.projectId,
     taskId: timeEntry.taskId,

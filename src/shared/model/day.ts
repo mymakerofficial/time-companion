@@ -25,5 +25,5 @@ export const daySchema = z.object({
   date: plainDateType.default(() => PlainDate.now()),
   targetBillableDuration: durationType
     .nullable()
-    .default(Duration.from('PT8H')),
+    .default(Duration.from({ hours: 8 })),
 })

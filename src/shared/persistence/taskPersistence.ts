@@ -12,7 +12,6 @@ import {
   errorIsUniqueViolation,
 } from '@database/types/errors'
 import { toTaskDto } from '@shared/model/mappers/task'
-import { uuid } from '@shared/lib/utils/uuid'
 import type { Database } from '@shared/drizzle/database'
 import { and, asc, eq, isNull } from 'drizzle-orm'
 
@@ -74,13 +73,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
   }
 
   async createTask(task: CreateTask): Promise<TaskDto> {
-    const res = await this.database
-      .insert(tasksTable)
-      .values({
-        id: uuid(),
-        ...task,
-      })
-      .returning()
+    const res = await this.database.insert(tasksTable).values(task).returning()
     return toTaskDto(firstOf(res))
   }
 
