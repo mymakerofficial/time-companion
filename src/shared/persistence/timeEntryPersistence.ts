@@ -32,7 +32,7 @@ import {
   errorIsUniqueViolation,
 } from '@database/types/errors'
 import type { Database, Transaction } from '@shared/drizzle/database'
-import { and, asc, eq, isNull as colIsNull, ne } from 'drizzle-orm'
+import { and, asc, count, eq, isNull as colIsNull, ne } from 'drizzle-orm'
 import { todo } from '@shared/lib/utils/todo'
 
 class TimeEntryUniqueViolation extends IllegalStateError {
@@ -251,7 +251,6 @@ function resolveError(error: DatabaseError): never {
 
 const TIME_ENTRY_MAX_DURATION = Duration.from({ hours: 24 })
 const ONE_DAY = Duration.from({ days: 1 })
-const ONE_MONTH = Duration.from({ months: 1 })
 
 async function checkConstraints(
   tx: Transaction,
@@ -273,7 +272,7 @@ async function checkConstraints(
   } else {
     // Check if there is already a running time entry.
     const runningTimeEntry = await tx
-      .select()
+      .select({ id: timeEntriesTable.id })
       .from(timeEntriesTable)
       .where(
         and(
@@ -284,10 +283,9 @@ async function checkConstraints(
         ),
       )
       .limit(1)
-      .then((res) => firstOfOrNull(res.map(toTimeEntryDto)))
 
     check(
-      isNull(runningTimeEntry),
+      isEmpty(runningTimeEntry),
       () => new TimeEntryMultipleRunningViolation(),
     )
   }
