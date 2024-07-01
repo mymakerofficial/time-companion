@@ -7,6 +7,7 @@ import { createColumnHelper } from '@tanstack/vue-table'
 import TableVisibilitySelect from '@renderer/components/common/table/TableVisibilitySelect.vue'
 import TableActions from '@renderer/components/common/table/TableActions.vue'
 import { Button } from '@shadcn/button'
+import { sql } from 'drizzle-orm'
 
 const props = defineProps<{
   tableName: string
@@ -18,30 +19,35 @@ const tableName = computed(() => props.tableName)
 const { data: tableColumns } = useQuery({
   queryKey: ['databaseExplorer', 'table', tableName, 'columns'],
   queryFn: async () => {
-    const { rows } = await database.execRaw(
-      `PRAGMA table_info(${toValue(tableName)})`,
-      [],
-      'object',
+    const res = await database.get<string[][]>(
+      sql.raw(`PRAGMA table_info(${toValue(tableName)})`),
     )
-    return rows.map((row: any) => ({
-      name: row.name,
-      type: row.type,
+    return res.map((row: any) => ({
+      name: row.at(1),
+      type: row.at(2),
     }))
   },
   initialData: [],
 })
 
-const { data } = useQuery({
+const { data: rows } = useQuery({
   queryKey: ['databaseExplorer', 'table', tableName, 'data'],
   queryFn: async () => {
-    const { rows } = await database.execRaw(
-      `SELECT * FROM ${toValue(tableName)}`,
-      [],
-      'object',
-    )
-    return rows
+    return database.get<any[][]>(sql.raw(`SELECT * FROM ${toValue(tableName)}`))
   },
   initialData: [],
+})
+
+const data = computed(() => {
+  return rows.value.map((row) =>
+    tableColumns.value.reduce(
+      (acc, col, i) => {
+        acc[col.name] = row[i]
+        return acc
+      },
+      {} as Record<string, any>,
+    ),
+  )
 })
 
 const columnHelper = createColumnHelper<object>()

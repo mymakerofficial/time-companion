@@ -6,14 +6,15 @@ import DatabaseExplorerTable from '@renderer/components/playground/database/Data
 import Combobox from '@renderer/components/common/inputs/combobox/Combobox.vue'
 import { ref } from 'vue'
 import { whenever } from '@vueuse/core'
+import { sql } from 'drizzle-orm'
 
 const { data: tables } = useQuery({
   queryKey: ['databaseExplorer', 'tables'],
   queryFn: async () => {
-    const { rows } = await database.execRaw(
-      `SELECT name FROM sqlite_schema WHERE type ='table'`,
+    const res = await database.get<string[][]>(
+      sql.raw(`SELECT name FROM sqlite_schema WHERE type = 'table'`),
     )
-    return rows.map(firstOf)
+    return res.map(firstOf)
   },
   initialData: [],
 })
