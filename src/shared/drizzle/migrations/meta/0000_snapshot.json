@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "950975d4-5156-46df-94f6-f30216466302",
+  "id": "b0391dd1-9382-4215-9982-ea591bbd076e",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "days": {
@@ -51,19 +51,12 @@
         }
       },
       "indexes": {
-        "days_date_unique": {
-          "name": "days_date_unique",
-          "columns": [
-            "date"
-          ],
-          "isUnique": true
-        },
         "date_idx": {
           "name": "date_idx",
           "columns": [
             "date"
           ],
-          "isUnique": false,
+          "isUnique": true,
           "where": "\"days\".\"deleted_at\" is null"
         }
       },
@@ -120,31 +113,26 @@
           "name": "is_billable",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
         },
         "is_break": {
           "name": "is_break",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
         }
       },
       "indexes": {
-        "projects_display_name_unique": {
-          "name": "projects_display_name_unique",
-          "columns": [
-            "display_name"
-          ],
-          "isUnique": true
-        },
         "display_name_idx": {
           "name": "display_name_idx",
           "columns": [
             "display_name"
           ],
-          "isUnique": false,
+          "isUnique": true,
           "where": "\"projects\".\"deleted_at\" is null"
         }
       },
@@ -199,19 +187,12 @@
         }
       },
       "indexes": {
-        "tasks_display_name_unique": {
-          "name": "tasks_display_name_unique",
-          "columns": [
-            "display_name"
-          ],
-          "isUnique": true
-        },
         "display_name_idx": {
           "name": "display_name_idx",
           "columns": [
             "display_name"
           ],
-          "isUnique": false,
+          "isUnique": true,
           "where": "\"tasks\".\"deleted_at\" is null"
         }
       },
@@ -299,7 +280,7 @@
           "columns": [
             "started_at"
           ],
-          "isUnique": false,
+          "isUnique": true,
           "where": "\"time_entries\".\"deleted_at\" is null"
         },
         "stopped_at_idx": {
@@ -307,7 +288,7 @@
           "columns": [
             "stopped_at"
           ],
-          "isUnique": false,
+          "isUnique": true,
           "where": "\"time_entries\".\"deleted_at\" is null"
         }
       },
@@ -322,7 +303,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
         "time_entries_project_id_projects_id_fk": {
@@ -335,7 +316,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "set null",
           "onUpdate": "no action"
         },
         "time_entries_task_id_tasks_id_fk": {
@@ -348,7 +329,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },

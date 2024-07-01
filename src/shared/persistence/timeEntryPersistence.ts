@@ -182,13 +182,15 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
 
   async createTimeEntry(timeEntry: CreateTimeEntry): Promise<TimeEntryDto> {
     return await this.database.transaction(async (tx) => {
-      await checkConstraints(tx, timeEntry)
-
       const res = await tx
         .insert(timeEntriesTable)
         .values(timeEntryEntityCreateFrom(timeEntry))
         .returning()
-      return firstOf(res.map(toTimeEntryDto))
+        .then((res) => firstOf(res.map(toTimeEntryDto)))
+
+      await checkConstraints(tx, timeEntry, res.id)
+
+      return res
     })
   }
 
