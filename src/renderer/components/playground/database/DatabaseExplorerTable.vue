@@ -19,7 +19,7 @@ const tableName = computed(() => props.tableName)
 const { data: tableColumns } = useQuery({
   queryKey: ['databaseExplorer', 'table', tableName, 'columns'],
   queryFn: async () => {
-    const res = await database.get<string[][]>(
+    const res = await database.all<string[]>(
       sql.raw(`PRAGMA table_info(${toValue(tableName)})`),
     )
     return res.map((row: any) => ({
@@ -33,7 +33,7 @@ const { data: tableColumns } = useQuery({
 const { data: rows } = useQuery({
   queryKey: ['databaseExplorer', 'table', tableName, 'data'],
   queryFn: async () => {
-    return database.get<any[][]>(sql.raw(`SELECT * FROM ${toValue(tableName)}`))
+    return database.all<any[][]>(sql.raw(`SELECT * FROM ${toValue(tableName)}`))
   },
   initialData: [],
 })

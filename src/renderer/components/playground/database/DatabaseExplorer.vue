@@ -10,8 +10,8 @@ import { sql } from 'drizzle-orm'
 
 const { data: tables } = useQuery({
   queryKey: ['databaseExplorer', 'tables'],
-  queryFn: async () => {
-    const res = await database.get<string[][]>(
+  queryFn: () => {
+    const res = database.all<string[]>(
       sql.raw(`SELECT name FROM sqlite_schema WHERE type = 'table'`),
     )
     return res.map(firstOf)

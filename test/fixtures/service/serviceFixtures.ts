@@ -8,13 +8,8 @@ import {
   createProjectService,
   type ProjectService,
 } from '@shared/service/projectService'
-import type { Database } from '@database/types/database'
 import { createFixtures } from '@test/helpers/createFixtures'
 import { ProjectTestHelpers } from '@test/fixtures/service/projectTestHelpers'
-import { createDatabase } from '@database/factory/database'
-import { indexedDBAdapter } from '@database/adapters/indexedDB/database'
-import fakeIndexedDB from 'fake-indexeddb'
-import config from '@shared/database.config'
 import { ServiceTestHelpers } from '@test/fixtures/service/serviceTestHelpers'
 import { createDayService, type DayService } from '@shared/service/dayService'
 import { createDayPersistence } from '@shared/persistence/dayPersistence'
@@ -28,6 +23,8 @@ import { DayTestHelpers } from '@test/fixtures/service/dayTestHelpers'
 
 import 'fake-indexeddb/auto'
 import { TimeEntryTestHelpers } from '@test/fixtures/service/timeEntryTestHelpers'
+import { database } from '@main/factory/database/database'
+import type { Database } from '@shared/drizzle/database'
 
 export interface ServiceFixtures {
   database: Database
@@ -43,10 +40,7 @@ export interface ServiceFixtures {
 
 export const useServiceFixtures = createFixtures<ServiceFixtures>({
   database: () => {
-    return createDatabase(
-      indexedDBAdapter('services-test-db', fakeIndexedDB),
-      config,
-    )
+    return database
   },
   taskService: ({ database }) => {
     return createTaskService({

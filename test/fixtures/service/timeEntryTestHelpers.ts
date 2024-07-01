@@ -10,8 +10,9 @@ import { timeEntriesTable } from '@shared/model/timeEntry'
 import { uuid } from '@shared/lib/utils/uuid'
 import { faker } from '@faker-js/faker'
 import { isSometimesNullOr } from '@test/helpers/maybe'
-import type { Database } from '@database/types/database'
 import { toTimeEntryDto } from '@shared/model/mappers/timeEntry'
+import type { Database } from '@shared/drizzle/database'
+import { isNull } from 'drizzle-orm'
 
 export class TimeEntryTestHelpers {
   constructor(
@@ -59,9 +60,10 @@ export class TimeEntryTestHelpers {
   }
 
   async getAll(): Promise<Array<TimeEntryDto>> {
-    return await this.database.table(timeEntriesTable).findMany({
-      where: timeEntriesTable.deletedAt.isNull(),
-      map: toTimeEntryDto,
-    })
+    return await this.database
+      .select()
+      .from(timeEntriesTable)
+      .where(isNull(timeEntriesTable.deletedAt))
+      .then((rows) => rows.map(toTimeEntryDto))
   }
 }

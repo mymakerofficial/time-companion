@@ -2,6 +2,7 @@ import { type Publisher, PublisherImpl } from '@shared/events/publisher'
 import { valuesOf } from '@shared/lib/utils/object'
 import type { Database } from '@shared/drizzle/database'
 import migrationFile from '@shared/drizzle/migrations/0000_solid_gunslinger.sql?raw'
+import { connector } from '@renderer/factory/database/database'
 
 export interface PreflightServiceDependencies {
   database: Database
@@ -75,7 +76,8 @@ class PreflightServiceImpl
 
   private async startAsync(): Promise<void> {
     this.setActorState('database', 'running')
-    await this.database
+    // TODO: This is temporary and only works in the browser
+    await connector
       .init()
       .then(() => {
         this._isReady = true
@@ -87,8 +89,9 @@ class PreflightServiceImpl
       })
 
     this.setActorState('databaseMigrations', 'running')
-    await this.database
-      .execRaw(migrationFile)
+    // TODO: This is temporary and only works in the browser
+    await connector
+      .exec(migrationFile)
       .then(() => {
         this._isReady = true
         this.setActorState('databaseMigrations', 'finished')

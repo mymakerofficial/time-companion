@@ -3,20 +3,12 @@ import { useDialogContext } from '@renderer/composables/dialog/useDialog'
 import BaseDialog from '@renderer/components/common/dialog/BaseDialog.vue'
 import { Button } from '@shadcn/button'
 import { AlertTriangle, Trash2 } from 'lucide-vue-next'
-import { database } from '@renderer/factory/database/database'
 import { toast } from 'vue-sonner'
 
 const { close, open } = useDialogContext()
 
 function handleDelete() {
-  database.unsafe.dropSchema().then(() => {
-    close()
-    toast.info('Congrats!', {
-      description:
-        'You just deleted everything. Its all gone now. Reload the page to get things working again.',
-      duration: Infinity,
-    })
-  })
+  toast.info('wip')
 }
 </script>
 

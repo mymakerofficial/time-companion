@@ -1,10 +1,8 @@
-import { createDatabase } from '@database/factory/database'
-import config from '@shared/database.config'
-import { pgliteAdapter } from '@database/adapters/pglite/database'
-import path from 'path'
-import { app } from 'electron'
+import { drizzle } from 'drizzle-orm/better-sqlite3'
+import { BetterSqlite3Connector } from '@shared/drizzle/connector/better-sqlite3'
+import * as schema from '@shared/drizzle/schema'
+import { todo } from '@shared/lib/utils/todo'
 
-export const database = (() => {
-  const dataDir = path.join(app.getPath('userData'), 'db')
-  return createDatabase(pgliteAdapter(dataDir), config)
-})()
+todo()
+export const connector = new BetterSqlite3Connector('sqlite.db')
+export const database = drizzle(connector.database, { schema })
