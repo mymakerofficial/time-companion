@@ -43,8 +43,8 @@ CREATE TABLE `time_entries` (
 	FOREIGN KEY (`task_id`) REFERENCES `tasks`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `date_idx` ON `days` (`date`) WHERE "days"."deleted_at" is null;--> statement-breakpoint
-CREATE UNIQUE INDEX `display_name_idx` ON `projects` (`display_name`) WHERE "projects"."deleted_at" is null;--> statement-breakpoint
-CREATE UNIQUE INDEX `display_name_idx` ON `tasks` (`display_name`) WHERE "tasks"."deleted_at" is null;--> statement-breakpoint
-CREATE UNIQUE INDEX `started_at_idx` ON `time_entries` (`started_at`) WHERE "time_entries"."deleted_at" is null;--> statement-breakpoint
-CREATE UNIQUE INDEX `stopped_at_idx` ON `time_entries` (`stopped_at`) WHERE "time_entries"."deleted_at" is null;
+CREATE UNIQUE INDEX `day_date_idx` ON `days` (`date`) WHERE "days"."deleted_at" is null;--> statement-breakpoint
+CREATE UNIQUE INDEX `project_display_name_idx` ON `projects` (`display_name`) WHERE "projects"."deleted_at" is null;--> statement-breakpoint
+CREATE UNIQUE INDEX `task_display_name_idx` ON `tasks` (`display_name`) WHERE "tasks"."deleted_at" is null;--> statement-breakpoint
+CREATE UNIQUE INDEX `time_entry_started_at_idx` ON `time_entries` (`started_at`) WHERE "time_entries"."deleted_at" is null;--> statement-breakpoint
+CREATE UNIQUE INDEX `time_entry_stopped_at_idx` ON `time_entries` (`stopped_at`) WHERE "time_entries"."deleted_at" is null;

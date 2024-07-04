@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "b0391dd1-9382-4215-9982-ea591bbd076e",
+  "id": "e9131840-ecad-4554-8097-767d9f6866e1",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "days": {
@@ -51,8 +51,8 @@
         }
       },
       "indexes": {
-        "date_idx": {
-          "name": "date_idx",
+        "day_date_idx": {
+          "name": "day_date_idx",
           "columns": [
             "date"
           ],
@@ -127,8 +127,8 @@
         }
       },
       "indexes": {
-        "display_name_idx": {
-          "name": "display_name_idx",
+        "project_display_name_idx": {
+          "name": "project_display_name_idx",
           "columns": [
             "display_name"
           ],
@@ -187,8 +187,8 @@
         }
       },
       "indexes": {
-        "display_name_idx": {
-          "name": "display_name_idx",
+        "task_display_name_idx": {
+          "name": "task_display_name_idx",
           "columns": [
             "display_name"
           ],
@@ -275,16 +275,16 @@
         }
       },
       "indexes": {
-        "started_at_idx": {
-          "name": "started_at_idx",
+        "time_entry_started_at_idx": {
+          "name": "time_entry_started_at_idx",
           "columns": [
             "started_at"
           ],
           "isUnique": true,
           "where": "\"time_entries\".\"deleted_at\" is null"
         },
-        "stopped_at_idx": {
-          "name": "stopped_at_idx",
+        "time_entry_stopped_at_idx": {
+          "name": "time_entry_stopped_at_idx",
           "columns": [
             "stopped_at"
           ],

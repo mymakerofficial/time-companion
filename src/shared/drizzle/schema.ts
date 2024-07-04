@@ -63,7 +63,7 @@ export const days = sqliteTable(
   },
   (table) => ({
     // ensure there is only ever one day per date (that hasn't been deleted)
-    dateIdx: uniqueIndex('date_idx')
+    dateIdx: uniqueIndex('day_date_idx')
       .on(table.date)
       .where(isNull(table.deletedAt)),
   }),
@@ -80,7 +80,7 @@ export const projects = sqliteTable(
   },
   (table) => ({
     // ensure there is only ever one project with a given display name (that hasn't been deleted)
-    displayNameIdx: uniqueIndex('display_name_idx')
+    displayNameIdx: uniqueIndex('project_display_name_idx')
       .on(table.displayName)
       .where(isNull(table.deletedAt)),
   }),
@@ -95,7 +95,7 @@ export const tasks = sqliteTable(
   },
   (table) => ({
     // ensure there is only ever one task with a given display name (that hasn't been deleted)
-    displayNameIdx: uniqueIndex('display_name_idx')
+    displayNameIdx: uniqueIndex('task_display_name_idx')
       .on(table.displayName)
       .where(isNull(table.deletedAt)),
   }),
@@ -120,14 +120,14 @@ export const timeEntries = sqliteTable(
   },
   (table) => ({
     // it's impossible to have two time entries starting at the same time without also overlapping
-    startedAtIdx: uniqueIndex('started_at_idx')
+    startedAtIdx: uniqueIndex('time_entry_started_at_idx')
       .on(table.startedAt)
       .where(isNull(table.deletedAt)),
     // same as above
     //  note: it isn't possible to check for uniqueness of null values in SQLite
     //  thus, this needs to be enforced in the application logic
     //  https://www.sqlite.org/lang_createindex.html#unique_indexes
-    stoppedAtIdx: uniqueIndex('stopped_at_idx')
+    stoppedAtIdx: uniqueIndex('time_entry_stopped_at_idx')
       .on(table.stoppedAt)
       .where(isNull(table.deletedAt)),
   }),
