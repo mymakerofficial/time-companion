@@ -1,8 +1,8 @@
 import { type Publisher, PublisherImpl } from '@shared/events/publisher'
 import { valuesOf } from '@shared/lib/utils/object'
 import type { Database } from '@shared/drizzle/database'
-import { connector } from '@renderer/factory/database/database'
 import { migrate } from '@shared/drizzle/migrator'
+import { initialize } from '@shared/drizzle/init'
 
 export interface PreflightServiceDependencies {
   database: Database
@@ -76,9 +76,7 @@ class PreflightServiceImpl
 
   private async startAsync(): Promise<void> {
     this.setActorState('database', 'running')
-    // TODO: This is temporary and only works in the browser
-    await connector
-      .init()
+    await initialize(this.database)
       .then(() => {
         this.setActorState('database', 'finished')
       })

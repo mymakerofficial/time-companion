@@ -1,28 +1,55 @@
 import { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core/db'
 import type { DrizzleConfig } from 'drizzle-orm/utils'
 import { SQLiteSyncDialect } from 'drizzle-orm/sqlite-core/dialect'
-import { SqliteWasmSession } from '@shared/drizzle/sqlite-wasm/session'
+import { SQLiteWasmSession } from '@shared/drizzle/sqlite-wasm/session'
 import {
   createTableRelationsHelpers,
   extractTablesRelationalConfig,
+  type ExtractTablesWithRelations,
   type RelationalSchemaConfig,
   type TablesRelationalConfig,
 } from 'drizzle-orm/relations'
-import { SqliteWasmConnector } from '@shared/drizzle/connector/sqlite-wasm'
+import { type Sqlite3Static } from '@sqlite.org/sqlite-wasm'
+import type { SQLiteWasmClient } from '@shared/drizzle/sqlite-wasm/client'
 
 // maybe we need to change this in the future
 export type SQLiteWasmRunResult = undefined
 
-export interface SqliteWasmDatabase<
-  TSchema extends Record<string, unknown> = Record<string, never>,
-> extends BaseSQLiteDatabase<'sync', SQLiteWasmRunResult, TSchema> {}
+export class SQLiteWasmDatabase<
+  TFullSchema extends Record<string, unknown> = Record<string, never>,
+  TSchema extends
+    TablesRelationalConfig = ExtractTablesWithRelations<TFullSchema>,
+> extends BaseSQLiteDatabase<
+  'sync',
+  SQLiteWasmRunResult,
+  TFullSchema,
+  TSchema
+> {
+  constructor(
+    private client: SQLiteWasmClient,
+    ...args: ConstructorParameters<
+      typeof BaseSQLiteDatabase<
+        'sync',
+        SQLiteWasmRunResult,
+        TFullSchema,
+        TSchema
+      >
+    >
+  ) {
+    super(...args)
+  }
+
+  async init() {
+    await this.client.init()
+  }
+}
 
 export function drizzle<
   TSchema extends Record<string, unknown> = Record<string, never>,
 >(
-  connector: SqliteWasmConnector,
+  client: SQLiteWasmClient,
   config: DrizzleConfig<TSchema> = {},
-): SqliteWasmDatabase<TSchema> {
+): SQLiteWasmDatabase<TSchema> {
   const dialect = new SQLiteSyncDialect()
 
   let schema: RelationalSchemaConfig<TablesRelationalConfig> | undefined
@@ -38,11 +65,16 @@ export function drizzle<
     }
   }
 
-  const session = new SqliteWasmSession(connector, dialect, schema)
-  return new BaseSQLiteDatabase(
+  const session = new SQLiteWasmSession<TSchema, TablesRelationalConfig>(
+    client,
+    dialect,
+    schema,
+  )
+  return new SQLiteWasmDatabase<TSchema, TablesRelationalConfig>(
+    client,
     'sync',
     dialect,
     session,
     schema,
-  ) as SqliteWasmDatabase<TSchema>
+  ) as SQLiteWasmDatabase<TSchema>
 }

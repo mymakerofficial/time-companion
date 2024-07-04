@@ -3,10 +3,9 @@ import sqlite3InitModule, {
   type Database as SqliteDatabase,
   type Sqlite3Static,
 } from '@sqlite.org/sqlite-wasm'
-import { check, isNotNull, isNull } from '@shared/lib/utils/checks'
-import type { DatabaseConnector } from '@shared/drizzle/connector/connector'
+import { check, isNull } from '@shared/lib/utils/checks'
 
-export class SqliteWasmConnector implements DatabaseConnector {
+export class SQLiteWasmClient {
   protected sqlite3: Nullable<Sqlite3Static> = null
   public database: Nullable<SqliteDatabase> = null
 
@@ -21,20 +20,8 @@ export class SqliteWasmConnector implements DatabaseConnector {
     this.database = new this.sqlite3.oo1.JsStorageDb('local')
     console.debug('Created database using kvvfs')
   }
+}
 
-  async exec(
-    sql: string,
-    bind: Array<any> = [],
-  ): Promise<{ rows: Array<any> }> {
-    return new Promise((resolve) => {
-      check(isNotNull(this.database), 'Database not initialized')
-      const rows = this.database.exec({
-        sql,
-        bind,
-        returnValue: 'resultRows',
-      })
-
-      resolve({ rows })
-    })
-  }
+export function sqliteWasm() {
+  return new SQLiteWasmClient()
 }

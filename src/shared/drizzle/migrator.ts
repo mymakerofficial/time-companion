@@ -1,6 +1,6 @@
 import { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core/db'
 import { SQLiteSyncDialect } from 'drizzle-orm/sqlite-core/dialect'
-import type { TablesRelationalConfig } from 'drizzle-orm/relations'
+import type { ExtractTablesWithRelations } from 'drizzle-orm/relations'
 import { SQLiteSession } from 'drizzle-orm/sqlite-core/session'
 import { sql } from 'drizzle-orm'
 import { getOrElse } from '@shared/lib/utils/result'
@@ -20,7 +20,12 @@ export async function migrate<
   // @ts-expect-error dialect and session are private, but we need to access it
   const { dialect, session } = database as {
     dialect: SQLiteSyncDialect
-    session: SQLiteSession<'sync', unknown, TSchema, TablesRelationalConfig>
+    session: SQLiteSession<
+      'sync',
+      undefined,
+      TSchema,
+      ExtractTablesWithRelations<TSchema>
+    >
   }
 
   const migrationsTable = '__drizzle_migrations'

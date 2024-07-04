@@ -1,4 +1,5 @@
 import type {
+  ExtractTablesWithRelations,
   RelationalSchemaConfig,
   TablesRelationalConfig,
 } from 'drizzle-orm/relations'
@@ -22,19 +23,20 @@ import type { SelectedFieldsOrdered } from 'drizzle-orm/sqlite-core/query-builde
 import { entityKind, is } from 'drizzle-orm/entity'
 import { sql } from 'drizzle-orm'
 import type { Database as SqliteDatabase } from '@sqlite.org/sqlite-wasm'
-import { SqliteWasmConnector } from '@shared/drizzle/connector/sqlite-wasm'
 import { check, isNotNull } from '@shared/lib/utils/checks'
 import { Column } from 'drizzle-orm/column'
 import { getTableName } from 'drizzle-orm/table'
+import type { SQLiteWasmClient } from '@shared/drizzle/sqlite-wasm/client'
 
-export class SqliteWasmSession<
-  TFullSchema extends Record<string, unknown>,
-  TSchema extends TablesRelationalConfig,
+export class SQLiteWasmSession<
+  TFullSchema extends Record<string, unknown> = Record<string, never>,
+  TSchema extends
+    TablesRelationalConfig = ExtractTablesWithRelations<TFullSchema>,
 > extends SQLiteSession<'sync', SQLiteWasmRunResult, TFullSchema, TSchema> {
   static readonly [entityKind]: string = 'SQLiteWasmSession'
 
   constructor(
-    private connector: SqliteWasmConnector,
+    private client: SQLiteWasmClient,
     dialect: SQLiteSyncDialect,
     private schema: RelationalSchemaConfig<TSchema> | undefined,
   ) {
@@ -48,9 +50,9 @@ export class SqliteWasmSession<
     isResponseInArrayMode: boolean,
     customResultMapper?: (rows: unknown[][]) => unknown,
   ): SQLiteWasmPreparedQuery<T> {
-    check(isNotNull(this.connector.database), 'Database not initialized')
+    check(isNotNull(this.client.database), 'Database not initialized')
     return new SQLiteWasmPreparedQuery<T>(
-      this.connector.database,
+      this.client.database,
       query,
       fields,
       executeMethod,
@@ -60,14 +62,12 @@ export class SqliteWasmSession<
   }
 
   override transaction<T>(
-    transaction: (
-      tx: SQLiteTransaction<'sync', SQLiteWasmRunResult, TFullSchema, TSchema>,
-    ) => T,
+    transaction: (tx: SQLiteWasmTransaction<TFullSchema, TSchema>) => T,
     config: SQLiteTransactionConfig = {},
   ): T {
     const tx = new SQLiteWasmTransaction(
       'sync',
-      // @ts-expect-error
+      // @ts-expect-error dialect is private
       this.dialect,
       this,
       this.schema,
@@ -177,8 +177,9 @@ export class SQLiteWasmPreparedQuery<
 }
 
 export class SQLiteWasmTransaction<
-  TFullSchema extends Record<string, unknown>,
-  TSchema extends TablesRelationalConfig,
+  TFullSchema extends Record<string, unknown> = Record<string, never>,
+  TSchema extends
+    TablesRelationalConfig = ExtractTablesWithRelations<TFullSchema>,
 > extends SQLiteTransaction<
   'sync',
   SQLiteWasmRunResult,

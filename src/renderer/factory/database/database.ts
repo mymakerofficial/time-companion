@@ -1,8 +1,7 @@
 import * as schema from '@shared/drizzle/schema'
-import { SqliteWasmConnector } from '@shared/drizzle/connector/sqlite-wasm'
 import { drizzle } from '@shared/drizzle/sqlite-wasm/driver'
+import { sqliteWasm } from '@shared/drizzle/sqlite-wasm/client'
 
-export const connector = new SqliteWasmConnector()
-export const database = drizzle(connector, {
+export const database = drizzle(sqliteWasm(), {
   schema,
 })
