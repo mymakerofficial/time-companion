@@ -24,11 +24,6 @@ import {
 } from '@shared/lib/utils/checks'
 import type { Nullable } from '@shared/lib/utils/types'
 import { Duration } from '@shared/lib/datetime/duration'
-import {
-  type DatabaseError,
-  errorIsUndefinedColumn,
-  errorIsUniqueViolation,
-} from '@database/types/errors'
 import type { Database, Transaction } from '@shared/drizzle/database'
 import { and, asc, eq, isNull as colIsNull, ne } from 'drizzle-orm'
 import { todo } from '@shared/lib/utils/todo'
@@ -231,18 +226,6 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
       .returning()
     check(isNotEmpty(res), `Time entry with id "${id}" not found.`)
   }
-}
-
-function resolveError(error: DatabaseError): never {
-  if (errorIsUniqueViolation(error)) {
-    throw new TimeEntryUniqueViolation(error.columnName, error.value)
-  }
-
-  if (errorIsUndefinedColumn(error)) {
-    throw new TimeEntryUndefinedFieldViolation(error.columnName)
-  }
-
-  throw error
 }
 
 const TIME_ENTRY_MAX_DURATION = Duration.from({ hours: 24 })

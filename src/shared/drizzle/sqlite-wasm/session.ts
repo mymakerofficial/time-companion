@@ -72,13 +72,45 @@ export class SQLiteWasmSession<
       this,
       this.schema,
     )
-    this.run(sql.raw(`begin${config?.behavior ? ' ' + config.behavior : ''}`))
+    this.run(sql.raw(`begin${config.behavior ? ` ${config.behavior}` : ''}`))
     try {
       const result = transaction(tx)
       this.run(sql`commit`)
       return result
     } catch (err) {
       this.run(sql`rollback`)
+      throw err
+    }
+  }
+}
+
+export class SQLiteWasmTransaction<
+  TFullSchema extends Record<string, unknown> = Record<string, never>,
+  TSchema extends
+    TablesRelationalConfig = ExtractTablesWithRelations<TFullSchema>,
+> extends SQLiteTransaction<'sync', SQLiteWasmRunResult, TFullSchema, TSchema> {
+  static readonly [entityKind]: string = 'SQLiteWasmTransaction'
+
+  override transaction<T>(
+    transaction: (tx: SQLiteWasmTransaction<TFullSchema, TSchema>) => T,
+  ): T {
+    const savepointName = `sp${this.nestedIndex + 1}`
+    const tx = new SQLiteWasmTransaction<TFullSchema, TSchema>(
+      'sync',
+      // @ts-expect-error dialect is private
+      this.dialect,
+      // @ts-expect-error session is private
+      this.session,
+      this.schema,
+      this.nestedIndex + 1,
+    )
+    tx.run(sql.raw(`savepoint ${savepointName}`))
+    try {
+      const result = transaction(tx)
+      tx.run(sql.raw(`release savepoint ${savepointName}`))
+      return result
+    } catch (err) {
+      tx.run(sql.raw(`rollback to savepoint ${savepointName}`))
       throw err
     }
   }
@@ -94,6 +126,8 @@ export class SQLiteWasmPreparedQuery<
   values: T['values']
   execute: T['execute']
 }> {
+  static readonly [entityKind]: string = 'SQLiteWasmPreparedQuery'
+
   constructor(
     private database: SqliteDatabase,
     query: Query,
@@ -175,17 +209,6 @@ export class SQLiteWasmPreparedQuery<
     })
   }
 }
-
-export class SQLiteWasmTransaction<
-  TFullSchema extends Record<string, unknown> = Record<string, never>,
-  TSchema extends
-    TablesRelationalConfig = ExtractTablesWithRelations<TFullSchema>,
-> extends SQLiteTransaction<
-  'sync',
-  SQLiteWasmRunResult,
-  TFullSchema,
-  TSchema
-> {}
 
 /***
  * drizzle internal function

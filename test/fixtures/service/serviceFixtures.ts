@@ -25,6 +25,7 @@ import { TimeEntryTestHelpers } from '@test/fixtures/service/timeEntryTestHelper
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import * as schema from '@shared/drizzle/schema'
 import type { Database } from '@shared/drizzle/database'
+import { fixTransactions } from '@shared/drizzle/transaction'
 
 export interface ServiceFixtures {
   database: Database
@@ -41,7 +42,7 @@ export interface ServiceFixtures {
 export const useServiceFixtures = createFixtures<ServiceFixtures>({
   database: () => {
     const client = new BetterSQLite3(':memory:')
-    return drizzle(client, { schema })
+    return fixTransactions(drizzle(client, { schema }))
   },
   taskService: ({ database }) => {
     return createTaskService({
