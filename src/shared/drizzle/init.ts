@@ -15,6 +15,10 @@ export async function initialize<
     //  this has to be async
     await database.init()
   }
+
+  // enable write-ahead logging
+  database.run(sql`PRAGMA journal_mode = WAL`)
+
   // enable foreign key constraints
   database.run(sql`PRAGMA foreign_keys = ON`)
 }
