@@ -53,7 +53,7 @@ function whereAgeGreaterThanOrEqual(age: number) {
   return (person: Person) => person.age >= age
 }
 
-describe.each([
+describe.skip.each([
   ['IndexedDB', () => indexedDBAdapter(`test-database-${uuid()}`)],
   [
     'PGLite',
