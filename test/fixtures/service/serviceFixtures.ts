@@ -20,10 +20,10 @@ import {
 import { createTimeEntryPersistence } from '@shared/persistence/timeEntryPersistence'
 import { afterAll, afterEach, beforeAll } from 'vitest'
 import { DayTestHelpers } from '@test/fixtures/service/dayTestHelpers'
-
-import 'fake-indexeddb/auto'
+import BetterSQLite3 from 'better-sqlite3'
 import { TimeEntryTestHelpers } from '@test/fixtures/service/timeEntryTestHelpers'
-import { database } from '@main/factory/database/database'
+import { drizzle } from 'drizzle-orm/better-sqlite3'
+import * as schema from '@shared/drizzle/schema'
 import type { Database } from '@shared/drizzle/database'
 
 export interface ServiceFixtures {
@@ -40,7 +40,8 @@ export interface ServiceFixtures {
 
 export const useServiceFixtures = createFixtures<ServiceFixtures>({
   database: () => {
-    return database
+    const client = new BetterSQLite3(':memory:')
+    return drizzle(client, { schema })
   },
   taskService: ({ database }) => {
     return createTaskService({

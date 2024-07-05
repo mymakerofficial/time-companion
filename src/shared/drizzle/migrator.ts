@@ -6,17 +6,58 @@ import { sql } from 'drizzle-orm'
 import { getOrElse } from '@shared/lib/utils/result'
 import { firstOfOrNull } from '@shared/lib/utils/list'
 import type { MigrationMeta } from 'drizzle-orm/migrator'
+import type { MaybePromise } from '@shared/lib/utils/types'
+import { ensurePromise } from '@shared/lib/utils/guards'
 
-// TODO: This probably won't work in a non-browser environment
+export type MigratorConfig = {
+  /***
+   * The name of the migrations table.
+   *
+   * Defaults to `__drizzle_migrations`.
+   */
+  migrationsTable?: string
+  /***
+   * The base path where the migrations are stored.
+   *
+   * Defaults to `/migrations`.
+   */
+  basePath?: string
+  /***
+   * A function that fetches the migration file content.
+   *
+   * Defaults to the browser `fetch` function.
+   */
+  fetchFn?: (path: string) => MaybePromise<string>
+  /***
+   * A function that generates a hash of the migration file content.
+   *
+   * Defaults to a SHA-256 hash function using the browser Crypto API.
+   */
+  hashFn?: (input: string) => MaybePromise<string>
+}
 
 /***
  * Migrate the database to the latest version.
  *
- * This function is an adapted version of the `migrate` function from drizzle that works in a browser environment.
+ * This function is an adapted version of the drizzle `migrate` function
+ *  that supports running in a browser or node environment.
+ *  It is also optimized to only fetch necessary migrations.
  */
 export async function migrate<
   TSchema extends Record<string, unknown> = Record<string, never>,
->(database: BaseSQLiteDatabase<'sync', unknown, TSchema>) {
+>(
+  database: BaseSQLiteDatabase<'sync', unknown, TSchema>,
+  config: MigratorConfig = {},
+) {
+  const {
+    migrationsTable = '__drizzle_migrations',
+    basePath = '/migrations',
+    fetchFn: _fetchFn = browserFetchFn,
+    hashFn: _hashFn = sha256,
+  } = config
+  const fetchFn = (path: string) => ensurePromise(_fetchFn(path))
+  const hashFn = (input: string) => ensurePromise(_hashFn(input))
+
   // @ts-expect-error dialect and session are private, but we need to access it
   const { dialect, session } = database as {
     dialect: SQLiteSyncDialect
@@ -28,8 +69,6 @@ export async function migrate<
     >
   }
 
-  const migrationsTable = '__drizzle_migrations'
-
   // Migrations table might not exist yet, so catch the error and use an empty array instead
   const dbMigrations = getOrElse(
     () =>
@@ -40,7 +79,10 @@ export async function migrate<
   ).map(([id, hash, createdAt]) => ({ id, hash, createdAt: Number(createdAt) }))
   const lastMigration = firstOfOrNull(dbMigrations)
 
-  const journal = await fetchJournal()
+  const journal = await fetchJournal(
+    (path) => ensurePromise(fetchFn(path)),
+    basePath,
+  )
 
   const migrationQueries: MigrationMeta[] = []
   for (const journalEntry of journal.entries) {
@@ -48,9 +90,13 @@ export async function migrate<
       continue
     }
 
-    const query = await fetchMigration(journalEntry.tag)
+    const query = await fetchMigration(
+      (path) => ensurePromise(fetchFn(path)),
+      basePath,
+      journalEntry.tag,
+    )
     const sql = query.split('--> statement-breakpoint')
-    const hash = await sha256(query)
+    const hash = await hashFn(query)
 
     migrationQueries.push({
       sql,
@@ -61,22 +107,34 @@ export async function migrate<
   }
 
   await new Promise<void>((resolve) => {
-    dialect.migrate(migrationQueries, session)
+    dialect.migrate(migrationQueries, session, migrationsTable)
     resolve()
   })
 }
 
-async function fetchJournal() {
-  const journalResponse = await fetch('/migrations/meta/_journal.json')
-  const journalText = await journalResponse.text()
-  return JSON.parse(journalText) as {
+export async function browserFetchFn(path: string) {
+  const response = await fetch(path)
+  return await response.text()
+}
+
+async function fetchJournal(
+  fetchFn: (path: string) => Promise<string>,
+  basePath: string,
+) {
+  const path = `${basePath}/meta/_journal.json`
+  const text = await fetchFn(path)
+  return JSON.parse(text) as {
     entries: { idx: number; when: number; tag: string; breakpoints: boolean }[]
   }
 }
 
-async function fetchMigration(tag: string) {
-  const migrationResponse = await fetch(`/migrations/${tag}.sql`)
-  return await migrationResponse.text()
+async function fetchMigration(
+  fetchFn: (path: string) => Promise<string>,
+  basePath: string,
+  tag: string,
+) {
+  const path = `${basePath}/${tag}.sql`
+  return await fetchFn(path)
 }
 
 /***
