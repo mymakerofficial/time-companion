@@ -36,5 +36,9 @@ export class ServiceTestHelpers {
     }
   }
 
-  async teardown() {}
+  async teardown() {
+    for (const table of valuesOf(schema)) {
+      await this.database.run(sql`DROP TABLE IF EXISTS ${table}`)
+    }
+  }
 }
