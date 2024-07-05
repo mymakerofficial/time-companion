@@ -6,14 +6,10 @@ import {
 } from '@shared/model/task'
 import { check, isNotEmpty } from '@shared/lib/utils/checks'
 import { firstOf } from '@shared/lib/utils/list'
-import {
-  type DatabaseError,
-  errorIsUndefinedColumn,
-  errorIsUniqueViolation,
-} from '@database/types/errors'
 import { toTaskDto } from '@shared/model/mappers/task'
 import type { Database } from '@shared/drizzle/database'
 import { and, asc, eq, isNull } from 'drizzle-orm'
+import { handleSqliteError } from '@shared/drizzle/error'
 
 export interface TaskPersistenceDependencies {
   database: Database
@@ -37,28 +33,14 @@ export class TaskPersistenceImpl implements TaskPersistence {
     this.database = deps.database
   }
 
-  protected resolveError(error: DatabaseError): never {
-    if (errorIsUniqueViolation(error)) {
-      throw new Error(
-        `Task with ${error.columnName} "${error.value}" already exists.`,
-      )
-    }
-
-    if (errorIsUndefinedColumn(error)) {
-      throw new Error(
-        `Tried to set value for undefined field "${error.columnName}" on task.`,
-      )
-    }
-
-    throw error
-  }
-
   async getTasks(): Promise<Array<TaskDto>> {
     const res = await this.database
       .select()
       .from(tasksTable)
       .where(isNull(tasksTable.deletedAt))
       .orderBy(asc(tasksTable.displayName))
+      .catch(handleSqliteError)
+
     return res.map(toTaskDto)
   }
 
@@ -68,6 +50,8 @@ export class TaskPersistenceImpl implements TaskPersistence {
       .from(tasksTable)
       .where(and(eq(tasksTable.id, id), isNull(tasksTable.deletedAt)))
       .limit(1)
+      .catch(handleSqliteError)
+
     check(isNotEmpty(res), `Task with id "${id}" not found.`)
     return toTaskDto(firstOf(res))
   }
@@ -86,6 +70,8 @@ export class TaskPersistenceImpl implements TaskPersistence {
       .set(partialTask)
       .where(and(eq(tasksTable.id, id), isNull(tasksTable.deletedAt)))
       .returning()
+      .catch(handleSqliteError)
+
     check(isNotEmpty(res), `Task with id "${id}" not found.`)
     return toTaskDto(firstOf(res))
   }
@@ -96,6 +82,8 @@ export class TaskPersistenceImpl implements TaskPersistence {
       .set({ deletedAt: new Date() })
       .where(and(eq(tasksTable.id, id), isNull(tasksTable.deletedAt)))
       .returning()
+      .catch(handleSqliteError)
+
     check(isNotEmpty(res), `Task with id "${id}" not found.`)
   }
 }

@@ -1,15 +1,11 @@
 import { type CreateDay, type DayDto, daysTable } from '@shared/model/day'
 import { toDayDto } from '@shared/model/mappers/day'
 import { check, isNotEmpty } from '@shared/lib/utils/checks'
-import {
-  type DatabaseError,
-  errorIsUndefinedColumn,
-  errorIsUniqueViolation,
-} from '@database/types/errors'
 import type { PlainDate } from '@shared/lib/datetime/plainDate'
 import type { Database } from '@shared/drizzle/database'
 import { and, eq, isNull } from 'drizzle-orm'
 import { firstOf } from '@shared/lib/utils/list'
+import { handleSqliteError } from '@shared/drizzle/error'
 
 export type DayPersistenceDependencies = {
   database: Database
@@ -35,27 +31,13 @@ class DayPersistenceImpl implements DayPersistence {
     this.database = deps.database
   }
 
-  protected resolveError(error: DatabaseError): never {
-    if (errorIsUniqueViolation(error)) {
-      throw new Error(
-        `Day with ${error.columnName} "${error.value}" already exists.`,
-      )
-    }
-
-    if (errorIsUndefinedColumn(error)) {
-      throw new Error(
-        `Tried to set value for undefined field "${error.columnName}" on day.`,
-      )
-    }
-
-    throw error
-  }
-
   async getDays(): Promise<Array<DayDto>> {
     const res = await this.database
       .select()
       .from(daysTable)
       .where(isNull(daysTable.deletedAt))
+      .catch(handleSqliteError)
+
     return res.map(toDayDto)
   }
 
@@ -65,6 +47,8 @@ class DayPersistenceImpl implements DayPersistence {
       .from(daysTable)
       .where(and(eq(daysTable.id, id), isNull(daysTable.deletedAt)))
       .limit(1)
+      .catch(handleSqliteError)
+
     check(isNotEmpty(res), `Day with id "${id}" not found.`)
     return toDayDto(firstOf(res))
   }
@@ -77,6 +61,8 @@ class DayPersistenceImpl implements DayPersistence {
         and(eq(daysTable.date, date.toDate()), isNull(daysTable.deletedAt)),
       )
       .limit(1)
+      .catch(handleSqliteError)
+
     check(isNotEmpty(res), `Day with date "${date}" not found.`)
     return toDayDto(firstOf(res))
   }
@@ -90,6 +76,8 @@ class DayPersistenceImpl implements DayPersistence {
           day.targetBillableDuration?.total('milliseconds') ?? null,
       })
       .returning()
+      .catch(handleSqliteError)
+
     return toDayDto(firstOf(res))
   }
 }

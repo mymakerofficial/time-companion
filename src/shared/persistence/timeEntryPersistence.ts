@@ -27,6 +27,7 @@ import { Duration } from '@shared/lib/datetime/duration'
 import type { Database, Transaction } from '@shared/drizzle/database'
 import { and, asc, eq, isNull as colIsNull, ne } from 'drizzle-orm'
 import { todo } from '@shared/lib/utils/todo'
+import { handleSqliteError } from '@shared/drizzle/error'
 
 class TimeEntryUniqueViolation extends IllegalStateError {
   constructor(columnName: string, value: string) {
@@ -134,6 +135,8 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
       .from(timeEntriesTable)
       .where(eq(timeEntriesTable.id, id))
       .limit(1)
+      .catch(handleSqliteError)
+
     return firstOfOrNull(res.map(toTimeEntryDto))
   }
 
@@ -148,6 +151,8 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
         ),
       )
       .orderBy(asc(timeEntriesTable.startedAt))
+      .catch(handleSqliteError)
+
     return res.map(toTimeEntryDto)
   }
 
@@ -165,6 +170,8 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
         ),
       )
       .limit(1)
+      .catch(handleSqliteError)
+
     return firstOfOrNull(res.map(toTimeEntryDto))
   }
 
@@ -181,6 +188,7 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
         .insert(timeEntriesTable)
         .values(timeEntryEntityCreateFrom(timeEntry))
         .returning()
+        .catch(handleSqliteError)
         .then((res) => firstOf(res.map(toTimeEntryDto)))
 
       await checkConstraints(tx, timeEntry, res.id)
@@ -204,6 +212,7 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
           ),
         )
         .returning()
+        .catch(handleSqliteError)
         .then((res) => firstOfOrNull(res.map(toTimeEntryDto)))
 
       check(isNotNull(res), `Time entry with id "${id}" not found.`)
@@ -224,6 +233,8 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
         and(eq(timeEntriesTable.id, id), colIsNull(timeEntriesTable.deletedAt)),
       )
       .returning()
+      .catch(handleSqliteError)
+
     check(isNotEmpty(res), `Time entry with id "${id}" not found.`)
   }
 }
@@ -277,6 +288,7 @@ async function checkConstraints(
     )
     .limit(1)
     .then((res) => firstOfOrNull(res.map(toDayDto)))
+    .catch(handleSqliteError)
 
   check(isNotNull(day), `Day with id "${timeEntry.dayId}" not found.`)
 
@@ -293,6 +305,7 @@ async function checkConstraints(
     )
     .orderBy(asc(timeEntriesTable.startedAt))
     .then((res) => res.map(toTimeEntryDto))
+    .catch(handleSqliteError)
 
   const lowerBound = day.date.toPlainDateTime()
   const timeEntryEarliest = timeEntry.startedAt

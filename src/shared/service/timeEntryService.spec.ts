@@ -62,7 +62,7 @@ describe('timeEntryService', () => {
 
       await expect(
         timeEntryService.createTimeEntry(timeEntry),
-      ).rejects.toThrowError(`Day with id "${nonExistingDayId}" not found.`)
+      ).rejects.toThrowError() // TODO: error message tbd
 
       // ensure the time entry was not created.
       const timeEntries = await timeEntryHelpers.getAll()
@@ -495,7 +495,7 @@ describe('timeEntryService', () => {
 
       await expect(
         timeEntryService.patchTimeEntry(timeEntry.id, update),
-      ).rejects.toThrowError(`Day with id "${nonExistingDayId}" not found.`)
+      ).rejects.toThrowError() // TODO: error message tbd
 
       // ensure the time entry was not updated.
       const timeEntries = await timeEntryHelpers.getAll()

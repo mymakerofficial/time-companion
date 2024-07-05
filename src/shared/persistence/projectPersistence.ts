@@ -6,14 +6,10 @@ import {
 } from '@shared/model/project'
 import { check, isNotEmpty } from '@shared/lib/utils/checks'
 import { firstOf } from '@shared/lib/utils/list'
-import {
-  type DatabaseError,
-  errorIsUndefinedColumn,
-  errorIsUniqueViolation,
-} from '@database/types/errors'
 import { toProjectDto } from '@shared/model/mappers/project'
 import type { Database } from '@shared/drizzle/database'
 import { and, asc, eq, isNull } from 'drizzle-orm'
+import { handleSqliteError } from '@shared/drizzle/error'
 
 export interface ProjectPersistenceDependencies {
   database: Database
@@ -38,28 +34,14 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     this.database = deps.database
   }
 
-  protected resolveError(error: DatabaseError): never {
-    if (errorIsUniqueViolation(error)) {
-      throw new Error(
-        `Project with ${error.columnName} "${error.value}" already exists.`,
-      )
-    }
-
-    if (errorIsUndefinedColumn(error)) {
-      throw new Error(
-        `Tried to set value for undefined field "${error.columnName}" on project.`,
-      )
-    }
-
-    throw error
-  }
-
   async getProjects(): Promise<Array<ProjectDto>> {
     const res = await this.database
       .select()
       .from(projectsTable)
       .where(isNull(projectsTable.deletedAt))
       .orderBy(asc(projectsTable.displayName))
+      .catch(handleSqliteError)
+
     return res.map(toProjectDto)
   }
 
@@ -69,6 +51,8 @@ class ProjectPersistenceImpl implements ProjectPersistence {
       .from(projectsTable)
       .where(and(eq(projectsTable.id, id), isNull(projectsTable.deletedAt)))
       .limit(1)
+      .catch(handleSqliteError)
+
     check(isNotEmpty(res), `Project with id "${id}" not found.`)
     return toProjectDto(firstOf(res))
   }
@@ -84,6 +68,8 @@ class ProjectPersistenceImpl implements ProjectPersistence {
         ),
       )
       .limit(1)
+      .catch(handleSqliteError)
+
     check(
       isNotEmpty(res),
       `Project with displayName "${displayName}" not found.`,
@@ -96,6 +82,8 @@ class ProjectPersistenceImpl implements ProjectPersistence {
       .insert(projectsTable)
       .values(project)
       .returning()
+      .catch(handleSqliteError)
+
     return toProjectDto(firstOf(res))
   }
 
@@ -108,6 +96,8 @@ class ProjectPersistenceImpl implements ProjectPersistence {
       .set(partialProject)
       .where(and(eq(projectsTable.id, id), isNull(projectsTable.deletedAt)))
       .returning()
+      .catch(handleSqliteError)
+
     check(isNotEmpty(res), `Project with id "${id}" not found.`)
     return toProjectDto(firstOf(res))
   }
@@ -120,6 +110,8 @@ class ProjectPersistenceImpl implements ProjectPersistence {
       })
       .where(and(eq(projectsTable.id, id), isNull(projectsTable.deletedAt)))
       .returning()
+      .catch(handleSqliteError)
+
     check(isNotEmpty(res), `Project with id "${id}" not found.`)
   }
 }
