@@ -5,6 +5,8 @@ import type { PlainTime } from '@shared/lib/datetime/plainTime'
 import { Duration } from '@shared/lib/datetime/duration'
 
 export class PlainDate extends Temporal.PlainDate {
+  static readonly Epoch = PlainDate.from({ year: 1970, month: 1, day: 1 })
+
   static from(
     item: Date | Temporal.PlainDate | Temporal.PlainDateLike | string,
     options?: Temporal.AssignmentOptions,
