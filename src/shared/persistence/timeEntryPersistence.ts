@@ -256,7 +256,7 @@ async function checkConstraints(
           isNull(timeEntriesTable.stoppedAt),
           isNull(timeEntriesTable.deletedAt),
           // Ignore the time entry we are currently updating.
-          isDefined(ignoreId) ? ne(timeEntriesTable.id, ignoreId) : undefined,
+          ne(timeEntriesTable.id, ignoreId!).if(isDefined(ignoreId)),
         ),
       )
       .limit(1)
@@ -285,7 +285,7 @@ async function checkConstraints(
         eq(timeEntriesTable.dayId, timeEntry.dayId),
         isNull(timeEntriesTable.deletedAt),
         // Ignore the time entry we are currently updating.
-        isDefined(ignoreId) ? ne(timeEntriesTable.id, ignoreId) : undefined,
+        ne(timeEntriesTable.id, ignoreId!).if(isDefined(ignoreId)),
       ),
     )
     .orderBy(asc(timeEntriesTable.startedAt))
