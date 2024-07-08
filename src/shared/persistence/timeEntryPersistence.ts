@@ -5,15 +5,9 @@ import {
   type TimeEntryDto,
   type UpdateTimeEntry,
 } from '@shared/model/timeEntry'
-import {
-  timeEntryEntityCreateFrom,
-  timeEntryEntityUpdateFrom,
-  toTimeEntryDto,
-} from '@shared/model/mappers/timeEntry'
 import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 import { firstOf, firstOfOrNull } from '@shared/lib/utils/list'
 import { daysTable } from '@shared/model/day'
-import { toDayDto } from '@shared/model/mappers/day'
 import {
   check,
   IllegalStateError,
@@ -25,7 +19,7 @@ import {
 import type { Nullable } from '@shared/lib/utils/types'
 import { Duration } from '@shared/lib/datetime/duration'
 import type { Database, Transaction } from '@shared/drizzle/database'
-import { and, asc, eq, isNull as colIsNull, ne } from 'drizzle-orm'
+import { and, asc, eq, isNull, ne } from 'drizzle-orm'
 import { todo } from '@shared/lib/utils/todo'
 import { handleSqliteError } from '@shared/drizzle/error'
 
@@ -130,49 +124,45 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
   }
 
   async getTimeEntryById(id: string): Promise<Nullable<TimeEntryDto>> {
-    const res = await this.database
+    return await this.database
       .select()
       .from(timeEntriesTable)
       .where(eq(timeEntriesTable.id, id))
       .limit(1)
       .catch(handleSqliteError)
-
-    return firstOfOrNull(res.map(toTimeEntryDto))
+      .then(firstOfOrNull)
   }
 
   async getTimeEntriesByDayId(dayId: string): Promise<Array<TimeEntryDto>> {
-    const res = await this.database
+    return await this.database
       .select()
       .from(timeEntriesTable)
       .where(
         and(
           eq(timeEntriesTable.dayId, dayId),
-          colIsNull(timeEntriesTable.deletedAt),
+          isNull(timeEntriesTable.deletedAt),
         ),
       )
       .orderBy(asc(timeEntriesTable.startedAt))
       .catch(handleSqliteError)
-
-    return res.map(toTimeEntryDto)
   }
 
   async getRunningTimeEntry(
     lowerBound?: PlainDateTime,
     upperBound?: PlainDateTime,
   ): Promise<Nullable<TimeEntryDto>> {
-    const res = await this.database
+    return await this.database
       .select()
       .from(timeEntriesTable)
       .where(
         and(
-          colIsNull(timeEntriesTable.stoppedAt),
-          colIsNull(timeEntriesTable.deletedAt),
+          isNull(timeEntriesTable.stoppedAt),
+          isNull(timeEntriesTable.deletedAt),
         ),
       )
       .limit(1)
       .catch(handleSqliteError)
-
-    return firstOfOrNull(res.map(toTimeEntryDto))
+      .then(firstOfOrNull)
   }
 
   async getTimeEntriesBetween(
@@ -186,10 +176,10 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
     return await this.database.transaction(async (tx) => {
       const res = await tx
         .insert(timeEntriesTable)
-        .values(timeEntryEntityCreateFrom(timeEntry))
+        .values(timeEntry)
         .returning()
         .catch(handleSqliteError)
-        .then((res) => firstOf(res.map(toTimeEntryDto)))
+        .then(firstOf)
 
       await checkConstraints(tx, timeEntry, res.id)
 
@@ -204,16 +194,13 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
     return await this.database.transaction(async (tx) => {
       const res = await tx
         .update(timeEntriesTable)
-        .set(timeEntryEntityUpdateFrom(timeEntry))
+        .set(timeEntry)
         .where(
-          and(
-            eq(timeEntriesTable.id, id),
-            colIsNull(timeEntriesTable.deletedAt),
-          ),
+          and(eq(timeEntriesTable.id, id), isNull(timeEntriesTable.deletedAt)),
         )
         .returning()
         .catch(handleSqliteError)
-        .then((res) => firstOfOrNull(res.map(toTimeEntryDto)))
+        .then(firstOfOrNull)
 
       check(isNotNull(res), `Time entry with id "${id}" not found.`)
 
@@ -230,7 +217,7 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
         deletedAt: PlainDateTime.now(),
       })
       .where(
-        and(eq(timeEntriesTable.id, id), colIsNull(timeEntriesTable.deletedAt)),
+        and(eq(timeEntriesTable.id, id), isNull(timeEntriesTable.deletedAt)),
       )
       .returning()
       .catch(handleSqliteError)
@@ -266,8 +253,8 @@ async function checkConstraints(
       .from(timeEntriesTable)
       .where(
         and(
-          colIsNull(timeEntriesTable.stoppedAt),
-          colIsNull(timeEntriesTable.deletedAt),
+          isNull(timeEntriesTable.stoppedAt),
+          isNull(timeEntriesTable.deletedAt),
           // Ignore the time entry we are currently updating.
           isDefined(ignoreId) ? ne(timeEntriesTable.id, ignoreId) : undefined,
         ),
@@ -283,12 +270,10 @@ async function checkConstraints(
   const day = await tx
     .select()
     .from(daysTable)
-    .where(
-      and(eq(daysTable.id, timeEntry.dayId), colIsNull(daysTable.deletedAt)),
-    )
+    .where(and(eq(daysTable.id, timeEntry.dayId), isNull(daysTable.deletedAt)))
     .limit(1)
-    .then((res) => firstOfOrNull(res.map(toDayDto)))
     .catch(handleSqliteError)
+    .then(firstOfOrNull)
 
   check(isNotNull(day), `Day with id "${timeEntry.dayId}" not found.`)
 
@@ -298,13 +283,12 @@ async function checkConstraints(
     .where(
       and(
         eq(timeEntriesTable.dayId, timeEntry.dayId),
-        colIsNull(timeEntriesTable.deletedAt),
+        isNull(timeEntriesTable.deletedAt),
         // Ignore the time entry we are currently updating.
         isDefined(ignoreId) ? ne(timeEntriesTable.id, ignoreId) : undefined,
       ),
     )
     .orderBy(asc(timeEntriesTable.startedAt))
-    .then((res) => res.map(toTimeEntryDto))
     .catch(handleSqliteError)
 
   const lowerBound = day.date.toPlainDateTime()

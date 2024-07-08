@@ -4,9 +4,8 @@ import {
   tasksTable,
   type UpdateTask,
 } from '@shared/model/task'
-import { check, isNotEmpty } from '@shared/lib/utils/checks'
-import { firstOf } from '@shared/lib/utils/list'
-import { toTaskDto } from '@shared/model/mappers/task'
+import { check, isNotEmpty, isNotNull } from '@shared/lib/utils/checks'
+import { firstOf, firstOfOrNull } from '@shared/lib/utils/list'
 import type { Database } from '@shared/drizzle/database'
 import { and, asc, eq, isNull } from 'drizzle-orm'
 import { handleSqliteError } from '@shared/drizzle/error'
@@ -35,14 +34,12 @@ export class TaskPersistenceImpl implements TaskPersistence {
   }
 
   async getTasks(): Promise<Array<TaskDto>> {
-    const res = await this.database
+    return await this.database
       .select()
       .from(tasksTable)
       .where(isNull(tasksTable.deletedAt))
       .orderBy(asc(tasksTable.displayName))
       .catch(handleSqliteError)
-
-    return res.map(toTaskDto)
   }
 
   async getTaskById(id: string): Promise<TaskDto> {
@@ -52,14 +49,20 @@ export class TaskPersistenceImpl implements TaskPersistence {
       .where(and(eq(tasksTable.id, id), isNull(tasksTable.deletedAt)))
       .limit(1)
       .catch(handleSqliteError)
+      .then(firstOfOrNull)
 
-    check(isNotEmpty(res), `Task with id "${id}" not found.`)
-    return toTaskDto(firstOf(res))
+    check(isNotNull(res), `Task with id "${id}" not found.`)
+
+    return res
   }
 
   async createTask(task: CreateTask): Promise<TaskDto> {
-    const res = await this.database.insert(tasksTable).values(task).returning()
-    return toTaskDto(firstOf(res))
+    return await this.database
+      .insert(tasksTable)
+      .values(task)
+      .returning()
+      .catch(handleSqliteError)
+      .then(firstOf)
   }
 
   async patchTaskById(
@@ -72,9 +75,11 @@ export class TaskPersistenceImpl implements TaskPersistence {
       .where(and(eq(tasksTable.id, id), isNull(tasksTable.deletedAt)))
       .returning()
       .catch(handleSqliteError)
+      .then(firstOfOrNull)
 
-    check(isNotEmpty(res), `Task with id "${id}" not found.`)
-    return toTaskDto(firstOf(res))
+    check(isNotNull(res), `Task with id "${id}" not found.`)
+
+    return res
   }
 
   async softDeleteTask(id: string): Promise<void> {

@@ -4,9 +4,8 @@ import {
   projectsTable,
   type UpdateProject,
 } from '@shared/model/project'
-import { check, isNotEmpty } from '@shared/lib/utils/checks'
-import { firstOf } from '@shared/lib/utils/list'
-import { toProjectDto } from '@shared/model/mappers/project'
+import { check, isNotEmpty, isNotNull } from '@shared/lib/utils/checks'
+import { firstOf, firstOfOrNull } from '@shared/lib/utils/list'
 import type { Database } from '@shared/drizzle/database'
 import { and, asc, eq, isNull } from 'drizzle-orm'
 import { handleSqliteError } from '@shared/drizzle/error'
@@ -36,14 +35,12 @@ class ProjectPersistenceImpl implements ProjectPersistence {
   }
 
   async getProjects(): Promise<Array<ProjectDto>> {
-    const res = await this.database
+    return await this.database
       .select()
       .from(projectsTable)
       .where(isNull(projectsTable.deletedAt))
       .orderBy(asc(projectsTable.displayName))
       .catch(handleSqliteError)
-
-    return res.map(toProjectDto)
   }
 
   async getProjectById(id: string): Promise<ProjectDto> {
@@ -53,9 +50,11 @@ class ProjectPersistenceImpl implements ProjectPersistence {
       .where(and(eq(projectsTable.id, id), isNull(projectsTable.deletedAt)))
       .limit(1)
       .catch(handleSqliteError)
+      .then(firstOfOrNull)
 
-    check(isNotEmpty(res), `Project with id "${id}" not found.`)
-    return toProjectDto(firstOf(res))
+    check(isNotNull(res), `Project with id "${id}" not found.`)
+
+    return res
   }
 
   async getProjectByDisplayName(displayName: string): Promise<ProjectDto> {
@@ -70,22 +69,23 @@ class ProjectPersistenceImpl implements ProjectPersistence {
       )
       .limit(1)
       .catch(handleSqliteError)
+      .then(firstOfOrNull)
 
     check(
-      isNotEmpty(res),
+      isNotNull(res),
       `Project with displayName "${displayName}" not found.`,
     )
-    return toProjectDto(firstOf(res))
+
+    return res
   }
 
   async createProject(project: CreateProject): Promise<ProjectDto> {
-    const res = await this.database
+    return await this.database
       .insert(projectsTable)
       .values(project)
       .returning()
       .catch(handleSqliteError)
-
-    return toProjectDto(firstOf(res))
+      .then(firstOf)
   }
 
   async patchProjectById(
@@ -98,9 +98,11 @@ class ProjectPersistenceImpl implements ProjectPersistence {
       .where(and(eq(projectsTable.id, id), isNull(projectsTable.deletedAt)))
       .returning()
       .catch(handleSqliteError)
+      .then(firstOfOrNull)
 
-    check(isNotEmpty(res), `Project with id "${id}" not found.`)
-    return toProjectDto(firstOf(res))
+    check(isNotNull(res), `Project with id "${id}" not found.`)
+
+    return res
   }
 
   async softDeleteProject(id: string): Promise<void> {

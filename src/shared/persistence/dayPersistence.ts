@@ -1,10 +1,9 @@
 import { type CreateDay, type DayDto, daysTable } from '@shared/model/day'
-import { toDayDto } from '@shared/model/mappers/day'
-import { check, isNotEmpty } from '@shared/lib/utils/checks'
+import { check, isNotNull } from '@shared/lib/utils/checks'
 import type { PlainDate } from '@shared/lib/datetime/plainDate'
 import type { Database } from '@shared/drizzle/database'
 import { and, eq, isNull } from 'drizzle-orm'
-import { firstOf } from '@shared/lib/utils/list'
+import { firstOf, firstOfOrNull } from '@shared/lib/utils/list'
 import { handleSqliteError } from '@shared/drizzle/error'
 
 export type DayPersistenceDependencies = {
@@ -32,13 +31,11 @@ class DayPersistenceImpl implements DayPersistence {
   }
 
   async getDays(): Promise<Array<DayDto>> {
-    const res = await this.database
+    return await this.database
       .select()
       .from(daysTable)
       .where(isNull(daysTable.deletedAt))
       .catch(handleSqliteError)
-
-    return res.map(toDayDto)
   }
 
   async getDayById(id: string): Promise<DayDto> {
@@ -48,9 +45,11 @@ class DayPersistenceImpl implements DayPersistence {
       .where(and(eq(daysTable.id, id), isNull(daysTable.deletedAt)))
       .limit(1)
       .catch(handleSqliteError)
+      .then(firstOfOrNull)
 
-    check(isNotEmpty(res), `Day with id "${id}" not found.`)
-    return toDayDto(firstOf(res))
+    check(isNotNull(res), `Day with id "${id}" not found.`)
+
+    return res
   }
 
   async getDayByDate(date: PlainDate): Promise<DayDto> {
@@ -60,18 +59,19 @@ class DayPersistenceImpl implements DayPersistence {
       .where(and(eq(daysTable.date, date), isNull(daysTable.deletedAt)))
       .limit(1)
       .catch(handleSqliteError)
+      .then(firstOfOrNull)
 
-    check(isNotEmpty(res), `Day with date "${date}" not found.`)
-    return toDayDto(firstOf(res))
+    check(isNotNull(res), `Day with date "${date}" not found.`)
+
+    return res
   }
 
   async createDay(day: CreateDay): Promise<DayDto> {
-    const res = await this.database
+    return await this.database
       .insert(daysTable)
       .values(day)
       .returning()
       .catch(handleSqliteError)
-
-    return toDayDto(firstOf(res))
+      .then(firstOf)
   }
 }
