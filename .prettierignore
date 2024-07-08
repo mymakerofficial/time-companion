@@ -2,6 +2,7 @@
 dist
 dev-dist
 dist-electron
+public
 
 vercel.json
 
