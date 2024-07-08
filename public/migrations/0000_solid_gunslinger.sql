@@ -4,7 +4,7 @@ CREATE TABLE `days` (
 	`modified_at` integer,
 	`deleted_at` integer,
 	`date` integer NOT NULL,
-	`target_billable_duration_ms` integer
+	`target_billable_duration` integer
 );
 --> statement-breakpoint
 CREATE TABLE `projects` (

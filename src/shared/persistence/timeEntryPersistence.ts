@@ -227,7 +227,7 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
     const res = await this.database
       .update(timeEntriesTable)
       .set({
-        deletedAt: new Date(),
+        deletedAt: PlainDateTime.now(),
       })
       .where(
         and(eq(timeEntriesTable.id, id), colIsNull(timeEntriesTable.deletedAt)),

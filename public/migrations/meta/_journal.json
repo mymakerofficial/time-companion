@@ -1,1 +1,13 @@
-{"version":"7","dialect":"sqlite","entries":[{"idx":0,"version":"6","when":1720021186179,"tag":"0000_solid_gunslinger","breakpoints":true}]}
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1720462604601,
+      "tag": "0000_solid_gunslinger",
+      "breakpoints": true
+    }
+  ]
+}

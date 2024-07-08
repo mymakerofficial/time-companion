@@ -4,41 +4,16 @@
  * @see https://orm.drizzle.team/docs/migrations#quick-start
  */
 
-import {
-  integer,
-  sqliteTable,
-  text,
-  uniqueIndex,
-} from 'drizzle-orm/sqlite-core'
+import { sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core'
 import { isNull } from 'drizzle-orm'
 import { uuid } from '@shared/lib/utils/uuid'
-
-/***
- * A signed integer representing the number of milliseconds since the Unix epoch.
- *  Automatically converted to a Date object by drizzle.
- * @see https://orm.drizzle.team/docs/column-types/sqlite#integer
- */
-function timestamp(name: string) {
-  return integer(name, { mode: 'timestamp' })
-}
-
-/***
- * A signed integer representing the number of milliseconds.
- *  Name is suffixed with `_ms` to make it clear that it's in milliseconds.
- * @see https://orm.drizzle.team/docs/column-types/sqlite#integer
- */
-function duration(name: string) {
-  return integer(`${name}_ms`)
-}
-
-/***
- * A signed integer representing a boolean value.
- *  Automatically converted to a boolean by drizzle.
- * @see https://orm.drizzle.team/docs/column-types/sqlite#integer
- */
-function boolean(name: string) {
-  return integer(name, { mode: 'boolean' })
-}
+import {
+  boolean,
+  duration,
+  plainDate,
+  plainDateTime,
+} from '@shared/drizzle/columns'
+import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 
 /***
  * Common columns shared by all entity tables.
@@ -47,18 +22,18 @@ const entityMixins = {
   id: text('id')
     .primaryKey()
     .$default(() => uuid()), // automatically generate a UUID for new entities
-  createdAt: timestamp('created_at')
+  createdAt: plainDateTime('created_at')
     .notNull()
-    .$default(() => new Date()), // automatically set the creation date
-  modifiedAt: timestamp('modified_at').$onUpdate(() => new Date()), // automatically update the modification date on every change
-  deletedAt: timestamp('deleted_at'),
+    .$default(() => PlainDateTime.now()), // automatically set the creation date
+  modifiedAt: plainDateTime('modified_at').$onUpdate(() => PlainDateTime.now()), // automatically update the modification date on every change
+  deletedAt: plainDateTime('deleted_at'),
 }
 
 export const days = sqliteTable(
   'days',
   {
     ...entityMixins,
-    date: timestamp('date').notNull(),
+    date: plainDate('date').notNull(),
     targetBillableDuration: duration('target_billable_duration'),
   },
   (table) => ({
@@ -115,8 +90,8 @@ export const timeEntries = sqliteTable(
       onDelete: 'set null',
     }),
     description: text('description').notNull(),
-    startedAt: timestamp('started_at').notNull(),
-    stoppedAt: timestamp('stopped_at'),
+    startedAt: plainDateTime('started_at').notNull(),
+    stoppedAt: plainDateTime('stopped_at'),
   },
   (table) => ({
     // it's impossible to have two time entries starting at the same time without also overlapping

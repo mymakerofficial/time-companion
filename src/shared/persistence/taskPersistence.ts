@@ -10,6 +10,7 @@ import { toTaskDto } from '@shared/model/mappers/task'
 import type { Database } from '@shared/drizzle/database'
 import { and, asc, eq, isNull } from 'drizzle-orm'
 import { handleSqliteError } from '@shared/drizzle/error'
+import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 
 export interface TaskPersistenceDependencies {
   database: Database
@@ -79,7 +80,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
   async softDeleteTask(id: string): Promise<void> {
     const res = await this.database
       .update(tasksTable)
-      .set({ deletedAt: new Date() })
+      .set({ deletedAt: PlainDateTime.now() })
       .where(and(eq(tasksTable.id, id), isNull(tasksTable.deletedAt)))
       .returning()
       .catch(handleSqliteError)

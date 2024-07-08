@@ -10,6 +10,7 @@ import { toProjectDto } from '@shared/model/mappers/project'
 import type { Database } from '@shared/drizzle/database'
 import { and, asc, eq, isNull } from 'drizzle-orm'
 import { handleSqliteError } from '@shared/drizzle/error'
+import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 
 export interface ProjectPersistenceDependencies {
   database: Database
@@ -106,7 +107,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     const res = await this.database
       .update(projectsTable)
       .set({
-        deletedAt: new Date(),
+        deletedAt: PlainDateTime.now(),
       })
       .where(and(eq(projectsTable.id, id), isNull(projectsTable.deletedAt)))
       .returning()

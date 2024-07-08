@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "e9131840-ecad-4554-8097-767d9f6866e1",
+  "id": "92e50b9d-a9ee-4a23-bd18-2965a81da3cc",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "days": {
@@ -42,8 +42,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "target_billable_duration_ms": {
-          "name": "target_billable_duration_ms",
+        "target_billable_duration": {
+          "name": "target_billable_duration",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,

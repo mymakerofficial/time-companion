@@ -57,9 +57,7 @@ class DayPersistenceImpl implements DayPersistence {
     const res = await this.database
       .select()
       .from(daysTable)
-      .where(
-        and(eq(daysTable.date, date.toDate()), isNull(daysTable.deletedAt)),
-      )
+      .where(and(eq(daysTable.date, date), isNull(daysTable.deletedAt)))
       .limit(1)
       .catch(handleSqliteError)
 
@@ -70,11 +68,7 @@ class DayPersistenceImpl implements DayPersistence {
   async createDay(day: CreateDay): Promise<DayDto> {
     const res = await this.database
       .insert(daysTable)
-      .values({
-        date: day.date.toDate(),
-        targetBillableDuration:
-          day.targetBillableDuration?.total('milliseconds') ?? null,
-      })
+      .values(day)
       .returning()
       .catch(handleSqliteError)
 
