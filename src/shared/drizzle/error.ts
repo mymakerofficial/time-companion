@@ -1,3 +1,5 @@
+import type { Optional } from '@shared/lib/utils/types'
+
 export const SQLiteErrorCode = {
   Error: 'SQLITE_ERROR',
   Abort: 'SQLITE_ABORT',
@@ -24,8 +26,8 @@ export const SQLiteErrorCode = {
 export type SQLiteErrorCode =
   (typeof SQLiteErrorCode)[keyof typeof SQLiteErrorCode]
 
-const SQLiteErrorMessage: Record<SQLiteErrorCode, string> = {
-  [SQLiteErrorCode.Error]: 'Unexpected error',
+const SQLiteErrorMessage: Record<SQLiteErrorCode, Optional<string>> = {
+  [SQLiteErrorCode.Error]: undefined,
   [SQLiteErrorCode.Abort]: 'Application requested an abort',
   [SQLiteErrorCode.Busy]: 'The database file is locked',
   [SQLiteErrorCode.CantOpen]: 'Unable to open the database file',
@@ -51,23 +53,22 @@ const SQLiteErrorMessage: Record<SQLiteErrorCode, string> = {
 export class SQLiteError extends Error {
   public code: SQLiteErrorCode
 
-  constructor(code: string) {
-    super(`${code}: ${SQLiteErrorMessage[code as SQLiteErrorCode]}`)
+  constructor(code: string, message?: string) {
+    super(`${code}: ${SQLiteErrorMessage[code as SQLiteErrorCode] ?? message}`)
     this.name = 'SQLiteError'
     this.code = code as SQLiteErrorCode
   }
 }
 
 export function resolveSqliteError(error: Error): SQLiteError {
-  let code: string
   if (isSqliteWasmError(error)) {
-    code = error.message.split(':')[0]
+    const [code, message] = error.message.split(':')
+    return new SQLiteError(code, message)
   } else if (isBetterSqlite3Error(error)) {
-    code = error.code
+    return new SQLiteError(error.code, error.message)
   } else {
-    code = SQLiteErrorCode.Error
+    return new SQLiteError(SQLiteErrorCode.Error, 'Unknown SQLite error')
   }
-  return new SQLiteError(code)
 }
 
 export function handleSqliteError(error: Error): never {
