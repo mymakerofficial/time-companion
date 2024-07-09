@@ -8,6 +8,7 @@ import TableVisibilitySelect from '@renderer/components/common/table/TableVisibi
 import TableActions from '@renderer/components/common/table/TableActions.vue'
 import { Button } from '@shadcn/button'
 import { sql } from 'drizzle-orm'
+import { RefreshCw } from 'lucide-vue-next'
 
 const props = defineProps<{
   tableName: string
@@ -73,7 +74,10 @@ function handleRefresh() {
         <template #left><slot name="actions" /></template>
         <template #right>
           <TableVisibilitySelect :table="table" />
-          <Button @click="handleRefresh">Refresh</Button>
+          <Button @click="handleRefresh" class="gap-2">
+            <RefreshCw class="size-4" />
+            <span>Refresh</span>
+          </Button>
         </template>
       </TableActions>
     </template>
