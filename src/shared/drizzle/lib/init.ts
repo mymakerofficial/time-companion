@@ -1,5 +1,5 @@
 import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core/db'
-import type { SQLiteWasmDatabase } from '@shared/drizzle/sqlite-wasm/driver'
+import type { SQLiteWasmDatabase } from '@shared/drizzle/lib/sqlite-wasm/driver'
 import { isFunction } from '@shared/lib/utils/checks'
 import { sql } from 'drizzle-orm'
 

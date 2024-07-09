@@ -18,10 +18,10 @@ import {
 } from '@shared/lib/utils/checks'
 import type { Nullable } from '@shared/lib/utils/types'
 import { Duration } from '@shared/lib/datetime/duration'
-import type { Database, Transaction } from '@shared/drizzle/database'
+import type { Database } from '@shared/drizzle/database'
 import { and, asc, eq, isNull, ne } from 'drizzle-orm'
 import { todo } from '@shared/lib/utils/todo'
-import { handleSqliteError } from '@shared/drizzle/error'
+import { handleSqliteError } from '@shared/drizzle/lib/error'
 
 class TimeEntryUniqueViolation extends IllegalStateError {
   constructor(columnName: string, value: string) {
@@ -230,7 +230,7 @@ const TIME_ENTRY_MAX_DURATION = Duration.from({ hours: 24 })
 const ONE_DAY = Duration.from({ days: 1 })
 
 async function checkConstraints(
-  tx: Transaction,
+  tx: Database,
   timeEntry: TimeEntryBase,
   ignoreId?: string,
 ) {

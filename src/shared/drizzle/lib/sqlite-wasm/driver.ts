@@ -1,7 +1,7 @@
 import { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core/db'
 import type { DrizzleConfig } from 'drizzle-orm/utils'
 import { SQLiteSyncDialect } from 'drizzle-orm/sqlite-core/dialect'
-import { SQLiteWasmSession } from '@shared/drizzle/sqlite-wasm/session'
+import { SQLiteWasmSession } from '@shared/drizzle/lib/sqlite-wasm/session'
 import {
   createTableRelationsHelpers,
   extractTablesRelationalConfig,
@@ -9,8 +9,7 @@ import {
   type RelationalSchemaConfig,
   type TablesRelationalConfig,
 } from 'drizzle-orm/relations'
-import { type Sqlite3Static } from '@sqlite.org/sqlite-wasm'
-import type { SQLiteWasmClient } from '@shared/drizzle/sqlite-wasm/client'
+import type { SQLiteWasmClient } from '@shared/drizzle/lib/sqlite-wasm/client'
 
 // maybe we need to change this in the future
 export type SQLiteWasmRunResult = undefined

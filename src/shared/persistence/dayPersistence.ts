@@ -4,7 +4,7 @@ import type { PlainDate } from '@shared/lib/datetime/plainDate'
 import type { Database } from '@shared/drizzle/database'
 import { and, eq, isNull } from 'drizzle-orm'
 import { firstOf, firstOfOrNull } from '@shared/lib/utils/list'
-import { handleSqliteError } from '@shared/drizzle/error'
+import { handleSqliteError } from '@shared/drizzle/lib/error'
 
 export type DayPersistenceDependencies = {
   database: Database

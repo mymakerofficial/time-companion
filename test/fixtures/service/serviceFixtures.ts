@@ -25,7 +25,7 @@ import { TimeEntryTestHelpers } from '@test/fixtures/service/timeEntryTestHelper
 import { drizzle } from 'drizzle-orm/better-sqlite3'
 import * as schema from '@shared/drizzle/schema'
 import type { Database } from '@shared/drizzle/database'
-import { fixTransactions } from '@shared/drizzle/transaction'
+import { fixTransactions } from '@shared/drizzle/lib/transaction'
 
 export interface ServiceFixtures {
   database: Database

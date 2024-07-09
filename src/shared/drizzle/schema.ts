@@ -12,7 +12,7 @@ import {
   duration,
   plainDate,
   plainDateTime,
-} from '@shared/drizzle/columns'
+} from '@shared/drizzle/lib/columns'
 import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 
 /***

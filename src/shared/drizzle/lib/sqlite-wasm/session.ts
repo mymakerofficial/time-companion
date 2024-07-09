@@ -11,7 +11,7 @@ import {
   SQLiteTransaction,
   type SQLiteTransactionConfig,
 } from 'drizzle-orm/sqlite-core/session'
-import type { SQLiteWasmRunResult } from '@shared/drizzle/sqlite-wasm/driver'
+import type { SQLiteWasmRunResult } from '@shared/drizzle/lib/sqlite-wasm/driver'
 import type { SQLiteSyncDialect } from 'drizzle-orm/sqlite-core/dialect'
 import {
   type DriverValueDecoder,
@@ -26,7 +26,7 @@ import type { Database as SqliteDatabase } from '@sqlite.org/sqlite-wasm'
 import { check, isNotNull } from '@shared/lib/utils/checks'
 import { Column } from 'drizzle-orm/column'
 import { getTableName } from 'drizzle-orm/table'
-import type { SQLiteWasmClient } from '@shared/drizzle/sqlite-wasm/client'
+import type { SQLiteWasmClient } from '@shared/drizzle/lib/sqlite-wasm/client'
 
 export class SQLiteWasmSession<
   TFullSchema extends Record<string, unknown> = Record<string, never>,

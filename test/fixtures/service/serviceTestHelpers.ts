@@ -1,6 +1,6 @@
 import type { Database } from '@shared/drizzle/database'
-import { initialize } from '@shared/drizzle/init'
-import { migrate } from '@shared/drizzle/migrator'
+import { initialize } from '@shared/drizzle/lib/init'
+import { migrate } from '@shared/drizzle/lib/migrator'
 import * as schema from '@shared/drizzle/schema'
 import { valuesOf } from '@shared/lib/utils/object'
 import { sql } from 'drizzle-orm'

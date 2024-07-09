@@ -8,7 +8,7 @@ import { check, isNotEmpty, isNotNull } from '@shared/lib/utils/checks'
 import { firstOf, firstOfOrNull } from '@shared/lib/utils/list'
 import type { Database } from '@shared/drizzle/database'
 import { and, asc, eq, isNull } from 'drizzle-orm'
-import { handleSqliteError } from '@shared/drizzle/error'
+import { handleSqliteError } from '@shared/drizzle/lib/error'
 import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 
 export interface TaskPersistenceDependencies {
