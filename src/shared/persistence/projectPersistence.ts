@@ -7,9 +7,8 @@ import {
 import { check, isNotEmpty, isNotNull } from '@shared/lib/utils/checks'
 import { firstOf, firstOfOrNull } from '@shared/lib/utils/list'
 import type { Database } from '@shared/drizzle/database'
-import { and, asc, eq, isNull } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 import { handleSqliteError } from '@shared/drizzle/lib/error'
-import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 
 export interface ProjectPersistenceDependencies {
   database: Database
@@ -24,7 +23,7 @@ export interface ProjectPersistence {
     id: string,
     partialProject: Partial<UpdateProject>,
   ): Promise<ProjectDto>
-  softDeleteProject(id: string): Promise<void>
+  deleteProject(id: string): Promise<void>
 }
 
 class ProjectPersistenceImpl implements ProjectPersistence {
@@ -38,7 +37,6 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     return await this.database
       .select()
       .from(projectsTable)
-      .where(isNull(projectsTable.deletedAt))
       .orderBy(asc(projectsTable.displayName))
       .catch(handleSqliteError)
   }
@@ -47,7 +45,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     const res = await this.database
       .select()
       .from(projectsTable)
-      .where(and(eq(projectsTable.id, id), isNull(projectsTable.deletedAt)))
+      .where(eq(projectsTable.id, id))
       .limit(1)
       .catch(handleSqliteError)
       .then(firstOfOrNull)
@@ -61,12 +59,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     const res = await this.database
       .select()
       .from(projectsTable)
-      .where(
-        and(
-          eq(projectsTable.displayName, displayName),
-          isNull(projectsTable.deletedAt),
-        ),
-      )
+      .where(eq(projectsTable.displayName, displayName))
       .limit(1)
       .catch(handleSqliteError)
       .then(firstOfOrNull)
@@ -95,7 +88,7 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     const res = await this.database
       .update(projectsTable)
       .set(partialProject)
-      .where(and(eq(projectsTable.id, id), isNull(projectsTable.deletedAt)))
+      .where(eq(projectsTable.id, id))
       .returning()
       .catch(handleSqliteError)
       .then(firstOfOrNull)
@@ -105,13 +98,10 @@ class ProjectPersistenceImpl implements ProjectPersistence {
     return res
   }
 
-  async softDeleteProject(id: string): Promise<void> {
+  async deleteProject(id: string): Promise<void> {
     const res = await this.database
-      .update(projectsTable)
-      .set({
-        deletedAt: PlainDateTime.now(),
-      })
-      .where(and(eq(projectsTable.id, id), isNull(projectsTable.deletedAt)))
+      .delete(projectsTable)
+      .where(eq(projectsTable.id, id))
       .returning()
       .catch(handleSqliteError)
 

@@ -23,7 +23,6 @@ function timeEntryDtoContaining(timeEntry: Partial<TimeEntryBase>) {
       : expect.toBeOneOf([null, expect.any(PlainDateTime)]),
     createdAt: expect.any(PlainDateTime),
     modifiedAt: expect.toBeOneOf([null, expect.any(PlainDateTime)]),
-    deletedAt: null,
   })
 }
 

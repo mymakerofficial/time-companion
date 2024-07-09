@@ -5,7 +5,7 @@ import ProjectForm from '@renderer/components/common/forms/project/ProjectForm.v
 import { useGetProjectById } from '@renderer/composables/queries/projects/useGetProjectById'
 import { usePatchProjectById } from '@renderer/composables/mutations/projects/usePatchProjectById'
 import type { UpdateProject } from '@shared/model/project'
-import { useSoftDeleteProject } from '@renderer/composables/mutations/projects/useSoftDeleteProject'
+import { useDeleteProject } from '@renderer/composables/mutations/projects/useDeleteProject'
 import { useDialogContext } from '@renderer/composables/dialog/useDialog'
 
 const props = defineProps<{
@@ -17,7 +17,7 @@ const { data: project, isPending, isError, error } = useGetProjectById(props.id)
 const { mutate: patchProject } = usePatchProjectById({
   onSuccess: close,
 })
-const { mutate: deleteProject } = useSoftDeleteProject({
+const { mutate: deleteProject } = useDeleteProject({
   onSuccess: close,
 })
 

@@ -31,7 +31,7 @@ export interface ProjectService extends EntityService<ProjectDto> {
   ): Promise<ProjectDto>
   // soft deletes a project by its id,
   //  this does not delete the project from the database but sets the deletedAt field
-  softDeleteProject(id: string): Promise<void>
+  deleteProject(id: string): Promise<void>
 }
 
 export function createProjectService(
@@ -84,8 +84,8 @@ class ProjectServiceImpl
     return patchedProject
   }
 
-  async softDeleteProject(id: string): Promise<void> {
-    await this.projectPersistence.softDeleteProject(id)
+  async deleteProject(id: string): Promise<void> {
+    await this.projectPersistence.deleteProject(id)
 
     this.publishDeleted(id)
   }

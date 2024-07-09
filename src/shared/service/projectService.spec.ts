@@ -192,7 +192,7 @@ describe('projectService', () => {
       await projectHelpers.createSampleProjects()
       const randomProject = await projectHelpers.getRandomExistingProject()
 
-      await projectService.softDeleteProject(randomProject.id)
+      await projectService.deleteProject(randomProject.id)
 
       const resProjects = await projectService.getProjects()
 
@@ -205,7 +205,7 @@ describe('projectService', () => {
       const nonExistentId = uuid()
 
       await expect(() =>
-        projectService.softDeleteProject(nonExistentId),
+        projectService.deleteProject(nonExistentId),
       ).rejects.toThrowError(`Project with id "${nonExistentId}" not found.`)
     })
 
@@ -213,7 +213,7 @@ describe('projectService', () => {
       await projectHelpers.createSampleProjects()
       const randomProject = await projectHelpers.getRandomExistingProject()
 
-      await projectService.softDeleteProject(randomProject.id)
+      await projectService.deleteProject(randomProject.id)
 
       expect(subscriber).toHaveBeenCalledWith(
         {

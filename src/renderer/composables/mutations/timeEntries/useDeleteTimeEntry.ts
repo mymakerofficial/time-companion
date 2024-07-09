@@ -3,12 +3,10 @@ import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { handleMutationError } from '@renderer/composables/mutations/helpers/handleMutationError'
 import { timeEntryService } from '@renderer/factory/service/timeEntryService'
 
-export function useSoftDeleteTimeEntry(
-  options?: MutationOptions<void, string>,
-) {
+export function useDeleteTimeEntry(options?: MutationOptions<void, string>) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (id: string) => timeEntryService.softDeleteTimeEntry(id),
+    mutationFn: (id: string) => timeEntryService.deleteTimeEntry(id),
     onError: (error, variables, context) => {
       handleMutationError(error)
 

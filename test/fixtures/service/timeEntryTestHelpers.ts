@@ -11,7 +11,6 @@ import { uuid } from '@shared/lib/utils/uuid'
 import { faker } from '@faker-js/faker'
 import { isSometimesNullOr } from '@test/helpers/maybe'
 import type { Database } from '@shared/drizzle/database'
-import { isNull } from 'drizzle-orm'
 
 export class TimeEntryTestHelpers {
   constructor(
@@ -59,9 +58,6 @@ export class TimeEntryTestHelpers {
   }
 
   async getAll(): Promise<Array<TimeEntryDto>> {
-    return this.database
-      .select()
-      .from(timeEntriesTable)
-      .where(isNull(timeEntriesTable.deletedAt))
+    return this.database.select().from(timeEntriesTable)
   }
 }

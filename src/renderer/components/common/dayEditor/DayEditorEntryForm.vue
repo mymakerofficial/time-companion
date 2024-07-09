@@ -6,14 +6,14 @@ import { vProvideColor } from '@renderer/directives/vProvideColor'
 import { useGetProjectById } from '@renderer/composables/queries/projects/useGetProjectById'
 import TimeEntryRealtimeForm from '@renderer/components/common/forms/timeEntry/TimeEntryRealtimeForm.vue'
 import type { TimeEntryBase } from '@shared/model/timeEntry'
-import { useSoftDeleteTimeEntry } from '@renderer/composables/mutations/timeEntries/useSoftDeleteTimeEntry'
+import { useDeleteTimeEntry } from '@renderer/composables/mutations/timeEntries/useDeleteTimeEntry'
 
 const props = defineProps<{
   id: string
 }>()
 const { data: timeEntry } = useGetTimeEntry(props.id)
 const { mutateAsync: patchEntry } = usePatchTimeEntry()
-const { mutateAsync: deleteEntry } = useSoftDeleteTimeEntry()
+const { mutateAsync: deleteEntry } = useDeleteTimeEntry()
 const { data: project } = useGetProjectById(() => timeEntry.value?.projectId)
 
 async function handleChange(values: TimeEntryBase) {

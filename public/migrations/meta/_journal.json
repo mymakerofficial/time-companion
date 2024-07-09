@@ -8,6 +8,13 @@
       "when": 1720462604601,
       "tag": "0000_solid_gunslinger",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1720542639989,
+      "tag": "0001_milky_magneto",
+      "breakpoints": true
     }
   ]
 }

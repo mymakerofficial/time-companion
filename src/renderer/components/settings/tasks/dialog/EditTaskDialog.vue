@@ -6,7 +6,7 @@ import TaskForm from '@renderer/components/common/forms/task/TaskForm.vue'
 import { useDialogContext } from '@renderer/composables/dialog/useDialog'
 import { useGetTaskById } from '@renderer/composables/queries/tasks/useGetTaskById'
 import { usePatchTaskById } from '@renderer/composables/mutations/tasks/usePatchTaskById'
-import { useSoftDeleteTask } from '@renderer/composables/mutations/tasks/useSoftDeleteTask'
+import { useDeleteTask } from '@renderer/composables/mutations/tasks/useDeleteTask'
 
 const props = defineProps<{
   id: string
@@ -17,7 +17,7 @@ const { data: task, isPending, isError, error } = useGetTaskById(props.id)
 const { mutate: patchTask } = usePatchTaskById({
   onSuccess: close,
 })
-const { mutate: deleteTask } = useSoftDeleteTask({
+const { mutate: deleteTask } = useDeleteTask({
   onSuccess: close,
 })
 

@@ -8,7 +8,7 @@ import { ref, watch } from 'vue'
 import { Button } from '@shadcn/button'
 import { getSchemaDefaults } from '@shared/lib/helpers/getSchemaDefaults'
 import { usePatchTimeEntry } from '@renderer/composables/mutations/timeEntries/usePatchTimeEntry'
-import { useSoftDeleteTimeEntry } from '@renderer/composables/mutations/timeEntries/useSoftDeleteTimeEntry'
+import { useDeleteTimeEntry } from '@renderer/composables/mutations/timeEntries/useDeleteTimeEntry'
 
 const props = defineProps<{
   id: string
@@ -18,7 +18,7 @@ const props = defineProps<{
 
 const { close, open } = useDialogContext()
 const { data: actualEntry } = useGetTimeEntry(props.id)
-const { mutateAsync: deleteTimeEntry } = useSoftDeleteTimeEntry()
+const { mutateAsync: deleteTimeEntry } = useDeleteTimeEntry()
 const { mutateAsync: patchTimeEntry } = usePatchTimeEntry()
 
 const completeUserInput = ref<TimeEntryBase>(getSchemaDefaults(timeEntrySchema))

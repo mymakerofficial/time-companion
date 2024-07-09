@@ -32,7 +32,7 @@ export interface TimeEntryService extends EntityService<TimeEntryDto> {
     id: string,
     timeEntry: Partial<UpdateTimeEntry>,
   ): Promise<TimeEntryDto>
-  softDeleteTimeEntry(id: string): Promise<void>
+  deleteTimeEntry(id: string): Promise<void>
 }
 
 export function createTimeEntryService(
@@ -95,8 +95,8 @@ class TimeEntryServiceImpl
     return res
   }
 
-  async softDeleteTimeEntry(id: string): Promise<void> {
-    await this.timeEntryPersistence.softDeleteTimeEntry(id)
+  async deleteTimeEntry(id: string): Promise<void> {
+    await this.timeEntryPersistence.deleteTimeEntry(id)
     this.publishDeleted(id)
   }
 }

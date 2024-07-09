@@ -107,7 +107,7 @@ export interface TimeEntryPersistence {
     id: string,
     timeEntry: Partial<UpdateTimeEntry>,
   ): Promise<TimeEntryDto>
-  softDeleteTimeEntry(id: string): Promise<void>
+  deleteTimeEntry(id: string): Promise<void>
 }
 
 export function createTimeEntryPersistence(
@@ -137,12 +137,7 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
     return await this.database
       .select()
       .from(timeEntriesTable)
-      .where(
-        and(
-          eq(timeEntriesTable.dayId, dayId),
-          isNull(timeEntriesTable.deletedAt),
-        ),
-      )
+      .where(eq(timeEntriesTable.dayId, dayId))
       .orderBy(asc(timeEntriesTable.startedAt))
       .catch(handleSqliteError)
   }
@@ -154,12 +149,7 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
     return await this.database
       .select()
       .from(timeEntriesTable)
-      .where(
-        and(
-          isNull(timeEntriesTable.stoppedAt),
-          isNull(timeEntriesTable.deletedAt),
-        ),
-      )
+      .where(isNull(timeEntriesTable.stoppedAt))
       .limit(1)
       .catch(handleSqliteError)
       .then(firstOfOrNull)
@@ -195,9 +185,7 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
       const res = await tx
         .update(timeEntriesTable)
         .set(timeEntry)
-        .where(
-          and(eq(timeEntriesTable.id, id), isNull(timeEntriesTable.deletedAt)),
-        )
+        .where(eq(timeEntriesTable.id, id))
         .returning()
         .catch(handleSqliteError)
         .then(firstOfOrNull)
@@ -210,15 +198,10 @@ class TimeEntryPersistenceImpl implements TimeEntryPersistence {
     })
   }
 
-  async softDeleteTimeEntry(id: string): Promise<void> {
+  async deleteTimeEntry(id: string): Promise<void> {
     const res = await this.database
-      .update(timeEntriesTable)
-      .set({
-        deletedAt: PlainDateTime.now(),
-      })
-      .where(
-        and(eq(timeEntriesTable.id, id), isNull(timeEntriesTable.deletedAt)),
-      )
+      .delete(timeEntriesTable)
+      .where(eq(timeEntriesTable.id, id))
       .returning()
       .catch(handleSqliteError)
 
@@ -254,7 +237,6 @@ async function checkConstraints(
       .where(
         and(
           isNull(timeEntriesTable.stoppedAt),
-          isNull(timeEntriesTable.deletedAt),
           // Ignore the time entry we are currently updating.
           ne(timeEntriesTable.id, ignoreId!).if(isDefined(ignoreId)),
         ),
@@ -270,7 +252,7 @@ async function checkConstraints(
   const day = await tx
     .select()
     .from(daysTable)
-    .where(and(eq(daysTable.id, timeEntry.dayId), isNull(daysTable.deletedAt)))
+    .where(eq(daysTable.id, timeEntry.dayId))
     .limit(1)
     .catch(handleSqliteError)
     .then(firstOfOrNull)
@@ -283,7 +265,6 @@ async function checkConstraints(
     .where(
       and(
         eq(timeEntriesTable.dayId, timeEntry.dayId),
-        isNull(timeEntriesTable.deletedAt),
         // Ignore the time entry we are currently updating.
         ne(timeEntriesTable.id, ignoreId!).if(isDefined(ignoreId)),
       ),

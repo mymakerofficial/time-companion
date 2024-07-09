@@ -30,7 +30,7 @@ export interface TaskService extends EntityService<TaskDto> {
   ) => Promise<TaskDto>
   // soft deletes a task by its id,
   //  this does not delete the task from the database but sets the deletedAt field
-  softDeleteTask: (id: string) => Promise<void>
+  deleteTask: (id: string) => Promise<void>
 }
 
 export function createTaskService(deps: TaskServiceDependencies): TaskService {
@@ -81,8 +81,8 @@ class TaskServiceImpl
     return patchedTask
   }
 
-  async softDeleteTask(id: string): Promise<void> {
-    await this.taskPersistence.softDeleteTask(id)
+  async deleteTask(id: string): Promise<void> {
+    await this.taskPersistence.deleteTask(id)
 
     this.publishDeleted(id)
   }

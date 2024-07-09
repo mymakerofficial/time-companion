@@ -7,9 +7,8 @@ import {
 import { check, isNotEmpty, isNotNull } from '@shared/lib/utils/checks'
 import { firstOf, firstOfOrNull } from '@shared/lib/utils/list'
 import type { Database } from '@shared/drizzle/database'
-import { and, asc, eq, isNull } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 import { handleSqliteError } from '@shared/drizzle/lib/error'
-import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 
 export interface TaskPersistenceDependencies {
   database: Database
@@ -23,7 +22,7 @@ export interface TaskPersistence {
     id: string,
     partialTask: Partial<UpdateTask>,
   ) => Promise<TaskDto>
-  softDeleteTask: (id: string) => Promise<void>
+  deleteTask: (id: string) => Promise<void>
 }
 
 export class TaskPersistenceImpl implements TaskPersistence {
@@ -37,7 +36,6 @@ export class TaskPersistenceImpl implements TaskPersistence {
     return await this.database
       .select()
       .from(tasksTable)
-      .where(isNull(tasksTable.deletedAt))
       .orderBy(asc(tasksTable.displayName))
       .catch(handleSqliteError)
   }
@@ -46,7 +44,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
     const res = await this.database
       .select()
       .from(tasksTable)
-      .where(and(eq(tasksTable.id, id), isNull(tasksTable.deletedAt)))
+      .where(eq(tasksTable.id, id))
       .limit(1)
       .catch(handleSqliteError)
       .then(firstOfOrNull)
@@ -72,7 +70,7 @@ export class TaskPersistenceImpl implements TaskPersistence {
     const res = await this.database
       .update(tasksTable)
       .set(partialTask)
-      .where(and(eq(tasksTable.id, id), isNull(tasksTable.deletedAt)))
+      .where(eq(tasksTable.id, id))
       .returning()
       .catch(handleSqliteError)
       .then(firstOfOrNull)
@@ -82,11 +80,10 @@ export class TaskPersistenceImpl implements TaskPersistence {
     return res
   }
 
-  async softDeleteTask(id: string): Promise<void> {
+  async deleteTask(id: string): Promise<void> {
     const res = await this.database
-      .update(tasksTable)
-      .set({ deletedAt: PlainDateTime.now() })
-      .where(and(eq(tasksTable.id, id), isNull(tasksTable.deletedAt)))
+      .delete(tasksTable)
+      .where(eq(tasksTable.id, id))
       .returning()
       .catch(handleSqliteError)
 

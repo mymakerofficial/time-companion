@@ -2,7 +2,7 @@ import { type CreateDay, type DayDto, daysTable } from '@shared/model/day'
 import { check, isNotNull } from '@shared/lib/utils/checks'
 import type { PlainDate } from '@shared/lib/datetime/plainDate'
 import type { Database } from '@shared/drizzle/database'
-import { and, eq, isNull } from 'drizzle-orm'
+import { asc, eq } from 'drizzle-orm'
 import { firstOf, firstOfOrNull } from '@shared/lib/utils/list'
 import { handleSqliteError } from '@shared/drizzle/lib/error'
 
@@ -34,7 +34,7 @@ class DayPersistenceImpl implements DayPersistence {
     return await this.database
       .select()
       .from(daysTable)
-      .where(isNull(daysTable.deletedAt))
+      .orderBy(asc(daysTable.date))
       .catch(handleSqliteError)
   }
 
@@ -42,7 +42,7 @@ class DayPersistenceImpl implements DayPersistence {
     const res = await this.database
       .select()
       .from(daysTable)
-      .where(and(eq(daysTable.id, id), isNull(daysTable.deletedAt)))
+      .where(eq(daysTable.id, id))
       .limit(1)
       .catch(handleSqliteError)
       .then(firstOfOrNull)
@@ -56,7 +56,7 @@ class DayPersistenceImpl implements DayPersistence {
     const res = await this.database
       .select()
       .from(daysTable)
-      .where(and(eq(daysTable.date, date), isNull(daysTable.deletedAt)))
+      .where(eq(daysTable.date, date))
       .limit(1)
       .catch(handleSqliteError)
       .then(firstOfOrNull)
