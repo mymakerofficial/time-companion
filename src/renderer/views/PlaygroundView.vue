@@ -6,8 +6,6 @@ import { useToday } from '@renderer/composables/useNow'
 import PlaygroundTimeEntriesList from '@renderer/components/playground/PlaygroundTimeEntriesList.vue'
 import PlaygroundDayInfo from '@renderer/components/playground/PlaygroundDayInfo.vue'
 import { useGetOrCreateDayByDate } from '@renderer/composables/queries/days/useGetOrCreateDayByDate'
-import DatabaseExplorer from '@renderer/components/playground/database/DatabaseExplorer.vue'
-import DatabaseSqlRunner from '@renderer/components/playground/database/DatabaseSqlRunner.vue'
 
 const today = useToday()
 const { data: day } = useGetOrCreateDayByDate(today)
@@ -15,12 +13,6 @@ const { data: day } = useGetOrCreateDayByDate(today)
 
 <template>
   <ResponsiveContainer class="my-14 flex flex-col">
-    <SettingsSection title="Database Explorer">
-      <DatabaseExplorer />
-    </SettingsSection>
-    <SettingsSection title="SQL Runner">
-      <DatabaseSqlRunner />
-    </SettingsSection>
     <SettingsSection v-if="day" title="Running Time Entry">
       <RunningTimeEntryInput :day-id="day.id" />
     </SettingsSection>

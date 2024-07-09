@@ -5,6 +5,7 @@ import { database } from '@renderer/factory/database/database'
 import { sql } from 'drizzle-orm'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { Loader2, Play } from 'lucide-vue-next'
+import { Separator } from '@shadcn/separator'
 
 const queryClient = useQueryClient()
 
@@ -49,7 +50,7 @@ function handleRun() {
 
 <template>
   <div class="flex flex-col gap-2">
-    <div class="flex gap-2">
+    <div class="flex gap-2 p-6">
       <textarea
         v-model="query"
         class="p-3 w-full rounded-md bg-secondary ring-offset-background placeholder:text-muted-foreground has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring has-[:focus-visible]:ring-offset-2"
@@ -60,7 +61,8 @@ function handleRun() {
         <span>Run</span>
       </Button>
     </div>
-    <div v-if="!isIdle" class="flex flex-col gap-2 bg-accent p-3 rounded-md">
+    <Separator />
+    <div v-if="!isIdle" class="flex flex-col gap-2 p-6">
       <template v-if="error">
         <div class="text-red-500 font-bold" v-text="error.message" />
       </template>

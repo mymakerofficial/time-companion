@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { useQuery } from '@tanstack/vue-query'
+import { useQuery, useQueryClient } from '@tanstack/vue-query'
 import { database } from '@renderer/factory/database/database'
 import { firstOf } from '@shared/lib/utils/list'
 import DatabaseExplorerTable from '@renderer/components/playground/database/DatabaseExplorerTable.vue'
 import Combobox from '@renderer/components/common/inputs/combobox/Combobox.vue'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { whenever } from '@vueuse/core'
 import { sql } from 'drizzle-orm'
+
+const queryClient = useQueryClient()
 
 const { data: tables } = useQuery({
   queryKey: ['databaseExplorer', 'tables'],
@@ -26,6 +28,12 @@ whenever(
     table.value = firstOf(tables.value)
   },
 )
+
+onMounted(() => {
+  queryClient.refetchQueries({
+    queryKey: ['databaseExplorer'],
+  })
+})
 </script>
 
 <template>

@@ -54,9 +54,19 @@ const router = createRouter({
       ],
     },
     {
-      path: '/playground',
-      name: 'playground',
-      component: () => import('../views/PlaygroundView.vue'),
+      path: '/dev',
+      children: [
+        {
+          path: 'playground',
+          name: 'playground',
+          component: () => import('../views/PlaygroundView.vue'),
+        },
+        {
+          path: 'database',
+          name: 'database-explorer',
+          component: () => import('../views/DatabaseView.vue'),
+        },
+      ],
     },
   ],
 })

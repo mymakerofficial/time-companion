@@ -3,7 +3,7 @@ import { RouterView } from 'vue-router'
 import AppNavigation from '@renderer/components/common/layout/AppNavigation.vue'
 import { TooltipProvider } from 'radix-vue'
 import type { NavLink } from '@renderer/components/common/layout/nav/nav-link'
-import { Archive, BugPlay, Calendar, Settings } from 'lucide-vue-next'
+import { Archive, BugPlay, Calendar, Database, Settings } from 'lucide-vue-next'
 import DialogProvider from '@renderer/components/common/dialog/DialogProvider.vue'
 import { useI18n } from 'vue-i18n'
 import { computed } from 'vue'
@@ -44,6 +44,11 @@ const links = computed<NavLink[]>(() => {
   ]
 
   if (import.meta.env.DEV) {
+    links.push({
+      label: 'Database Explorer',
+      to: { name: 'database-explorer' },
+      icon: Database,
+    })
     links.push({
       label: 'Dev Playground',
       to: { name: 'playground' },
