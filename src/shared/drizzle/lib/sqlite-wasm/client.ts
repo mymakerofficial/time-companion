@@ -12,13 +12,24 @@ export class SQLiteWasmClient {
   async init() {
     check(isNull(this.sqlite3), 'SQLite3 already initialized')
     check(isNull(this.database), 'Database already created')
-    this.sqlite3 = await sqlite3InitModule({
-      print: console.log,
-      printErr: console.error,
-    })
-    console.debug('Running SQLite3 version', this.sqlite3.version.libVersion)
+    console.debug('[sqlite-wasm] Initializing SQLite3')
+    // sqlite-wasm warns about OPFS not being available.
+    //  We can ignore this warning because we are not using OPFS.
+    //  Because there is no way to disable this warning, we need to overwrite console.warn.
+    //  This must be inside its own block, so we don't globally overwrite console.warn.
+    {
+      console.warn = function () {}
+      this.sqlite3 = await sqlite3InitModule({
+        print: console.log,
+        printErr: console.error,
+      })
+    }
+    console.debug(
+      '[sqlite-wasm] Running SQLite3 version',
+      this.sqlite3.version.libVersion,
+    )
     this.database = new this.sqlite3.oo1.JsStorageDb('local')
-    console.debug('Created database using kvvfs')
+    console.debug('[sqlite-wasm] Created database using kvvfs')
   }
 }
 
