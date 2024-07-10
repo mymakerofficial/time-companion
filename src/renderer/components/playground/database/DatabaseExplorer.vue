@@ -38,8 +38,12 @@ onMounted(() => {
 
 <template>
   <DatabaseExplorerTable v-if="table" :table-name="table">
-    <template #actions>
+    <template #left>
       <Combobox v-model="table" :options="tables" />
+      <slot name="left" />
+    </template>
+    <template #right>
+      <slot name="right" />
     </template>
   </DatabaseExplorerTable>
 </template>

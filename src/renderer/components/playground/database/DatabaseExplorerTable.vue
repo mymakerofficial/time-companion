@@ -71,13 +71,14 @@ function handleRefresh() {
   <Table :data="data" :columns="columns">
     <template #actions="{ table }">
       <TableActions>
-        <template #left><slot name="actions" /></template>
+        <template #left><slot name="left" /></template>
         <template #right>
           <TableVisibilitySelect :table="table" />
-          <Button @click="handleRefresh" class="gap-2">
+          <Button @click="handleRefresh" variant="secondary" class="gap-2">
             <RefreshCw class="size-4" />
             <span>Refresh</span>
           </Button>
+          <slot name="right" />
         </template>
       </TableActions>
     </template>
