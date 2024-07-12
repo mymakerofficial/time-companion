@@ -15,6 +15,13 @@
       "when": 1720542639989,
       "tag": "0001_milky_magneto",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1720791126452,
+      "tag": "0002_famous_ted_forrester",
+      "breakpoints": true
     }
   ]
 }

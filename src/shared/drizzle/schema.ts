@@ -14,17 +14,29 @@ import {
 } from '@shared/drizzle/lib/columns'
 import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
 
+const hasId = {
+  id: text('id')
+    .primaryKey()
+    .$default(() => uuid()), // automatically generate a UUID for new entities
+}
+
+const hasCreatedAt = {
+  createdAt: plainDateTime('created_at')
+    .notNull()
+    .$default(() => PlainDateTime.now()), // automatically set the creation date
+}
+
+const hasModifiedAt = {
+  modifiedAt: plainDateTime('modified_at').$onUpdate(() => PlainDateTime.now()), // automatically update the modification date on every change
+}
+
 /***
  * Common columns shared by all entity tables.
  */
 const entityBase = {
-  id: text('id')
-    .primaryKey()
-    .$default(() => uuid()), // automatically generate a UUID for new entities
-  createdAt: plainDateTime('created_at')
-    .notNull()
-    .$default(() => PlainDateTime.now()), // automatically set the creation date
-  modifiedAt: plainDateTime('modified_at').$onUpdate(() => PlainDateTime.now()), // automatically update the modification date on every change
+  ...hasId,
+  ...hasCreatedAt,
+  ...hasModifiedAt,
 }
 
 export const days = sqliteTable(
@@ -97,3 +109,9 @@ export const timeEntries = sqliteTable(
     stoppedAtIdx: uniqueIndex('time_entry_stopped_at_idx').on(table.stoppedAt),
   }),
 )
+
+export const settings = sqliteTable('settings', {
+  key: text('key').primaryKey(),
+  value: text('value'),
+  ...hasModifiedAt,
+})

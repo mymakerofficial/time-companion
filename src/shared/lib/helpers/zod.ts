@@ -1,8 +1,8 @@
 import { fromError } from 'zod-validation-error'
 
-export function runZod(block: () => void) {
+export function runZod<T>(block: () => T) {
   try {
-    block()
+    return block()
   } catch (error) {
     throw fromError(error, {
       prefix: null,

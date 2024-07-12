@@ -29,68 +29,98 @@ import { drizzle } from 'drizzle-orm/better-sqlite3'
 import * as schema from '@shared/drizzle/schema'
 import type { Database } from '@shared/drizzle/database'
 import { fixTransactions } from '@shared/drizzle/lib/transaction'
+import {
+  createSettingsService,
+  type SettingsService,
+} from '@shared/business/settings/settingsService'
+import { createSettingsPersistence } from '@shared/business/settings/settingsPersistence'
+import type {
+  SettingsConfig,
+  SettingsTypeMap,
+} from '@shared/business/settings/types'
 
-export interface ServiceFixtures {
+interface ServiceFixturesOptions {
+  settingsConfig: SettingsConfig
+}
+
+export interface ServiceFixtures<TOpt extends ServiceFixturesOptions> {
   database: Database
   taskService: TaskService
   projectService: ProjectService
   dayService: DayService
   timeEntryService: TimeEntryService
+  settingsService: SettingsService<SettingsTypeMap<TOpt['settingsConfig']>>
   serviceHelpers: ServiceTestHelpers
   projectHelpers: ProjectTestHelpers
   dayHelpers: DayTestHelpers
   timeEntryHelpers: TimeEntryTestHelpers
 }
 
-export const useServiceFixtures = createFixtures<ServiceFixtures>({
-  database: () => {
-    const client = new BetterSQLite3(':memory:')
-    return fixTransactions(drizzle(client, { schema }))
-  },
-  taskService: ({ database }) => {
-    return createTaskService({
-      taskPersistence: createTaskPersistence({
-        database: database,
-      }),
-    })
-  },
-  projectService: ({ database }) => {
-    return createProjectService({
-      projectPersistence: createProjectPersistence({
-        database: database,
-      }),
-    })
-  },
-  dayService: ({ database }) => {
-    return createDayService({
-      dayPersistence: createDayPersistence({
-        database: database,
-      }),
-    })
-  },
-  timeEntryService: ({ database }) => {
-    return createTimeEntryService({
-      timeEntryPersistence: createTimeEntryPersistence({
-        database: database,
-      }),
-    })
-  },
-  serviceHelpers: ({ database }) => {
-    return new ServiceTestHelpers(database)
-  },
-  projectHelpers: ({ taskService, projectService }) => {
-    return new ProjectTestHelpers(taskService, projectService)
-  },
-  dayHelpers: ({ dayService }) => {
-    return new DayTestHelpers(dayService)
-  },
-  timeEntryHelpers: ({ timeEntryService, database }) => {
-    return new TimeEntryTestHelpers(timeEntryService, database)
-  },
-})
+export function useServiceFixtures<TOpt extends ServiceFixturesOptions>(
+  options?: Partial<TOpt>,
+) {
+  const { settingsConfig = {} } = options || {}
 
-export function useServiceTest() {
-  const fixtures = useServiceFixtures()
+  return createFixtures<ServiceFixtures<TOpt>>({
+    database: () => {
+      const client = new BetterSQLite3(':memory:')
+      return fixTransactions(drizzle(client, { schema }))
+    },
+    taskService: ({ database }) => {
+      return createTaskService({
+        taskPersistence: createTaskPersistence({
+          database,
+        }),
+      })
+    },
+    projectService: ({ database }) => {
+      return createProjectService({
+        projectPersistence: createProjectPersistence({
+          database,
+        }),
+      })
+    },
+    dayService: ({ database }) => {
+      return createDayService({
+        dayPersistence: createDayPersistence({
+          database,
+        }),
+      })
+    },
+    timeEntryService: ({ database }) => {
+      return createTimeEntryService({
+        timeEntryPersistence: createTimeEntryPersistence({
+          database,
+        }),
+      })
+    },
+    settingsService: ({ database }) => {
+      return createSettingsService({
+        settingsPersistence: createSettingsPersistence({
+          database,
+        }),
+        config: settingsConfig,
+      })
+    },
+    serviceHelpers: ({ database }) => {
+      return new ServiceTestHelpers(database)
+    },
+    projectHelpers: ({ taskService, projectService }) => {
+      return new ProjectTestHelpers(taskService, projectService)
+    },
+    dayHelpers: ({ dayService }) => {
+      return new DayTestHelpers(dayService)
+    },
+    timeEntryHelpers: ({ timeEntryService, database }) => {
+      return new TimeEntryTestHelpers(timeEntryService, database)
+    },
+  })()
+}
+
+export function useServiceTest<TOpt extends ServiceFixturesOptions>(
+  options?: Partial<TOpt>,
+) {
+  const fixtures = useServiceFixtures(options)
 
   beforeAll(async () => {
     await fixtures.serviceHelpers.setup()
