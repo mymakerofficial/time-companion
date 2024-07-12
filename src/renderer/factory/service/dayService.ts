@@ -6,9 +6,9 @@ import type {
   EntityPublisherTopics,
 } from '@shared/events/entityPublisher'
 import type { DayDto } from '@shared/model/day'
-import type { DayService } from '@shared/service/dayService'
-import { createDayService } from '@shared/service/dayService'
-import { createDayPersistence } from '@shared/persistence/dayPersistence'
+import type { DayService } from '@shared/business/day/dayService'
+import { createDayService } from '@shared/business/day/dayService'
+import { createDayPersistence } from '@shared/business/day/dayPersistence'
 
 export const dayService: DayService = (() => {
   if (isDefined(window.electronAPI)) {

@@ -1,7 +1,7 @@
 import { database } from '@renderer/factory/database/database'
-import type { DayService } from '@shared/service/dayService'
-import { createDayService } from '@shared/service/dayService'
-import { createDayPersistence } from '@shared/persistence/dayPersistence'
+import type { DayService } from '@shared/business/day/dayService'
+import { createDayService } from '@shared/business/day/dayService'
+import { createDayPersistence } from '@shared/business/day/dayPersistence'
 
 export const dayService: DayService = (() => {
   return createDayService({

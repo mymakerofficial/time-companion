@@ -1,23 +1,26 @@
 import {
   createTaskService,
   type TaskService,
-} from '@shared/service/taskService'
-import { createTaskPersistence } from '@shared/persistence/taskPersistence'
-import { createProjectPersistence } from '@shared/persistence/projectPersistence'
+} from '@shared/business/task/taskService'
+import { createTaskPersistence } from '@shared/business/task/taskPersistence'
+import { createProjectPersistence } from '@shared/business/project/projectPersistence'
 import {
   createProjectService,
   type ProjectService,
-} from '@shared/service/projectService'
+} from '@shared/business/project/projectService'
 import { createFixtures } from '@test/helpers/createFixtures'
 import { ProjectTestHelpers } from '@test/fixtures/service/projectTestHelpers'
 import { ServiceTestHelpers } from '@test/fixtures/service/serviceTestHelpers'
-import { createDayService, type DayService } from '@shared/service/dayService'
-import { createDayPersistence } from '@shared/persistence/dayPersistence'
+import {
+  createDayService,
+  type DayService,
+} from '@shared/business/day/dayService'
+import { createDayPersistence } from '@shared/business/day/dayPersistence'
 import {
   createTimeEntryService,
   type TimeEntryService,
-} from '@shared/service/timeEntryService'
-import { createTimeEntryPersistence } from '@shared/persistence/timeEntryPersistence'
+} from '@shared/business/timeEntry/timeEntryService'
+import { createTimeEntryPersistence } from '@shared/business/timeEntry/timeEntryPersistence'
 import { afterAll, afterEach, beforeAll } from 'vitest'
 import { DayTestHelpers } from '@test/fixtures/service/dayTestHelpers'
 import BetterSQLite3 from 'better-sqlite3'

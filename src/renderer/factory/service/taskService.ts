@@ -1,8 +1,8 @@
 import { database } from '@renderer/factory/database/database'
 import { isDefined } from '@shared/lib/utils/checks'
-import type { TaskService } from '@shared/service/taskService'
-import { createTaskService } from '@shared/service/taskService'
-import { createTaskPersistence } from '@shared/persistence/taskPersistence'
+import type { TaskService } from '@shared/business/task/taskService'
+import { createTaskService } from '@shared/business/task/taskService'
+import { createTaskPersistence } from '@shared/business/task/taskPersistence'
 import { createPublisherServiceProxy } from '@shared/ipc/publisherServiceProxy'
 import type {
   EntityPublisherEvent,

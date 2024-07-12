@@ -4,7 +4,7 @@ import {
   type TestDataOverride,
 } from '@test/helpers/testDataOverride'
 import { randomDateTime } from '@test/helpers/datetime'
-import type { TimeEntryService } from '@shared/service/timeEntryService'
+import type { TimeEntryService } from '@shared/business/timeEntry/timeEntryService'
 import type { TimeEntryBase, TimeEntryDto } from '@shared/model/timeEntry'
 import { timeEntriesTable } from '@shared/model/timeEntry'
 import { uuid } from '@shared/lib/utils/uuid'

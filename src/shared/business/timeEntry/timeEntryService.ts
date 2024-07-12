@@ -1,4 +1,4 @@
-import type { TimeEntryPersistence } from '@shared/persistence/timeEntryPersistence'
+import type { TimeEntryPersistence } from '@shared/business/timeEntry/timeEntryPersistence'
 import {
   type CreateTimeEntry,
   type TimeEntryDto,
@@ -6,8 +6,8 @@ import {
   type UpdateTimeEntry,
 } from '@shared/model/timeEntry'
 import { PlainDateTime } from '@shared/lib/datetime/plainDateTime'
-import type { EntityService } from '@shared/service/helpers/entityService'
-import { EntityServiceImpl } from '@shared/service/helpers/entityService'
+import type { EntityService } from '@shared/business/helpers/entityService'
+import { EntityServiceImpl } from '@shared/business/helpers/entityService'
 import type { Nullable } from '@shared/lib/utils/types'
 import { getSchemaDefaults } from '@shared/lib/helpers/getSchemaDefaults'
 import { Duration } from '@shared/lib/datetime/duration'

@@ -1,4 +1,4 @@
-import type { TaskPersistence } from '@shared/persistence/taskPersistence'
+import type { TaskPersistence } from '@shared/business/task/taskPersistence'
 import {
   type CreateTask,
   type TaskDto,
@@ -9,7 +9,7 @@ import type { Nullable } from '@shared/lib/utils/types'
 import {
   type EntityService,
   EntityServiceImpl,
-} from '@shared/service/helpers/entityService'
+} from '@shared/business/helpers/entityService'
 import { getSchemaDefaults } from '@shared/lib/helpers/getSchemaDefaults'
 
 export interface TaskServiceDependencies {

@@ -1,4 +1,4 @@
-import type { DayService } from '@shared/service/dayService'
+import type { DayService } from '@shared/business/day/dayService'
 import type { DayBase, DayDto } from '@shared/model/day'
 import { arrayOfLength } from '@shared/lib/utils/list'
 import {

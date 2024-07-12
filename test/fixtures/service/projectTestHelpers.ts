@@ -1,5 +1,5 @@
-import type { ProjectService } from '@shared/service/projectService'
-import type { TaskService } from '@shared/service/taskService'
+import type { ProjectService } from '@shared/business/project/projectService'
+import type { TaskService } from '@shared/business/task/taskService'
 import type { CreateProject, ProjectDto } from '@shared/model/project'
 import { faker } from '@faker-js/faker'
 import {

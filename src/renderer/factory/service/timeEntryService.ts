@@ -5,10 +5,10 @@ import type {
   EntityPublisherEvent,
   EntityPublisherTopics,
 } from '@shared/events/entityPublisher'
-import type { TimeEntryService } from '@shared/service/timeEntryService'
-import { createTimeEntryService } from '@shared/service/timeEntryService'
+import type { TimeEntryService } from '@shared/business/timeEntry/timeEntryService'
+import { createTimeEntryService } from '@shared/business/timeEntry/timeEntryService'
 import type { TimeEntryDto } from '@shared/model/timeEntry'
-import { createTimeEntryPersistence } from '@shared/persistence/timeEntryPersistence'
+import { createTimeEntryPersistence } from '@shared/business/timeEntry/timeEntryPersistence'
 
 export const timeEntryService: TimeEntryService = (() => {
   if (isDefined(window.electronAPI)) {

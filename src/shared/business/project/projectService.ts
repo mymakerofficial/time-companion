@@ -4,12 +4,12 @@ import type {
   UpdateProject,
 } from '@shared/model/project'
 import { projectSchema } from '@shared/model/project'
-import { type ProjectPersistence } from '@shared/persistence/projectPersistence'
+import { type ProjectPersistence } from '@shared/business/project/projectPersistence'
 import type { Nullable } from '@shared/lib/utils/types'
 import {
   type EntityService,
   EntityServiceImpl,
-} from '@shared/service/helpers/entityService'
+} from '@shared/business/helpers/entityService'
 import type { UpdateTask } from '@shared/model/task'
 import { getSchemaDefaults } from '@shared/lib/helpers/getSchemaDefaults'
 
